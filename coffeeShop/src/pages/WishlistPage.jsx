@@ -1,8 +1,9 @@
 // src/pages/WishlistPage.jsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { useWishlist } from '../context/WishlistContext';
-import { useCart } from '../context/CartContext';
+import { addToCart, getCart } from '../redux/Slicer/cartSlice';
 import {
     Heart,
     ShoppingBag,
@@ -14,55 +15,62 @@ import {
     X
 } from 'lucide-react';
 
-
 const WishlistPage = () => {
-    const { wishlistItems, removeFromWishlist, clearWishlist } = useWishlist();
-    const { addToCart } = useCart();
+    const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { wishlistItems, removeFromWishlist, clearWishlist } = useWishlist();
+    const { isAuthenticated } = useSelector((state) => state.auth);
     const [isLoading, setIsLoading] = useState(false);
     const [addedItems, setAddedItems] = useState({});
 
     // Handle add to cart from wishlist
-    const handleAddToCart = (item) => {
-        const cartItem = {
-            id: item.id,
-            name: item.name,
-            price: item.discountPrice || item.price,
-            originalPrice: item.price,
-            image: item.image,
-            category: item.category || 'Coffee',
-            quantity: 1
-        };
+    const handleAddToCart = async (item) => {
+        if (!isAuthenticated) {
+            navigate('/login');
+            return;
+        }
 
-        addToCart(cartItem);
+        try {
+            const result = await dispatch(addToCart({
+                coffeeId: item.id,
+                quantity: 1
+            }));
 
-        setAddedItems(prev => ({ ...prev, [item.id]: true }));
-        setTimeout(() => {
-            setAddedItems(prev => ({ ...prev, [item.id]: false }));
-        }, 1500);
+            if (addToCart.fulfilled.match(result)) {
+                await dispatch(getCart());
+                setAddedItems(prev => ({ ...prev, [item.id]: true }));
+                setTimeout(() => {
+                    setAddedItems(prev => ({ ...prev, [item.id]: false }));
+                }, 1500);
+            }
+        } catch (error) {
+            console.error("Add to cart error:", error);
+        }
     };
 
     // Handle add all to cart
-    const handleAddAllToCart = () => {
+    const handleAddAllToCart = async () => {
         if (wishlistItems.length === 0) return;
 
-        setIsLoading(true);
-        wishlistItems.forEach(item => {
-            const cartItem = {
-                id: item.id,
-                name: item.name,
-                price: item.discountPrice || item.price,
-                originalPrice: item.price,
-                image: item.image,
-                category: item.category || 'Coffee',
-                quantity: 1
-            };
-            addToCart(cartItem);
-        });
+        if (!isAuthenticated) {
+            navigate('/login');
+            return;
+        }
 
-        setTimeout(() => {
+        setIsLoading(true);
+        try {
+            for (const item of wishlistItems) {
+                await dispatch(addToCart({
+                    coffeeId: item.id,
+                    quantity: 1
+                }));
+            }
+            await dispatch(getCart());
+        } catch (error) {
+            console.error("Add all to cart error:", error);
+        } finally {
             setIsLoading(false);
-        }, 1000);
+        }
     };
 
     // Handle remove from wishlist
@@ -125,22 +133,13 @@ const WishlistPage = () => {
                 </div>
 
                 <div className="max-w-7xl mx-auto relative z-10 mt-8">
-                    {/* Header - Exactly Like CartPage */}
+                    {/* Header */}
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-8">
                         <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
-                            {/* <button
-                                onClick={() => navigate(-1)}
-                                className="p-1.5 sm:p-2 rounded-full bg-white/30 backdrop-blur-sm border border-white/30 hover:bg-white/50 transition-all flex-shrink-0"
-                            >
-                                <ChevronLeft size={20} className="sm:w-6 sm:h-6 text-gray-700" />
-                            </button> */}
                             <div className="min-w-0 flex-1">
                                 <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 truncate">
                                     My <span className="text-[#0D7C53]">Wishlist</span>
                                 </h1>
-                                {/* <p className="text-xs sm:text-sm text-gray-500 truncate">
-                                    {wishlistItems.length} items saved
-                                </p> */}
                             </div>
                         </div>
                         <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
@@ -175,7 +174,7 @@ const WishlistPage = () => {
                         </div>
                     </div>
 
-                    {/* Wishlist Grid - Exactly Like CartPage */}
+                    {/* Wishlist Grid */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                         {/* Wishlist Items */}
                         <div className="lg:col-span-2 space-y-3 sm:space-y-4">
@@ -205,7 +204,6 @@ const WishlistPage = () => {
                                                         {item.category || 'Coffee'}
                                                     </p>
                                                 </div>
-                                                {/* ✅ Delete Button - Red Color like CartPage */}
                                                 <button
                                                     onClick={() => handleRemove(item.id)}
                                                     className="p-1 rounded-full bg-red-200 hover:bg-red-300 transition-all opacity-80 group-hover:opacity-100 flex-shrink-0"
@@ -214,7 +212,7 @@ const WishlistPage = () => {
                                                 </button>
                                             </div>
 
-                                            {/* Price Section - No Quantity */}
+                                            {/* Price Section */}
                                             <div className="flex flex-row items-center justify-between mt-2 sm:mt-3 gap-2">
                                                 <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
                                                     <span className="font-bold text-[#0D7C53] text-sm sm:text-base md:text-lg">
@@ -227,7 +225,7 @@ const WishlistPage = () => {
                                                     )}
                                                 </div>
 
-                                                {/* Add to Cart Button - Small */}
+                                                {/* Add to Cart Button */}
                                                 <button
                                                     onClick={() => handleAddToCart(item)}
                                                     className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2 text-sm sm:text-base ${addedItems[item.id]
@@ -253,7 +251,7 @@ const WishlistPage = () => {
                             ))}
                         </div>
 
-                        {/* Order Summary - Same as CartPage */}
+                        {/* Wishlist Summary */}
                         <div className="lg:col-span-1">
                             <div className="sticky top-20 sm:top-24 backdrop-blur-xl bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl shadow-black/5">
                                 <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-3 sm:mb-4">
@@ -316,7 +314,8 @@ const WishlistPage = () => {
                     </div>
                 </div>
             </div>
-            <style >{`
+
+            <style>{`
                 @keyframes pulse-slow {
                     0%, 100% { transform: scale(1); opacity: 0.5; }
                     50% { transform: scale(1.1); opacity: 0.8; }
@@ -339,12 +338,12 @@ const WishlistPage = () => {
                 .animate-float-delay { animation: float-delay 7s ease-in-out infinite; }
                 
                 @media (min-width: 480px) {
-                    .xs\:inline { display: inline; }
-                    .xs\:hidden { display: none; }
+                    .xs\\:inline { display: inline; }
+                    .xs\\:hidden { display: none; }
                 }
                 @media (max-width: 479px) {
-                    .xs\:inline { display: none; }
-                    .xs\:hidden { display: inline; }
+                    .xs\\:inline { display: none; }
+                    .xs\\:hidden { display: inline; }
                 }
             `}</style>
         </>

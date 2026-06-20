@@ -17,7 +17,9 @@ const Benefits = () => {
     };
 
     return (
+        
         <section className="relative py-10 px-4 overflow-hidden">
+            
             {/* ========== GLASS EFFECT BACKGROUND ========== */}
             <div className="absolute inset-0 -z-10">
                 {/* Main Gradient - Same as CategoryPage */}

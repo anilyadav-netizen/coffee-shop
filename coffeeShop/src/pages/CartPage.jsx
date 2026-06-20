@@ -50,7 +50,7 @@ const CartPage = () => {
     if (cartItems.length === 0) {
         return (
             <>
-                <Navbar />
+                
                 <div className="min-h-screen bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3] pt-20 sm:pt-24 px-3 sm:px-4 overflow-x-hidden">
                     <div className="max-w-7xl mx-auto">
                         <div className="backdrop-blur-xl bg-white/30 border border-white/40 rounded-2xl sm:rounded-3xl p-6 sm:p-12 text-center shadow-2xl shadow-black/5">
@@ -77,7 +77,7 @@ const CartPage = () => {
                         </div>
                     </div>
                 </div>
-                <Footer />
+              
             </>
         );
     }
