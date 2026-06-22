@@ -1,12 +1,10 @@
 // src/components/Navbar.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
-import { useWishlist } from '../context/WishlistContext';
 import ProfileDropdown from "../component/ProfileDropdown";
 import Sidebar from '../component/Sidebar'
 import { useSelector, useDispatch } from 'react-redux';
-import { logout } from '../redux/Slicer/authSlice'; // ✅ logout import
+import { logout } from '../redux/Slicer/authSlice';
 import {
     ShoppingCart,
     Menu as MenuIcon,
@@ -17,14 +15,16 @@ import {
 const Navbar = () => {
 
     const [open, setOpen] = useState(false);
-    const { totalItems } = useCart();
-    const { wishlistCount } = useWishlist();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const navigate = useNavigate();
 
     const dispatch = useDispatch();
     const { user, isAuthenticated } = useSelector((state) => state.auth);
+    
+    // ✅ Redux se cart aur wishlist
+    const { totalItems } = useSelector((state) => state.cart);
+    const { wishlistCount } = useSelector((state) => state.wishlist);
 
     const navItems = [
         { name: "Home", path: "/" },
@@ -50,9 +50,8 @@ const Navbar = () => {
         navigate('/wishlist');
     };
 
-    // ✅ Logout handler - FIXED
     const handleLogout = () => {
-        dispatch(logout()); // ✅ Sirf yeh
+        dispatch(logout());
         navigate('/login');
         setIsMenuOpen(false);
     };
@@ -142,7 +141,7 @@ const Navbar = () => {
                 </div>
             </div>
 
-            {/* Mobile Menu - Sidebar with user prop */}
+            {/* Mobile Menu - Sidebar */}
             <Sidebar
                 isOpen={isMenuOpen}
                 onClose={() => setIsMenuOpen(false)}
@@ -151,7 +150,7 @@ const Navbar = () => {
                 handleCartClick={handleCartClick}
                 wishlistCount={wishlistCount}
                 totalItems={totalItems}
-                user={isAuthenticated ? user : null} // ✅ Real-time sync
+                user={isAuthenticated ? user : null}
                 onLogout={handleLogout}
             />
         </nav>

@@ -18,8 +18,6 @@ import {
     X
 } from "lucide-react";
 import Footer from "../component/Footer";
-import { useCart } from "../context/CartContext";
-import { useWishlist } from "../context/WishlistContext";
 import Navbar from "../component/Navbar";
 
 const MenuPage = () => {

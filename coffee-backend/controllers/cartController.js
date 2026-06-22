@@ -5,8 +5,11 @@ exports.addToCart = async (req, res) => {
   try {
     const { coffeeId, quantity } = req.body;
 
+    console.log(coffeeId, "=> coff id",
+      quantity)
+
     const cartItem = await Cart.create({
-      user: req.user._id,
+      user: req.user.id,
       coffee: coffeeId,
       quantity,
     });
@@ -23,7 +26,7 @@ exports.addToCart = async (req, res) => {
 exports.getCart = async (req, res) => {
   try {
     const cart = await Cart.find({
-      user: req.user._id,
+      user: req.user.id,
     }).populate("coffee");
 
     res.status(200).json(cart);
@@ -53,6 +56,8 @@ exports.removeCartItem = async (req, res) => {
 exports.increaseQuantity = async (req, res) => {
   try {
     const { id } = req.params;
+
+    console.log(id)
 
     const cartItem = await Cart.findById(id);
 

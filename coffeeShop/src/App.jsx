@@ -1,44 +1,75 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import './App.css';
-import Home from './pages/Home';
-import MenuPage from './pages/MenuPage';
-import About from './pages/About';
-import Contact from './pages/Contact';
-import Review from './pages/Review';
-import Gallery from './pages/Gallery';
-import Journey from './pages/Journey';
-import CartPage from './pages/CartPage';
-import WishlistPage from './pages/WishlistPage';
-import Footer from './component/Footer';
-import Navbar from './component/Navbar';
-import Login from './pages/Login';
-import SignUp from './pages/SignUp';
-import PrivateRoute from './component/PrivateRoute';
-import ScrollToTop from './component/ScrollToTop';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import "./App.css";
+
+import Home from "./pages/Home";
+import MenuPage from "./pages/MenuPage";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import Review from "./pages/Review";
+import Gallery from "./pages/Gallery";
+import Journey from "./pages/Journey";
+import CartPage from "./pages/CartPage";
+import WishlistPage from "./pages/WishlistPage";
+import Login from "./pages/Login";
+import SignUp from "./pages/SignUp";
+
+import ScrollToTop from "./component/ScrollToTop";
+import PrivateRoute from "./component/PrivateRoute";
+
+// Layout
+import UserLayouts from "./Layouts/UserLayouts";
+import AdminLayout from "./Admin/adLayouts/AdminLayout";
+import Dashboard from "./Admin/adpages/Dashboard";
+import Products from "./Admin/adpages/Products";
+import AddProduct from "./Admin/adpages/AddProduct";
 
 function App() {
   return (
     <BrowserRouter>
-    <ScrollToTop/>
-      <Navbar />
-      <Routes>
-        {/* Home Route */}
-        <Route path="/" element={<Home />} />
-        {/* Menu Route with Category ID */}
+      <ScrollToTop />
 
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/menu" element={<MenuPage />} />
-        <Route path="/menu/:categoryId" element={<MenuPage />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/gallery" element={<Gallery />} />
-        <Route path="/journey" element={<Journey />} />
-        <Route path="/review" element={<Review />} />
-        <Route path="/cart" element={<CartPage />} />
-        <Route path="/wishlist" element={<WishlistPage />} />
+      <Routes>
+        {/* User Layout */}
+        <Route element={<UserLayouts />}>
+          <Route path="/" element={<Home />} />
+
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+
+          <Route path="/menu" element={<MenuPage />} />
+          <Route path="/menu/:categoryId" element={<MenuPage />} />
+
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/gallery" element={<Gallery />} />
+          <Route path="/journey" element={<Journey />} />
+          <Route path="/review" element={<Review />} />
+
+          <Route
+            path="/cart"
+            element={
+              <PrivateRoute>
+                <CartPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/wishlist"
+            element={
+              <PrivateRoute>
+                <WishlistPage />
+              </PrivateRoute>
+            }
+          />
+        </Route>
+        {/* Admin Routes */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="products" element={<Products />} />
+          <Route path="add-product" element={<AddProduct />} />
+        </Route>
+
       </Routes>
-      <Footer />
     </BrowserRouter>
   );
 }

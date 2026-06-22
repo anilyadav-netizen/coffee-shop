@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { useWishlist } from '../context/WishlistContext';
 import { addToCart, getCart } from '../redux/Slicer/cartSlice';
+import { getWishlist, removeFromWishlist, clearWishlist } from '../redux/Slicer/wishlistSlice'; // ✅ Redux Wishlist
 import {
     Heart,
     ShoppingBag,
@@ -18,72 +18,20 @@ import {
 const WishlistPage = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { wishlistItems, removeFromWishlist, clearWishlist } = useWishlist();
+    
+    // ✅ Redux se wishlist items lo
+    const { items: wishlistItems, wishlistCount, loading } = useSelector((state) => state.wishlist);
     const { isAuthenticated } = useSelector((state) => state.auth);
+    
     const [isLoading, setIsLoading] = useState(false);
     const [addedItems, setAddedItems] = useState({});
 
-    // Handle add to cart from wishlist
-    const handleAddToCart = async (item) => {
-        if (!isAuthenticated) {
-            navigate('/login');
-            return;
-        }
+    // ✅ Page load par wishlist fetch karo
+    useEffect(() => {
+        dispatch(getWishlist());
+    }, [dispatch]);
 
-        try {
-            const result = await dispatch(addToCart({
-                coffeeId: item.id,
-                quantity: 1
-            }));
-
-            if (addToCart.fulfilled.match(result)) {
-                await dispatch(getCart());
-                setAddedItems(prev => ({ ...prev, [item.id]: true }));
-                setTimeout(() => {
-                    setAddedItems(prev => ({ ...prev, [item.id]: false }));
-                }, 1500);
-            }
-        } catch (error) {
-            console.error("Add to cart error:", error);
-        }
-    };
-
-    // Handle add all to cart
-    const handleAddAllToCart = async () => {
-        if (wishlistItems.length === 0) return;
-
-        if (!isAuthenticated) {
-            navigate('/login');
-            return;
-        }
-
-        setIsLoading(true);
-        try {
-            for (const item of wishlistItems) {
-                await dispatch(addToCart({
-                    coffeeId: item.id,
-                    quantity: 1
-                }));
-            }
-            await dispatch(getCart());
-        } catch (error) {
-            console.error("Add all to cart error:", error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    // Handle remove from wishlist
-    const handleRemove = (itemId) => {
-        removeFromWishlist(itemId);
-    };
-
-    // Handle continue shopping
-    const handleContinueShopping = () => {
-        navigate("/menu");
-    };
-
-    // WishlistPage.jsx mein bhi yeh useEffect add karo
+    // ✅ Navbar dark
     useEffect(() => {
         const navbar = document.querySelector('nav');
         if (navbar) {
@@ -100,7 +48,93 @@ const WishlistPage = () => {
         };
     }, []);
 
-    // Empty state
+    // ✅ Handle add to cart from wishlist
+    const handleAddToCart = async (item) => {
+        if (!isAuthenticated) {
+            navigate('/login');
+            return;
+        }
+
+        try {
+            const result = await dispatch(addToCart({
+                coffeeId: item.coffee?._id || item._id || item.id, // ✅ Backend structure
+                quantity: 1
+            }));
+
+            if (addToCart.fulfilled.match(result)) {
+                await dispatch(getCart());
+                setAddedItems(prev => ({ ...prev, [item._id || item.id]: true }));
+                setTimeout(() => {
+                    setAddedItems(prev => ({ ...prev, [item._id || item.id]: false }));
+                }, 1500);
+            }
+        } catch (error) {
+            console.error("Add to cart error:", error);
+        }
+    };
+
+    // ✅ Handle add all to cart
+    const handleAddAllToCart = async () => {
+        if (wishlistItems.length === 0) return;
+
+        if (!isAuthenticated) {
+            navigate('/login');
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            for (const item of wishlistItems) {
+                await dispatch(addToCart({
+                    coffeeId: item.coffee?._id || item._id || item.id,
+                    quantity: 1
+                }));
+            }
+            await dispatch(getCart());
+        } catch (error) {
+            console.error("Add all to cart error:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // ✅ Handle remove from wishlist (Redux)
+    const handleRemove = (itemId) => {
+        dispatch(removeFromWishlist(itemId))
+            .unwrap()
+            .then(() => {
+                // Success - automatically removed from state
+            })
+            .catch((error) => {
+                console.error("Failed to remove:", error);
+            });
+    };
+
+    // ✅ Handle clear wishlist
+    const handleClearWishlist = () => {
+        if (window.confirm('Remove all items from wishlist?')) {
+            // ✅ Saare items ek-ek karke remove karo
+            wishlistItems.forEach(item => {
+                dispatch(removeFromWishlist(item._id));
+            });
+        }
+    };
+
+    // ✅ Handle continue shopping
+    const handleContinueShopping = () => {
+        navigate("/menu");
+    };
+
+    // ✅ Loading state
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="w-10 h-10 border-4 border-[#0D7C53] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
+    // ✅ Empty state
     if (wishlistItems.length === 0) {
         return (
             <>
@@ -157,15 +191,12 @@ const WishlistPage = () => {
                                 <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 truncate">
                                     My <span className="text-[#0D7C53]">Wishlist</span>
                                 </h1>
+                                <p className="text-sm text-gray-500">{wishlistItems.length} items</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
                             <button
-                                onClick={() => {
-                                    if (window.confirm('Remove all items from wishlist?')) {
-                                        clearWishlist();
-                                    }
-                                }}
+                                onClick={handleClearWishlist}
                                 className="text-sm sm:text-base text-red-500 hover:text-red-600 font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-red-50/50 backdrop-blur-sm border border-red-200/50 hover:bg-red-100/50 transition-all flex-shrink-0"
                             >
                                 Clear All
@@ -195,77 +226,84 @@ const WishlistPage = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                         {/* Wishlist Items */}
                         <div className="lg:col-span-2 space-y-3 sm:space-y-4">
-                            {wishlistItems.map((item) => (
-                                <div
-                                    key={item.id}
-                                    className="group backdrop-blur-xl bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-md shadow-black/5 hover:shadow-lg transition-all duration-300"
-                                >
-                                    <div className="flex gap-3 sm:gap-4">
-                                        {/* Image */}
-                                        <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-lg sm:rounded-xl overflow-hidden flex-shrink-0 bg-gray-100/50 border border-white/20">
-                                            <img
-                                                src={item.image || 'https://placehold.co/100x100/e2e8f0/64748b?text=☕'}
-                                                alt={item.name}
-                                                className="w-full h-full object-cover"
-                                            />
-                                        </div>
-
-                                        {/* Details */}
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-start justify-between gap-2">
-                                                <div className="min-w-0 flex-1">
-                                                    <h3 className="font-semibold text-gray-800 text-base sm:text-base truncate">
-                                                        {item.name}
-                                                    </h3>
-                                                    <p className="text-[12px] sm:text-sm text-gray-500 truncate">
-                                                        {item.category || 'Coffee'}
-                                                    </p>
-                                                </div>
-                                                <button
-                                                    onClick={() => handleRemove(item.id)}
-                                                    className="p-1 rounded-full bg-red-200 hover:bg-red-300 transition-all opacity-80 group-hover:opacity-100 flex-shrink-0"
-                                                >
-                                                    <Trash2 className="w-4 h-4 sm:w-5 sm:h-5 text-red-400 hover:text-red-700" />
-                                                </button>
+                            {wishlistItems.map((item) => {
+                                // ✅ Backend se item ka structure
+                                const coffeeData = item.coffee || item;
+                                const itemId = item._id;
+                                const coffeeId = coffeeData._id || itemId;
+                                
+                                return (
+                                    <div
+                                        key={itemId}
+                                        className="group backdrop-blur-xl bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-md shadow-black/5 hover:shadow-lg transition-all duration-300"
+                                    >
+                                        <div className="flex gap-3 sm:gap-4">
+                                            {/* Image */}
+                                            <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-lg sm:rounded-xl overflow-hidden flex-shrink-0 bg-gray-100/50 border border-white/20">
+                                                <img
+                                                    src={coffeeData.image || 'https://placehold.co/100x100/e2e8f0/64748b?text=☕'}
+                                                    alt={coffeeData.name}
+                                                    className="w-full h-full object-cover"
+                                                />
                                             </div>
 
-                                            {/* Price Section */}
-                                            <div className="flex flex-row items-center justify-between mt-2 sm:mt-3 gap-2">
-                                                <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-                                                    <span className="font-bold text-[#0D7C53] text-sm sm:text-base md:text-lg">
-                                                        ₹{(item.discountPrice || item.price).toFixed(2)}
-                                                    </span>
-                                                    {item.discountPrice && (
-                                                        <span className="text-[10px] sm:text-xs text-gray-400 line-through">
-                                                            ₹{item.price.toFixed(2)}
-                                                        </span>
-                                                    )}
+                                            {/* Details */}
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-start justify-between gap-2">
+                                                    <div className="min-w-0 flex-1">
+                                                        <h3 className="font-semibold text-gray-800 text-base sm:text-base truncate">
+                                                            {coffeeData.name}
+                                                        </h3>
+                                                        <p className="text-[12px] sm:text-sm text-gray-500 truncate">
+                                                            {coffeeData.category || 'Coffee'}
+                                                        </p>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleRemove(itemId)}
+                                                        className="p-1 rounded-full bg-red-200 hover:bg-red-300 transition-all opacity-80 group-hover:opacity-100 flex-shrink-0"
+                                                    >
+                                                        <Trash2 className="w-4 h-4 sm:w-5 sm:h-5 text-red-400 hover:text-red-700" />
+                                                    </button>
                                                 </div>
 
-                                                {/* Add to Cart Button */}
-                                                <button
-                                                    onClick={() => handleAddToCart(item)}
-                                                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2 text-sm sm:text-base ${addedItems[item.id]
-                                                        ? 'bg-green-500 text-white'
-                                                        : 'bg-gradient-to-r from-[#0D7C53] to-green-600 text-white hover:shadow-lg hover:scale-[1.02]'
-                                                        }`}
-                                                >
-                                                    {addedItems[item.id] ? (
-                                                        <>
-                                                            <span>Added ✓</span>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <ShoppingCart size={14} className="sm:w-3.5 sm:h-3.5" />
-                                                            Add
-                                                        </>
-                                                    )}
-                                                </button>
+                                                {/* Price Section */}
+                                                <div className="flex flex-row items-center justify-between mt-2 sm:mt-3 gap-2">
+                                                    <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                                                        <span className="font-bold text-[#0D7C53] text-sm sm:text-base md:text-lg">
+                                                            ₹{(coffeeData.discountPrice || coffeeData.price || 0).toFixed(2)}
+                                                        </span>
+                                                        {coffeeData.discountPrice && (
+                                                            <span className="text-[10px] sm:text-xs text-gray-400 line-through">
+                                                                ₹{coffeeData.price.toFixed(2)}
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Add to Cart Button */}
+                                                    <button
+                                                        onClick={() => handleAddToCart(item)}
+                                                        className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2 text-sm sm:text-base ${addedItems[itemId]
+                                                            ? 'bg-green-500 text-white'
+                                                            : 'bg-gradient-to-r from-[#0D7C53] to-green-600 text-white hover:shadow-lg hover:scale-[1.02]'
+                                                            }`}
+                                                    >
+                                                        {addedItems[itemId] ? (
+                                                            <>
+                                                                <span>Added ✓</span>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <ShoppingCart size={14} className="sm:w-3.5 sm:h-3.5" />
+                                                                Add
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
 
                         {/* Wishlist Summary */}
@@ -283,7 +321,10 @@ const WishlistPage = () => {
                                     <div className="flex justify-between text-sm sm:text-base">
                                         <span className="text-gray-500">Estimated Total</span>
                                         <span className="font-medium text-gray-800">
-                                            ₹{wishlistItems.reduce((sum, item) => sum + (item.discountPrice || item.price), 0).toFixed(2)}
+                                            ₹{wishlistItems.reduce((sum, item) => {
+                                                const coffee = item.coffee || item;
+                                                return sum + (coffee.discountPrice || coffee.price || 0);
+                                            }, 0).toFixed(2)}
                                         </span>
                                     </div>
                                     <div className="border-t border-gray-200/50 pt-2 sm:pt-3 mt-2 sm:mt-3">

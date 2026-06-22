@@ -12,6 +12,7 @@ const authRoutes = require("./routes/authRoutes");
 const coffeeRoutes = require("./routes/coffeeRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
+const wishlistRoute = require("./routes/wishlistRoute")
 
 app.use(express.json())
 
@@ -28,6 +29,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/coffee", coffeeRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/payment", paymentRoutes);
+app.use('/api/wishlist',wishlistRoute)
 connectDB()
 
 
