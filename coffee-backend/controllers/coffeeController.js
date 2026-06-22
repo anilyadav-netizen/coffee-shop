@@ -1,9 +1,48 @@
 const Coffee = require("../models/Coffee");
+const axios = require("axios");
+const sharp = require("sharp");
+const FormData = require("form-data");
+
+const uploadToImgBB = async (buffer, originalname) => {
+  const compressedBuffer = await sharp(buffer)
+    .resize(600)
+    .jpeg({ quality: 70 })
+    .toBuffer();
+
+  const formData = new FormData();
+
+  formData.append("image", compressedBuffer, {
+    filename: originalname,
+    contentType: "image/jpeg",
+  });
+
+  const upload = await axios.post(
+    `https://api.imgbb.com/1/upload?key=${process.env.IMGBB_API_KEY}`,
+    formData,
+    {
+      headers: formData.getHeaders(),
+    }
+  );
+
+  return upload.data.data.url;
+};
 
 // Create Coffee
 exports.createCoffee = async (req, res) => {
   try {
-    const coffee = await Coffee.create(req.body);
+    let imageUrl = "";
+
+    if (req.file) {
+      imageUrl = await uploadToImgBB(
+        req.file.buffer,
+        req.file.originalname
+      );
+    }
+
+    const coffee = await Coffee.create({
+      ...req.body,
+      image: imageUrl,
+    });
 
     res.status(201).json({
       success: true,
@@ -17,6 +56,40 @@ exports.createCoffee = async (req, res) => {
   }
 };
 
+// Update Coffee
+exports.updateCoffee = async (req, res) => {
+  try {
+    const updateData = { ...req.body };
+
+    if (req.file) {
+      const imageUrl = await uploadToImgBB(
+        req.file.buffer,
+        req.file.originalname
+      );
+
+      updateData.image = imageUrl;
+    }
+
+    const coffee = await Coffee.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      data: coffee,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 // Get All Coffee
 exports.getAllCoffee = async (req, res) => {
   try {
@@ -54,21 +127,7 @@ exports.getCoffeeById = async (req, res) => {
 };
 
 // Update Coffee
-exports.updateCoffee = async (req, res) => {
-  try {
-    const coffee = await Coffee.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
 
-    res.status(200).json(coffee);
-  } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
-  }
-};
 
 // Delete Coffee
 exports.deleteCoffee = async (req, res) => {
