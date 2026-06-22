@@ -1,3 +1,5 @@
+// src/redux/Slicer/adminProductSlice.js
+
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import API from "../../Api/Api";
 
@@ -7,7 +9,7 @@ export const getProducts = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const { data } = await API.get("/coffee");
-            return data.data; // ✅ Backend se data.data mein aayega
+            return data.data;
         } catch (error) {
             return rejectWithValue(
                 error.response?.data?.message || "Failed to fetch products"
@@ -17,15 +19,15 @@ export const getProducts = createAsyncThunk(
 );
 
 // ================= ADD PRODUCT =================
-// src/redux/Slicer/adminProductSlice.js
-
-// ================= ADD PRODUCT =================
 export const addProduct = createAsyncThunk(
     "adminProducts/addProduct",
-    async (productData, { rejectWithValue }) => {
+    async (formData, { rejectWithValue }) => {
         try {
-            // ✅ JSON bhejo (FormData nahi)
-            const { data } = await API.post("/coffee", productData);
+            const { data } = await API.post("/coffee", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
             return data.data;
         } catch (error) {
             return rejectWithValue(
@@ -35,13 +37,31 @@ export const addProduct = createAsyncThunk(
     }
 );
 
+// ================= GET SINGLE PRODUCT =================
+export const getSingleProduct = createAsyncThunk(
+    "adminProducts/getSingleProduct",
+    async (id, { rejectWithValue }) => {
+        try {
+            const { data } = await API.get(`/coffee/${id}`);
+            return data;
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data?.message || "Failed to fetch product"
+            );
+        }
+    }
+);
+
 // ================= UPDATE PRODUCT =================
 export const updateProduct = createAsyncThunk(
     "adminProducts/updateProduct",
-    async ({ id, productData }, { rejectWithValue }) => {
+    async ({ id, formData }, { rejectWithValue }) => {
         try {
-            // ✅ JSON bhejo (FormData nahi)
-            const { data } = await API.put(`/coffee/${id}`, productData);
+            const { data } = await API.put(`/coffee/${id}`, formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
             return data;
         } catch (error) {
             return rejectWithValue(
@@ -71,11 +91,16 @@ const adminProductSlice = createSlice({
     name: "adminProducts",
     initialState: {
         products: [],
+        product: null,
         loading: false,
         error: null,
         totalProducts: 0,
     },
-    reducers: {},
+    reducers: {
+        clearProduct: (state) => {
+            state.product = null;
+        },
+    },
     extraReducers: (builder) => {
         builder
             // GET PRODUCTS
@@ -89,6 +114,19 @@ const adminProductSlice = createSlice({
                 state.totalProducts = action.payload?.length || 0;
             })
             .addCase(getProducts.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            // GET SINGLE PRODUCT
+            .addCase(getSingleProduct.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(getSingleProduct.fulfilled, (state, action) => {
+                state.loading = false;
+                state.product = action.payload;
+            })
+            .addCase(getSingleProduct.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             })
@@ -117,6 +155,7 @@ const adminProductSlice = createSlice({
                 if (index !== -1) {
                     state.products[index] = action.payload;
                 }
+                state.product = null;
             })
             .addCase(updateProduct.rejected, (state, action) => {
                 state.loading = false;
@@ -139,5 +178,7 @@ const adminProductSlice = createSlice({
             });
     },
 });
+
+export const { clearProduct } = adminProductSlice.actions;
 
 export default adminProductSlice.reducer;

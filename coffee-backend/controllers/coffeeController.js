@@ -39,6 +39,8 @@ exports.createCoffee = async (req, res) => {
       );
     }
 
+    console.log(req.body,"body","filer", req.file)
+
     const coffee = await Coffee.create({
       ...req.body,
       image: imageUrl,

@@ -22,6 +22,7 @@ export const getWishlist = createAsyncThunk(
 export const addToWishlist = createAsyncThunk(
     "wishlist/addToWishlist",
     async ({ coffeeId }, { rejectWithValue }) => {
+        console.log(coffeeId,"qwerty")
         try {
             const { data } = await API.post("/wishlist", { coffeeId });
             return data.data;
@@ -73,18 +74,18 @@ export const clearWishlist = createAsyncThunk(
 // ================= TOGGLE WISHLIST =================
 export const toggleWishlist = createAsyncThunk(
     "wishlist/toggleWishlist",
-    async ({ coffeeId }, { rejectWithValue, getState }) => {
+    async ({ coffee }, { rejectWithValue, getState }) => {
         try {
             const { wishlist } = getState();
             const existingItem = wishlist.items.find(
-                (item) => item.coffee?._id === coffeeId || item.coffee === coffeeId
+                (item) => item.coffee?._id === coffeeId || item.coffee === coffee
             );
 
             if (existingItem) {
                 await API.delete(`/wishlist/${existingItem._id}`);
                 return { id: existingItem._id, removed: true };
             } else {
-                const { data } = await API.post("/wishlist", { coffeeId });
+                const { data } = await API.post("/wishlist", { coffee });
                 return { data: data.data, removed: false };
             }
         } catch (error) {
@@ -92,7 +93,7 @@ export const toggleWishlist = createAsyncThunk(
                 try {
                     const { wishlist } = getState();
                     const existingItem = wishlist.items.find(
-                        (item) => item.coffee?._id === coffeeId || item.coffee === coffeeId
+                        (item) => item.coffee?._id === coffee || item.coffee === coffee
                     );
                     if (existingItem) {
                         await API.delete(`/wishlist/${existingItem._id}`);

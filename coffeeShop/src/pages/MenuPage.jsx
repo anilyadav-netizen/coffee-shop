@@ -23,8 +23,6 @@ import Navbar from "../component/Navbar";
 const MenuPage = () => {
     const { categoryId } = useParams();
     const navigate = useNavigate();
-    const { addToCart } = useCart();
-    const { toggleWishlist, isInWishlist } = useWishlist();
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [filteredItems, setFilteredItems] = useState([]);
@@ -392,8 +390,7 @@ const MenuPage = () => {
                         {filteredItems && filteredItems.length > 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 pb-12">
                                 {filteredItems.map((item) => {
-                                    const isWishlisted = isInWishlist(item.id);
-                                    const isAdded = addedItems[item.id];
+                                   
 
                                     return (
                                         <div
@@ -427,7 +424,7 @@ const MenuPage = () => {
                                                 >
                                                     <Heart
                                                         size={16}
-                                                        className={`sm:w-[18px] sm:h-[18px] transition-colors ${isWishlisted
+                                                        className={`sm:w-[18px] sm:h-[18px] transition-colors
                                                             ? 'fill-red-500 text-red-500'
                                                             : 'text-gray-400 hover:text-red-500'
                                                             }`}
@@ -472,7 +469,7 @@ const MenuPage = () => {
                                                 </div>
 
                                                 {/* ✅ Add to Cart Button with Feedback */}
-                                                <button
+                                                {/* <button
                                                     onClick={(e) => handleAddToCart(item, e)}
                                                     className={`w-full mt-2 sm:mt-3 md:mt-4 font-medium py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2 group/btn text-sm sm:text-base ${isAdded
                                                         ? 'bg-green-500 text-white'
@@ -490,7 +487,7 @@ const MenuPage = () => {
                                                             <ChevronRight size={12} className="sm:w-4 sm:h-4 group-hover/btn:translate-x-1 transition-transform" />
                                                         </>
                                                     )}
-                                                </button>
+                                                </button> */}
                                             </div>
                                         </div>
                                     );

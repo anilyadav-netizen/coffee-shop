@@ -6,6 +6,8 @@ exports.createWishlist = async (req, res) => {
   try {
     const { coffeeId } = req.body;
 
+    console.log(req.body)
+
     const exists = await Wishlist.findOne({
       user: req.user.id,
       coffee: coffeeId,

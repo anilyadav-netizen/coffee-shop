@@ -67,6 +67,8 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="products" element={<Products />} />
           <Route path="add-product" element={<AddProduct />} />
+          <Route path="/admin/update-product/:id" element={<AddProduct />} /> {/* ✅ Same component */}
+
         </Route>
 
       </Routes>

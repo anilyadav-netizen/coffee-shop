@@ -32,6 +32,11 @@ const coffeeSchema = new mongoose.Schema(
       type: String,
       default: "Coffee",
     },
+    status: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "active",
+    },
   },
   {
     timestamps: true,

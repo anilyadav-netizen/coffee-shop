@@ -22,6 +22,8 @@ export const getCart = createAsyncThunk(
 export const addToCart = createAsyncThunk(
     "cart/addToCart",
     async ({ coffeeId, quantity }, { rejectWithValue }) => {
+
+        console.log(coffeeId,quantity)
         try {
             const { data } = await API.post("/cart", {
                 coffeeId,
