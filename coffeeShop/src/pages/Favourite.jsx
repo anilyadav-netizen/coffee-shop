@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getFavouriteItems, toggleFavourite, getFavouriteCount } from '../data/favouriteData';
-import { useCart } from '../context/CartContext';
-import { useWishlist } from '../context/WishlistContext';
 import {
     Heart,
     Star,
@@ -21,8 +19,6 @@ import {
 
 const Favourite = () => {
     const navigate = useNavigate();
-    const { addToCart } = useCart();
-    const { toggleWishlist, isInWishlist } = useWishlist();
     const [favourites, setFavourites] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState('all');
@@ -222,7 +218,7 @@ const Favourite = () => {
                 {filteredFavourites.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {filteredFavourites.map((item) => {
-                            const isWishlisted = isInWishlist(item.id);
+                          
                             const isAdded = addedItems[item.id];
                             
                             return (
@@ -253,11 +249,7 @@ const Favourite = () => {
                                         >
                                             <Heart 
                                                 size={18} 
-                                                className={`transition-colors ${
-                                                    isWishlisted 
-                                                        ? 'fill-red-500 text-red-500' 
-                                                        : 'text-gray-400 hover:text-red-500'
-                                                }`}
+                                               
                                             />
                                         </button>
 

@@ -1,37 +1,36 @@
-// src/components/CartPage.jsx
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import {
-    ShoppingCart,
-    X,
+    getCart,
+    removeCartItem,
+    increaseQuantity,
+    decreaseQuantity,
+    clearCartState
+} from '../redux/Slicer/cartSlice';
+import {
     Plus,
     Minus,
     Trash2,
     ArrowRight,
     Coffee,
     ShoppingBag,
-    Heart,
-    Sparkles,
-    ChevronLeft
 } from "lucide-react";
 
-
 const CartPage = () => {
-    const {
-        cartItems,
-        totalItems,
-        totalPrice,
-        removeFromCart,
-        updateQuantity,
-        clearCart,
-        closeCart
-    } = useCart();
-
+    const dispatch = useDispatch();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
 
-    // ✅ YEH ADD KARO
+    // ✅ Redux se cart data
+    const { cartItems, totalItems, totalPrice, loading } = useSelector((state) => state.cart);
+
+    // ✅ Page load par cart fetch karo
+    useEffect(() => {
+        dispatch(getCart());
+    }, [dispatch]);
+
+    // ✅ Navbar force dark
     useEffect(() => {
         const navbar = document.querySelector('nav');
         if (navbar) {
@@ -48,8 +47,34 @@ const CartPage = () => {
         };
     }, []);
 
-    const handleClose = () => {
-        navigate(-1);
+    // ✅ Increase quantity
+    const handleIncrease = (id) => {
+        dispatch(increaseQuantity(id))
+            .unwrap()
+            .catch((error) => console.error("Failed to increase:", error));
+    };
+
+    // ✅ Decrease quantity
+    const handleDecrease = (id) => {
+        dispatch(decreaseQuantity(id))
+            .unwrap()
+            .catch((error) => console.error("Failed to decrease:", error));
+    };
+
+    // ✅ Remove item
+    const handleRemove = (id) => {
+        dispatch(removeCartItem(id))
+            .unwrap()
+            .catch((error) => console.error("Failed to remove:", error));
+    };
+
+    // ✅ Clear cart
+    const handleClearCart = () => {
+        if (window.confirm('Are you sure you want to clear your cart?')) {
+            cartItems.forEach(item => {
+                dispatch(removeCartItem(item._id));
+            });
+        }
     };
 
     const handleCheckout = () => {
@@ -64,38 +89,44 @@ const CartPage = () => {
         navigate("/menu");
     };
 
+    // ✅ Loading state
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="w-10 h-10 border-4 border-[#0D7C53] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
+    // ✅ Empty cart
     if (cartItems.length === 0) {
         return (
-            <>
-                
-                <div className="min-h-screen bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3] pt-20 sm:pt-24 px-3 sm:px-4 overflow-x-hidden">
-                    <div className="max-w-7xl mx-auto">
-                        <div className="backdrop-blur-xl bg-white/30 border border-white/40 rounded-2xl sm:rounded-3xl p-6 sm:p-12 text-center shadow-2xl shadow-black/5">
-                            <div className="flex flex-col items-center justify-center py-8 sm:py-16">
-                                <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white/40 backdrop-blur-sm rounded-full flex items-center justify-center mb-4 sm:mb-6 border border-white/30">
-                                    <ShoppingBag className="w-12 h-12 sm:w-16 sm:h-16 text-[#0D7C53]" />
-                                </div>
-                                <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2 sm:mb-3">
-                                    Your Cart is Empty
-                                </h2>
-                                <p className="text-sm sm:text-base text-gray-500 max-w-md mx-auto mb-6 sm:mb-8 px-2">
-                                    Looks like you haven't added any items to your cart yet.
-                                    Start exploring our delicious coffee collection!
-                                </p>
-                                <button
-                                    onClick={handleContinueShopping}
-                                    className="px-6 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-[#0D7C53] to-green-600 text-white rounded-full font-medium hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center gap-2 text-sm sm:text-base"
-                                >
-                                    <Coffee size={18} className="sm:w-5 sm:h-5" />
-                                    Browse Menu
-                                    <ArrowRight size={16} className="sm:w-[18px] sm:h-[18px]" />
-                                </button>
+            <div className="min-h-screen bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3] pt-20 sm:pt-24 px-3 sm:px-4 overflow-x-hidden">
+                <div className="max-w-7xl mx-auto">
+                    <div className="backdrop-blur-xl bg-white/30 border border-white/40 rounded-2xl sm:rounded-3xl p-6 sm:p-12 text-center shadow-2xl shadow-black/5">
+                        <div className="flex flex-col items-center justify-center py-8 sm:py-16">
+                            <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white/40 backdrop-blur-sm rounded-full flex items-center justify-center mb-4 sm:mb-6 border border-white/30">
+                                <ShoppingBag className="w-12 h-12 sm:w-16 sm:h-16 text-[#0D7C53]" />
                             </div>
+                            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2 sm:mb-3">
+                                Your Cart is Empty
+                            </h2>
+                            <p className="text-sm sm:text-base text-gray-500 max-w-md mx-auto mb-6 sm:mb-8 px-2">
+                                Looks like you haven't added any items to your cart yet.
+                                Start exploring our delicious coffee collection!
+                            </p>
+                            <button
+                                onClick={handleContinueShopping}
+                                className="px-6 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-[#0D7C53] to-green-600 text-white rounded-full font-medium hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center gap-2 text-sm sm:text-base"
+                            >
+                                <Coffee size={18} className="sm:w-5 sm:h-5" />
+                                Browse Menu
+                                <ArrowRight size={16} className="sm:w-[18px] sm:h-[18px]" />
+                            </button>
                         </div>
                     </div>
                 </div>
-              
-            </>
+            </div>
         );
     }
 
@@ -118,15 +149,15 @@ const CartPage = () => {
                     {/* Header */}
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-8">
                         <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
-                           
                             <div className="min-w-0 flex-1">
                                 <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 truncate">
                                     Your <span className="text-[#0D7C53]">Cart</span>
                                 </h1>
+                                <p className="text-sm text-gray-500">{totalItems} items</p>
                             </div>
                         </div>
                         <button
-                            onClick={clearCart}
+                            onClick={handleClearCart}
                             className="text-sm sm:text-base text-red-500 hover:text-red-600 font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-red-50/50 backdrop-blur-sm border border-red-200/50 hover:bg-red-100/50 transition-all flex-shrink-0"
                         >
                             Clear All
@@ -138,15 +169,15 @@ const CartPage = () => {
                         <div className="lg:col-span-2 space-y-3 sm:space-y-4">
                             {cartItems.map((item) => (
                                 <div
-                                    key={item.id}
+                                    key={item._id}
                                     className="group backdrop-blur-xl bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-md shadow-black/5 hover:shadow-lg transition-all duration-300"
                                 >
                                     <div className="flex gap-3 sm:gap-4">
                                         {/* Image */}
                                         <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-lg sm:rounded-xl overflow-hidden flex-shrink-0 bg-gray-100/50 border border-white/20">
                                             <img
-                                                src={item.image || 'https://placehold.co/100x100/e2e8f0/64748b?text=☕'}
-                                                alt={item.name}
+                                                src={item.coffee?.image || 'https://placehold.co/100x100/e2e8f0/64748b?text=☕'}
+                                                alt={item.coffee?.name}
                                                 className="w-full h-full object-cover"
                                             />
                                         </div>
@@ -156,38 +187,32 @@ const CartPage = () => {
                                             <div className="flex items-start justify-between gap-2">
                                                 <div className="min-w-0 flex-1">
                                                     <h3 className="font-semibold text-gray-800 text-base sm:text-lg truncate">
-                                                        {item.name}
+                                                        {item.coffee?.name}
                                                     </h3>
                                                     <p className="text-[12px] sm:text-sm text-gray-500 truncate">
-                                                        {item.category || 'Coffee'}
+                                                        {item.coffee?.category || 'Coffee'}
                                                     </p>
                                                 </div>
                                                 <button
-                                                    onClick={() => removeFromCart(item.id)}
-                                                    className="p-1 rounded-full  bg-red-200 hover:bg-red-300 transition-all opacity-80 group-hover:opacity-100 flex-shrink-0"
+                                                    onClick={() => handleRemove(item._id)}
+                                                    className="p-1 rounded-full bg-red-200 hover:bg-red-300 transition-all opacity-80 group-hover:opacity-100 flex-shrink-0"
                                                 >
                                                     <Trash2 className="w-4 h-4 sm:w-5 sm:h-5 text-red-400 hover:text-red-600" />
                                                 </button>
                                             </div>
 
-                                            {/* Price & Quantity - Side by Side */}
+                                            {/* Price & Quantity */}
                                             <div className="flex flex-row items-center justify-between mt-2 sm:mt-3 gap-2">
-                                                {/* Price - Left Side */}
                                                 <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
                                                     <span className="font-bold text-[#0D7C53] text-sm sm:text-base md:text-lg">
-                                                        ₹{(item.price * item.quantity).toFixed(2)}
+                                                        ₹{(item.coffee?.price * item.quantity).toFixed(2)}
                                                     </span>
-                                                    {item.originalPrice && (
-                                                        <span className="text-[10px] sm:text-xs text-gray-400 line-through">
-                                                            ₹{(item.originalPrice * item.quantity).toFixed(2)}
-                                                        </span>
-                                                    )}
                                                 </div>
 
-                                                {/* Quantity Controls - Right Side */}
+                                                {/* Quantity Controls */}
                                                 <div className="flex items-center gap-1 sm:gap-2 bg-white/50 backdrop-blur-sm rounded-full p-0.5 sm:p-1 border border-white/30 flex-shrink-0">
                                                     <button
-                                                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                                        onClick={() => handleDecrease(item._id)}
                                                         className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-all duration-300"
                                                     >
                                                         <Minus className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-gray-600" />
@@ -196,7 +221,7 @@ const CartPage = () => {
                                                         {item.quantity}
                                                     </span>
                                                     <button
-                                                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                        onClick={() => handleIncrease(item._id)}
                                                         className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-[#0D7C53] hover:bg-green-700 flex items-center justify-center transition-all duration-300"
                                                     >
                                                         <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 text-white" />
@@ -272,17 +297,6 @@ const CartPage = () => {
                                         </>
                                     )}
                                 </button>
-
-                                {/* <p className="text-center text-[10px] sm:text-xs text-gray-400 mt-2 sm:mt-3">
-                                    🔒 Secure checkout • Free delivery on orders above ₹500
-                                </p>
-
-                                <button
-                                    onClick={handleContinueShopping}
-                                    className="w-full mt-2 sm:mt-3 text-center text-[10px] sm:text-sm text-gray-500 hover:text-[#0D7C53] transition-all"
-                                >
-                                    ← Continue Shopping
-                                </button> */}
                             </div>
                         </div>
                     </div>

@@ -1,7 +1,6 @@
-// src/components/Sidebar.jsx
 import React from "react";
 import { Link } from "react-router-dom";
-import { Heart, ShoppingCart, X, User, LogOut, UserCircle } from "lucide-react";
+import { Heart, ShoppingCart, X, LogOut, UserCircle } from "lucide-react";
 
 const Sidebar = ({
     isOpen,
@@ -11,33 +10,35 @@ const Sidebar = ({
     handleCartClick,
     wishlistCount,
     totalItems,
-    user,        // ✅ User prop
-    onLogout,    // ✅ Logout function
+    user,
+    onLogout,
 }) => {
+
     return (
         <>
             {/* Overlay */}
             <div
-                className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300 lg:hidden ${isOpen ? "opacity-100 visible" : "opacity-0 invisible"
-                    }`}
+                className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300 lg:hidden ${
+                    isOpen ? "opacity-100 visible" : "opacity-0 invisible"
+                }`}
                 onClick={onClose}
             />
 
             {/* Sidebar */}
             <div
-                className={`fixed top-0 left-0 h-screen w-72 bg-white/95 backdrop-blur-md border-r border-white/30 z-50 transform transition-transform duration-300 lg:hidden ${isOpen ? "translate-x-0" : "-translate-x-full"
-                    }`}
+                className={`fixed top-0 left-0 h-screen w-72 bg-white/95 backdrop-blur-md border-r border-white/30 z-50 transform transition-transform duration-300 lg:hidden ${
+                    isOpen ? "translate-x-0" : "-translate-x-full"
+                }`}
             >
-                {/* ✅ Header - FIX: Correctly show user or login */}
+                {/* Header */}
                 <div className="flex items-center justify-between p-5 border-b border-gray-200/50">
                     {user ? (
-                        // ✅ LOGGED IN - Show user profile
                         <div className="flex items-center gap-3 flex-1">
                             <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#0D7C53] to-green-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                                 {user.avatar ? (
-                                    <img
-                                        src={user.avatar}
-                                        alt={user.name}
+                                    <img 
+                                        src={user.avatar} 
+                                        alt={user.name} 
                                         className="w-full h-full rounded-full object-cover"
                                     />
                                 ) : (
@@ -54,9 +55,8 @@ const Sidebar = ({
                             </div>
                         </div>
                     ) : (
-                        // ❌ NOT LOGGED IN - Show Login link
-                        <Link
-                            to="/login"
+                        <Link 
+                            to="/login" 
                             onClick={onClose}
                             className="flex items-center gap-2 text-[#0D7C53] hover:text-[#0a6a45] transition-colors"
                         >
@@ -125,7 +125,6 @@ const Sidebar = ({
                             )}
                         </button>
 
-                        {/* ✅ Logout button - Only when logged in */}
                         {user && (
                             <button
                                 onClick={() => {

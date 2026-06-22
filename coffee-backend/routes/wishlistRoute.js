@@ -8,7 +8,7 @@ const {
   deleteWishlist,
 } = require("../controllers/wishlistController.js");
 
-const { protect } = require("../middleware/auth");
+const protect = require("../middleware/authMiddleware");
 
 // Add
 router.post("/", protect, createWishlist);

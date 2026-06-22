@@ -1,24 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   COFFEE_PRODUCTS,
   getDiscountPercentage,
 } from "../data/coffeeData";
-import { useCart } from "../context/CartContext";
-import { useWishlist } from "../context/WishlistContext"; // ✅ Import Wishlist
-
+import { addToCart } from "../redux/Slicer/cartSlice";
+import { toggleWishlist, getWishlist } from "../redux/Slicer/wishlistSlice";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import { Autoplay } from "swiper/modules";
 
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import Types from "./Types";
 
-// Icons with green theme
-const StarIcon = () => (
-  <svg className="w-4 h-4 text-green-500 fill-green-500" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-);
-
+// Icons
 const HeartIcon = ({ isWishlisted = false, className = "" }) => (
   <svg 
     className={`w-5 h-5 transition-colors ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-400 group-hover:text-red-500'} ${className}`} 
@@ -31,63 +26,78 @@ const HeartIcon = ({ isWishlisted = false, className = "" }) => (
 );
 
 const CoffeeIcon = () => (
-  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+  </svg>
 );
 
 const CategoryPage = () => {
+  const dispatch = useDispatch();
+  
+  // ✅ Redux se cart aur wishlist
+  const { totalItems } = useSelector((state) => state.cart);
+  const { items: wishlistItems, wishlistCount } = useSelector((state) => state.wishlist);
+
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [hoveredId, setHoveredId] = useState(null);
   const [modalQuantity, setModalQuantity] = useState(1);
-  const { addToCart } = useCart();
-  const { toggleWishlist, isInWishlist } = useWishlist(); // ✅ Wishlist functions
+
+  // ✅ Page load par wishlist fetch karo
+  useEffect(() => {
+    dispatch(getWishlist());
+  }, [dispatch]);
+
+  // ✅ Check if item is in wishlist
+  const isInWishlist = (productId) => {
+    return wishlistItems.some(
+      (item) => item.coffee?._id === productId || item._id === productId
+    );
+  };
 
   // ✅ Handle Add to Cart from Card
   const handleAddToCart = (product, e) => {
     e.stopPropagation();
     
-    const item = {
-      id: product.id,
-      name: product.name,
-      price: product.discountPrice || product.price,
-      originalPrice: product.price,
-      image: product.image,
-      category: "Coffee",
+    dispatch(addToCart({
+      coffeeId: product.id,
       quantity: 1
-    };
-    
-    addToCart(item);
-    
-    const btn = e.currentTarget;
-    btn.textContent = "Added ✓";
-    btn.style.background = "linear-gradient(to right, #16a34a, #22c55e)";
-    setTimeout(() => {
-      btn.innerHTML = `
-        <svg class="w-4 h-4 group-hover/btn:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-        </svg>
-        Add to Cart
-      `;
-      btn.style.background = "linear-gradient(to right, #0D7C53, #16a34a)";
-    }, 1500);
+    }))
+    .unwrap()
+    .then(() => {
+      const btn = e.currentTarget;
+      btn.textContent = "Added ✓";
+      btn.style.background = "linear-gradient(to right, #16a34a, #22c55e)";
+      setTimeout(() => {
+        btn.innerHTML = `
+          <svg class="w-4 h-4 group-hover/btn:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+          Add to Cart
+        `;
+        btn.style.background = "linear-gradient(to right, #0D7C53, #16a34a)";
+      }, 1500);
+    })
+    .catch((error) => {
+      console.error("Failed to add to cart:", error);
+    });
   };
 
   // ✅ Handle Add to Cart from Modal
   const handleModalAddToCart = () => {
     if (!selectedProduct) return;
     
-    const item = {
-      id: selectedProduct.id,
-      name: selectedProduct.name,
-      price: selectedProduct.discountPrice || selectedProduct.price,
-      originalPrice: selectedProduct.price,
-      image: selectedProduct.image,
-      category: "Coffee",
+    dispatch(addToCart({
+      coffeeId: selectedProduct.id,
       quantity: modalQuantity
-    };
-    
-    addToCart(item);
-    setSelectedProduct(null);
-    setModalQuantity(1);
+    }))
+    .unwrap()
+    .then(() => {
+      setSelectedProduct(null);
+      setModalQuantity(1);
+    })
+    .catch((error) => {
+      console.error("Failed to add to cart:", error);
+    });
   };
 
   // ✅ Handle quantity change in modal
@@ -95,36 +105,24 @@ const CategoryPage = () => {
     setModalQuantity(prev => Math.max(1, prev + change));
   };
 
-  // ✅ Handle Wishlist Toggle
+  // ✅ Handle Wishlist Toggle (Redux)
   const handleWishlistToggle = (product, e) => {
     e.stopPropagation();
-    const wishlistItem = {
-      id: product.id,
-      name: product.name,
-      price: product.discountPrice || product.price,
-      originalPrice: product.price,
-      image: product.image,
-      category: "Coffee",
-      description: product.description || "Premium coffee blend",
-      likes: product.likes || 0
-    };
-    toggleWishlist(wishlistItem);
+    dispatch(toggleWishlist({ coffeeId: product.id }))
+      .unwrap()
+      .catch((error) => {
+        console.error("Failed to toggle wishlist:", error);
+      });
   };
 
   // ✅ Handle Modal Wishlist Toggle
   const handleModalWishlistToggle = () => {
     if (!selectedProduct) return;
-    const wishlistItem = {
-      id: selectedProduct.id,
-      name: selectedProduct.name,
-      price: selectedProduct.discountPrice || selectedProduct.price,
-      originalPrice: selectedProduct.price,
-      image: selectedProduct.image,
-      category: "Coffee",
-      description: selectedProduct.description || "Premium coffee blend",
-      likes: selectedProduct.likes || 0
-    };
-    toggleWishlist(wishlistItem);
+    dispatch(toggleWishlist({ coffeeId: selectedProduct.id }))
+      .unwrap()
+      .catch((error) => {
+        console.error("Failed to toggle wishlist:", error);
+      });
   };
 
   return (
@@ -157,6 +155,13 @@ const CategoryPage = () => {
             <p className="text-gray-500 mt-1 max-w-2xl mx-auto">
               Freshly brewed happiness in every cup — discover your perfect blend.
             </p>
+            {/* ✅ Cart Badge */}
+            {totalItems > 0 && (
+              <div className="mt-3 inline-flex items-center gap-2 bg-[#0D7C53]/10 text-[#0D7C53] px-4 py-2 rounded-full text-sm font-medium">
+                <span>🛒</span>
+                <span>{totalItems} item{totalItems > 1 ? 's' : ''} in cart</span>
+              </div>
+            )}
           </div>
 
           {/* Swiper */}
@@ -213,7 +218,7 @@ const CategoryPage = () => {
                         </span>
                       )}
 
-                      {/* ✅ Wishlist Button - Now Functional */}
+                      {/* Wishlist Button */}
                       <button
                         className="absolute top-3 right-3 z-10 w-9 h-9 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:bg-white transition-all duration-300 hover:scale-110"
                         onClick={(e) => handleWishlistToggle(product, e)}
@@ -264,7 +269,9 @@ const CategoryPage = () => {
                         className="mt-4 w-full bg-gradient-to-r from-[#0D7C53] to-green-600 hover:from-green-600 hover:to-[#0D7C53] text-white py-2.5 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 group/btn"
                         onClick={(e) => handleAddToCart(product, e)}
                       >
-                      
+                        <svg className="w-4 h-4 group-hover/btn:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
                         Add to Cart
                       </button>
                     </div>
@@ -276,7 +283,7 @@ const CategoryPage = () => {
         </div>
       </section>
 
-      {/* Modal - Updated with Wishlist */}
+      {/* Modal */}
       {selectedProduct && (
         <div
           className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-300"
@@ -319,7 +326,7 @@ const CategoryPage = () => {
                 </span>
               )}
 
-              {/* ✅ Modal Wishlist Button */}
+              {/* Modal Wishlist Button */}
               <button 
                 className="absolute bottom-3 right-3 bg-white/95 backdrop-blur-sm p-2.5 rounded-full shadow-lg hover:bg-white transition hover:scale-105 border border-gray-100"
                 onClick={(e) => {
@@ -421,52 +428,32 @@ const CategoryPage = () => {
         </div>
       )}
 
-      {/* CSS Animations */}
-      <style >{`
+      <style>{`
         @keyframes pulse-slow {
           0%, 100% { transform: scale(1); opacity: 0.5; }
           50% { transform: scale(1.1); opacity: 0.8; }
         }
-        
         @keyframes pulse-slow-delay {
           0%, 100% { transform: scale(1); opacity: 0.5; }
           50% { transform: scale(1.15); opacity: 0.7; }
         }
-        
         @keyframes float {
           0%, 100% { transform: translateY(0px) rotate(12deg); }
           50% { transform: translateY(-20px) rotate(15deg); }
         }
-        
         @keyframes float-delay {
           0%, 100% { transform: translateY(0px) rotate(-12deg); }
           50% { transform: translateY(20px) rotate(-15deg); }
         }
-        
         @keyframes float-slow {
           0%, 100% { transform: translateY(0px) rotate(45deg); }
           50% { transform: translateY(-15px) rotate(50deg); }
         }
-        
-        .animate-pulse-slow {
-          animation: pulse-slow 8s ease-in-out infinite;
-        }
-        
-        .animate-pulse-slow-delay {
-          animation: pulse-slow-delay 10s ease-in-out infinite;
-        }
-        
-        .animate-float {
-          animation: float 6s ease-in-out infinite;
-        }
-        
-        .animate-float-delay {
-          animation: float-delay 7s ease-in-out infinite;
-        }
-        
-        .animate-float-slow {
-          animation: float-slow 9s ease-in-out infinite;
-        }
+        .animate-pulse-slow { animation: pulse-slow 8s ease-in-out infinite; }
+        .animate-pulse-slow-delay { animation: pulse-slow-delay 10s ease-in-out infinite; }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        .animate-float-delay { animation: float-delay 7s ease-in-out infinite; }
+        .animate-float-slow { animation: float-slow 9s ease-in-out infinite; }
       `}</style>
     </>
   );
