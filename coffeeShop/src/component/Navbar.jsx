@@ -5,10 +5,10 @@ import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import ProfileDropdown from "../component/ProfileDropdown";
 import Sidebar from '../component/Sidebar'
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from '../redux/Slicer/authSlice'; // ✅ logout import
 import {
     ShoppingCart,
-    User,
-    Search,
     Menu as MenuIcon,
     X,
     Heart
@@ -22,6 +22,9 @@ const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const navigate = useNavigate();
+
+    const dispatch = useDispatch();
+    const { user, isAuthenticated } = useSelector((state) => state.auth);
 
     const navItems = [
         { name: "Home", path: "/" },
@@ -47,12 +50,17 @@ const Navbar = () => {
         navigate('/wishlist');
     };
 
+    // ✅ Logout handler - FIXED
+    const handleLogout = () => {
+        dispatch(logout()); // ✅ Sirf yeh
+        navigate('/login');
+        setIsMenuOpen(false);
+    };
+
     useEffect(() => {
         const handleClickOutside = () => setOpen(false);
         document.addEventListener("click", handleClickOutside);
-
-        return () =>
-            document.removeEventListener("click", handleClickOutside);
+        return () => document.removeEventListener("click", handleClickOutside);
     }, []);
 
     return (
@@ -91,11 +99,6 @@ const Navbar = () => {
 
                 {/* Right Side */}
                 <div className="flex items-center gap-2">
-                    {/* Search Button */}
-                    {/* <button className="p-2 rounded-full hover:bg-white/10 transition-all duration-300 hover:scale-110">
-                        <Search size={20} className="text-white/80 hover:text-white" />
-                    </button> */}
-
                     {/* Wishlist Button */}
                     <button
                         onClick={handleWishlistClick}
@@ -139,7 +142,7 @@ const Navbar = () => {
                 </div>
             </div>
 
-            {/* Mobile Menu */}
+            {/* Mobile Menu - Sidebar with user prop */}
             <Sidebar
                 isOpen={isMenuOpen}
                 onClose={() => setIsMenuOpen(false)}
@@ -148,9 +151,11 @@ const Navbar = () => {
                 handleCartClick={handleCartClick}
                 wishlistCount={wishlistCount}
                 totalItems={totalItems}
+                user={isAuthenticated ? user : null} // ✅ Real-time sync
+                onLogout={handleLogout}
             />
         </nav>
     );
 };
 
-export default Navbar; // ✅ Export default
+export default Navbar;

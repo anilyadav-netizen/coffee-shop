@@ -14,10 +14,12 @@ import Navbar from './component/Navbar';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import PrivateRoute from './component/PrivateRoute';
+import ScrollToTop from './component/ScrollToTop';
 
 function App() {
   return (
     <BrowserRouter>
+    <ScrollToTop/>
       <Navbar />
       <Routes>
         {/* Home Route */}

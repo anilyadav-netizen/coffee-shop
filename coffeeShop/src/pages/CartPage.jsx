@@ -31,6 +31,23 @@ const CartPage = () => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
 
+    // ✅ YEH ADD KARO
+    useEffect(() => {
+        const navbar = document.querySelector('nav');
+        if (navbar) {
+            navbar.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+            navbar.style.backdropFilter = 'blur(20px)';
+            navbar.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
+        }
+        return () => {
+            if (navbar) {
+                navbar.style.backgroundColor = '';
+                navbar.style.backdropFilter = '';
+                navbar.style.boxShadow = '';
+            }
+        };
+    }, []);
+
     const handleClose = () => {
         navigate(-1);
     };

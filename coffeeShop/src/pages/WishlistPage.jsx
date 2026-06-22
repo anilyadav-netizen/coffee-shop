@@ -1,5 +1,5 @@
 // src/pages/WishlistPage.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useWishlist } from '../context/WishlistContext';
@@ -82,6 +82,23 @@ const WishlistPage = () => {
     const handleContinueShopping = () => {
         navigate("/menu");
     };
+
+    // WishlistPage.jsx mein bhi yeh useEffect add karo
+    useEffect(() => {
+        const navbar = document.querySelector('nav');
+        if (navbar) {
+            navbar.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+            navbar.style.backdropFilter = 'blur(20px)';
+            navbar.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
+        }
+        return () => {
+            if (navbar) {
+                navbar.style.backgroundColor = '';
+                navbar.style.backdropFilter = '';
+                navbar.style.boxShadow = '';
+            }
+        };
+    }, []);
 
     // Empty state
     if (wishlistItems.length === 0) {
