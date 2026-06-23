@@ -35,8 +35,12 @@ const Gallery = () => {
         return [...GALLERY_ITEMS, ...userImages];
     }, [userImages]);
 
-    // Get current items for pagination
+    // Get current items for pagination (only for desktop)
     const currentItems = useMemo(() => {
+        // For mobile, show all images without pagination
+        if (window.innerWidth < 768) {
+            return allImages;
+        }
         const startIndex = (currentPage - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
         return allImages.slice(startIndex, endIndex);
@@ -133,10 +137,20 @@ const Gallery = () => {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [selectedImage]);
 
+    // Handle window resize to update current items
+    const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
+    React.useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     return (
         <>
             {/* ========== HERO SECTION WITH OVERLAP ========== */}
-            <section className="relative h-[90vh] min-h-[400px] overflow-hidden -mt-20">
+            <section className="relative h-[50vh] md:h-[80vh] min-h-[400px] md:min-h-[500px] overflow-hidden">
                 {/* Background Image */}
                 <div className="absolute inset-0 w-full h-full">
                     <img
@@ -157,8 +171,8 @@ const Gallery = () => {
                 </div>
 
                 {/* Content */}
-                <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4 mt-10">
-                    <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-lg border border-white/20 px-6 py-2 rounded-full mb-6 animate-fade-in-down">
+                <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4 mt-5 md:mt-10">
+                    <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-lg border border-white/20 px-6 py-2 rounded-full mb-1 md:mb-6 animate-fade-in-down">
                         <span className="w-2 h-2 bg-green-400 rounded-full animate-ping"></span>
                         <span className="text-white/90 text-sm font-medium tracking-wider">SHARE YOUR MOMENTS</span>
                     </div>
@@ -171,12 +185,12 @@ const Gallery = () => {
                         Share your coffee moments with our community and get featured!
                     </p>
 
-                    <div className="w-24 h-1 bg-gradient-to-r from-[#0D7C53] to-green-400 mx-auto mt-6 rounded-full animate-fade-in-up delay-300"></div>
+                    <div className="w-24 h-1 bg-gradient-to-r from-[#0D7C53] to-green-400 mx-auto mt-2 md:mt-6 rounded-full animate-fade-in-up delay-300"></div>
 
                     {/* Upload Button */}
                     <button
                         onClick={() => setShowUploadModal(true)}
-                        className="mt-8 flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#0D7C53] to-green-500 text-white rounded-full font-medium hover:shadow-lg hover:scale-105 transition-all duration-300"
+                        className="mt-3 md:mt-8 flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#0D7C53] to-green-500 text-white rounded-full font-medium hover:shadow-lg hover:scale-105 transition-all duration-300"
                     >
                         <Camera size={20} />
                         Share Your Moment
@@ -235,7 +249,7 @@ const Gallery = () => {
                     </div>
 
                     {/* Gallery Grid - Glass Cards */}
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {currentItems.map((item) => (
                             <div
                                 key={item.id}
@@ -294,8 +308,8 @@ const Gallery = () => {
                         ))}
                     </div>
 
-                    {/* Pagination - Glass Effect */}
-                    {totalPages > 1 && (
+                    {/* Pagination - Only show on desktop */}
+                    {!isMobile && totalPages > 1 && (
                         <div className="flex items-center justify-center gap-2 mt-8">
                             <button
                                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
@@ -489,7 +503,7 @@ const Gallery = () => {
 
 
             {/* ========== CSS ANIMATIONS ========== */}
-            <style jsx>{`
+            <style >{`
                 @keyframes pulse-slow {
                     0%, 100% { transform: scale(1); opacity: 0.5; }
                     50% { transform: scale(1.1); opacity: 0.8; }

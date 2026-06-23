@@ -18,8 +18,8 @@ app.use(express.json({ limit: "500mb" }));
 app.use(express.urlencoded({ limit: "500mb", extended: true }));
 
 app.use(cors(
-    {origin:"*",
-        methods:["GET","POST","PUT","DELETE"]
+    {origin:"http://localhost:5173",
+        methods:["GET","POST","PUT","DELETE", "PATCH"]
     }
 ))
 

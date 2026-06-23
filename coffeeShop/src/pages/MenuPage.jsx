@@ -6,6 +6,7 @@ import Banner2 from '../assets/Images/Banner2.png';
 import Banner3 from '../assets/Images/Banner3.png';
 import Banner4 from '../assets/Images/Banner4.png';
 import Banner5 from '../assets/Images/Banner5.png';
+import { getProducts } from "../redux/Slicer/adminProductSlice";
 import {
     ArrowLeft,
     Star,
@@ -19,14 +20,26 @@ import {
 } from "lucide-react";
 import Footer from "../component/Footer";
 import Navbar from "../component/Navbar";
+import { useDispatch, useSelector } from "react-redux";
 
 const MenuPage = () => {
+
+    const dispatch = useDispatch()
+    const { products, loading } = useSelector(
+        (state) => state.adminProducts
+    )
+
+    useEffect(() => {
+        dispatch(getProducts())
+    }, [dispatch])
+
     const { categoryId } = useParams();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [filteredItems, setFilteredItems] = useState([]);
     const [addedItems, setAddedItems] = useState({});
+    const [likedItems, setLikedItems] = useState({});
 
     const effectiveCategoryId = categoryId ? parseInt(categoryId) : 1;
 
@@ -74,17 +87,10 @@ const MenuPage = () => {
     // ✅ Handle Wishlist Toggle
     const handleWishlistToggle = (item, e) => {
         e.stopPropagation();
-        const wishlistItem = {
-            id: item.id,
-            name: item.name,
-            price: item.price,
-            originalPrice: item.originalPrice || item.price,
-            image: item.image,
-            category: category?.name || 'Coffee',
-            description: item.description || 'Premium coffee blend',
-            likes: item.rating || 0
-        };
-        toggleWishlist(wishlistItem);
+        setLikedItems(prev => ({
+            ...prev,
+            [item.id]: !prev[item.id]
+        }));
     };
 
     useEffect(() => {
@@ -389,16 +395,14 @@ const MenuPage = () => {
                         {/* Items Grid */}
                         {filteredItems && filteredItems.length > 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 pb-12">
-                                {filteredItems.map((item) => {
-                                   
-
+                                {products.map((item) => {
                                     return (
                                         <div
                                             key={item.id}
-                                            className="group backdrop-blur-xl bg-white/20 border border-white/30 rounded-xl sm:rounded-2xl shadow-md shadow-black/5 hover:shadow-lg transition-all duration-500 overflow-hidden hover:-translate-y-1"
+                                            className="group backdrop-blur-xl bg-white/20 border border-white/30 rounded-xl sm:rounded-2xl shadow-md shadow-black/5 hover:shadow-lg transition-all duration-500 overflow-hidden hover:-translate-y-1 flex flex-col h-full"
                                         >
                                             {/* Image Container */}
-                                            <div className="relative h-40 sm:h-48 md:h-56 overflow-hidden bg-gray-100/50">
+                                            <div className="relative h-40 sm:h-48 md:h-56 overflow-hidden bg-gray-100/50 flex-shrink-0">
                                                 <img
                                                     src={item.image}
                                                     alt={item.name}
@@ -417,7 +421,7 @@ const MenuPage = () => {
                                                     </div>
                                                 )}
 
-                                                {/* ✅ Wishlist Button - Top Right */}
+                                                {/* Wishlist Button - Top Right */}
                                                 <button
                                                     onClick={(e) => handleWishlistToggle(item, e)}
                                                     className="absolute top-2 sm:top-3 right-2 sm:right-3 z-10 w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:bg-white transition-all duration-300 hover:scale-110"
@@ -425,33 +429,27 @@ const MenuPage = () => {
                                                     <Heart
                                                         size={16}
                                                         className={`sm:w-[18px] sm:h-[18px] transition-colors
-                                                            ? 'fill-red-500 text-red-500'
-                                                            : 'text-gray-400 hover:text-red-500'
+                                                            ${likedItems[item.id]
+                                                                ? 'fill-red-500 text-red-500'
+                                                                : 'text-gray-400 hover:text-red-500'
                                                             }`}
                                                     />
                                                 </button>
-
-                                                {/* ❌ Quick View Button - REMOVED */}
                                             </div>
 
                                             {/* Content */}
-                                            <div className="p-3 sm:p-4 md:p-5">
+                                            <div className="p-3 sm:p-4 md:p-5 flex flex-col flex-1">
                                                 <h3 className="font-bold text-gray-800 text-sm sm:text-base md:text-lg group-hover:text-[#0D7C53] transition-colors mb-0.5 sm:mb-1 truncate">
                                                     {item.name}
                                                 </h3>
 
-                                                <p className="text-gray-600 text-[10px] sm:text-sm mb-2 sm:mb-3 line-clamp-2">
-                                                    {item.description}
-                                                </p>
-
-                                                <div className="flex items-center gap-0.5 sm:gap-1 mb-2 sm:mb-3">
-                                                    {[...Array(5)].map((_, i) => (
-                                                        <Star key={i} size={12} className="sm:w-3.5 sm:h-3.5 fill-yellow-400 text-yellow-400" />
-                                                    ))}
-                                                    <span className="text-[8px] sm:text-xs text-gray-500 ml-0.5 sm:ml-1">(24)</span>
+                                                {/* Fixed height description */}
+                                                <div className="h-8 sm:h-10 md:h-12 overflow-hidden">
+                                                    <p className="text-gray-600 text-[10px] sm:text-sm line-clamp-2">
+                                                        {item.description}
+                                                    </p>
                                                 </div>
-
-                                                <div className="flex items-center justify-between pt-2 sm:pt-3 border-t border-white/20">
+                                                <div className="flex items-center justify-between border-t border-white/20">
                                                     <div className="flex items-center gap-1 sm:gap-2">
                                                         <span className="text-base sm:text-lg md:text-xl font-bold text-[#0D7C53]">
                                                             ₹{item.price.toFixed(2)}
@@ -462,32 +460,20 @@ const MenuPage = () => {
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <div className="flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-xs font-medium text-green-600 bg-green-100/60 backdrop-blur-sm px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
+                                                    <div className="flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-xs font-medium text-green-600 bg-green-100/60 backdrop-blur-sm px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full flex-shrink-0">
                                                         <TrendingUp size={10} className="sm:w-3 sm:h-3" />
                                                         {item.points} Pts
                                                     </div>
                                                 </div>
 
-                                                {/* ✅ Add to Cart Button with Feedback */}
-                                                {/* <button
+                                                {/* Add to Cart Button */}
+                                                <button
                                                     onClick={(e) => handleAddToCart(item, e)}
-                                                    className={`w-full mt-2 sm:mt-3 md:mt-4 font-medium py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2 group/btn text-sm sm:text-base ${isAdded
-                                                        ? 'bg-green-500 text-white'
-                                                        : 'bg-gradient-to-r from-[#0D7C53] to-green-600 text-white hover:shadow-lg hover:shadow-[#0D7C53]/30'
-                                                        }`}
+                                                    className="w-full mt-2 sm:mt-3 md:mt-4 bg-gradient-to-r from-[#0D7C53] to-green-600 text-white font-medium py-2.5 rounded-lg sm:rounded-xl hover:shadow-lg hover:shadow-[#0D7C53]/30 transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base flex-shrink-0"
                                                 >
-                                                    {isAdded ? (
-                                                        <>
-                                                            <span>Added ✓</span>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <ShoppingBag size={14} className="sm:w-[18px] sm:h-[18px] group-hover/btn:scale-110 transition-transform" />
-                                                            Add to Cart
-                                                            <ChevronRight size={12} className="sm:w-4 sm:h-4 group-hover/btn:translate-x-1 transition-transform" />
-                                                        </>
-                                                    )}
-                                                </button> */}
+                                                    <ShoppingBag size={16} />
+                                                    Add to Cart
+                                                </button>
                                             </div>
                                         </div>
                                     );

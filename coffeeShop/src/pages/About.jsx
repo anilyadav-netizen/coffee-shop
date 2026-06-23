@@ -79,7 +79,7 @@ const About = () => {
         <>
             <div className="min-h-screen">
                 {/* ========== HERO SECTION - UNCHANGED ========== */}
-                <div className="relative h-[80vh] min-h-[500px] overflow-hidden">
+                <div className="relative h-[50vh] md:h-[80vh] min-h-[400px] md:min-h-[500px] overflow-hidden">
                     <div
                         className="absolute inset-0 w-full h-[120%] -top-[10%]"
                         style={{
@@ -108,7 +108,7 @@ const About = () => {
                             <span className="text-white/90 text-sm font-medium tracking-wider">{hero.badge}</span>
                         </div>
 
-                        <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-white mb-6 leading-tight animate-fade-in-up">
+                        <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold text-white mb-2 md:mb-6 leading-tight animate-fade-in-up">
                             {hero.title}
                             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#0D7C53] to-green-400">
                                 {hero.highlight}
@@ -119,9 +119,9 @@ const About = () => {
                             {hero.subtitle}
                         </p>
 
-                        <div className="w-24 h-1 bg-gradient-to-r from-[#0D7C53] to-green-400 mx-auto mt-6 rounded-full animate-fade-in-up delay-300"></div>
+                        <div className="w-24 h-1 bg-gradient-to-r from-[#0D7C53] to-green-400 mx-auto mt-2 md:mt-6 rounded-full animate-fade-in-up delay-300"></div>
 
-                        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+                        <div className="absolute bottom-5 md:bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
                             <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center p-1">
                                 <div className="w-1 h-2 bg-white/50 rounded-full animate-scroll"></div>
                             </div>
@@ -297,7 +297,7 @@ const About = () => {
             </div>
 
             {/* ========== CSS ANIMATIONS ========== */}
-            <style jsx>{`
+            <style >{`
                 @keyframes pulse-slow {
                     0%, 100% { transform: scale(1); opacity: 0.5; }
                     50% { transform: scale(1.1); opacity: 0.8; }

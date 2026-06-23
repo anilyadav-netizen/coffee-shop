@@ -22,6 +22,7 @@ import AdminLayout from "./Admin/adLayouts/AdminLayout";
 import Dashboard from "./Admin/adpages/Dashboard";
 import Products from "./Admin/adpages/Products";
 import AddProduct from "./Admin/adpages/AddProduct";
+import OderDetailsPage from "./pages/OderDetailsPage";
 
 function App() {
   return (
@@ -32,19 +33,14 @@ function App() {
         {/* User Layout */}
         <Route element={<UserLayouts />}>
           <Route path="/" element={<Home />} />
-
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
-
           <Route path="/menu" element={<MenuPage />} />
           <Route path="/menu/:categoryId" element={<MenuPage />} />
-
-          <Route path="/about" element={<About />} />
+          <Route path="/aboutus" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/journey" element={<Journey />} />
           <Route path="/review" element={<Review />} />
-
+          <Route path="/orderDetails" element={<OderDetailsPage />} />
           <Route
             path="/cart"
             element={
@@ -70,8 +66,11 @@ function App() {
           <Route path="/admin/update-product/:id" element={<AddProduct />} /> {/* ✅ Same component */}
 
         </Route>
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
 
       </Routes>
+
     </BrowserRouter>
   );
 }

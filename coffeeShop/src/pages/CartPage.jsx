@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
+    createOrder,
+    verifyPayment,
+} from "../redux/Slicer/paymentSlice";
+import {
     getCart,
     removeCartItem,
     increaseQuantity,
@@ -21,6 +25,7 @@ const CartPage = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     // ✅ Redux se cart data
     const { cartItems, totalItems, totalPrice, loading } = useSelector((state) => state.cart);
@@ -48,41 +53,60 @@ const CartPage = () => {
     }, []);
 
     // ✅ Increase quantity
-    const handleIncrease = (id) => {
-        dispatch(increaseQuantity(id))
-            .unwrap()
-            .catch((error) => console.error("Failed to increase:", error));
-    };
-
-    // ✅ Decrease quantity
-    const handleDecrease = (id) => {
-        dispatch(decreaseQuantity(id))
-            .unwrap()
-            .catch((error) => console.error("Failed to decrease:", error));
-    };
-
-    // ✅ Remove item
-    const handleRemove = (id) => {
-        dispatch(removeCartItem(id))
-            .unwrap()
-            .catch((error) => console.error("Failed to remove:", error));
-    };
-
-    // ✅ Clear cart
-    const handleClearCart = () => {
-        if (window.confirm('Are you sure you want to clear your cart?')) {
-            cartItems.forEach(item => {
-                dispatch(removeCartItem(item._id));
-            });
+    const handleIncrease = async (id) => {
+        setError(null);
+        try {
+            const result = await dispatch(increaseQuantity(id)).unwrap();
+            console.log("✅ Increase successful:", result);
+        } catch (error) {
+            console.error("❌ Failed to increase:", error);
+            setError("Failed to increase quantity. Please try again.");
+            // 🔥 Refetch cart to ensure consistency
+            dispatch(getCart());
         }
     };
 
-    const handleCheckout = () => {
-        setIsLoading(true);
-        setTimeout(() => {
-            setIsLoading(false);
-            navigate('/checkout');
-        }, 1000);
+    // ✅ Decrease quantity
+    const handleDecrease = async (id) => {
+        setError(null);
+        try {
+            const result = await dispatch(decreaseQuantity(id)).unwrap();
+            console.log("✅ Decrease successful:", result);
+        } catch (error) {
+            console.error("❌ Failed to decrease:", error);
+            setError("Failed to decrease quantity. Please try again.");
+            // 🔥 Refetch cart to ensure consistency
+            dispatch(getCart());
+        }
+    };
+
+    // ✅ Remove item
+    const handleRemove = async (id) => {
+        setError(null);
+        try {
+            await dispatch(removeCartItem(id)).unwrap();
+            console.log("✅ Remove successful");
+        } catch (error) {
+            console.error("❌ Failed to remove:", error);
+            setError("Failed to remove item. Please try again.");
+        }
+    };
+
+    // ✅ Clear cart
+    const handleClearCart = async () => {
+        if (window.confirm('Are you sure you want to clear your cart?')) {
+            setError(null);
+            try {
+                // Remove all items one by one
+                for (const item of cartItems) {
+                    await dispatch(removeCartItem(item._id)).unwrap();
+                }
+                console.log("✅ Cart cleared successfully");
+            } catch (error) {
+                console.error("❌ Failed to clear cart:", error);
+                setError("Failed to clear cart. Please try again.");
+            }
+        }
     };
 
     const handleContinueShopping = () => {
@@ -97,6 +121,51 @@ const CartPage = () => {
             </div>
         );
     }
+
+
+    const handleCheckout = async () => {
+        try {
+            setIsLoading(true);
+            const order = await dispatch(
+                createOrder(totalPrice)
+            ).unwrap();
+            const options = {
+                key: "rzp_test_Rn6mAmy8ydPszM",
+                amount: order.amount,
+                currency: order.currency,
+                order_id: order.id,
+                name: "Coffee Shop",
+                description: "Coffee Order",
+                handler: async function (response) {
+                    try {
+                        await dispatch(
+                            verifyPayment({
+                                razorpay_order_id:
+                                    response.razorpay_order_id,
+                            })
+                        ).unwrap();
+
+                        navigate("/checkout");
+                    } catch (error) {
+                        console.error(
+                            "Payment verification failed",
+                            error
+                        );
+                    }
+                },
+            };
+            const razorpay =
+                new window.Razorpay(options);
+            razorpay.open();
+        } catch (error) {
+            console.error(
+                "Order creation failed",
+                error
+            );
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     // ✅ Empty cart
     if (cartItems.length === 0) {
@@ -133,7 +202,8 @@ const CartPage = () => {
     return (
         <>
             <div className="min-h-screen bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3] pt-20 sm:pt-24 px-3 sm:px-4 pb-10 overflow-hidden">
-                
+
+                {/* Background decorations */}
                 <div className="absolute inset-0 -z-10 overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />
                     <div className="absolute inset-0 bg-gradient-to-tr from-[#EDE0D4]/20 via-transparent to-[#D4B896]/10" />
@@ -146,6 +216,13 @@ const CartPage = () => {
                 </div>
 
                 <div className="max-w-7xl mx-auto relative z-10 mt-5">
+                    {/* Error Message */}
+                    {error && (
+                        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                            {error}
+                        </div>
+                    )}
+
                     {/* Header */}
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-8">
                         <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
@@ -213,7 +290,8 @@ const CartPage = () => {
                                                 <div className="flex items-center gap-1 sm:gap-2 bg-white/50 backdrop-blur-sm rounded-full p-0.5 sm:p-1 border border-white/30 flex-shrink-0">
                                                     <button
                                                         onClick={() => handleDecrease(item._id)}
-                                                        className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-all duration-300"
+                                                        disabled={loading}
+                                                        className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                                                     >
                                                         <Minus className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-gray-600" />
                                                     </button>
@@ -222,7 +300,8 @@ const CartPage = () => {
                                                     </span>
                                                     <button
                                                         onClick={() => handleIncrease(item._id)}
-                                                        className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-[#0D7C53] hover:bg-green-700 flex items-center justify-center transition-all duration-300"
+                                                        disabled={loading}
+                                                        className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-[#0D7C53] hover:bg-green-700 flex items-center justify-center transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                                                     >
                                                         <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 text-white" />
                                                     </button>
@@ -282,7 +361,7 @@ const CartPage = () => {
 
                                 <button
                                     onClick={handleCheckout}
-                                    disabled={isLoading}
+                                    disabled={isLoading || loading}
                                     className="w-full mt-4 sm:mt-6 py-2.5 sm:py-3.5 bg-gradient-to-r from-[#0D7C53] to-green-600 text-white rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 group disabled:opacity-70 text-base sm:text-lg"
                                 >
                                     {isLoading ? (

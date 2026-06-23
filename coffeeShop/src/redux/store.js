@@ -3,11 +3,13 @@ import authReducer from './Slicer/authSlice'
 import cartReducer from './Slicer/cartSlice'
 import wishlistReducer from './Slicer/wishlistSlice'
 import adminProductReducer from './Slicer/adminProductSlice'
+import paymentReducer from './Slicer/paymentSlice'
 export const store = configureStore({
     reducer: {
         auth: authReducer,
         cart: cartReducer,
         wishlist: wishlistReducer,
-        adminProducts: adminProductReducer
+        adminProducts: adminProductReducer,
+        payment: paymentReducer,
     }
 })

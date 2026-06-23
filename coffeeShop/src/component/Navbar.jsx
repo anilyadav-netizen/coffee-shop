@@ -5,6 +5,7 @@ import ProfileDropdown from "../component/ProfileDropdown";
 import Sidebar from '../component/Sidebar'
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../redux/Slicer/authSlice';
+import { useLocation } from 'react-router-dom';
 import {
     ShoppingCart,
     Menu as MenuIcon,
@@ -13,6 +14,7 @@ import {
 } from "lucide-react";
 
 const Navbar = () => {
+    const location = useLocation();
 
     const [open, setOpen] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -61,6 +63,11 @@ const Navbar = () => {
         document.addEventListener("click", handleClickOutside);
         return () => document.removeEventListener("click", handleClickOutside);
     }, []);
+
+
+if (location.pathname === "/login" || location.pathname === "/signup") {
+  return null;
+}
 
     return (
         <nav className={`fixed w-full top-0 left-0 z-50 transition-all duration-500 ${isScrolled ? 'bg-black/90 backdrop-blur-xl shadow-2xl' : 'bg-transparent'}`}>
@@ -129,7 +136,7 @@ const Navbar = () => {
                     </button>
 
                     {/* Profile Button */}
-                    <ProfileDropdown />
+                    <ProfileDropdown/>
 
                     {/* Mobile Menu Button */}
                     <button

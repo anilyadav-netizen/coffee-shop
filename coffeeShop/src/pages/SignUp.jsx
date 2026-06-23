@@ -120,7 +120,7 @@ const SignUp = () => {
     const displayError = localError || Error;
 
     return (
-        <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden mt-16">
+        <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
             {/* Background */}
             <div className="absolute inset-0 -z-10">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />
@@ -139,10 +139,8 @@ const SignUp = () => {
             </div>
 
             <div className="w-full max-w-md">
-                <div className="text-center mb-8">
-                    <span className="inline-block px-4 py-1.5 bg-green-100/80 backdrop-blur-sm text-green-800 text-xs font-semibold tracking-wider uppercase rounded-full mb-3">
-                        Join Us
-                    </span>
+                <div className="text-center mb-3 pt-5">
+                  
                     <h2 className="text-3xl md:text-4xl font-extrabold text-[#0D7C53] tracking-tight">
                         Create Account
                     </h2>
