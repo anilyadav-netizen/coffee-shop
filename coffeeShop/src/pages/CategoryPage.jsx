@@ -33,8 +33,8 @@ const CoffeeIcon = () => (
 );
 
 const CategoryPage = () => {
-  const dispatch = useDispatch();
 
+  const dispatch = useDispatch();
   const { products, loading } = useSelector((state) => state.adminProducts);
 
   useEffect(() => {
@@ -127,7 +127,6 @@ const CategoryPage = () => {
     e.stopPropagation();
     const coffeeId = product._id || product.id;
 
-    console.log(coffeeId)
     
     dispatch(addToWishlist( {coffeeId} ))
       .unwrap()

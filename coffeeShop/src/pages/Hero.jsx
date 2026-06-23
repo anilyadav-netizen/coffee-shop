@@ -32,14 +32,14 @@ const Hero = () => {
     };
 
     return (
-        <div className="relative w-full min-h-screen overflow-hidden">
+        <div className="relative  h-[50vh] md:h-[80vh] min-h-[400px] md:min-h-[500px] lg:min-h-screen overflow-hidden">
             {/* ✅ Navbar Component */}
             <Navbar />
 
             {/* Hero Background with Parallax Effect */}
-            <div className="absolute inset-0 w-full h-full">
+            <div className="absolute inset-0 w-full h-[60vh] md:h-full">
                 <div
-                    className="w-full h-full transition-transform duration-1000"
+                    className="w-full h-[60vh] md:h-full transition-transform duration-1000"
                     style={{
                         transform: `scale(${1 + scrollY * 0.001})`,
                     }}
@@ -65,16 +65,16 @@ const Hero = () => {
             </div>
 
             {/* Hero Content */}
-            <div className="relative z-20 w-full h-screen flex flex-col items-center justify-center px-4">
+            <div className="relative z-20 w-full h-[55vh] md:h-screen flex flex-col items-center justify-center px-4">
                 <div className="text-center max-w-4xl mx-auto">
                     {/* Badge */}
-                    <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-lg border border-white/20 px-6 py-2 rounded-full mb-6 animate-fade-in-down">
+                    <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-lg border border-white/20 px-6 py-2 rounded-full mb-4 md:mb-6 animate-fade-in-down">
                         <span className="w-2 h-2 bg-green-400 rounded-full animate-ping"></span>
                         <span className="text-white/90 text-sm font-medium">Now Open - 20% Off First Order</span>
                     </div>
 
                     {/* Main Heading with Animation */}
-                    <h1 className="text-5xl sm:text-6xl md:text-8xl font-bold text-white mb-6 leading-tight animate-fade-in-up">
+                    <h1 className="text-4xl sm:text-5xl md:text-8xl font-bold text-white mb-2 md:mb-6 leading-tight animate-fade-in-up">
                         Discover Your
                         <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#0D7C53] to-green-400">
                             Perfect Cup
@@ -82,25 +82,32 @@ const Hero = () => {
                     </h1>
 
                     {/* Description */}
-                    <p className="text-base sm:text-lg md:text-xl text-white/80 max-w-2xl mx-auto mb-8 animate-fade-in-up delay-200">
+                    <p className="hidden md:block text-base sm:text-lg md:text-xl text-white/80 max-w-2xl mx-auto mb-3 md:mb-8 animate-fade-in-up delay-200">
                         Experience the art of coffee with our carefully crafted blends,
                         sourced from the finest beans around the world.
                     </p>
 
                     {/* Action Buttons */}
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up delay-300">
+                    <div className="flex flex-row items-center justify-center gap-3 md:gap-4 animate-fade-in-up delay-300">
                         <button
                             onClick={handleOrderNow}
-                            className="group relative inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[#0D7C53] to-green-600 text-white rounded-full transition-all duration-300 shadow-2xl shadow-[#0D7C53]/25 hover:shadow-[#0D7C53]/50 hover:scale-105"
+                            className="group relative inline-flex items-center gap-2 px-3 sm:px-4 md:px-8 py-2.5 md:py-4 bg-gradient-to-r from-[#0D7C53] to-green-600 text-white rounded-full transition-all duration-300 shadow-2xl shadow-[#0D7C53]/25 hover:shadow-[#0D7C53]/50 hover:scale-105 whitespace-nowrap"
                         >
-                            <span className="font-semibold text-lg">Order Now</span>
-                            <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                            <span className="font-semibold text-sm md:text-lg">
+                                Order Now
+                            </span>
+
+                            <ArrowRight
+                                size={18}
+                                className="group-hover:translate-x-1 transition-transform"
+                            />
+
                             <div className="absolute inset-0 rounded-full bg-white/20 blur-xl group-hover:blur-2xl transition-all duration-300"></div>
                         </button>
 
                         <button
                             onClick={handleExploreMenu}
-                            className="px-8 py-4 border-2 border-white/30 hover:border-white/60 text-white rounded-full transition-all duration-300 hover:bg-white/10 backdrop-blur-sm font-medium"
+                            className="px-3 sm:px-4 md:px-8 py-2.5 md:py-4 border-2 border-white/30 hover:border-white/60 text-white rounded-full transition-all duration-300 hover:bg-white/10 backdrop-blur-sm font-medium text-sm md:text-base whitespace-nowrap"
                         >
                             Explore Menu
                         </button>
@@ -108,24 +115,23 @@ const Hero = () => {
                 </div>
 
                 {/* Stats */}
-                <div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-20 hidden md:flex gap-8 bg-black/40 backdrop-blur-xl px-8 py-4 rounded-2xl border border-white/10">
-                    {stats.map((stat, index) => (
-                        <div key={index} className="flex items-center gap-3 text-white">
-                            <span className="text-[#0D7C53]">{stat.icon}</span>
-                            <div>
-                                <p className="text-2xl font-bold">{stat.number}</p>
-                                <p className="text-xs text-white/60">{stat.label}</p>
-                            </div>
-                            {index < stats.length - 1 && (
-                                <div className="w-px h-10 bg-white/10"></div>
-                            )}
+                <div className="absolute bottom-16 md:bottom-32 left-1/2 -translate-x-1/2 z-20 hidden md:flex gap-8 bg-black/40 backdrop-blur-xl px-8 py-4 rounded-2xl border border-white/10">                    {stats.map((stat, index) => (
+                    <div key={index} className="flex items-center gap-3 text-white">
+                        <span className="text-[#0D7C53]">{stat.icon}</span>
+                        <div>
+                            <p className="text-2xl font-bold">{stat.number}</p>
+                            <p className="text-xs text-white/60">{stat.label}</p>
                         </div>
-                    ))}
+                        {index < stats.length - 1 && (
+                            <div className="w-px h-10 bg-white/10"></div>
+                        )}
+                    </div>
+                ))}
                 </div>
             </div>
 
             {/* Scroll Indicator */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 animate-bounce">
+            <div className="absolute bottom-5 md:bottom-8 left-1/2 -translate-x-1/2 z-20 animate-bounce">
                 <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center p-1">
                     <div className="w-1 h-2 bg-white/50 rounded-full animate-scroll"></div>
                 </div>

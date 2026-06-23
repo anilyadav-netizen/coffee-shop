@@ -9,8 +9,10 @@ export const getCart = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const { data } = await API.get("/cart");
+            console.log("✅ GET CART response:", data);
             return data;
         } catch (error) {
+            console.error("❌ GET CART error:", error);
             return rejectWithValue(
                 error.response?.data?.message || "Failed to fetch cart"
             );
@@ -22,15 +24,16 @@ export const getCart = createAsyncThunk(
 export const addToCart = createAsyncThunk(
     "cart/addToCart",
     async ({ coffeeId, quantity }, { rejectWithValue }) => {
-
-        console.log(coffeeId,quantity)
+        console.log("📦 ADD TO CART:", { coffeeId, quantity });
         try {
             const { data } = await API.post("/cart", {
                 coffeeId,
                 quantity,
             });
+            console.log("✅ ADD TO CART response:", data);
             return data;
         } catch (error) {
+            console.error("❌ ADD TO CART error:", error);
             return rejectWithValue(
                 error.response?.data?.message || "Failed to add item"
             );
@@ -42,10 +45,13 @@ export const addToCart = createAsyncThunk(
 export const removeCartItem = createAsyncThunk(
     "cart/removeCartItem",
     async (id, { rejectWithValue }) => {
+        console.log("🗑️ REMOVE ITEM:", id);
         try {
-            await API.delete(`/cart/${id}`);
+            const { data } = await API.delete(`/cart/${id}`);
+            console.log("✅ REMOVE response:", data);
             return id;
         } catch (error) {
+            console.error("❌ REMOVE error:", error);
             return rejectWithValue(
                 error.response?.data?.message || "Failed to remove item"
             );
@@ -58,8 +64,8 @@ export const increaseQuantity = createAsyncThunk(
     "cart/increaseQuantity",
     async (id, { rejectWithValue }) => {
         try {
-            const { data } = await API.put(`/cart/increase/${id}`);
-            return data.data; // Backend se updated item
+            const { data } = await API.patch(`/cart/increase/${id}`);
+            return data.data;
         } catch (error) {
             return rejectWithValue(
                 error.response?.data?.message || "Failed to increase quantity"
@@ -73,13 +79,10 @@ export const decreaseQuantity = createAsyncThunk(
     "cart/decreaseQuantity",
     async (id, { rejectWithValue }) => {
         try {
-            const { data } = await API.put(`/cart/decrease/${id}`);
-            
-            // ✅ Check if item was removed (quantity <= 1)
+            const { data } = await API.patch(`/cart/decrease/${id}`);
             if (data.message === "Item removed from cart") {
                 return { id, removed: true };
             }
-            
             return { id, data: data.data, removed: false };
         } catch (error) {
             return rejectWithValue(
@@ -107,6 +110,8 @@ const cartSlice = createSlice({
             state.cartItems = [];
             state.totalItems = 0;
             state.totalPrice = 0;
+            state.error = null;
+            state.loading = false;
         },
     },
 
@@ -121,20 +126,23 @@ const cartSlice = createSlice({
             .addCase(getCart.fulfilled, (state, action) => {
                 state.loading = false;
                 state.cartItems = action.payload;
+
+                // ✅ FIX: Use cartItems.length for unique items count
+                state.totalItems = state.cartItems.length;  // <--- CHANGE HERE
                 
-                // ✅ Calculate totals
-                state.totalItems = action.payload.reduce(
-                    (sum, item) => sum + item.quantity,
-                    0
+                state.totalPrice = state.cartItems.reduce(
+                    (sum, item) => sum + ((item.coffee?.price || 0) * (item.quantity || 0)), 0
                 );
-                state.totalPrice = action.payload.reduce(
-                    (sum, item) => sum + (item.coffee?.price || 0) * item.quantity,
-                    0
-                );
+                console.log("📊 Cart loaded:", {
+                    totalItems: state.totalItems,  // Now shows unique products count
+                    totalPrice: state.totalPrice,
+                    items: state.cartItems.length
+                });
             })
             .addCase(getCart.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
+                console.error("❌ GET CART rejected:", action.payload);
             });
 
         // ========== ADD TO CART ==========
@@ -144,14 +152,29 @@ const cartSlice = createSlice({
             })
             .addCase(addToCart.fulfilled, (state, action) => {
                 state.loading = false;
-                state.cartItems.push(action.payload);
+                const newItem = action.payload;
+
+                const existingIndex = state.cartItems.findIndex(
+                    item => item.coffee?._id === newItem.coffee?._id
+                );
+
+                if (existingIndex !== -1) {
+                    state.cartItems[existingIndex] = newItem;
+                } else {
+                    state.cartItems.push(newItem);
+                }
+
+                // ✅ FIX: Use cartItems.length (already correct)
+                state.totalItems = state.cartItems.length;  // <--- KEEP AS IS
                 
-                state.totalItems += action.payload.quantity;
-                state.totalPrice += (action.payload.coffee?.price || 0) * action.payload.quantity;
+                state.totalPrice = state.cartItems.reduce(
+                    (sum, item) => sum + ((item.coffee?.price || 0) * (item.quantity || 0)), 0
+                );
             })
             .addCase(addToCart.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
+                console.error("❌ ADD TO CART rejected:", action.payload);
             });
 
         // ========== REMOVE CART ITEM ==========
@@ -161,85 +184,130 @@ const cartSlice = createSlice({
             })
             .addCase(removeCartItem.fulfilled, (state, action) => {
                 state.loading = false;
-                const removedItem = state.cartItems.find(
-                    (item) => item._id === action.payload
-                );
-                
                 state.cartItems = state.cartItems.filter(
                     (item) => item._id !== action.payload
                 );
+
+                // ✅ FIX: Use cartItems.length
+                state.totalItems = state.cartItems.length;  // <--- CHANGE HERE
                 
-                if (removedItem) {
-                    state.totalItems -= removedItem.quantity;
-                    state.totalPrice -= (removedItem.coffee?.price || 0) * removedItem.quantity;
-                }
+                state.totalPrice = state.cartItems.reduce(
+                    (sum, item) => sum + ((item.coffee?.price || 0) * (item.quantity || 0)), 0
+                );
+                console.log("🗑️ Item removed, new totals:", {
+                    totalItems: state.totalItems,
+                    totalPrice: state.totalPrice
+                });
             })
             .addCase(removeCartItem.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
+                console.error("❌ REMOVE rejected:", action.payload);
             });
 
         // ========== INCREASE QUANTITY ==========
         builder
             .addCase(increaseQuantity.pending, (state) => {
                 state.loading = true;
+                state.error = null;
             })
             .addCase(increaseQuantity.fulfilled, (state, action) => {
                 state.loading = false;
-                
+
+                const updatedItem = action.payload;
+                console.log("⬆️ Updated item:", updatedItem);
+
+                if (!updatedItem || !updatedItem._id) {
+                    console.error("❌ Invalid updated item:", updatedItem);
+                    return;
+                }
+
                 const index = state.cartItems.findIndex(
-                    (item) => item._id === action.payload._id
+                    (item) => item._id === updatedItem._id
                 );
+
                 if (index !== -1) {
-                    state.cartItems[index] = action.payload;
-                    state.totalItems += 1;
-                    state.totalPrice += (action.payload.coffee?.price || 0);
+                    state.cartItems[index].quantity = updatedItem.quantity;
+
+                    // ✅ FIX: Use cartItems.length (quantity change should NOT affect totalItems)
+                    state.totalItems = state.cartItems.length;  // <--- CHANGE HERE
+                    
+                    state.totalPrice = state.cartItems.reduce(
+                        (sum, item) => sum + ((item.coffee?.price || 0) * (item.quantity || 0)), 0
+                    );
+
+                    console.log("⬆️ Quantity increased:", {
+                        newQuantity: updatedItem.quantity,
+                        totalItems: state.totalItems,  // Now unchanged by quantity change
+                        totalPrice: state.totalPrice
+                    });
+                } else {
+                    console.warn("⚠️ Item not found in cart:", updatedItem._id);
                 }
             })
             .addCase(increaseQuantity.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
+                console.error("❌ INCREASE rejected:", action.payload);
             });
 
         // ========== DECREASE QUANTITY ==========
         builder
             .addCase(decreaseQuantity.pending, (state) => {
                 state.loading = true;
+                state.error = null;
             })
             .addCase(decreaseQuantity.fulfilled, (state, action) => {
                 state.loading = false;
-                
-                // ✅ Agar item remove ho gaya
+
+                console.log("⬇️ Decrease payload:", action.payload);
+
                 if (action.payload.removed) {
-                    const removedItem = state.cartItems.find(
-                        (item) => item._id === action.payload.id
-                    );
-                    if (removedItem) {
-                        state.totalItems -= 1;
-                        state.totalPrice -= (removedItem.coffee?.price || 0);
-                    }
                     state.cartItems = state.cartItems.filter(
                         (item) => item._id !== action.payload.id
                     );
+                    console.log("🗑️ Item removed due to quantity 0");
                 } else {
-                    // ✅ Agar quantity decrease hui
+                    const updatedItem = action.payload.data;
+
+                    if (!updatedItem || !updatedItem._id) {
+                        console.error("❌ Invalid updated item:", updatedItem);
+                        return;
+                    }
+
                     const index = state.cartItems.findIndex(
-                        (item) => item._id === action.payload.data._id
+                        (item) => item._id === updatedItem._id
                     );
+
                     if (index !== -1) {
-                        state.cartItems[index] = action.payload.data;
-                        state.totalItems -= 1;
-                        state.totalPrice -= (action.payload.data.coffee?.price || 0);
+                        state.cartItems[index].quantity = updatedItem.quantity;
+                        console.log("⬇️ Quantity decreased:", {
+                            newQuantity: updatedItem.quantity
+                        });
+                    } else {
+                        console.warn("⚠️ Item not found in cart:", updatedItem._id);
                     }
                 }
+
+                // ✅ FIX: Use cartItems.length
+                state.totalItems = state.cartItems.length;  // <--- CHANGE HERE
+                
+                state.totalPrice = state.cartItems.reduce(
+                    (sum, item) => sum + ((item.coffee?.price || 0) * (item.quantity || 0)), 0
+                );
+
+                console.log("📊 Updated totals:", {
+                    totalItems: state.totalItems,  // Now unchanged by quantity change
+                    totalPrice: state.totalPrice
+                });
             })
             .addCase(decreaseQuantity.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
+                console.error("❌ DECREASE rejected:", action.payload);
             });
     },
 });
 
 export const { clearCartState } = cartSlice.actions;
-
 export default cartSlice.reducer;

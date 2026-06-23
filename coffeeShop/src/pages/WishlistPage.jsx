@@ -18,11 +18,11 @@ import {
 const WishlistPage = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    
+
     // ✅ Redux se wishlist items lo
     const { items: wishlistItems, wishlistCount, loading } = useSelector((state) => state.wishlist);
     const { isAuthenticated } = useSelector((state) => state.auth);
-    
+
     const [isLoading, setIsLoading] = useState(false);
     const [addedItems, setAddedItems] = useState({});
 
@@ -231,7 +231,7 @@ const WishlistPage = () => {
                                 const coffeeData = item.coffee || item;
                                 const itemId = item._id;
                                 const coffeeId = coffeeData._id || itemId;
-                                
+
                                 return (
                                     <div
                                         key={itemId}
@@ -403,6 +403,7 @@ const WishlistPage = () => {
                     .xs\\:inline { display: none; }
                     .xs\\:hidden { display: inline; }
                 }
+                
             `}</style>
         </>
     );
