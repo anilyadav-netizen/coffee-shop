@@ -1,124 +1,133 @@
 const Cart = require("../models/Cart");
 
-// Add To Cart
+// Helper: get today's date string
+const getTodayDate = () => new Date().toISOString().split("T")[0];
+
+// ─── Add To Cart ──────────────────────────────────────────────────────────────
 exports.addToCart = async (req, res) => {
   try {
     const { coffeeId, quantity } = req.body;
+    const today = getTodayDate();
 
+    // Find today's cart for this user (upsert if not exists)
+    let cart = await Cart.findOne({ user: req.user.id, date: today });
 
+    if (!cart) {
+      // New day → new document
+      cart = await Cart.create({
+        user: req.user.id,
+        date: today,
+        items: [{ coffee: coffeeId, quantity }],
+      });
+    } else {
+      // Same day → check if coffee already in items
+      const existingItem = cart.items.find(
+        (item) => item.coffee.toString() === coffeeId
+      );
 
-    const cartItem = await Cart.create({
-      user: req.user.id,
-      coffee: coffeeId,
-      quantity,
-    });
+      if (existingItem) {
+        existingItem.quantity += quantity;
+      } else {
+        cart.items.push({ coffee: coffeeId, quantity });
+      }
 
-    res.status(201).json(cartItem);
+      await cart.save();
+    }
+
+    res.status(201).json(cart);
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    res.status(500).json({ message: error.message });
   }
 };
 
-// Get User Cart
+// ─── Get User Cart ────────────────────────────────────────────────────────────
 exports.getCart = async (req, res) => {
   try {
-    const cart = await Cart.find({
-      user: req.user.id,
-    }).populate("coffee");
+    const today = getTodayDate();
 
-    res.status(200).json(cart);
+    const cart = await Cart.findOne({ user: req.user.id, date: today }).populate(
+      "items.coffee"
+    );
+
+    res.status(200).json(cart || { user: req.user.id, date: today, items: [] });
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    res.status(500).json({ message: error.message });
   }
 };
 
-// Remove Cart Item
+// ─── Remove Cart Item ─────────────────────────────────────────────────────────
 exports.removeCartItem = async (req, res) => {
   try {
-    await Cart.findByIdAndDelete(req.params.id);
+    const today = getTodayDate();
+    const { coffeeId } = req.params; // pass coffeeId in URL
 
-    res.status(200).json({
-      message: "Item removed",
-    });
+    const cart = await Cart.findOne({ user: req.user.id, date: today });
+
+    if (!cart) return res.status(404).json({ message: "Cart not found" });
+
+    cart.items = cart.items.filter(
+      (item) => item.coffee.toString() !== coffeeId
+    );
+
+    await cart.save();
+
+    res.status(200).json({ message: "Item removed", cart });
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    res.status(500).json({ message: error.message });
   }
 };
 
-
+// ─── Increase Quantity ────────────────────────────────────────────────────────
 exports.increaseQuantity = async (req, res) => {
   try {
-    const { id } = req.params;
+    const today = getTodayDate();
+    const { coffeeId } = req.params;
 
-    console.log(id)
+    const cart = await Cart.findOne({ user: req.user.id, date: today });
 
-    const cartItem = await Cart.findById(id);
+    if (!cart) return res.status(404).json({ success: false, message: "Cart not found" });
 
-    if (!cartItem) {
-      return res.status(404).json({
-        success: false,
-        message: "Cart item not found",
-      });
-    }
+    const item = cart.items.find((i) => i.coffee.toString() === coffeeId);
 
-    cartItem.quantity += 1;
-    await cartItem.save();
+    if (!item)
+      return res.status(404).json({ success: false, message: "Item not found in cart" });
 
-    res.status(200).json({
-      success: true,
-      message: "Quantity increased",
-      data: cartItem,
-    });
+    item.quantity += 1;
+    await cart.save();
+
+    res.status(200).json({ success: true, message: "Quantity increased", data: cart });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// Decrease Quantity
+// ─── Decrease Quantity ────────────────────────────────────────────────────────
 exports.decreaseQuantity = async (req, res) => {
   try {
-    const { id } = req.params;
+    const today = getTodayDate();
+    const { coffeeId } = req.params;
 
-    const cartItem = await Cart.findById(id);
+    const cart = await Cart.findOne({ user: req.user.id, date: today });
 
-    if (!cartItem) {
-      return res.status(404).json({
-        success: false,
-        message: "Cart item not found",
-      });
+    if (!cart) return res.status(404).json({ success: false, message: "Cart not found" });
+
+    const itemIndex = cart.items.findIndex((i) => i.coffee.toString() === coffeeId);
+
+    if (itemIndex === -1)
+      return res.status(404).json({ success: false, message: "Item not found in cart" });
+
+    if (cart.items[itemIndex].quantity <= 1) {
+      // Remove item if quantity reaches 0
+      cart.items.splice(itemIndex, 1);
+      await cart.save();
+      return res.status(200).json({ success: true, message: "Item removed from cart", data: cart });
     }
 
-    // If quantity is 1, remove item from cart
-    if (cartItem.quantity <= 1) {
-      await Cart.findByIdAndDelete(id);
+    cart.items[itemIndex].quantity -= 1;
+    await cart.save();
 
-      return res.status(200).json({
-        success: true,
-        message: "Item removed from cart",
-      });
-    }
-
-    cartItem.quantity -= 1;
-    await cartItem.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Quantity decreased",
-      data: cartItem,
-    });
+    res.status(200).json({ success: true, message: "Quantity decreased", data: cart });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
