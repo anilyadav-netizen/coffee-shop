@@ -1,4 +1,23 @@
+import { useDispatch, useSelector } from "react-redux";
+import { getProducts } from "../../redux/Slicer/adminProductSlice";
+import { getCategories } from "../../redux/Slicer/categorySlice";
+import { useEffect } from "react";
+
+
 const Dashboard = () => {
+    const dispatch = useDispatch()
+    const { products } = useSelector(
+        (state) => state.adminProducts
+    )
+    const { categories } = useSelector(
+        (state) => state.category
+    )
+    useEffect(() => {
+        dispatch(getProducts())
+        dispatch(getCategories)
+    }, dispatch)
+    console.log(products)
+
     return (
         <div>
             <h1 className="text-3xl font-bold mb-6">
@@ -11,16 +30,16 @@ const Dashboard = () => {
                         Total Products
                     </h3>
                     <p className="text-3xl font-bold mt-2">
-                        0
+                        {products?.length || 0}
                     </p>
                 </div>
 
                 <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow">
                     <h3 className="text-gray-500">
-                        Total Orders
+                        Total Category
                     </h3>
                     <p className="text-3xl font-bold mt-2">
-                        0
+                        {categories?.length || 0}
                     </p>
                 </div>
 

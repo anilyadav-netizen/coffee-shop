@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+
 import {
     createOrder,
     verifyPayment,
@@ -359,7 +360,7 @@ const CartPage = () => {
                                     </div>
                                 </div>
 
-                                <button
+                                <Link to ="/orderDetails"
                                     onClick={handleCheckout}
                                     disabled={isLoading || loading}
                                     className="w-full mt-4 sm:mt-6 py-2.5 sm:py-3.5 bg-gradient-to-r from-[#0D7C53] to-green-600 text-white rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 group disabled:opacity-70 text-base sm:text-lg"
@@ -375,7 +376,7 @@ const CartPage = () => {
                                             <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
                                         </>
                                     )}
-                                </button>
+                                </Link>
                             </div>
                         </div>
                     </div>

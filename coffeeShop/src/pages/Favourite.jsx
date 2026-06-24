@@ -16,30 +16,46 @@ import {
     X,
     Search
 } from 'lucide-react';
+import { getProducts } from '../redux/Slicer/adminProductSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { getCategories } from '../redux/Slicer/categorySlice';
+import { addToCart } from "../redux/Slicer/cartSlice";
+import {
+    getWishlist,
+    addToWishlist,
+    removeFromWishlist,
+} from "../redux/Slicer/wishlistSlice";
+import { toast } from "react-toastify";
 
 const Favourite = () => {
+
+    const dispatch = useDispatch()
+    const { products } = useSelector(
+        (state) => state.adminProducts
+    )
+    const { categories } = useSelector(
+        (state) => state.category
+    )
+
+    const { loading: cartLoading } = useSelector(
+        (state) => state.cart
+    );
+
+    const { items: wishlistItems } = useSelector(
+        (state) => state.wishlist
+    );
+
+    useEffect(() => {
+        dispatch(getProducts());
+        dispatch(getCategories());
+        dispatch(getWishlist());
+    }, [dispatch]);
+
     const navigate = useNavigate();
     const [favourites, setFavourites] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [addedItems, setAddedItems] = useState({});
-
-    // Category mapping for icons
-    const categoryIcons = {
-        1: <Coffee className="w-4 h-4" />,
-        2: <Utensils className="w-4 h-4" />,
-        3: <Cake className="w-4 h-4" />,
-        4: <Package className="w-4 h-4" />,
-        5: <Leaf className="w-4 h-4" />
-    };
-
-    const categoryNames = {
-        1: 'Beverages',
-        2: 'Foods',
-        3: 'Desserts',
-        4: 'Combos',
-        5: 'Seasonal'
-    };
 
     useEffect(() => {
         const loadFavourites = () => {
@@ -51,43 +67,56 @@ const Favourite = () => {
     }, []);
 
     // ✅ Handle Add to Cart
-    const handleAddToCart = (item, e) => {
+    const handleAddToCart = async (item, e) => {
         e.stopPropagation();
-        
-        const cartItem = {
-            id: item.id,
-            name: item.name,
-            price: item.price,
-            originalPrice: item.originalPrice || item.price,
-            image: item.image,
-            category: categoryNames[item.categoryId] || 'Coffee',
-            quantity: 1
-        };
-        
-        addToCart(cartItem);
-        
-        setAddedItems(prev => ({ ...prev, [item.id]: true }));
-        setTimeout(() => {
-            setAddedItems(prev => ({ ...prev, [item.id]: false }));
-        }, 1500);
+
+        try {
+            await dispatch(
+                addToCart({
+                    coffeeId: item._id,
+                    quantity: 1,
+                })
+            ).unwrap();
+            toast.success("Item added to cart successfully!");
+
+            setAddedItems((prev) => ({
+                ...prev,
+                [item._id]: true,
+            }));
+
+            setTimeout(() => {
+                setAddedItems((prev) => ({
+                    ...prev,
+                    [item._id]: false,
+                }));
+            }, 1500);
+
+        } catch (error) {
+            console.error("Add To Cart Error:", error);
+        }
     };
 
     // ✅ Handle Wishlist Toggle
-    const handleWishlistToggle = (item, e) => {
+    const handleWishlistToggle = async (item, e) => {
         e.stopPropagation();
-        
-        const wishlistItem = {
-            id: item.id,
-            name: item.name,
-            price: item.price,
-            originalPrice: item.originalPrice || item.price,
-            image: item.image,
-            category: categoryNames[item.categoryId] || 'Coffee',
-            description: item.description || 'Premium coffee blend',
-            likes: item.rating || 0
-        };
-        
-        toggleWishlist(wishlistItem);
+
+        try {
+            const existingItem = wishlistItems.find(
+                (wish) =>
+                    wish.coffee?._id === item._id ||
+                    wish.coffee === item._id
+            );
+
+            if (existingItem) {
+                await dispatch(removeFromWishlist(existingItem._id)).unwrap();
+                toast.info("Item Removed from wishlist");
+            } else {
+                await dispatch(addToWishlist({ coffeeId: item._id })).unwrap();
+                toast.success("Item Added to wishlist ❤️");
+            }
+        } catch (error) {
+            console.error("Wishlist Error:", error);
+        }
     };
 
     const handleRemoveFavourite = (itemId) => {
@@ -96,19 +125,12 @@ const Favourite = () => {
     };
 
     const handleItemClick = (item) => {
-        navigate(`/menu/${item.categoryId}`);
+        navigate(`/menu/${item.category?._id || item.categoryId}`);
     };
 
     const handleViewAll = () => {
         navigate('/menu');
     };
-
-    // Filter favourites by category
-    const filteredFavourites = selectedCategory === 'all'
-        ? favourites
-        : favourites.filter(item => item.categoryId === parseInt(selectedCategory));
-
-    const categories = ['all', ...new Set(favourites.map(item => item.categoryId))];
 
     if (isLoading) {
         return (
@@ -177,7 +199,11 @@ const Favourite = () => {
     return (
         <section className="relative px-4 overflow-hidden pb-5">
             {/* Glass Background */}
-            <div className="absolute inset-0 -z-10">
+            {/* <div className="absolute inset-0 -z-10 pointer-events-none">
+                <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-amber-400/10 rounded-full blur-[120px]" />
+                <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-orange-500/10 rounded-full blur-[100px]" />
+            </div> */}
+            {/* <div className="absolute inset-0 -z-10">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />
                 <div className="absolute inset-0 bg-gradient-to-tr from-[#EDE0D4]/20 via-transparent to-[#D4B896]/10" />
                 <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-amber-400/15 rounded-full blur-[120px] animate-pulse-slow" />
@@ -189,7 +215,7 @@ const Favourite = () => {
                     <div className="absolute top-1/3 right-1/4 text-4xl rotate-45 animate-float-slow">☕</div>
                     <div className="absolute bottom-1/4 left-1/3 text-5xl -rotate-45 animate-float-delay">🫘</div>
                 </div>
-            </div>
+            </div> */}
 
             {/* Content */}
             <div className="max-w-[104rem] mx-auto relative z-10">
@@ -215,15 +241,28 @@ const Favourite = () => {
                 </div>
 
                 {/* Favourites Grid */}
-                {filteredFavourites.length > 0 ? (
+                {products.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {filteredFavourites.map((item) => {
-                          
-                            const isAdded = addedItems[item.id];
-                            
+                        {products.map((item) => {
+
+                            const isAdded = addedItems[item._id];
+
+                            const isWishlisted = wishlistItems.some(
+                                (wish) =>
+                                    wish.coffee?._id === item._id ||
+                                    wish.coffee === item._id
+                            );
+
+                            // ✅ Fixed: Get category from the nested category object
+                            const category = item.category; // This is already the category object
+
+                            console.log('Product:', item);
+                            console.log('Category:', category);
+                            console.log('All Categories:', categories);
+
                             return (
                                 <div
-                                    key={item.id}
+                                    key={item._id}
                                     className="group backdrop-blur-xl bg-white/20 border border-white/30 rounded-3xl overflow-hidden shadow-2xl shadow-black/5 hover:shadow-3xl transition-all duration-500 hover:-translate-y-2 relative"
                                 >
                                     {/* Image Container */}
@@ -242,21 +281,34 @@ const Favourite = () => {
 
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-                                        {/* ✅ Wishlist Icon - Top Right on Image */}
+                                        {/* Wishlist Icon - Top Right on Image */}
                                         <button
                                             onClick={(e) => handleWishlistToggle(item, e)}
-                                            className="absolute top-3 right-3 z-10 w-9 h-9 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:bg-white transition-all duration-300 hover:scale-110"
+                                            className={`absolute top-3 right-3 z-10 w-9 h-9 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-110 ${isWishlisted ? "bg-red-50" : ""
+                                                }`}
                                         >
-                                            <Heart 
-                                                size={18} 
-                                               
+                                            <Heart
+                                                size={18}
+                                                className={
+                                                    isWishlisted
+                                                        ? "fill-red-500 text-red-500"
+                                                        : "text-gray-600"
+                                                }
                                             />
                                         </button>
 
                                         {/* Category Badge */}
-                                        <div className="absolute top-3 left-3 bg-white/70 backdrop-blur-md text-xs font-semibold px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5 border border-white/30">
-                                            {categoryIcons[item.categoryId]}
-                                            <span className="text-gray-700">{categoryNames[item.categoryId]}</span>
+                                        <div className="absolute top-3 left-3 bg-white/70 backdrop-blur-md text-xs font-semibold px-3 py-1.5 rounded-full shadow-md flex items-center gap-2 border border-white/30">
+                                            {category?.icon && (
+                                                <img
+                                                    src={category.icon}
+                                                    alt={category.name}
+                                                    className="w-5 h-5 rounded-full object-cover"
+                                                />
+                                            )}
+                                            <span className="text-black">
+                                                {category?.name || 'Uncategorized'}
+                                            </span>
                                         </div>
 
                                         {/* Rating Badge */}
@@ -278,14 +330,14 @@ const Favourite = () => {
                                     <div className="p-5">
                                         <div className="flex items-start justify-between mb-1">
                                             <h3
-                                                className="font-bold text-gray-800 text-lg group-hover:text-[#0D7C53] transition-colors cursor-pointer line-clamp-1"
+                                                className="font-bold text-white text-lg group-hover:text-[#0D7C53] transition-colors cursor-pointer line-clamp-1"
                                                 onClick={() => handleItemClick(item)}
                                             >
                                                 {item.name}
                                             </h3>
                                         </div>
 
-                                        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                                        <p className="text-white text-base mb-3 line-clamp-2">
                                             {item.description}
                                         </p>
 
@@ -293,12 +345,12 @@ const Favourite = () => {
                                             {[...Array(5)].map((_, i) => (
                                                 <Star key={i} size={14} className="fill-yellow-400 text-yellow-400" />
                                             ))}
-                                            <span className="text-xs text-gray-500 ml-1">({item.reviews || 24})</span>
+                                            <span className="text-xs text-white ml-1">({item.reviews || 24})</span>
                                         </div>
 
                                         <div className="flex items-center justify-between pt-3 border-t border-white/20">
                                             <div className="flex items-center gap-2">
-                                                <span className="text-xl font-bold text-[#0D7C53]">
+                                                <span className="text-xl font-bold text-white">
                                                     ₹{item.price.toFixed(2)}
                                                 </span>
                                                 {item.originalPrice && (
@@ -309,28 +361,31 @@ const Favourite = () => {
                                             </div>
                                             <div className="flex items-center gap-1 text-xs font-medium text-green-600 bg-green-100/60 backdrop-blur-sm px-2 py-1 rounded-full">
                                                 <TrendingUp size={12} />
-                                                {item.points} Pts
+                                                {item.points || 0} Pts
                                             </div>
                                         </div>
 
                                         {/* Add to Cart Button */}
                                         <button
                                             onClick={(e) => handleAddToCart(item, e)}
-                                            className={`w-full mt-4 font-medium py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group/btn ${
-                                                isAdded
-                                                    ? 'bg-green-500 text-white'
-                                                    : 'bg-gradient-to-r from-[#0D7C53] to-green-600 text-white hover:shadow-lg hover:shadow-[#0D7C53]/30'
-                                            }`}
+                                            className={`w-full mt-4 font-medium py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group/btn ${isAdded
+                                                ? "bg-green-500 text-white"
+                                                : "bg-gradient-to-r from-[#0D7C53] to-green-600 text-white hover:shadow-lg hover:shadow-[#0D7C53]/30"
+                                                }`}
                                         >
                                             {isAdded ? (
-                                                <>
-                                                    <span>Added ✓</span>
-                                                </>
+                                                <span>Added ✓</span>
                                             ) : (
                                                 <>
-                                                    <ShoppingBag size={18} className="group-hover/btn:scale-110 transition-transform" />
+                                                    <ShoppingBag
+                                                        size={18}
+                                                        className="group-hover/btn:scale-110 transition-transform"
+                                                    />
                                                     Add to Cart
-                                                    <ChevronRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
+                                                    <ChevronRight
+                                                        size={16}
+                                                        className="group-hover/btn:translate-x-1 transition-transform"
+                                                    />
                                                 </>
                                             )}
                                         </button>

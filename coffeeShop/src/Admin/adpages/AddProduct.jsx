@@ -4,13 +4,24 @@ import { FaArrowLeft, FaImage, FaTimes } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addProduct, updateProduct, getSingleProduct, clearProduct } from "../../redux/Slicer/adminProductSlice";
-import { ToastContainer } from "react-toastify"; 
+import { ToastContainer } from "react-toastify";
 import { toast } from "react-toastify";
+import { getCategories } from "../../redux/Slicer/categorySlice";
+
 const AddProduct = () => {
+
     const { id } = useParams(); // ✅ Agar URL mein id hai toh Update Mode
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const fileInputRef = useRef(null);
+
+    const { categories } = useSelector(
+        (state) => state.category
+    )
+    
+    useEffect(() => {
+        dispatch(getCategories())
+    }, [dispatch])
 
     const { product, loading } = useSelector((state) => state.adminProducts);
     const isEditMode = Boolean(id);
@@ -21,6 +32,7 @@ const AddProduct = () => {
         price: "",
         stock: "",
         status: "active",
+        category: "", // ✅ Added category field
     });
 
     const [imageFile, setImageFile] = useState(null);
@@ -40,6 +52,7 @@ const AddProduct = () => {
                         price: data.price || "",
                         stock: data.stock || "",
                         status: data.status || "active",
+                        category: data.category?._id || data.category || "", // ✅ Pre-select category
                     });
                     if (data.image) {
                         setImagePreview(data.image);
@@ -119,6 +132,12 @@ const AddProduct = () => {
             return;
         }
 
+        // ✅ Category validation
+        if (!formData.category) {
+            toast.error("Please select a category");
+            return;
+        }
+
         // ✅ Image validation - Add mode mein compulsory, Update mode mein optional
         if (!isEditMode && !imageFile) {
             toast.error("Please upload a product image");
@@ -134,6 +153,7 @@ const AddProduct = () => {
             submitData.append("price", formData.price);
             submitData.append("stock", formData.stock);
             submitData.append("status", formData.status);
+            submitData.append("category", formData.category); // ✅ Append category ID
 
             // ✅ Agar nayi image select ki hai toh bhejo, warna mat bhejo
             if (imageFile) {
@@ -269,6 +289,32 @@ const AddProduct = () => {
                                 className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-xl text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#0D7C53] focus:border-transparent resize-none transition-all duration-300"
                                 required
                             />
+                        </div>
+
+                        {/* CATEGORY DROPDOWN */}
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                Category <span className="text-red-500">*</span>
+                            </label>
+                            <select
+                                name="category"
+                                value={formData.category}
+                                onChange={handleChange}
+                                className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-xl text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0D7C53] focus:border-transparent transition-all duration-300 appearance-none"
+                                required
+                            >
+                                <option value="">Select a category</option>
+                                {categories && categories.map((category) => (
+                                    <option key={category._id} value={category._id}>
+                                        {category.name}
+                                    </option>
+                                ))}
+                            </select>
+                            {categories && categories.length === 0 && (
+                                <p className="text-sm text-amber-600 dark:text-amber-400 mt-1">
+                                    No categories found. Please add a category first.
+                                </p>
+                            )}
                         </div>
 
                         {/* PRICE & STOCK */}

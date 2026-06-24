@@ -1,7 +1,33 @@
-import Category from "../models/category.model.js";
-import { uploadToImgBB } from "../utils/uploadToImgBB.js";
+const Category = require("../models/category.model");
+const sharp = require("sharp");
+const axios = require("axios");
+const FormData = require("form-data");
 
-export const createCategory = async (req, res) => {
+const uploadToImgBB = async (buffer, originalname) => {
+  const compressedBuffer = await sharp(buffer)
+    .resize(600)
+    .jpeg({ quality: 70 })
+    .toBuffer();
+
+  const formData = new FormData();
+
+  formData.append("image", compressedBuffer, {
+    filename: originalname,
+    contentType: "image/jpeg",
+  });
+
+  const upload = await axios.post(
+    `https://api.imgbb.com/1/upload?key=${process.env.IMGBB_API_KEY}`,
+    formData,
+    {
+      headers: formData.getHeaders(),
+    }
+  );
+
+  return upload.data.data.url;
+};
+
+const createCategory = async (req, res) => {
   try {
     const { name } = req.body;
 
@@ -35,7 +61,7 @@ export const createCategory = async (req, res) => {
   }
 };
 
-export const updateCategory = async (req, res) => {
+const updateCategory = async (req, res) => {
   try {
     const { name } = req.body;
 
@@ -76,23 +102,23 @@ export const updateCategory = async (req, res) => {
   }
 };
 
-export const getCategories = async (req, res) => {
+const getCategories = async (req, res) => {
   try {
     const categories = await Category.find().sort({ createdAt: -1 });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: categories,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
   }
 };
 
-export const getCategoryById = async (req, res) => {
+const getCategoryById = async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
 
@@ -103,19 +129,19 @@ export const getCategoryById = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: category,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
   }
 };
 
-export const deleteCategory = async (req, res) => {
+const deleteCategory = async (req, res) => {
   try {
     const category = await Category.findByIdAndDelete(req.params.id);
 
@@ -126,14 +152,22 @@ export const deleteCategory = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Category deleted successfully",
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
   }
+};
+
+module.exports = {
+  createCategory,
+  updateCategory,
+  getCategories,
+  getCategoryById,
+  deleteCategory,
 };

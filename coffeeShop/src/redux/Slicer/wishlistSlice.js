@@ -179,6 +179,7 @@ const wishlistSlice = createSlice({
                     (item) => item._id !== action.payload
                 );
                 state.wishlistCount -= 1;
+                
             })
             .addCase(removeFromWishlist.rejected, (state, action) => {
                 state.loading = false;

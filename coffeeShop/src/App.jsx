@@ -23,19 +23,24 @@ import Dashboard from "./Admin/adpages/Dashboard";
 import Products from "./Admin/adpages/Products";
 import AddProduct from "./Admin/adpages/AddProduct";
 import OderDetailsPage from "./pages/OderDetailsPage";
+import Category from "./Admin/adpages/Category";
+import AddCategory from "./Admin/adpages/AddCategory";
+import { ToastContainer } from 'react-toastify';
+
 
 function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
 
+        <ToastContainer />
       <Routes>
         {/* User Layout */}
         <Route element={<UserLayouts />}>
           <Route path="/" element={<Home />} />
           <Route path="/menu" element={<MenuPage />} />
           <Route path="/menu/:categoryId" element={<MenuPage />} />
-          <Route path="/aboutus" element={<About />} />
+          <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/journey" element={<Journey />} />
@@ -63,7 +68,10 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="products" element={<Products />} />
           <Route path="add-product" element={<AddProduct />} />
+          <Route path="category" element={<Category />} />
+          <Route path="add-category" element={<AddCategory />} />
           <Route path="/admin/update-product/:id" element={<AddProduct />} /> {/* ✅ Same component */}
+          <Route path="/admin/update-category/:id" element={<AddCategory/>} /> 
 
         </Route>
         <Route path="/login" element={<Login />} />

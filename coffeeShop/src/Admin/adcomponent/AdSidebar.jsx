@@ -4,6 +4,7 @@ import {
   FaBoxOpen,
   FaShoppingBag,
   FaUsers,
+  FaTags,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 
@@ -18,6 +19,11 @@ const AdSidebar = () => {
       name: "Products",
       path: "/admin/products",
       icon: <FaCoffee size={18} />,
+    },
+    {
+      name: "Category",
+      path: "/admin/category",
+      icon: <FaTags size={18} />,
     },
     {
       name: "Orders",
@@ -60,10 +66,9 @@ const AdSidebar = () => {
             to={item.path}
             end={item.path === "/admin"}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
-                isActive
-                  ? "bg-amber-500 text-black font-semibold shadow-lg"
-                  : "text-zinc-300 hover:bg-zinc-800 hover:text-white"
+              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${isActive
+                ? "bg-amber-500 text-black font-semibold shadow-lg"
+                : "text-zinc-300 hover:bg-zinc-800 hover:text-white"
               }`
             }
           >
@@ -73,7 +78,7 @@ const AdSidebar = () => {
         ))}
       </nav>
 
-   
+
     </aside>
   );
 };

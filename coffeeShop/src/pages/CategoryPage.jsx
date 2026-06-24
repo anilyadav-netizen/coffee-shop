@@ -5,7 +5,7 @@ import {
   getDiscountPercentage,
 } from "../data/coffeeData";
 import { addToCart } from "../redux/Slicer/cartSlice";
-import { toggleWishlist, getWishlist, addToWishlist } from "../redux/Slicer/wishlistSlice";
+import { toggleWishlist, getWishlist, addToWishlist, removeFromWishlist } from "../redux/Slicer/wishlistSlice";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import { getProducts } from "../redux/Slicer/adminProductSlice";
@@ -13,6 +13,7 @@ import { getProducts } from "../redux/Slicer/adminProductSlice";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import { toast } from "react-toastify";
 
 // Icons
 const HeartIcon = ({ isWishlisted = false, className = "" }) => (
@@ -33,8 +34,8 @@ const CoffeeIcon = () => (
 );
 
 const CategoryPage = () => {
-
   const dispatch = useDispatch();
+
   const { products, loading } = useSelector((state) => state.adminProducts);
 
   useEffect(() => {
@@ -69,10 +70,10 @@ const CategoryPage = () => {
   // ✅ Handle Add to Cart from Card - FIXED: Use product._id instead of product.id
   const handleAddToCart = (product, e) => {
     e.stopPropagation();
-    
+
     // Use _id or id consistently
     const productId = product._id || product.id;
-    
+
     dispatch(addToCart({
       coffeeId: productId,
       quantity: 1
@@ -100,9 +101,9 @@ const CategoryPage = () => {
   // ✅ Handle Add to Cart from Modal - FIXED: Use product._id
   const handleModalAddToCart = () => {
     if (!selectedProduct) return;
-    
+
     const productId = selectedProduct._id || selectedProduct.id;
-    
+
     dispatch(addToCart({
       coffeeId: productId,
       quantity: modalQuantity
@@ -125,21 +126,47 @@ const CategoryPage = () => {
   // ✅ Handle Wishlist Toggle (Redux) - FIXED: Consistent ID
   const handleWishlistToggle = (product, e) => {
     e.stopPropagation();
+
     const coffeeId = product._id || product.id;
 
-    
-    dispatch(addToWishlist( {coffeeId} ))
-      .unwrap()
-      .catch((error) => {
-        console.error("Failed to toggle wishlist:", error);
-      });
+    const alreadyInWishlist = isInWishlist(coffeeId);
+
+    if (alreadyInWishlist) {
+      // ❌ REMOVE FROM WISHLIST
+      const existingItem = wishlistItems.find(
+        (item) =>
+          (item.coffee?._id || item.coffee?.id || item._id || item.id) === coffeeId
+      );
+
+      if (!existingItem) return;
+
+      dispatch(removeFromWishlist(existingItem._id))
+        .unwrap()
+        .then(() => {
+          toast.info("Item Removed from wishlist");
+        })
+        .catch((error) => {
+          toast.error("Failed to remove from wishlist");
+        });
+
+    } else {
+      // ✅ ADD TO WISHLIST
+      dispatch(addToWishlist({ coffeeId }))
+        .unwrap()
+        .then(() => {
+          toast.success("Item Added to wishlist");
+        })
+        .catch((error) => {
+          toast.error("Failed to add to wishlist");
+        });
+    }
   };
 
   // ✅ Handle Modal Wishlist Toggle - FIXED: Consistent ID
   const handleModalWishlistToggle = () => {
     if (!selectedProduct) return;
     const productId = selectedProduct._id || selectedProduct.id;
-    
+
     dispatch(toggleWishlist({ coffee: productId }))
       .unwrap()
       .catch((error) => {
@@ -177,13 +204,7 @@ const CategoryPage = () => {
             <p className="text-gray-500 mt-1 max-w-2xl mx-auto">
               Freshly brewed happiness in every cup — discover your perfect blend.
             </p>
-            {/* ✅ Cart Badge */}
-            {totalItems > 0 && (
-              <div className="mt-3 inline-flex items-center gap-2 bg-[#0D7C53]/10 text-[#0D7C53] px-4 py-2 rounded-full text-sm font-medium">
-                <span>🛒</span>
-                <span>{totalItems} item{totalItems > 1 ? 's' : ''} in cart</span>
-              </div>
-            )}
+            
           </div>
 
           {/* Swiper */}
