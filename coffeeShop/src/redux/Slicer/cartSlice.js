@@ -125,19 +125,19 @@ const cartSlice = createSlice({
             })
             .addCase(getCart.fulfilled, (state, action) => {
                 state.loading = false;
-                state.cartItems = action.payload;
 
-                // ✅ FIX: Use cartItems.length for unique items count
-                state.totalItems = state.cartItems.length;  // <--- CHANGE HERE
-                
-                state.totalPrice = state.cartItems.reduce(
-                    (sum, item) => sum + ((item.coffee?.price || 0) * (item.quantity || 0)), 0
+                state.cartItems = action.payload.items || [];
+
+                state.totalItems = state.cartItems.reduce(
+                    (sum, item) => sum + item.quantity,
+                    0
                 );
-                console.log("📊 Cart loaded:", {
-                    totalItems: state.totalItems,  // Now shows unique products count
-                    totalPrice: state.totalPrice,
-                    items: state.cartItems.length
-                });
+
+                state.totalPrice = state.cartItems.reduce(
+                    (sum, item) =>
+                        sum + item.quantity * (item.coffee?.price || 0),
+                    0
+                );
             })
             .addCase(getCart.rejected, (state, action) => {
                 state.loading = false;
@@ -152,23 +152,18 @@ const cartSlice = createSlice({
             })
             .addCase(addToCart.fulfilled, (state, action) => {
                 state.loading = false;
-                const newItem = action.payload;
 
-                const existingIndex = state.cartItems.findIndex(
-                    item => item.coffee?._id === newItem.coffee?._id
+                state.cartItems = action.payload.items || [];
+
+                state.totalItems = state.cartItems.reduce(
+                    (sum, item) => sum + item.quantity,
+                    0
                 );
 
-                if (existingIndex !== -1) {
-                    state.cartItems[existingIndex] = newItem;
-                } else {
-                    state.cartItems.push(newItem);
-                }
-
-                // ✅ FIX: Use cartItems.length (already correct)
-                state.totalItems = state.cartItems.length;  // <--- KEEP AS IS
-                
                 state.totalPrice = state.cartItems.reduce(
-                    (sum, item) => sum + ((item.coffee?.price || 0) * (item.quantity || 0)), 0
+                    (sum, item) =>
+                        sum + item.quantity * (item.coffee?.price || 0),
+                    0
                 );
             })
             .addCase(addToCart.rejected, (state, action) => {
@@ -190,7 +185,7 @@ const cartSlice = createSlice({
 
                 // ✅ FIX: Use cartItems.length
                 state.totalItems = state.cartItems.length;  // <--- CHANGE HERE
-                
+
                 state.totalPrice = state.cartItems.reduce(
                     (sum, item) => sum + ((item.coffee?.price || 0) * (item.quantity || 0)), 0
                 );
@@ -231,7 +226,7 @@ const cartSlice = createSlice({
 
                     // ✅ FIX: Use cartItems.length (quantity change should NOT affect totalItems)
                     state.totalItems = state.cartItems.length;  // <--- CHANGE HERE
-                    
+
                     state.totalPrice = state.cartItems.reduce(
                         (sum, item) => sum + ((item.coffee?.price || 0) * (item.quantity || 0)), 0
                     );
@@ -291,7 +286,7 @@ const cartSlice = createSlice({
 
                 // ✅ FIX: Use cartItems.length
                 state.totalItems = state.cartItems.length;  // <--- CHANGE HERE
-                
+
                 state.totalPrice = state.cartItems.reduce(
                     (sum, item) => sum + ((item.coffee?.price || 0) * (item.quantity || 0)), 0
                 );

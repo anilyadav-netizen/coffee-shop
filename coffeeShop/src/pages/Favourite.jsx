@@ -226,7 +226,7 @@ const Favourite = () => {
                             <div className="flex items-center gap-3">
                                 <div>
                                     <h2 className="text-3xl font-bold text-[#0D7C53]">All Time Favourites</h2>
-                                    <p className="text-gray-500 text-sm">Items Customer love the most</p>
+                                    <p className="text-white text-base">Items Customer love the most</p>
                                 </div>
                             </div>
                         </div>
@@ -242,7 +242,7 @@ const Favourite = () => {
 
                 {/* Favourites Grid */}
                 {products.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                         {products.map((item) => {
 
                             const isAdded = addedItems[item._id];
@@ -312,10 +312,10 @@ const Favourite = () => {
                                         </div>
 
                                         {/* Rating Badge */}
-                                        <div className="absolute bottom-3 left-3 bg-black/40 backdrop-blur-md text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-1 border border-white/20">
+                                        {/* <div className="absolute bottom-3 left-3 bg-black/40 backdrop-blur-md text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-1 border border-white/20">
                                             <Star size={12} className="fill-yellow-400 text-yellow-400" />
                                             {item.rating || 4.5}
-                                        </div>
+                                        </div> */}
 
                                         {/* Quick View Button */}
                                         <button
@@ -330,7 +330,7 @@ const Favourite = () => {
                                     <div className="p-5">
                                         <div className="flex items-start justify-between mb-1">
                                             <h3
-                                                className="font-bold text-white text-lg group-hover:text-[#0D7C53] transition-colors cursor-pointer line-clamp-1"
+                                                className="font-bold text-white text-lg group-hover:text-[#169466] transition-colors cursor-pointer line-clamp-1"
                                                 onClick={() => handleItemClick(item)}
                                             >
                                                 {item.name}
@@ -341,12 +341,12 @@ const Favourite = () => {
                                             {item.description}
                                         </p>
 
-                                        <div className="flex items-center gap-1 mb-3">
+                                        {/* <div className="flex items-center gap-1 mb-3">
                                             {[...Array(5)].map((_, i) => (
                                                 <Star key={i} size={14} className="fill-yellow-400 text-yellow-400" />
                                             ))}
                                             <span className="text-xs text-white ml-1">({item.reviews || 24})</span>
-                                        </div>
+                                        </div> */}
 
                                         <div className="flex items-center justify-between pt-3 border-t border-white/20">
                                             <div className="flex items-center gap-2">
@@ -359,10 +359,10 @@ const Favourite = () => {
                                                     </span>
                                                 )}
                                             </div>
-                                            <div className="flex items-center gap-1 text-xs font-medium text-green-600 bg-green-100/60 backdrop-blur-sm px-2 py-1 rounded-full">
+                                            {/* <div className="flex items-center gap-1 text-xs font-medium text-green-600 bg-green-100/60 backdrop-blur-sm px-2 py-1 rounded-full">
                                                 <TrendingUp size={12} />
                                                 {item.points || 0} Pts
-                                            </div>
+                                            </div> */}
                                         </div>
 
                                         {/* Add to Cart Button */}
