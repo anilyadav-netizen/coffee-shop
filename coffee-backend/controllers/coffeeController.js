@@ -95,7 +95,8 @@ exports.updateCoffee = async (req, res) => {
 // Get All Coffee
 exports.getAllCoffee = async (req, res) => {
   try {
-    const coffees = await Coffee.find();
+    const coffees = await Coffee.find()
+      .populate("category", "name icon");
 
     res.status(200).json({
       success: true,
@@ -109,20 +110,26 @@ exports.getAllCoffee = async (req, res) => {
   }
 };
 
-// Get Single Coffee
+
 exports.getCoffeeById = async (req, res) => {
   try {
-    const coffee = await Coffee.findById(req.params.id);
+    const coffee = await Coffee.findById(req.params.id)
+      .populate("category", "name icon");
 
     if (!coffee) {
       return res.status(404).json({
+        success: false,
         message: "Coffee not found",
       });
     }
 
-    res.status(200).json(coffee);
+    res.status(200).json({
+      success: true,
+      data: coffee,
+    });
   } catch (error) {
     res.status(500).json({
+      success: false,
       message: error.message,
     });
   }
