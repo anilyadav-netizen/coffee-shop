@@ -29,9 +29,11 @@ const coffeeSchema = new mongoose.Schema(
     },
 
     category: {
-      type: String,
-      default: "Coffee",
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      required: true,
     },
+
     status: {
       type: String,
       enum: ["active", "inactive"],
