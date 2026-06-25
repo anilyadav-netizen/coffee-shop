@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Banner from '../assets/Images/Banner.png';
+import imagebg from '../assets/Images/imagebg.jpg';
 
 import { getProducts } from "../redux/Slicer/adminProductSlice";
 import { getCategories } from "../redux/Slicer/categorySlice";
@@ -13,14 +14,13 @@ import {
     Heart,
     Search,
     X,
-    Grid3x3 // All icon
+    Grid3x3
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../redux/slicer/cartSlice";
 import { addToWishlist, removeFromWishlist, getWishlist } from "../redux/slicer/wishlistSlice";
 
 const MenuPage = () => {
-
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { categoryId } = useParams();
@@ -41,6 +41,9 @@ const MenuPage = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [filteredItems, setFilteredItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [visibleCards, setVisibleCards] = useState(new Set());
+    const cardRefs = useRef({});
+    const [isAnimating, setIsAnimating] = useState(false);
 
     // Fetch data
     useEffect(() => {
@@ -49,13 +52,36 @@ const MenuPage = () => {
         dispatch(getWishlist());
     }, [dispatch]);
 
-    // ===== 🔥 FIX: Create "All" category and handle categoryId =====
+    // ===== AUTO ANIMATE ITEMS ON CATEGORY CHANGE OR SEARCH =====
+    useEffect(() => {
+        if (filteredItems.length === 0) {
+            setVisibleCards(new Set());
+            return;
+        }
+
+        // Reset visibility
+        setVisibleCards(new Set());
+        setIsAnimating(true);
+
+        // Auto show items with delay (2-3 seconds)
+        const timer = setTimeout(() => {
+            const allIds = filteredItems.map(item => item._id);
+            setVisibleCards(new Set(allIds));
+            setIsAnimating(false);
+        }, 300); // 300ms delay for smooth appearance
+
+        return () => {
+            clearTimeout(timer);
+            setIsAnimating(false);
+        };
+    }, [filteredItems, categoryId, searchTerm]);
+
+    // ===== Create "All" category =====
     const allCategories = useMemo(() => {
         if (!categories || categories.length === 0) return [];
 
-        // "All" category ko pehle rakhna hai
         const allCategory = {
-            _id: 'all', // Special ID for "All"
+            _id: 'all',
             name: 'All',
             icon: null,
             isAll: true
@@ -68,33 +94,29 @@ const MenuPage = () => {
     const currentCategory = useMemo(() => {
         if (!categories || categories.length === 0) return null;
 
-        // Agar categoryId "all" hai ya nahi hai
         if (!categoryId || categoryId === 'all') {
-            return allCategories[0]; // "All" category
+            return allCategories[0];
         }
 
-        // Agar categoryId match karti hai
         const found = categories.find(cat => String(cat._id) === String(categoryId));
-        return found || allCategories[0]; // Agar nahi mili toh "All"
+        return found || allCategories[0];
     }, [categories, categoryId, allCategories]);
 
-    // ===== 🔥 FIX: Redirect if no categoryId =====
+    // Redirect if no categoryId
     useEffect(() => {
         if (categories && categories.length > 0 && !categoryId) {
             navigate(`/menu/all`, { replace: true });
         }
     }, [categories, categoryId, navigate]);
 
-    // ===== 🔥 FIX: Filter products based on category =====
+    // Filter products based on category
     const categoryProducts = useMemo(() => {
         if (!products || products.length === 0) return [];
 
-        // Agar "All" category hai toh saare products dikhao
         if (!categoryId || categoryId === 'all') {
             return products;
         }
 
-        // Otherwise filter by category
         return products.filter(product => {
             if (product.category && typeof product.category === 'object') {
                 return String(product.category._id) === String(categoryId);
@@ -111,8 +133,7 @@ const MenuPage = () => {
 
     // Category banners mapping
     const categoryBanners = {
-        'all': Banner, // "All" category ke liye default banner
-        // Add your MongoDB ObjectId to banner mappings here
+        'all': Banner,
     };
 
     const currentBanner = useMemo(() => {
@@ -166,14 +187,13 @@ const MenuPage = () => {
             });
     };
 
-
     const isInWishlist = (productId) => {
         return wishlistItems?.some(
             (item) =>
                 (item.coffee?._id || item.coffee) === productId
         );
     };
-    // Handle Wishlist Toggle
+
     const handleWishlistToggle = (item, e) => {
         e.stopPropagation();
 
@@ -208,13 +228,12 @@ const MenuPage = () => {
         setSearchTerm("");
     };
 
-    // ============ LOADING STATE WITH FULL ANIMATION ============
+    // ============ LOADING STATE ============
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#1A0F0A] to-[#3D2013] overflow-x-hidden">
                 <div className="text-center">
                     <div className="relative w-48 h-64 mx-auto">
-                        {/* Coffee pouring animation - Keep your existing animation */}
                         <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                             <div className="w-16 h-12 bg-[#6B4F3A] rounded-t-full rounded-b-lg shadow-lg relative">
                                 <div className="absolute -bottom-2 right-0 w-6 h-3 bg-[#6B4F3A] rounded-br-full"></div>
@@ -222,7 +241,6 @@ const MenuPage = () => {
                             </div>
                         </div>
 
-                        {/* Rest of your animation - KEEP AS IS */}
                         <div className="absolute top-10 left-1/2 transform -translate-x-1/2">
                             <div className="w-3 h-32 bg-gradient-to-b from-[#3C1A0A] to-[#5C2A12] rounded-full animate-pour"></div>
                             <div className="absolute -left-6 top-8 w-5 h-7 bg-[#4A2512] rounded-full animate-drop-big-1 shadow-lg"></div>
@@ -429,17 +447,24 @@ const MenuPage = () => {
                     </div>
                 </div>
 
-                {/* Content Section */}
+                {/* ===== CONTENT SECTION WITH BACKGROUND IMAGE ===== */}
                 <div className="relative -mt-16 pb-12">
+                    {/* ===== BACKGROUND IMAGE ===== */}
                     <div className="absolute inset-0 -z-10 overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />
-                        <div className="absolute inset-0 bg-gradient-to-tr from-[#EDE0D4]/20 via-transparent to-[#D4B896]/10" />
+                        <img
+                            src={imagebg}
+                            alt="Menu Background"
+                            className="absolute inset-0 w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/60"></div>
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#0D7C53]/30 via-transparent to-[#169466]/20"></div>
 
-                        <div className="absolute -top-40 -left-40 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-amber-400/15 rounded-full blur-[80px] sm:blur-[120px] animate-pulse-slow"></div>
-                        <div className="absolute -bottom-40 -right-40 w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] bg-amber-700/10 rounded-full blur-[70px] sm:blur-[100px] animate-pulse-slow-delay"></div>
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-emerald-500/5 rounded-full blur-[100px] sm:blur-[150px] animate-pulse-slow"></div>
+                        {/* Decorative Glows */}
+                        <div className="absolute -top-40 -left-40 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-amber-400/20 rounded-full blur-[80px] sm:blur-[120px] animate-pulse-slow"></div>
+                        <div className="absolute -bottom-40 -right-40 w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] bg-amber-700/20 rounded-full blur-[70px] sm:blur-[100px] animate-pulse-slow-delay"></div>
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-emerald-500/10 rounded-full blur-[100px] sm:blur-[150px] animate-pulse-slow"></div>
 
-                        <div className="absolute inset-0 pointer-events-none opacity-10">
+                        <div className="absolute inset-0 pointer-events-none opacity-20">
                             <div className="absolute top-20 left-10 text-2xl sm:text-6xl rotate-12 animate-float">🫘</div>
                             <div className="absolute bottom-32 right-20 text-2xl sm:text-6xl -rotate-12 animate-float-delay">🫘</div>
                             <div className="absolute top-1/3 right-[15%] text-xl sm:text-4xl rotate-45 animate-float-slow">☕</div>
@@ -448,15 +473,18 @@ const MenuPage = () => {
                     </div>
 
                     <div className="container mx-auto px-3 sm:px-4 relative z-10">
-                        {/* ===== 🔥 Category Selector with "All" ===== */}
-                        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-4 sm:mb-6 backdrop-blur-xl bg-white/20 border border-white/30 p-2 sm:p-3 rounded-xl sm:rounded-2xl shadow-2xl shadow-black/5">
+                        {/* Category Selector */}
+                        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-4 sm:mb-6 backdrop-blur-xl bg-white/10 border border-white/20 p-2 sm:p-3 rounded-xl sm:rounded-2xl shadow-2xl shadow-black/5">
                             {allCategories.map((cat) => (
                                 <button
                                     key={cat._id}
-                                    onClick={() => navigate(`/menu/${cat._id}`)}
+                                    onClick={() => {
+                                        navigate(`/menu/${cat._id}`);
+                                        setVisibleCards(new Set());
+                                    }}
                                     className={`px-2 sm:px-4 py-1 sm:py-2 rounded-full text-[10px] sm:text-sm font-medium transition-all duration-300 flex items-center gap-1 ${String(currentCategory?._id) === String(cat._id)
                                         ? 'bg-[#0D7C53] text-white shadow-lg'
-                                        : 'backdrop-blur-sm bg-white/40 border border-white/20 text-gray-600 hover:bg-white/60'
+                                        : 'backdrop-blur-sm bg-white/20 border border-white/20 text-white hover:bg-white/30'
                                         }`}
                                 >
                                     {cat.isAll && <Grid3x3 size={14} />}
@@ -468,18 +496,18 @@ const MenuPage = () => {
                         {/* Search Bar */}
                         <div className="max-w-md mx-auto mb-6 sm:mb-8">
                             <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60" size={18} />
                                 <input
                                     type="text"
                                     placeholder={`Search ${currentCategory?.isAll ? 'Menu' : currentCategory?.name}...`}
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full pl-9 sm:pl-10 pr-8 sm:pr-10 py-2 sm:py-3 backdrop-blur-xl bg-white/30 border-2 border-white/30 rounded-full shadow-xl shadow-black/5 focus:outline-none focus:ring-2 focus:ring-[#0D7C53] focus:border-transparent transition-all text-gray-800 placeholder:text-gray-400 text-sm sm:text-base"
+                                    className="w-full pl-9 sm:pl-10 pr-8 sm:pr-10 py-2 sm:py-3 backdrop-blur-xl bg-white/10 border-2 border-white/20 rounded-full shadow-xl shadow-black/5 focus:outline-none focus:ring-2 focus:ring-[#0D7C53] focus:border-transparent transition-all text-white placeholder:text-white/60"
                                 />
                                 {searchTerm && (
                                     <button
                                         onClick={clearSearch}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white"
                                     >
                                         <X size={16} />
                                     </button>
@@ -487,12 +515,10 @@ const MenuPage = () => {
                             </div>
                         </div>
 
-                        {/* Items Grid */}
+                        {/* Items Grid with Auto Animation */}
                         {filteredItems && filteredItems.length > 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 pb-12">
-                                {filteredItems.map((item) => {
-
-                                    // Get category name for display
+                                {filteredItems.map((item, index) => {
                                     let itemCategoryName = 'Uncategorized';
                                     if (item.category && typeof item.category === 'object') {
                                         itemCategoryName = item.category.name;
@@ -501,13 +527,28 @@ const MenuPage = () => {
                                         itemCategoryName = found?.name || 'Uncategorized';
                                     }
 
+                                    const isVisible = visibleCards.has(item._id);
+
+                                    // Alternate between left and right
+                                    const isEven = index % 2 === 0;
+                                    const direction = isEven ? 'left' : 'right';
+
                                     return (
                                         <div
                                             key={item._id}
-                                            className="group backdrop-blur-xl bg-white/20 border border-white/30 rounded-xl sm:rounded-2xl shadow-md shadow-black/5 hover:shadow-lg transition-all duration-500 overflow-hidden hover:-translate-y-1 flex flex-col h-full"
+                                            ref={(el) => (cardRefs.current[item._id] = el)}
+                                            data-id={item._id}
+                                            className={`group backdrop-blur-xl bg-white/10 border border-white/20 rounded-xl sm:rounded-2xl shadow-md shadow-black/10 hover:shadow-lg hover:shadow-[#0D7C53]/20 transition-all duration-700 overflow-hidden hover:-translate-y-1 flex flex-col h-full hover:bg-white/15
+                                                ${isVisible
+                                                    ? 'opacity-100 translate-x-0'
+                                                    : `opacity-0 ${direction === 'left' ? '-translate-x-16' : 'translate-x-16'}`
+                                                }`}
+                                            style={{
+                                                transitionDelay: `${index * 80}ms`,
+                                            }}
                                         >
                                             {/* Image Container */}
-                                            <div className="relative h-40 sm:h-48 md:h-56 overflow-hidden bg-gray-100/50 flex-shrink-0">
+                                            <div className="relative h-40 sm:h-48 md:h-56 overflow-hidden bg-black/30 flex-shrink-0">
                                                 <img
                                                     src={item.image}
                                                     alt={item.name}
@@ -517,7 +558,7 @@ const MenuPage = () => {
                                                     }}
                                                 />
 
-                                                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
                                                 {item.isFeatured && (
                                                     <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-gradient-to-r from-[#0D7C53] to-green-500 text-white text-[8px] sm:text-xs font-bold px-2 sm:px-3 py-0.5 sm:py-1.5 rounded-full shadow-md flex items-center gap-0.5 sm:gap-1 backdrop-blur-sm">
@@ -526,9 +567,8 @@ const MenuPage = () => {
                                                     </div>
                                                 )}
 
-                                                {/* Category Badge - Show category name when "All" is selected */}
                                                 {currentCategory?.isAll && (
-                                                    <div className="absolute bottom-2 left-2 bg-black/50 backdrop-blur-sm text-white text-[8px] sm:text-xs px-2 py-0.5 sm:py-1 rounded-full">
+                                                    <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm text-white text-[8px] sm:text-xs px-2 py-0.5 sm:py-1 rounded-full">
                                                         {itemCategoryName}
                                                     </div>
                                                 )}
@@ -542,7 +582,7 @@ const MenuPage = () => {
                                                         size={16}
                                                         className={`sm:w-[18px] sm:h-[18px] transition-colors ${isInWishlist(item._id)
                                                             ? 'fill-red-500 text-red-500'
-                                                            : 'text-gray-400 hover:text-red-500'
+                                                            : 'text-gray-600 hover:text-red-500'
                                                             }`}
                                                     />
                                                 </button>
@@ -550,28 +590,28 @@ const MenuPage = () => {
 
                                             {/* Content */}
                                             <div className="p-3 sm:p-4 md:p-5 flex flex-col flex-1">
-                                                <h3 className="font-bold text-gray-800 text-sm sm:text-base md:text-lg group-hover:text-[#0D7C53] transition-colors mb-0.5 sm:mb-1 truncate">
+                                                <h3 className="font-bold text-white text-sm sm:text-base md:text-lg group-hover:text-[#169466] transition-colors mb-0.5 sm:mb-1 truncate">
                                                     {item.name}
                                                 </h3>
 
                                                 <div className="h-8 sm:h-10 md:h-12 overflow-hidden">
-                                                    <p className="text-gray-600 text-[10px] sm:text-sm line-clamp-2">
+                                                    <p className="text-white/70 text-[10px] sm:text-sm line-clamp-2">
                                                         {item.description || 'Delicious item from our menu'}
                                                     </p>
                                                 </div>
 
-                                                <div className="flex items-center justify-between border-t border-white/20 pt-2 mt-2">
+                                                <div className="flex items-center justify-between border-t border-white/10 pt-2 mt-2">
                                                     <div className="flex items-center gap-1 sm:gap-2">
-                                                        <span className="text-base sm:text-lg md:text-xl font-bold text-[#0D7C53]">
+                                                        <span className="text-base sm:text-lg md:text-xl font-bold text-white">
                                                             ₹{item.price.toFixed(2)}
                                                         </span>
                                                         {item.originalPrice && (
-                                                            <span className="text-[8px] sm:text-xs text-gray-400 line-through">
+                                                            <span className="text-[8px] sm:text-xs text-white/40 line-through">
                                                                 ₹{item.originalPrice.toFixed(2)}
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <div className="flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-xs font-medium text-green-600 bg-green-100/60 backdrop-blur-sm px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full flex-shrink-0">
+                                                    <div className="flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-xs font-medium text-green-400 bg-green-500/20 backdrop-blur-sm px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full flex-shrink-0">
                                                         <TrendingUp size={10} className="sm:w-3 sm:h-3" />
                                                         {item.points || 0} Pts
                                                     </div>
@@ -580,7 +620,7 @@ const MenuPage = () => {
                                                 {/* Add to Cart Button */}
                                                 <button
                                                     onClick={(e) => handleAddToCart(item, e)}
-                                                    className="w-full mt-2 sm:mt-3 md:mt-4 font-medium py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base flex-shrink-0 bg-gradient-to-r from-[#0D7C53] to-green-600 text-white hover:shadow-lg hover:shadow-[#0D7C53]/30"
+                                                    className="w-full mt-2 sm:mt-3 md:mt-4 font-medium py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base flex-shrink-0 bg-gradient-to-r from-[#0D7C53] to-[#169466] text-white hover:shadow-lg hover:shadow-[#0D7C53]/40 hover:scale-[1.02]"
                                                 >
                                                     <ShoppingBag size={16} />
                                                     Add to Cart
@@ -592,14 +632,14 @@ const MenuPage = () => {
                             </div>
                         ) : (
                             <div className="text-center py-12 sm:py-20">
-                                <div className="backdrop-blur-xl bg-white/20 border border-white/30 rounded-2xl sm:rounded-3xl p-6 sm:p-12 shadow-2xl shadow-black/5 max-w-2xl mx-auto">
-                                    <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gray-100/50 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                                        <Search size={28} className="sm:w-10 sm:h-10 text-gray-400" />
+                                <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl sm:rounded-3xl p-6 sm:p-12 shadow-2xl shadow-black/5 max-w-2xl mx-auto">
+                                    <div className="w-16 h-16 sm:w-24 sm:h-24 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                                        <Search size={28} className="sm:w-10 sm:h-10 text-white/40" />
                                     </div>
-                                    <h3 className="text-lg sm:text-2xl font-bold text-gray-700">No Items Found</h3>
-                                    <p className="text-sm sm:text-base text-gray-500 mt-1 sm:mt-2">
+                                    <h3 className="text-lg sm:text-2xl font-bold text-white">No Items Found</h3>
+                                    <p className="text-sm sm:text-base text-white/60 mt-1 sm:mt-2">
                                         {searchTerm ? (
-                                            <>No results for "<span className="font-medium">{searchTerm}</span>"</>
+                                            <>No results for "<span className="font-medium text-white/80">{searchTerm}</span>"</>
                                         ) : (
                                             <>This category is currently empty. Check back later!</>
                                         )}
@@ -607,7 +647,7 @@ const MenuPage = () => {
                                     {searchTerm && (
                                         <button
                                             onClick={clearSearch}
-                                            className="mt-3 sm:mt-4 px-4 sm:px-6 py-1.5 sm:py-2 backdrop-blur-sm bg-white/40 border border-white/20 text-gray-700 rounded-full hover:bg-white/60 transition-colors text-sm sm:text-base"
+                                            className="mt-3 sm:mt-4 px-4 sm:px-6 py-1.5 sm:py-2 backdrop-blur-sm bg-white/20 border border-white/20 text-white rounded-full hover:bg-white/30 transition-colors text-sm sm:text-base"
                                         >
                                             Clear Search
                                         </button>
@@ -618,7 +658,7 @@ const MenuPage = () => {
                     </div>
                 </div>
             </div>
-           
+
             <style>{`
                 @keyframes pulse-slow {
                     0%, 100% { transform: scale(1); opacity: 0.5; }

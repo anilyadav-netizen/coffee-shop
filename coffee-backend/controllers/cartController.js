@@ -83,21 +83,43 @@ exports.increaseQuantity = async (req, res) => {
     const today = getTodayDate();
     const { coffeeId } = req.params;
 
-    const cart = await Cart.findOne({ user: req.user.id, date: today });
+    const cart = await Cart.findOne({
+      user: req.user.id,
+      date: today,
+    });
 
-    if (!cart) return res.status(404).json({ success: false, message: "Cart not found" });
+    if (!cart)
+      return res.status(404).json({
+        success: false,
+        message: "Cart not found",
+      });
 
-    const item = cart.items.find((i) => i.coffee.toString() === coffeeId);
+    const item = cart.items.find(
+      (i) => i.coffee.toString() === coffeeId
+    );
 
     if (!item)
-      return res.status(404).json({ success: false, message: "Item not found in cart" });
+      return res.status(404).json({
+        success: false,
+        message: "Item not found in cart",
+      });
 
     item.quantity += 1;
     await cart.save();
 
-    res.status(200).json({ success: true, message: "Quantity increased", data: cart });
+    const updatedCart = await Cart.findById(cart._id)
+      .populate("items.coffee");
+
+    res.status(200).json({
+      success: true,
+      message: "Quantity increased",
+      data: updatedCart,
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
@@ -107,27 +129,47 @@ exports.decreaseQuantity = async (req, res) => {
     const today = getTodayDate();
     const { coffeeId } = req.params;
 
-    const cart = await Cart.findOne({ user: req.user.id, date: today });
+    const cart = await Cart.findOne({
+      user: req.user.id,
+      date: today,
+    });
 
-    if (!cart) return res.status(404).json({ success: false, message: "Cart not found" });
+    if (!cart)
+      return res.status(404).json({
+        success: false,
+        message: "Cart not found",
+      });
 
-    const itemIndex = cart.items.findIndex((i) => i.coffee.toString() === coffeeId);
+    const itemIndex = cart.items.findIndex(
+      (i) => i.coffee.toString() === coffeeId
+    );
 
     if (itemIndex === -1)
-      return res.status(404).json({ success: false, message: "Item not found in cart" });
+      return res.status(404).json({
+        success: false,
+        message: "Item not found in cart",
+      });
 
     if (cart.items[itemIndex].quantity <= 1) {
-      // Remove item if quantity reaches 0
       cart.items.splice(itemIndex, 1);
-      await cart.save();
-      return res.status(200).json({ success: true, message: "Item removed from cart", data: cart });
+    } else {
+      cart.items[itemIndex].quantity -= 1;
     }
 
-    cart.items[itemIndex].quantity -= 1;
     await cart.save();
 
-    res.status(200).json({ success: true, message: "Quantity decreased", data: cart });
+    const updatedCart = await Cart.findById(cart._id)
+      .populate("items.coffee");
+
+    res.status(200).json({
+      success: true,
+      message: "Quantity decreased",
+      data: updatedCart,
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };

@@ -178,7 +178,7 @@ const CategoryPage = () => {
     <>
       <section className="relative px-4 overflow-hidden">
         {/* Background */}
-        <div className="absolute inset-0 -z-10">
+        {/* <div className="absolute inset-0 -z-10">
           <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />
           <div className="absolute inset-0 bg-gradient-to-tr from-[#EDE0D4]/20 via-transparent to-[#D4B896]/10" />
           <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-amber-400/15 rounded-full blur-[120px] animate-pulse-slow" />
@@ -190,21 +190,21 @@ const CategoryPage = () => {
             <div className="absolute top-1/3 right-1/4 text-4xl rotate-45 animate-float-slow">☕</div>
             <div className="absolute bottom-1/4 left-1/3 text-5xl -rotate-45 animate-float-delay">🫘</div>
           </div>
-        </div>
+        </div> */}
 
         <div className="max-w-[104rem] mx-auto relative">
           {/* Header */}
-          <div className="rounded-2xl p-8 mb-5 text-center">
-            <span className="inline-block px-4 py-1.5 bg-green-100/80 backdrop-blur-sm text-green-800 text-xs font-semibold tracking-wider uppercase rounded-full mb-3">
+          <div className="rounded-2xl p-8 mb-2 text-center">
+            {/* <span className="inline-block px-4 py-1.5 bg-green-100/0 backdrop-blur-sm text-white text-xs font-semibold tracking-wider uppercase rounded-full mb-3">
               Brewed Perfection
-            </span>
-            <h2 className="text-3xl md:text-5xl font-extrabold text-[#0D7C53] tracking-tight">
+            </span> */}
+            <h2 className="text-2xl md:text-5xl font-extrabold text-white tracking-tight">
               Our Coffee Collection
             </h2>
-            <p className="text-gray-500 mt-1 max-w-2xl mx-auto">
+            <p className="text-gray-300 mt-1 max-w-2xl mx-auto">
               Freshly brewed happiness in every cup — discover your perfect blend.
             </p>
-            
+
           </div>
 
           {/* Swiper */}
@@ -241,7 +241,7 @@ const CategoryPage = () => {
                     onMouseEnter={() => setHoveredId(productId)}
                     onMouseLeave={() => setHoveredId(null)}
                     onClick={() => setSelectedProduct(product)}
-                    className="group relative cursor-pointer bg-white/40 backdrop-blur-md rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-500 hover:-translate-y-1 border border-white/30"
+                    className="group backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl overflow-hidden shadow-2xl shadow-black/10 hover:shadow-[#0D7C53]/20 transition-all duration-500 hover:-translate-y-2 hover:bg-white/15 relative"
                   >
                     <div className="relative overflow-hidden aspect-[4/3]">
                       <img
@@ -277,40 +277,46 @@ const CategoryPage = () => {
                       </div>
                     </div>
 
-                    <div className="p-5 relative">
-                      <div className="flex items-center gap-1.5 mb-2">
+                    {/* Content Area - PERFECT BACKGROUND */}
+                    <div className="p-4 bg-gradient-to-b from-white/15 to-white/10 backdrop-blur-sm">
+                      {/* <div className="flex items-center gap-1.5 mb-2">
                         <CoffeeIcon />
-                        <span className="text-xs font-medium text-green-600 uppercase tracking-wider">
+                        <span className="text-xs font-medium text-white uppercase tracking-wider">
                           Specialty Blend
                         </span>
-                      </div>
+                      </div> */}
 
-                      <h3 className="font-bold text-lg text-gray-800 line-clamp-1 group-hover:text-green-700 transition-colors">
+                      <h3 className="font-bold text-lg text-white line-clamp-1 transition-colors">
                         {product.name}
                       </h3>
+                      <p className="text-white/80 text-base mb-2 line-clamp-2">
+                        {product.description}
+                      </p>
 
-                      <div className="flex items-center gap-3 mt-3">
-                        {product.discountPrice ? (
-                          <>
-                            <span className="font-bold text-2xl text-[#0D7C53] tracking-tight">
-                              ₹{product.discountPrice}
-                            </span>
-                            <span className="text-sm text-gray-400 line-through">
+                      <div className="flex items-center justify-between pt-1 border-t border-white/20">
+                        <div className="flex items-center gap-3 mt-0">
+                          {product.discountPrice ? (
+                            <>
+                              <span className="font-bold text-2xl text-white tracking-tight">
+                                ₹{product.discountPrice}
+                              </span>
+                              <span className="text-sm text-white line-through">
+                                ₹{product.price}
+                              </span>
+                              <span className="ml-auto text-xs bg-green-100 text-white px-2 py-0.5 rounded-full font-semibold">
+                                Save ₹{product.price - product.discountPrice}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="font-bold text-2xl text-white tracking-tight">
                               ₹{product.price}
                             </span>
-                            <span className="ml-auto text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">
-                              Save ₹{product.price - product.discountPrice}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="font-bold text-2xl text-[#0D7C53] tracking-tight">
-                            ₹{product.price}
-                          </span>
-                        )}
+                          )}
+                        </div>
                       </div>
 
                       <button
-                        className="mt-4 w-full bg-gradient-to-r from-[#0D7C53] to-green-600 hover:from-green-600 hover:to-[#0D7C53] text-white py-2.5 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 group/btn"
+                        className="mt-2 w-full bg-gradient-to-r bg-emerald-500 hover:bg-emerald-600 text-white  from-[#0D7C53] to-[#169466] py-2.5 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 group/btn"
                         onClick={(e) => handleAddToCart(product, e)}
                       >
                         <svg className="w-4 h-4 group-hover/btn:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">

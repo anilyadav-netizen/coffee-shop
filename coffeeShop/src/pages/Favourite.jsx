@@ -225,14 +225,14 @@ const Favourite = () => {
                         <div>
                             <div className="flex items-center gap-3">
                                 <div>
-                                    <h2 className="text-3xl font-bold text-[#0D7C53]">All Time Favourites</h2>
-                                    <p className="text-white text-base">Items Customer love the most</p>
+                                    <h2 className="text-3xl font-bold text-white">All Time Favourites</h2>
+                                    <p className="text-gray-300 text-base">Items Customer love the most</p>
                                 </div>
                             </div>
                         </div>
                         <button
                             onClick={handleViewAll}
-                            className="flex items-center gap-2 px-6 py-2.5 bg-[#0D7C53]/20 backdrop-blur-sm text-[#0D7C53] rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30"
+                            className="flex items-center gap-2 px-6 py-2.5 bg-[#0D7C53]/20 backdrop-blur-sm text-white rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30"
                         >
                             View All Menu
                             <ChevronRight size={18} />
@@ -244,30 +244,20 @@ const Favourite = () => {
                 {products.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                         {products.map((item) => {
-
                             const isAdded = addedItems[item._id];
-
                             const isWishlisted = wishlistItems.some(
-                                (wish) =>
-                                    wish.coffee?._id === item._id ||
-                                    wish.coffee === item._id
+                                (wish) => wish.coffee?._id === item._id || wish.coffee === item._id
                             );
-
-                            // ✅ Fixed: Get category from the nested category object
-                            const category = item.category; // This is already the category object
-
-                            console.log('Product:', item);
-                            console.log('Category:', category);
-                            console.log('All Categories:', categories);
+                            const category = item.category;
 
                             return (
                                 <div
                                     key={item._id}
-                                    className="group backdrop-blur-xl bg-white/20 border border-white/30 rounded-3xl overflow-hidden shadow-2xl shadow-black/5 hover:shadow-3xl transition-all duration-500 hover:-translate-y-2 relative"
+                                    className="group backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl overflow-hidden shadow-2xl shadow-black/10 hover:shadow-[#0D7C53]/20 transition-all duration-500 hover:-translate-y-2 hover:bg-white/15 relative"
                                 >
                                     {/* Image Container */}
                                     <div
-                                        className="relative h-56 overflow-hidden bg-gray-100/50 cursor-pointer"
+                                        className="relative h-56 overflow-hidden bg-gray-900/30 cursor-pointer"
                                         onClick={() => handleItemClick(item)}
                                     >
                                         <img
@@ -279,12 +269,12 @@ const Favourite = () => {
                                             }}
                                         />
 
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-                                        {/* Wishlist Icon - Top Right on Image */}
+                                        {/* Wishlist Icon */}
                                         <button
                                             onClick={(e) => handleWishlistToggle(item, e)}
-                                            className={`absolute top-3 right-3 z-10 w-9 h-9 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-110 ${isWishlisted ? "bg-red-50" : ""
+                                            className={`absolute top-3 right-3 z-10 w-9 h-9 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-110 hover:bg-white ${isWishlisted ? "bg-red-50" : ""
                                                 }`}
                                         >
                                             <Heart
@@ -292,85 +282,68 @@ const Favourite = () => {
                                                 className={
                                                     isWishlisted
                                                         ? "fill-red-500 text-red-500"
-                                                        : "text-gray-600"
+                                                        : "text-gray-700"
                                                 }
                                             />
                                         </button>
 
-                                        {/* Category Badge */}
-                                        <div className="absolute top-3 left-3 bg-white/70 backdrop-blur-md text-xs font-semibold px-3 py-1.5 rounded-full shadow-md flex items-center gap-2 border border-white/30">
+                                        {/* Category Badge - Improved */}
+                                        <div className="absolute top-3 left-3 bg-white/70 backdrop-blur-md text-xs font-semibold px-3 py-1.5 rounded-full shadow-md flex items-center gap-2 border border-white/70">
                                             {category?.icon && (
                                                 <img
                                                     src={category.icon}
                                                     alt={category.name}
-                                                    className="w-5 h-5 rounded-full object-cover"
+                                                    className="w-6 h-6 rounded-full object-cover"
                                                 />
                                             )}
-                                            <span className="text-black">
+                                            <span className="text-gray-900">
                                                 {category?.name || 'Uncategorized'}
                                             </span>
                                         </div>
 
-                                        {/* Rating Badge */}
-                                        {/* <div className="absolute bottom-3 left-3 bg-black/40 backdrop-blur-md text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-1 border border-white/20">
-                                            <Star size={12} className="fill-yellow-400 text-yellow-400" />
-                                            {item.rating || 4.5}
-                                        </div> */}
-
-                                        {/* Quick View Button */}
+                                        {/* Quick View Button - Improved */}
                                         <button
                                             onClick={() => handleItemClick(item)}
-                                            className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-md text-gray-800 px-6 py-2 rounded-full font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-[#0D7C53] hover:text-white shadow-md border border-white/30"
+                                            className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md text-gray-800 px-6 py-2.5 rounded-full font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-[#0D7C53] hover:text-white shadow-lg border border-white/30 hover:scale-105"
                                         >
                                             View Item
                                         </button>
                                     </div>
 
                                     {/* Content */}
-                                    <div className="p-5">
-                                        <div className="flex items-start justify-between mb-1">
+                                    <div className="p-4 bg-gradient-to-b from-white/15 to-white/10 backdrop-blur-sm">
+                                        <div className="flex items-start justify-between">
                                             <h3
-                                                className="font-bold text-white text-lg group-hover:text-[#169466] transition-colors cursor-pointer line-clamp-1"
+                                                className="font-bold text-white text-lg transition-colors cursor-pointer line-clamp-1"
                                                 onClick={() => handleItemClick(item)}
                                             >
                                                 {item.name}
                                             </h3>
                                         </div>
 
-                                        <p className="text-white text-base mb-3 line-clamp-2">
+                                        <p className="text-white/80 text-base mb-2 line-clamp-2">
                                             {item.description}
                                         </p>
 
-                                        {/* <div className="flex items-center gap-1 mb-3">
-                                            {[...Array(5)].map((_, i) => (
-                                                <Star key={i} size={14} className="fill-yellow-400 text-yellow-400" />
-                                            ))}
-                                            <span className="text-xs text-white ml-1">({item.reviews || 24})</span>
-                                        </div> */}
-
-                                        <div className="flex items-center justify-between pt-3 border-t border-white/20">
+                                        <div className="flex items-center justify-between pt-1 border-t border-white/20">
                                             <div className="flex items-center gap-2">
                                                 <span className="text-xl font-bold text-white">
                                                     ₹{item.price.toFixed(2)}
                                                 </span>
                                                 {item.originalPrice && (
-                                                    <span className="text-sm text-gray-400 line-through">
+                                                    <span className="text-sm text-white/50 line-through">
                                                         ₹{item.originalPrice.toFixed(2)}
                                                     </span>
                                                 )}
                                             </div>
-                                            {/* <div className="flex items-center gap-1 text-xs font-medium text-green-600 bg-green-100/60 backdrop-blur-sm px-2 py-1 rounded-full">
-                                                <TrendingUp size={12} />
-                                                {item.points || 0} Pts
-                                            </div> */}
                                         </div>
 
-                                        {/* Add to Cart Button */}
+                                        {/* Add to Cart Button - Improved */}
                                         <button
                                             onClick={(e) => handleAddToCart(item, e)}
-                                            className={`w-full mt-4 font-medium py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group/btn ${isAdded
-                                                ? "bg-green-500 text-white"
-                                                : "bg-gradient-to-r from-[#0D7C53] to-green-600 text-white hover:shadow-lg hover:shadow-[#0D7C53]/30"
+                                            className={`w-full mt-2 font-medium py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group/btn ${isAdded
+                                                ? "bg-emerald-500 text-white hover:bg-emerald-600"
+                                                : "bg-gradient-to-r from-[#0D7C53] to-[#169466] text-white hover:shadow-lg hover:shadow-[#0D7C53]/30 hover:scale-[1.02]"
                                                 }`}
                                         >
                                             {isAdded ? (

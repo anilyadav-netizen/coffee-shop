@@ -11,6 +11,7 @@ import Login from './Login'
 import bgImage from '../assets/Images/HomePageBgImage.png'
 import homeImage from '../assets/Images/homeImage.png'
 import zero from '../assets/Images/zero.png'
+import WhyUs from './WhyUs'
 const Home = () => {
     return (
         <div
@@ -28,6 +29,7 @@ const Home = () => {
                 <Types />
                 <CategoryPage />
                 <Favourite />
+                <WhyUs/> 
                 <Benfits />
                 <Journey />
                 <Review />

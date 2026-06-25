@@ -11,18 +11,13 @@ const razorpay = new Razorpay({
 // Create Order
 exports.createOrder = async (req, res) => {
   try {
-    const { coffeeId } = req.body;
+    const { amount } = req.body;
 
-    const coffee = await Coffee.findById(coffeeId);
-
-    if (!coffee) {
-      return res.status(404).json({
-        message: "Coffee not found",
-      });
-    }
+    console.log("Amount:", amount);
+    console.log("User:", req.user);
 
     const options = {
-      amount: coffee.price * 100,
+      amount: amount * 100,
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
     };
@@ -31,17 +26,17 @@ exports.createOrder = async (req, res) => {
 
     await Payment.create({
       user: req.user._id,
-      coffee: coffee._id,
       razorpayOrderId: order.id,
-      amount: coffee.price,
+      amount,
+      status: "pending",
     });
 
-    res.status(200).json({
-      order,
-      coffee,
-    });
+    res.status(200).json(order);
   } catch (error) {
+    console.error("CREATE ORDER ERROR:", error);
+
     res.status(500).json({
+      success: false,
       message: error.message,
     });
   }

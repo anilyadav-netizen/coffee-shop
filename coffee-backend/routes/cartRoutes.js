@@ -13,9 +13,9 @@ const {
 
 router.post("/", protect, addToCart);
 router.get("/", protect, getCart);
-router.delete("/:id", protect, removeCartItem);
+router.delete("/:coffeeId", protect, removeCartItem);
 
-router.patch("/increase/:id", increaseQuantity);
-router.patch("/decrease/:id", decreaseQuantity);
+router.patch("/increase/:coffeeId", protect, increaseQuantity);
+router.patch("/decrease/:coffeeId", protect, decreaseQuantity);
 
 module.exports = router;

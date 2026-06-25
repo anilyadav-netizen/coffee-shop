@@ -54,42 +54,95 @@ const CartPage = () => {
     }, []);
 
     // ✅ Increase quantity
-    const handleIncrease = async (id) => {
+    const handleIncrease = async (coffeeId) => {
+        if (!coffeeId) {
+            console.error("❌ No coffeeId provided");
+            setError("Invalid item ID");
+            return;
+        }
+        
         setError(null);
+        console.log("🔼 Increasing quantity for coffeeId:", coffeeId);
+        
         try {
-            const result = await dispatch(increaseQuantity(id)).unwrap();
+            const result = await dispatch(increaseQuantity(coffeeId)).unwrap();
             console.log("✅ Increase successful:", result);
+            
+            // If there was an error in the response but still succeeded
+            if (result.error) {
+                setError(result.error);
+            }
         } catch (error) {
             console.error("❌ Failed to increase:", error);
-            setError("Failed to increase quantity. Please try again.");
+            setError(error || "Failed to increase quantity. Please try again.");
+            
             // 🔥 Refetch cart to ensure consistency
-            dispatch(getCart());
+            try {
+                await dispatch(getCart()).unwrap();
+                console.log("✅ Cart refetched after error");
+            } catch (refetchError) {
+                console.error("❌ Failed to refetch cart:", refetchError);
+            }
         }
     };
 
     // ✅ Decrease quantity
-    const handleDecrease = async (id) => {
+    const handleDecrease = async (coffeeId) => {
+        if (!coffeeId) {
+            console.error("❌ No coffeeId provided");
+            setError("Invalid item ID");
+            return;
+        }
+        
         setError(null);
+        console.log("🔽 Decreasing quantity for coffeeId:", coffeeId);
+        
         try {
-            const result = await dispatch(decreaseQuantity(id)).unwrap();
+            const result = await dispatch(decreaseQuantity(coffeeId)).unwrap();
             console.log("✅ Decrease successful:", result);
+            
+            // If there was an error in the response but still succeeded
+            if (result.error) {
+                setError(result.error);
+            }
         } catch (error) {
             console.error("❌ Failed to decrease:", error);
-            setError("Failed to decrease quantity. Please try again.");
+            setError(error || "Failed to decrease quantity. Please try again.");
+            
             // 🔥 Refetch cart to ensure consistency
-            dispatch(getCart());
+            try {
+                await dispatch(getCart()).unwrap();
+                console.log("✅ Cart refetched after error");
+            } catch (refetchError) {
+                console.error("❌ Failed to refetch cart:", refetchError);
+            }
         }
     };
 
     // ✅ Remove item
-    const handleRemove = async (id) => {
+    const handleRemove = async (coffeeId) => {
+        if (!coffeeId) {
+            console.error("❌ No coffeeId provided");
+            setError("Invalid item ID");
+            return;
+        }
+        
         setError(null);
+        console.log("🗑️ Removing item with coffeeId:", coffeeId);
+        
         try {
-            await dispatch(removeCartItem(id)).unwrap();
+            await dispatch(removeCartItem(coffeeId)).unwrap();
             console.log("✅ Remove successful");
         } catch (error) {
             console.error("❌ Failed to remove:", error);
-            setError("Failed to remove item. Please try again.");
+            setError(error || "Failed to remove item. Please try again.");
+            
+            // Refetch cart on error
+            try {
+                await dispatch(getCart()).unwrap();
+            } catch (refetchError) {
+                console.error("❌ Failed to refetch cart:", refetchError);
+            }
         }
     };
 
@@ -100,9 +153,14 @@ const CartPage = () => {
             try {
                 // Remove all items one by one
                 for (const item of cartItems) {
-                    await dispatch(removeCartItem(item._id)).unwrap();
+                    const coffeeId = item.coffee?._id;
+                    if (coffeeId) {
+                        await dispatch(removeCartItem(coffeeId)).unwrap();
+                    }
                 }
                 console.log("✅ Cart cleared successfully");
+                // Refetch cart to ensure it's empty
+                await dispatch(getCart()).unwrap();
             } catch (error) {
                 console.error("❌ Failed to clear cart:", error);
                 setError("Failed to clear cart. Please try again.");
@@ -115,14 +173,13 @@ const CartPage = () => {
     };
 
     // ✅ Loading state
-    if (loading) {
+    if (loading && cartItems.length === 0) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="w-10 h-10 border-4 border-[#0D7C53] border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
     }
-
 
     const handleCheckout = async () => {
         try {
@@ -145,7 +202,6 @@ const CartPage = () => {
                                     response.razorpay_order_id,
                             })
                         ).unwrap();
-
                         navigate("/checkout");
                     } catch (error) {
                         console.error(
@@ -221,6 +277,12 @@ const CartPage = () => {
                     {error && (
                         <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
                             {error}
+                            <button 
+                                onClick={() => setError(null)}
+                                className="ml-2 text-red-700 font-bold"
+                            >
+                                ×
+                            </button>
                         </div>
                     )}
 
@@ -245,73 +307,82 @@ const CartPage = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                         {/* Cart Items */}
                         <div className="lg:col-span-2 space-y-3 sm:space-y-4">
-                            {cartItems.map((item) => (
-                                <div
-                                    key={item._id}
-                                    className="group backdrop-blur-xl bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-md shadow-black/5 hover:shadow-lg transition-all duration-300"
-                                >
-                                    <div className="flex gap-3 sm:gap-4">
-                                        {/* Image */}
-                                        <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-lg sm:rounded-xl overflow-hidden flex-shrink-0 bg-gray-100/50 border border-white/20">
-                                            <img
-                                                src={item.coffee?.image || 'https://placehold.co/100x100/e2e8f0/64748b?text=☕'}
-                                                alt={item.coffee?.name}
-                                                className="w-full h-full object-cover"
-                                            />
-                                        </div>
-
-                                        {/* Details */}
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-start justify-between gap-2">
-                                                <div className="min-w-0 flex-1">
-                                                    <h3 className="font-semibold text-gray-800 text-base sm:text-lg truncate">
-                                                        {item.coffee?.name}
-                                                    </h3>
-                                                    <p className="text-[12px] sm:text-sm text-gray-500 truncate">
-                                                        {item.coffee?.category || 'Coffee'}
-                                                    </p>
-                                                </div>
-                                                <button
-                                                    onClick={() => handleRemove(item._id)}
-                                                    className="p-1 rounded-full bg-red-200 hover:bg-red-300 transition-all opacity-80 group-hover:opacity-100 flex-shrink-0"
-                                                >
-                                                    <Trash2 className="w-4 h-4 sm:w-5 sm:h-5 text-red-400 hover:text-red-600" />
-                                                </button>
+                            {cartItems.map((item) => {
+                                const coffeeId = item.coffee?._id;
+                                if (!coffeeId) {
+                                    console.warn("⚠️ Item missing coffee._id:", item);
+                                    return null;
+                                }
+                                
+                                return (
+                                    <div
+                                        key={coffeeId}
+                                        className="group backdrop-blur-xl bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-md shadow-black/5 hover:shadow-lg transition-all duration-300"
+                                    >
+                                        <div className="flex gap-3 sm:gap-4">
+                                            {/* Image */}
+                                            <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-lg sm:rounded-xl overflow-hidden flex-shrink-0 bg-gray-100/50 border border-white/20">
+                                                <img
+                                                    src={item.coffee?.image || 'https://placehold.co/100x100/e2e8f0/64748b?text=☕'}
+                                                    alt={item.coffee?.name}
+                                                    className="w-full h-full object-cover"
+                                                />
                                             </div>
 
-                                            {/* Price & Quantity */}
-                                            <div className="flex flex-row items-center justify-between mt-2 sm:mt-3 gap-2">
-                                                <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-                                                    <span className="font-bold text-[#0D7C53] text-sm sm:text-base md:text-lg">
-                                                        ₹{(item.coffee?.price * item.quantity).toFixed(2)}
-                                                    </span>
+                                            {/* Details */}
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-start justify-between gap-2">
+                                                    <div className="min-w-0 flex-1">
+                                                        <h3 className="font-semibold text-gray-800 text-base sm:text-lg truncate">
+                                                            {item.coffee?.name}
+                                                        </h3>
+                                                        <p className="text-[12px] sm:text-sm text-gray-500 truncate">
+                                                            {item.coffee?.category || 'Coffee'}
+                                                        </p>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleRemove(coffeeId)}
+                                                        className="p-1 rounded-full bg-red-200 hover:bg-red-300 transition-all opacity-80 group-hover:opacity-100 flex-shrink-0"
+                                                        disabled={loading}
+                                                    >
+                                                        <Trash2 className="w-4 h-4 sm:w-5 sm:h-5 text-red-400 hover:text-red-600" />
+                                                    </button>
                                                 </div>
 
-                                                {/* Quantity Controls */}
-                                                <div className="flex items-center gap-1 sm:gap-2 bg-white/50 backdrop-blur-sm rounded-full p-0.5 sm:p-1 border border-white/30 flex-shrink-0">
-                                                    <button
-                                                        onClick={() => handleDecrease(item._id)}
-                                                        disabled={loading}
-                                                        className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                    >
-                                                        <Minus className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-gray-600" />
-                                                    </button>
-                                                    <span className="w-5 sm:w-6 md:w-8 text-center font-semibold text-sm sm:text-base text-gray-800">
-                                                        {item.quantity}
-                                                    </span>
-                                                    <button
-                                                        onClick={() => handleIncrease(item._id)}
-                                                        disabled={loading}
-                                                        className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-[#0D7C53] hover:bg-green-700 flex items-center justify-center transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                    >
-                                                        <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 text-white" />
-                                                    </button>
+                                                {/* Price & Quantity */}
+                                                <div className="flex flex-row items-center justify-between mt-2 sm:mt-3 gap-2">
+                                                    <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                                                        <span className="font-bold text-[#0D7C53] text-sm sm:text-base md:text-lg">
+                                                            ₹{(item.coffee?.price * item.quantity).toFixed(2)}
+                                                        </span>
+                                                    </div>
+
+                                                    {/* Quantity Controls */}
+                                                    <div className="flex items-center gap-1 sm:gap-2 bg-white/50 backdrop-blur-sm rounded-full p-0.5 sm:p-1 border border-white/30 flex-shrink-0">
+                                                        <button
+                                                            onClick={() => handleDecrease(coffeeId)}
+                                                            disabled={loading}
+                                                            className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                        >
+                                                            <Minus className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-gray-600" />
+                                                        </button>
+                                                        <span className="w-5 sm:w-6 md:w-8 text-center font-semibold text-sm sm:text-base text-gray-800">
+                                                            {item.quantity}
+                                                        </span>
+                                                        <button
+                                                            onClick={() => handleIncrease(coffeeId)}
+                                                            disabled={loading}
+                                                            className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-[#0D7C53] hover:bg-green-700 flex items-center justify-center transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                        >
+                                                            <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 text-white" />
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
 
                         {/* Order Summary */}
@@ -360,10 +431,10 @@ const CartPage = () => {
                                     </div>
                                 </div>
 
-                                <Link to ="/orderDetails"
+                                <button
                                     onClick={handleCheckout}
-                                    disabled={isLoading || loading}
-                                    className="w-full mt-4 sm:mt-6 py-2.5 sm:py-3.5 bg-gradient-to-r from-[#0D7C53] to-green-600 text-white rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 group disabled:opacity-70 text-base sm:text-lg"
+                                    disabled={isLoading || loading || cartItems.length === 0}
+                                    className="w-full mt-4 sm:mt-6 py-2.5 sm:py-3.5 bg-gradient-to-r from-[#0D7C53] to-green-600 text-white rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed text-base sm:text-lg"
                                 >
                                     {isLoading ? (
                                         <>
@@ -376,7 +447,7 @@ const CartPage = () => {
                                             <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
                                         </>
                                     )}
-                                </Link>
+                                </button>
                             </div>
                         </div>
                     </div>
