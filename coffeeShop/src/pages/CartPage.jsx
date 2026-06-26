@@ -60,14 +60,14 @@ const CartPage = () => {
             setError("Invalid item ID");
             return;
         }
-        
+
         setError(null);
         console.log("🔼 Increasing quantity for coffeeId:", coffeeId);
-        
+
         try {
             const result = await dispatch(increaseQuantity(coffeeId)).unwrap();
             console.log("✅ Increase successful:", result);
-            
+
             // If there was an error in the response but still succeeded
             if (result.error) {
                 setError(result.error);
@@ -75,7 +75,7 @@ const CartPage = () => {
         } catch (error) {
             console.error("❌ Failed to increase:", error);
             setError(error || "Failed to increase quantity. Please try again.");
-            
+
             // 🔥 Refetch cart to ensure consistency
             try {
                 await dispatch(getCart()).unwrap();
@@ -93,14 +93,14 @@ const CartPage = () => {
             setError("Invalid item ID");
             return;
         }
-        
+
         setError(null);
         console.log("🔽 Decreasing quantity for coffeeId:", coffeeId);
-        
+
         try {
             const result = await dispatch(decreaseQuantity(coffeeId)).unwrap();
             console.log("✅ Decrease successful:", result);
-            
+
             // If there was an error in the response but still succeeded
             if (result.error) {
                 setError(result.error);
@@ -108,7 +108,7 @@ const CartPage = () => {
         } catch (error) {
             console.error("❌ Failed to decrease:", error);
             setError(error || "Failed to decrease quantity. Please try again.");
-            
+
             // 🔥 Refetch cart to ensure consistency
             try {
                 await dispatch(getCart()).unwrap();
@@ -126,17 +126,17 @@ const CartPage = () => {
             setError("Invalid item ID");
             return;
         }
-        
+
         setError(null);
         console.log("🗑️ Removing item with coffeeId:", coffeeId);
-        
+
         try {
             await dispatch(removeCartItem(coffeeId)).unwrap();
             console.log("✅ Remove successful");
         } catch (error) {
             console.error("❌ Failed to remove:", error);
             setError(error || "Failed to remove item. Please try again.");
-            
+
             // Refetch cart on error
             try {
                 await dispatch(getCart()).unwrap();
@@ -202,7 +202,8 @@ const CartPage = () => {
                                     response.razorpay_order_id,
                             })
                         ).unwrap();
-                        navigate("/checkout");
+                        
+                        navigate("/orderDetails");
                     } catch (error) {
                         console.error(
                             "Payment verification failed",
@@ -277,7 +278,7 @@ const CartPage = () => {
                     {error && (
                         <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
                             {error}
-                            <button 
+                            <button
                                 onClick={() => setError(null)}
                                 className="ml-2 text-red-700 font-bold"
                             >
@@ -313,7 +314,7 @@ const CartPage = () => {
                                     console.warn("⚠️ Item missing coffee._id:", item);
                                     return null;
                                 }
-                                
+
                                 return (
                                     <div
                                         key={coffeeId}

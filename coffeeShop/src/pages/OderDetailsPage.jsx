@@ -1,5 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+
 import {
     ArrowLeft,
     Package,
@@ -10,6 +12,8 @@ import {
 } from "lucide-react";
 
 const OrderDetailsPage = () => {
+
+      const { state } = useLocation();
     const navigate = useNavigate();
 
     // ✅ NAVBAR DARK - Same as WishlistPage (IMMEDIATELY DARK)

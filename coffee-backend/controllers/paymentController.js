@@ -51,16 +51,7 @@ exports.verifyPayment = async (req, res) => {
       { razorpayOrderId: razorpay_order_id },
       { status: "paid" },
       { new: true }
-    ).populate("coffee");
-
-    if (payment?.coffee) {
-      await Coffee.findByIdAndUpdate(
-        payment.coffee._id,
-        {
-          $inc: { stock: -1 },
-        }
-      );
-    }
+    );
 
     res.status(200).json({
       success: true,

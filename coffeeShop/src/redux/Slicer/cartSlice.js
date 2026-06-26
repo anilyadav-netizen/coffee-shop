@@ -67,13 +67,13 @@ export const increaseQuantity = createAsyncThunk(
         try {
             const { data } = await API.patch(`/cart/increase/${coffeeId}`);
             console.log("⬆️ INCREASE response:", data);
-            
+
             // If we get a success response with cart data
             if (data.success && data.data) {
-                return { 
-                    coffeeId, 
+                return {
+                    coffeeId,
                     cart: data.data,
-                    success: true 
+                    success: true
                 };
             } else {
                 // If backend returns different structure, try to fetch fresh cart
@@ -114,10 +114,10 @@ export const decreaseQuantity = createAsyncThunk(
         try {
             const { data } = await API.patch(`/cart/decrease/${coffeeId}`);
             console.log("⬇️ DECREASE response:", data);
-            
+
             if (data.success && data.data) {
-                return { 
-                    coffeeId, 
+                return {
+                    coffeeId,
                     cart: data.data,
                     success: true,
                     removed: data.message === "Item removed from cart"
@@ -188,14 +188,11 @@ const cartSlice = createSlice({
             })
             .addCase(getCart.fulfilled, (state, action) => {
                 state.loading = false;
-                
+
                 const cart = action.payload;
                 state.cartItems = cart?.items || [];
-                
-                state.totalItems = state.cartItems.reduce(
-                    (sum, item) => sum + item.quantity,
-                    0
-                );
+
+                state.totalItems = state.cartItems.length;
 
                 state.totalPrice = state.cartItems.reduce(
                     (sum, item) =>
@@ -221,14 +218,11 @@ const cartSlice = createSlice({
             .addCase(addToCart.fulfilled, (state, action) => {
                 state.loading = false;
                 console.log("PAYLOAD =>", action.payload);
-                
+
                 const cart = action.payload;
                 state.cartItems = cart?.items || [];
+                state.totalItems = state.cartItems.length;
 
-                state.totalItems = state.cartItems.reduce(
-                    (sum, item) => sum + item.quantity,
-                    0
-                );
 
                 state.totalPrice = state.cartItems.reduce(
                     (sum, item) =>
@@ -250,7 +244,7 @@ const cartSlice = createSlice({
             .addCase(removeCartItem.fulfilled, (state, action) => {
                 state.loading = false;
                 const coffeeId = action.payload;
-                
+
                 state.cartItems = state.cartItems.filter(
                     (item) => item.coffee?._id !== coffeeId
                 );
@@ -264,7 +258,7 @@ const cartSlice = createSlice({
                     (sum, item) => sum + item.quantity * (item.coffee?.price || 0),
                     0
                 );
-                
+
                 console.log("🗑️ Item removed, new totals:", {
                     totalItems: state.totalItems,
                     totalPrice: state.totalPrice
@@ -284,18 +278,17 @@ const cartSlice = createSlice({
             })
             .addCase(increaseQuantity.fulfilled, (state, action) => {
                 state.loading = false;
-                
+
                 const { coffeeId, cart, refetched } = action.payload;
-                
+
                 // Update cart items from the response
                 if (cart && cart.items) {
                     state.cartItems = cart.items;
                 }
-                
-                state.totalItems = state.cartItems.reduce(
-                    (sum, item) => sum + item.quantity,
-                    0
-                );
+
+                state.totalItems = new Set(
+                    state.cartItems.map(item => item.coffee?._id)
+                ).size;
 
                 state.totalPrice = state.cartItems.reduce(
                     (sum, item) => sum + item.quantity * (item.coffee?.price || 0),
@@ -306,7 +299,7 @@ const cartSlice = createSlice({
                     totalItems: state.totalItems,
                     totalPrice: state.totalPrice
                 });
-                
+
                 if (action.payload.error) {
                     state.error = action.payload.error;
                 }
@@ -327,14 +320,14 @@ const cartSlice = createSlice({
             })
             .addCase(decreaseQuantity.fulfilled, (state, action) => {
                 state.loading = false;
-                
+
                 const { coffeeId, cart, removed, refetched } = action.payload;
-                
+
                 // Update cart items from the response
                 if (cart && cart.items) {
                     state.cartItems = cart.items;
                 }
-                
+
                 state.totalItems = state.cartItems.reduce(
                     (sum, item) => sum + item.quantity,
                     0
@@ -350,7 +343,7 @@ const cartSlice = createSlice({
                     totalItems: state.totalItems,
                     totalPrice: state.totalPrice
                 });
-                
+
                 if (action.payload.error) {
                     state.error = action.payload.error;
                 }

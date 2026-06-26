@@ -12,6 +12,7 @@ import {
     X,
     Heart
 } from "lucide-react";
+import { getCart } from '../redux/Slicer/cartSlice';
 
 const Navbar = () => {
     const location = useLocation();
@@ -23,10 +24,12 @@ const Navbar = () => {
 
     const dispatch = useDispatch();
     const { user, isAuthenticated } = useSelector((state) => state.auth);
-    
+
     // ✅ Redux se cart aur wishlist
     const { totalItems } = useSelector((state) => state.cart);
     const { wishlistCount } = useSelector((state) => state.wishlist);
+
+   
 
     const navItems = [
         { name: "Home", path: "/" },
@@ -65,9 +68,14 @@ const Navbar = () => {
     }, []);
 
 
-if (location.pathname === "/login" || location.pathname === "/signup") {
-  return null;
-}
+    if (location.pathname === "/login" || location.pathname === "/signup") {
+        return null;
+    }
+
+        useEffect(() => {
+            dispatch(getCart());
+        }, [dispatch]);
+    
 
     return (
         <nav className={`fixed w-full top-0 left-0 z-50 transition-all duration-500 ${isScrolled ? 'bg-black/90 backdrop-blur-xl shadow-2xl' : 'bg-transparent'}`}>
@@ -136,7 +144,7 @@ if (location.pathname === "/login" || location.pathname === "/signup") {
                     </button>
 
                     {/* Profile Button */}
-                    <ProfileDropdown/>
+                    <ProfileDropdown />
 
                     {/* Mobile Menu Button */}
                     <button

@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   FaCoffee,
   FaBoxOpen,
@@ -57,9 +58,9 @@ const AdSidebar = ({ onClose }) => {
             <FaCoffee className="text-[#F5EDE3] dark:text-[#1A0F0A] text-xl" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-[#2C1810] dark:text-[#F5EDE3]">
+            <Link to ="/admin" lassName="text-xl font-bold text-[#2C1810] dark:text-[#F5EDE3]">
               Coffee Admin
-            </h1>
+            </Link>
             <p className="text-xs text-[#5C4033] dark:text-[#C4A882]">
               Management Panel
             </p>

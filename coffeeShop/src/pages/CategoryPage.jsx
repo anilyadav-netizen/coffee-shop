@@ -247,7 +247,7 @@ const CategoryPage = () => {
                       <img
                         src={product.image}
                         alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition duration-700 ease-out"
+                        className="w-full h-full object-cover group-hover:scale-[1.02] transition duration-700 ease-out"
                       />
 
                       <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -343,11 +343,11 @@ const CategoryPage = () => {
           }}
         >
           <div
-            className="bg-white rounded-2xl max-w-md w-full max-h-[85vh] overflow-y-auto animate-in zoom-in-95 duration-300 shadow-2xl"
+            className="bg-white rounded-2xl max-w-md w-full max-h-[80vh] overflow-y-auto animate-in zoom-in-95 duration-300 shadow-2xl mt-12"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Image Section */}
-            <div className="relative w-full h-80 sm:h-96 bg-green-50/30">
+            <div className="relative w-full h-[310px] sm:h-96 bg-green-50/30">
               <img
                 src={selectedProduct.image}
                 alt={selectedProduct.name}
@@ -429,7 +429,7 @@ const CategoryPage = () => {
                 </div>
               )}
 
-              <div className="mt-4">
+              {/* <div className="mt-4">
                 <span className="text-xs font-semibold text-gray-700 block mb-1.5">Select Size</span>
                 <div className="flex gap-1.5">
                   {['250g', '500g', '1kg'].map((size) => (
@@ -441,7 +441,7 @@ const CategoryPage = () => {
                     </button>
                   ))}
                 </div>
-              </div>
+              </div> */}
 
               {/* Quantity and Add to Cart */}
               <div className="mt-4 flex gap-2">

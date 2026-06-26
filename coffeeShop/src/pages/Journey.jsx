@@ -72,7 +72,7 @@ const Journey = () => {
     const currentStep = journeySteps[activeStep];
 
     return (
-        <section ref={sectionRef} className="relative py-6 px-4 overflow-hidden">
+        <section ref={sectionRef} className="relative py-2 md:py-6 px-4 overflow-hidden">
             {/* ========== GLASS BACKGROUND ========== */}
             {/* <div className="absolute inset-0 -z-10">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />
@@ -87,7 +87,7 @@ const Journey = () => {
 
             <div className="max-w-[104rem] mx-auto relative z-10">
                 {/* ========== HEADER ========== */}
-                <div className="text-center mb-10">
+                <div className="text-center mb-8">
                     <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10 backdrop-blur-sm rounded-full mb-2 border border-white/20">
                         <span className="flex items-center gap-2 px-6 py-2.5 bg-[#0D7C53]/20 backdrop-blur-sm text-white rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30">{sectionData.badge}</span>
                     </div>

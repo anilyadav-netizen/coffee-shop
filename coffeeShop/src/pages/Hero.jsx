@@ -32,7 +32,7 @@ const Hero = () => {
     };
 
     return (
-        <div className="relative  h-[50vh] md:h-[80vh] min-h-[400px] md:min-h-[500px] lg:min-h-screen overflow-hidden">
+        <div className="relative h-[48vh] md:h-[80vh] min-h-[400px] md:min-h-[500px] lg:min-h-screen overflow-hidden">
             {/* ✅ Navbar Component */}
             <Navbar />
 
@@ -131,7 +131,7 @@ const Hero = () => {
             </div>
 
             {/* Scroll Indicator */}
-            <div className="absolute bottom-5 md:bottom-8 left-1/2 -translate-x-1/2 z-20 animate-bounce">
+            <div className="absolute bottom-8 md:bottom-8 left-1/2 -translate-x-1/2 z-20 animate-bounce">
                 <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center p-1">
                     <div className="w-1 h-2 bg-white/50 rounded-full animate-scroll"></div>
                 </div>

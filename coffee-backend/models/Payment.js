@@ -7,12 +7,6 @@ const paymentSchema = new mongoose.Schema(
       ref: "User",
     },
 
-    coffee: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Coffee",
-      required: true,
-    },
-
     razorpayOrderId: String,
 
     amount: Number,

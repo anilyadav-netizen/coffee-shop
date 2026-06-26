@@ -5,28 +5,28 @@ const API_URL = "http://localhost:5003/api/payment";
 
 // Create Order
 export const createOrder = createAsyncThunk(
-  "payment/createOrder",
-  async (coffeeId, { rejectWithValue }) => {
-    try {
-      const token = localStorage.getItem("token");
+    "payment/createOrder",
+    async (amount, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem("token");
 
-      const { data } = await axios.post(
-        `${API_URL}/create-order`,
-        { coffeeId },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+            const { data } = await axios.post(
+                `${API_URL}/create-order`,
+                { amount },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            return data;
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data?.message || "Failed to create order"
+            );
         }
-      );
-
-      return data;
-    } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || "Failed to create order"
-      );
     }
-  }
 );
 
 // Verify Payment

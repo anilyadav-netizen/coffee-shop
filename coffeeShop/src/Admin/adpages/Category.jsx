@@ -85,8 +85,7 @@ const Category = () => {
                     className="flex items-center justify-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-[#6F4E37] dark:bg-[#C68E5C] text-[#F5EDE3] dark:text-[#1A0F0A] rounded-lg hover:bg-[#5C4033] dark:hover:bg-[#D4A574] transition text-sm sm:text-base"
                 >
                     <FaPlus className="text-xs sm:text-sm" />
-                    <span className="hidden xs:inline">Add Category</span>
-                    <span className="xs:hidden">Add</span>
+                    <span className="">Add Category</span>
                 </Link>
             </div>
 

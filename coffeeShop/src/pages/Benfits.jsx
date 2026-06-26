@@ -17,9 +17,9 @@ const Benefits = () => {
     };
 
     return (
-        
-        <section className="relative py-10 px-4 overflow-hidden">
-            
+
+        <section className="relative py-6 px-4 overflow-hidden">
+
             {/* ========== GLASS EFFECT BACKGROUND ========== */}
             {/* <div className="absolute inset-0 -z-10">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />

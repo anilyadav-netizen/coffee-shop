@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 import { FaUserCircle, FaSignOutAlt, FaMoon, FaSun, FaBars, FaTimes } from "react-icons/fa";
 import AdSidebar from "../adcomponent/AdSidebar";
 
@@ -69,9 +69,9 @@ const AdminLayout = () => {
                                 <FaBars className="text-[#2C1810] dark:text-[#F5EDE3] text-base sm:text-xl" />
                             </button>
 
-                            <h2 className="text-sm sm:text-base md:text-xl font-semibold text-[#2C1810] dark:text-[#F5EDE3] truncate">
+                            <Link to ="/admin" className="text-sm sm:text-base md:text-xl font-semibold text-[#2C1810] dark:text-[#F5EDE3] truncate">
                                 Admin Panel
-                            </h2>
+                            </Link>
                         </div>
 
                         {/* Right Section - Theme Toggle + Profile */}
