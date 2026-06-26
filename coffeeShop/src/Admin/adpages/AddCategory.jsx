@@ -135,23 +135,23 @@ const AddCategory = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-zinc-900 p-4 md:p-6">
+        <div className="min-h-screen bg-[#FDF8F3] dark:bg-[#1A0F0A] p-4 md:p-6">
             <div className="max-w-3xl mx-auto">
                 {/* HEADER */}
                 <div className="flex items-center gap-4 mb-6">
                     <button
                         onClick={() => navigate("/admin/category")}
-                        className="w-10 h-10 rounded-xl border border-gray-200 dark:border-zinc-700 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-zinc-800 transition"
+                        className="w-10 h-10 rounded-xl border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] flex items-center justify-center hover:bg-[#F5EDE3] dark:hover:bg-[#3D2317] transition"
                     >
-                        <FaArrowLeft className="text-gray-600 dark:text-gray-400" />
+                        <FaArrowLeft className="text-[#5C4033] dark:text-[#C4A882]" />
                     </button>
 
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
+                        <h1 className="text-3xl font-bold text-[#2C1810] dark:text-[#F5EDE3]">
                             {id ? "Update Category" : "Add Category"}
                         </h1>
 
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <p className="text-sm text-[#8B7355] dark:text-[#C4A882]">
                             {id
                                 ? "Update category details"
                                 : "Create a new category for products"}
@@ -162,12 +162,12 @@ const AddCategory = () => {
                 {/* FORM */}
                 <form
                     onSubmit={handleSubmit}
-                    className="bg-white dark:bg-zinc-800 rounded-2xl border border-gray-200 dark:border-zinc-700 shadow-sm p-6 md:p-8"
+                    className="bg-white dark:bg-[#261810] rounded-2xl border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] shadow-[0_2px_8px_rgba(44,24,16,0.06)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.4)] p-6 md:p-8"
                 >
                     <div className="space-y-6">
                         {/* ICON */}
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-semibold text-[#2C1810] dark:text-[#F5EDE3] mb-2">
                                 Category Icon
                                 <span className="text-red-500 ml-1">*</span>
                             </label>
@@ -177,7 +177,7 @@ const AddCategory = () => {
                                     <img
                                         src={iconPreview}
                                         alt="Category Preview"
-                                        className="w-40 h-40 rounded-xl object-cover border-2 border-gray-200 dark:border-zinc-600"
+                                        className="w-40 h-40 rounded-xl object-cover border-2 border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)]"
                                     />
 
                                     <button
@@ -193,7 +193,7 @@ const AddCategory = () => {
                                     onClick={() =>
                                         fileInputRef.current?.click()
                                     }
-                                    className="border-2 border-dashed border-gray-300 dark:border-zinc-600 rounded-xl p-8 text-center cursor-pointer hover:border-[#0D7C53] transition"
+                                    className="border-2 border-dashed border-[rgba(44,24,16,0.15)] dark:border-[rgba(245,237,227,0.15)] rounded-xl p-8 text-center cursor-pointer hover:border-[#6F4E37] dark:hover:border-[#C68E5C] transition"
                                 >
                                     <input
                                         ref={fileInputRef}
@@ -203,13 +203,13 @@ const AddCategory = () => {
                                         className="hidden"
                                     />
 
-                                    <FaImage className="w-12 h-12 mx-auto text-gray-400 mb-3" />
+                                    <FaImage className="w-12 h-12 mx-auto text-[#8B7355] dark:text-[#C4A882] mb-3" />
 
-                                    <p className="font-medium text-gray-600 dark:text-gray-400">
+                                    <p className="font-medium text-[#5C4033] dark:text-[#C4A882]">
                                         Click to upload category icon
                                     </p>
 
-                                    <p className="text-sm text-gray-400 mt-1">
+                                    <p className="text-sm text-[#8B7355] dark:text-[#C4A882] mt-1">
                                         PNG, JPG, WEBP (Max 5MB)
                                     </p>
                                 </div>
@@ -218,7 +218,7 @@ const AddCategory = () => {
 
                         {/* NAME */}
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-semibold text-[#2C1810] dark:text-[#F5EDE3] mb-2">
                                 Category Name
                                 <span className="text-red-500 ml-1">*</span>
                             </label>
@@ -230,18 +230,18 @@ const AddCategory = () => {
                                     setName(e.target.value)
                                 }
                                 placeholder="e.g. Coffee"
-                                className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-xl text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0D7C53]"
+                                className="w-full px-4 py-3 bg-[#FDF8F3] dark:bg-[#1A0F0A] border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] rounded-xl text-[#2C1810] dark:text-[#F5EDE3] placeholder-[#8B7355] dark:placeholder-[#C4A882] focus:outline-none focus:ring-2 focus:ring-[#6F4E37] dark:focus:ring-[#C68E5C]"
                             />
                         </div>
 
                         {/* BUTTONS */}
-                        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-200 dark:border-zinc-700">
+                        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)]">
                             <button
                                 type="button"
                                 onClick={() =>
                                     navigate("/admin/category")
                                 }
-                                className="px-6 py-3 border border-gray-300 dark:border-zinc-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-700"
+                                className="px-6 py-3 border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] rounded-xl text-[#5C4033] dark:text-[#C4A882] hover:bg-[#F5EDE3] dark:hover:bg-[#3D2317]"
                             >
                                 Cancel
                             </button>
@@ -249,7 +249,7 @@ const AddCategory = () => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="px-6 py-3 bg-[#0D7C53] hover:bg-[#0a6a45] text-white rounded-xl font-semibold disabled:opacity-70 disabled:cursor-not-allowed min-w-[150px]"
+                                className="px-6 py-3 bg-[#6F4E37] dark:bg-[#C68E5C] hover:bg-[#5C4033] dark:hover:bg-[#D4A574] text-[#F5EDE3] dark:text-[#1A0F0A] rounded-xl font-semibold disabled:opacity-70 disabled:cursor-not-allowed min-w-[150px] shadow-[0_2px_8px_rgba(44,24,16,0.15)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.4)] hover:shadow-lg transition"
                             >
                                 {loading
                                     ? id

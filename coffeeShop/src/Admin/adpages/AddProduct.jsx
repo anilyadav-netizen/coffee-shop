@@ -10,7 +10,7 @@ import { getCategories } from "../../redux/Slicer/categorySlice";
 
 const AddProduct = () => {
 
-    const { id } = useParams(); // ✅ Agar URL mein id hai toh Update Mode
+    const { id } = useParams();
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const fileInputRef = useRef(null);
@@ -32,7 +32,7 @@ const AddProduct = () => {
         price: "",
         stock: "",
         status: "active",
-        category: "", // ✅ Added category field
+        category: "",
     });
 
     const [imageFile, setImageFile] = useState(null);
@@ -40,7 +40,6 @@ const AddProduct = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isFetching, setIsFetching] = useState(isEditMode);
 
-    // ✅ Agar Edit Mode hai toh product fetch karo
     useEffect(() => {
         if (isEditMode && id) {
             dispatch(getSingleProduct(id))
@@ -52,7 +51,7 @@ const AddProduct = () => {
                         price: data.price || "",
                         stock: data.stock || "",
                         status: data.status || "active",
-                        category: data.category?._id || data.category || "", // ✅ Pre-select category
+                        category: data.category?._id || data.category || "",
                     });
                     if (data.image) {
                         setImagePreview(data.image);
@@ -70,7 +69,6 @@ const AddProduct = () => {
         }
     }, [dispatch, id, isEditMode, navigate]);
 
-    // ==================== HANDLE IMAGE UPLOAD ====================
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -108,7 +106,6 @@ const AddProduct = () => {
         });
     };
 
-    // ==================== HANDLE SUBMIT ====================
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -132,13 +129,11 @@ const AddProduct = () => {
             return;
         }
 
-        // ✅ Category validation
         if (!formData.category) {
             toast.error("Please select a category");
             return;
         }
 
-        // ✅ Image validation - Add mode mein compulsory, Update mode mein optional
         if (!isEditMode && !imageFile) {
             toast.error("Please upload a product image");
             return;
@@ -153,9 +148,8 @@ const AddProduct = () => {
             submitData.append("price", formData.price);
             submitData.append("stock", formData.stock);
             submitData.append("status", formData.status);
-            submitData.append("category", formData.category); // ✅ Append category ID
+            submitData.append("category", formData.category);
 
-            // ✅ Agar nayi image select ki hai toh bhejo, warna mat bhejo
             if (imageFile) {
                 submitData.append("image", imageFile);
             }
@@ -178,32 +172,31 @@ const AddProduct = () => {
         }
     };
 
-    // ✅ Loading state
     if (isFetching || loading) {
         return (
-            <div className="min-h-screen bg-gray-50 dark:bg-zinc-900 p-4 md:p-6 flex items-center justify-center">
-                <div className="w-10 h-10 border-4 border-[#0D7C53] border-t-transparent rounded-full animate-spin"></div>
+            <div className="min-h-screen bg-[#FDF8F3] dark:bg-[#1A0F0A] p-4 md:p-6 flex items-center justify-center">
+                <div className="w-10 h-10 border-4 border-[#6F4E37] dark:border-[#C68E5C] border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-zinc-900 p-4 md:p-6">
+        <div className="min-h-screen bg-[#FDF8F3] dark:bg-[#1A0F0A] p-4 md:p-6">
             <div className="max-w-4xl mx-auto">
                 {/* HEADER */}
                 <div className="flex items-center gap-4 mb-6">
                     <button
                         onClick={() => navigate("/admin/products")}
-                        className="w-10 h-10 rounded-xl border border-gray-200 dark:border-zinc-700 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors duration-200"
+                        className="w-10 h-10 rounded-xl border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] flex items-center justify-center hover:bg-[#F5EDE3] dark:hover:bg-[#3D2317] transition-colors duration-200"
                     >
-                        <FaArrowLeft className="text-gray-600 dark:text-gray-400" />
+                        <FaArrowLeft className="text-[#5C4033] dark:text-[#C4A882]" />
                     </button>
 
                     <div>
-                        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white">
+                        <h1 className="text-2xl md:text-3xl font-bold text-[#2C1810] dark:text-[#F5EDE3]">
                             {isEditMode ? "Update Product" : "Add Product"}
                         </h1>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <p className="text-sm text-[#8B7355] dark:text-[#C4A882]">
                             {isEditMode ? "Edit product details" : "Create a new coffee product for your store"}
                         </p>
                     </div>
@@ -212,12 +205,12 @@ const AddProduct = () => {
                 {/* FORM */}
                 <form
                     onSubmit={handleSubmit}
-                    className="bg-white dark:bg-zinc-800 rounded-2xl border border-gray-200 dark:border-zinc-700 shadow-sm p-6 md:p-8"
+                    className="bg-white dark:bg-[#261810] rounded-2xl border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] shadow-[0_2px_8px_rgba(44,24,16,0.06)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.4)] p-6 md:p-8"
                 >
                     <div className="space-y-6">
                         {/* IMAGE UPLOAD */}
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-semibold text-[#2C1810] dark:text-[#F5EDE3] mb-2">
                                 Product Image {!isEditMode && <span className="text-red-500">*</span>}
                             </label>
 
@@ -226,7 +219,7 @@ const AddProduct = () => {
                                     <img
                                         src={imagePreview}
                                         alt="Product Preview"
-                                        className="w-48 h-48 rounded-xl object-cover border-2 border-gray-200 dark:border-zinc-600"
+                                        className="w-48 h-48 rounded-xl object-cover border-2 border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)]"
                                     />
                                     <button
                                         type="button"
@@ -239,7 +232,7 @@ const AddProduct = () => {
                             ) : (
                                 <div
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="relative border-2 border-dashed border-gray-300 dark:border-zinc-600 rounded-xl p-8 text-center cursor-pointer hover:border-[#0D7C53] dark:hover:border-[#0D7C53] transition-all duration-300"
+                                    className="relative border-2 border-dashed border-[rgba(44,24,16,0.15)] dark:border-[rgba(245,237,227,0.15)] rounded-xl p-8 text-center cursor-pointer hover:border-[#6F4E37] dark:hover:border-[#C68E5C] transition-all duration-300"
                                 >
                                     <input
                                         ref={fileInputRef}
@@ -248,11 +241,11 @@ const AddProduct = () => {
                                         onChange={handleImageChange}
                                         className="hidden"
                                     />
-                                    <FaImage className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500 mb-3" />
-                                    <p className="text-gray-600 dark:text-gray-400 font-medium">
+                                    <FaImage className="w-12 h-12 mx-auto text-[#8B7355] dark:text-[#C4A882] mb-3" />
+                                    <p className="text-[#5C4033] dark:text-[#C4A882] font-medium">
                                         {isEditMode ? "Click to change image" : "Click to upload image"}
                                     </p>
-                                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                                    <p className="text-sm text-[#8B7355] dark:text-[#C4A882] mt-1">
                                         PNG, JPG, WEBP (Max 5MB)
                                     </p>
                                 </div>
@@ -261,7 +254,7 @@ const AddProduct = () => {
 
                         {/* PRODUCT NAME */}
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-semibold text-[#2C1810] dark:text-[#F5EDE3] mb-2">
                                 Product Name <span className="text-red-500">*</span>
                             </label>
                             <input
@@ -270,14 +263,14 @@ const AddProduct = () => {
                                 value={formData.name}
                                 onChange={handleChange}
                                 placeholder="e.g., Classic Espresso"
-                                className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-xl text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#0D7C53] focus:border-transparent transition-all duration-300"
+                                className="w-full px-4 py-3 bg-[#FDF8F3] dark:bg-[#1A0F0A] border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] rounded-xl text-[#2C1810] dark:text-[#F5EDE3] placeholder-[#8B7355] dark:placeholder-[#C4A882] focus:outline-none focus:ring-2 focus:ring-[#6F4E37] dark:focus:ring-[#C68E5C] focus:border-transparent transition-all duration-300"
                                 required
                             />
                         </div>
 
                         {/* DESCRIPTION */}
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-semibold text-[#2C1810] dark:text-[#F5EDE3] mb-2">
                                 Description <span className="text-red-500">*</span>
                             </label>
                             <textarea
@@ -286,32 +279,32 @@ const AddProduct = () => {
                                 value={formData.description}
                                 onChange={handleChange}
                                 placeholder="Write a brief description of the product..."
-                                className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-xl text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#0D7C53] focus:border-transparent resize-none transition-all duration-300"
+                                className="w-full px-4 py-3 bg-[#FDF8F3] dark:bg-[#1A0F0A] border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] rounded-xl text-[#2C1810] dark:text-[#F5EDE3] placeholder-[#8B7355] dark:placeholder-[#C4A882] focus:outline-none focus:ring-2 focus:ring-[#6F4E37] dark:focus:ring-[#C68E5C] focus:border-transparent resize-none transition-all duration-300"
                                 required
                             />
                         </div>
 
                         {/* CATEGORY DROPDOWN */}
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-semibold text-[#2C1810] dark:text-[#F5EDE3] mb-2">
                                 Category <span className="text-red-500">*</span>
                             </label>
                             <select
                                 name="category"
                                 value={formData.category}
                                 onChange={handleChange}
-                                className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-xl text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0D7C53] focus:border-transparent transition-all duration-300 appearance-none"
+                                className="w-full px-4 py-3 bg-[#FDF8F3] dark:bg-[#1A0F0A] border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] rounded-xl text-[#2C1810] dark:text-[#F5EDE3] focus:outline-none focus:ring-2 focus:ring-[#6F4E37] dark:focus:ring-[#C68E5C] focus:border-transparent transition-all duration-300 appearance-none"
                                 required
                             >
-                                <option value="">Select a category</option>
+                                <option value="" className="dark:bg-[#1A0F0A]">Select a category</option>
                                 {categories && categories.map((category) => (
-                                    <option key={category._id} value={category._id}>
+                                    <option key={category._id} value={category._id} className="dark:bg-[#1A0F0A]">
                                         {category.name}
                                     </option>
                                 ))}
                             </select>
                             {categories && categories.length === 0 && (
-                                <p className="text-sm text-amber-600 dark:text-amber-400 mt-1">
+                                <p className="text-sm text-[#C68E5C] mt-1">
                                     No categories found. Please add a category first.
                                 </p>
                             )}
@@ -320,7 +313,7 @@ const AddProduct = () => {
                         {/* PRICE & STOCK */}
                         <div className="grid md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                <label className="block text-sm font-semibold text-[#2C1810] dark:text-[#F5EDE3] mb-2">
                                     Price (₹) <span className="text-red-500">*</span>
                                 </label>
                                 <input
@@ -331,13 +324,13 @@ const AddProduct = () => {
                                     placeholder="199"
                                     min="0"
                                     step="1"
-                                    className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-xl text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#0D7C53] focus:border-transparent transition-all duration-300"
+                                    className="w-full px-4 py-3 bg-[#FDF8F3] dark:bg-[#1A0F0A] border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] rounded-xl text-[#2C1810] dark:text-[#F5EDE3] placeholder-[#8B7355] dark:placeholder-[#C4A882] focus:outline-none focus:ring-2 focus:ring-[#6F4E37] dark:focus:ring-[#C68E5C] focus:border-transparent transition-all duration-300"
                                     required
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                <label className="block text-sm font-semibold text-[#2C1810] dark:text-[#F5EDE3] mb-2">
                                     Stock <span className="text-red-500">*</span>
                                 </label>
                                 <input
@@ -348,7 +341,7 @@ const AddProduct = () => {
                                     placeholder="20"
                                     min="0"
                                     step="1"
-                                    className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-xl text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#0D7C53] focus:border-transparent transition-all duration-300"
+                                    className="w-full px-4 py-3 bg-[#FDF8F3] dark:bg-[#1A0F0A] border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] rounded-xl text-[#2C1810] dark:text-[#F5EDE3] placeholder-[#8B7355] dark:placeholder-[#C4A882] focus:outline-none focus:ring-2 focus:ring-[#6F4E37] dark:focus:ring-[#C68E5C] focus:border-transparent transition-all duration-300"
                                     required
                                 />
                             </div>
@@ -356,7 +349,7 @@ const AddProduct = () => {
 
                         {/* STATUS */}
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-semibold text-[#2C1810] dark:text-[#F5EDE3] mb-2">
                                 Status
                             </label>
                             <div className="flex gap-4">
@@ -367,9 +360,9 @@ const AddProduct = () => {
                                         value="active"
                                         checked={formData.status === "active"}
                                         onChange={handleChange}
-                                        className="w-4 h-4 text-[#0D7C53] focus:ring-[#0D7C53]"
+                                        className="w-4 h-4 text-[#6F4E37] dark:text-[#C68E5C] focus:ring-[#6F4E37] dark:focus:ring-[#C68E5C]"
                                     />
-                                    <span className="text-gray-700 dark:text-gray-300">Active</span>
+                                    <span className="text-[#5C4033] dark:text-[#C4A882]">Active</span>
                                 </label>
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input
@@ -380,17 +373,17 @@ const AddProduct = () => {
                                         onChange={handleChange}
                                         className="w-4 h-4 text-red-500 focus:ring-red-500"
                                     />
-                                    <span className="text-gray-700 dark:text-gray-300">Inactive</span>
+                                    <span className="text-[#5C4033] dark:text-[#C4A882]">Inactive</span>
                                 </label>
                             </div>
                         </div>
 
                         {/* BUTTONS */}
-                        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-200 dark:border-zinc-700">
+                        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)]">
                             <button
                                 type="button"
                                 onClick={() => navigate("/admin/products")}
-                                className="px-6 py-3 border border-gray-300 dark:border-zinc-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-700 transition-all duration-200 font-medium"
+                                className="px-6 py-3 border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] rounded-xl text-[#5C4033] dark:text-[#C4A882] hover:bg-[#F5EDE3] dark:hover:bg-[#3D2317] transition-all duration-200 font-medium"
                             >
                                 Cancel
                             </button>
@@ -398,11 +391,11 @@ const AddProduct = () => {
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="px-6 py-3 bg-[#0D7C53] hover:bg-[#0a6a45] text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[140px]"
+                                className="px-6 py-3 bg-[#6F4E37] dark:bg-[#C68E5C] hover:bg-[#5C4033] dark:hover:bg-[#D4A574] text-[#F5EDE3] dark:text-[#1A0F0A] rounded-xl font-semibold transition-all duration-200 shadow-[0_2px_8px_rgba(44,24,16,0.15)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.4)] hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[140px]"
                             >
                                 {isLoading ? (
                                     <>
-                                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <svg className="animate-spin h-5 w-5 text-[#F5EDE3] dark:text-[#1A0F0A]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>

@@ -53,27 +53,30 @@ const ProfileDropdown = () => {
             {/* Profile Button */}
             <button
                 onClick={() => setOpen(!open)}
-                className="flex items-center gap-2 bg-gradient-to-r from-[#0D7C53] to-green-600 text-white px-3 py-2 rounded-full shadow-lg hover:scale-105 transition-all duration-300"
+                className="relative group"
             >
-                {isAuthenticated ? (
-                    <div className="w-7 h-7 rounded-full bg-white text-[#0D7C53] flex items-center justify-center font-bold">
-                        {user?.name?.charAt(0)?.toUpperCase() || "U"}
-                    </div>
-                ) : (
-                    <User size={18} />
+                <div
+                    className="
+        w-10 h-10 rounded-full
+        bg-gradient-to-br from-[#0D7C53] to-green-600
+        flex items-center justify-center
+        text-white font-bold text-sm
+        border-2 border-white/20
+        shadow-lg
+        group-hover:scale-105
+        transition-all duration-300
+        "
+                >
+                    {isAuthenticated ? (
+                        user?.name?.charAt(0)?.toUpperCase()
+                    ) : (
+                        <User size={18} />
+                    )}
+                </div>
+
+                {isAuthenticated && (
+                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 border-2 border-white rounded-full" />
                 )}
-
-                <span>
-                    {isAuthenticated
-                        ? user?.name?.split(" ")[0]
-                        : "Login"}
-                </span>
-
-                <ChevronDown
-                    size={16}
-                    className={`transition-transform duration-300 ${open ? "rotate-180" : ""
-                        }`}
-                />
             </button>
 
             {/* Dropdown */}
@@ -158,7 +161,7 @@ const ProfileDropdown = () => {
 
                                 <button
                                     onClick={handleLogout}
-                                    className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 transition-all duration-300 group"
+                                    className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-red-500 hover:bg-red-100 transition-all duration-300 group"
                                 >
                                     <span className="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center group-hover:bg-red-100 transition-all">
                                         <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -60,60 +60,61 @@ const Category = () => {
         return (
             <div className="flex justify-center items-center h-64">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0D7C53] mx-auto"></div>
-                    <p className="mt-4 text-zinc-600 dark:text-zinc-400">Loading categories...</p>
+                    <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-[#6F4E37] dark:border-[#C68E5C] mx-auto"></div>
+                    <p className="mt-4 text-[#8B7355] dark:text-[#C4A882] text-sm sm:text-base">Loading categories...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="bg-white dark:bg-zinc-900 rounded-xl p-6 border border-zinc-200 dark:border-zinc-800">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
+        <div className="bg-white dark:bg-[#261810] rounded-xl p-3 sm:p-4 md:p-6 border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] shadow-[0_2px_8px_rgba(44,24,16,0.06)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
+            {/* Header - Responsive */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div>
-                    <h1 className="text-2xl font-semibold text-zinc-900 dark:text-white">
+                    <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-[#2C1810] dark:text-[#F5EDE3]">
                         Categories
                     </h1>
-
-                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                    <p className="text-xs sm:text-sm text-[#8B7355] dark:text-[#C4A882]">
                         Total {categories.length} Categories
                     </p>
                 </div>
 
                 <Link
                     to="/admin/add-category"
-                    className="flex items-center gap-2 px-4 py-2 bg-[#0D7C53] text-white rounded-lg hover:bg-[#0a6a45] transition"
+                    className="flex items-center justify-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-[#6F4E37] dark:bg-[#C68E5C] text-[#F5EDE3] dark:text-[#1A0F0A] rounded-lg hover:bg-[#5C4033] dark:hover:bg-[#D4A574] transition text-sm sm:text-base"
                 >
-                    <FaPlus />
-                    Add Category
+                    <FaPlus className="text-xs sm:text-sm" />
+                    <span className="hidden xs:inline">Add Category</span>
+                    <span className="xs:hidden">Add</span>
                 </Link>
             </div>
 
-            {/* Search */}
-            <div className="flex justify-end mb-6">
-                <div className="relative">
-                    <FaSearch className="absolute left-3 top-3 text-zinc-400" />
-
-                    <input
-                        type="text"
-                        placeholder="Search Category"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="pl-10 pr-4 py-2 border rounded-md outline-none dark:bg-zinc-800 dark:border-zinc-700 dark:text-white"
-                    />
+            {/* Search - Responsive */}
+            <div className="flex flex-col sm:flex-row justify-end mb-4 sm:mb-6">
+                <div className="w-full sm:w-auto">
+                    <div className="relative w-full sm:w-auto">
+                        <FaSearch className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-[#8B7355] dark:text-[#C4A882] text-xs sm:text-sm" />
+                        <input
+                            type="text"
+                            placeholder="Search Category"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full sm:w-[200px] md:w-[250px] pl-7 sm:pl-9 pr-3 sm:pr-4 py-1.5 sm:py-2 border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] rounded-md outline-none text-[#2C1810] dark:text-[#F5EDE3] placeholder-[#8B7355] dark:placeholder-[#C4A882] text-xs sm:text-sm bg-white dark:bg-[#1A0F0A]"
+                        />
+                    </div>
                 </div>
             </div>
 
-            {/* Table */}
-            <div className="overflow-x-auto border border-zinc-200 dark:border-zinc-800 rounded-lg">
-                <table className="w-full">
+            {/* Table with Horizontal Scroll */}
+            <div className="overflow-x-auto border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] rounded-lg">
+                <table className="w-full min-w-[600px] sm:min-w-full">
                     <thead>
-                        <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800">
-                            <th className="p-4 text-left">Icon</th>
-                            <th className="p-4 text-left">Category Name</th>
-                            <th className="p-4 text-left">Created At</th>
-                            <th className="p-4 text-left">Actions</th>
+                        <tr className="border-b border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] bg-[#F5EDE3] dark:bg-[#3D2317]">
+                            <th className="p-2 sm:p-3 md:p-4 text-left text-[#5C4033] dark:text-[#C4A882] text-xs sm:text-sm whitespace-nowrap">Icon</th>
+                            <th className="p-2 sm:p-3 md:p-4 text-left text-[#5C4033] dark:text-[#C4A882] text-xs sm:text-sm whitespace-nowrap">Category Name</th>
+                            <th className="hidden md:table-cell p-2 sm:p-3 md:p-4 text-left text-[#5C4033] dark:text-[#C4A882] text-xs sm:text-sm whitespace-nowrap">Created At</th>
+                            <th className="p-2 sm:p-3 md:p-4 text-left text-[#5C4033] dark:text-[#C4A882] text-xs sm:text-sm whitespace-nowrap">Actions</th>
                         </tr>
                     </thead>
 
@@ -122,48 +123,45 @@ const Category = () => {
                             filteredCategories.map((category) => (
                                 <tr
                                     key={category._id}
-                                    className="border-b border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                                    className="border-b border-[rgba(44,24,16,0.05)] dark:border-[rgba(245,237,227,0.05)] hover:bg-[#FDF8F3] dark:hover:bg-[#3D2317] transition-colors duration-150"
                                 >
-                                    <td className="p-4">
+                                    <td className="p-1.5 sm:p-2 md:p-4">
                                         <img
                                             src={category.icon}
                                             alt={category.name}
-                                            className="w-12 h-12 rounded-lg object-cover"
+                                            className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg object-cover"
                                         />
                                     </td>
 
-                                    <td className="p-4 font-medium text-zinc-900 dark:text-white">
+                                    <td className="p-1.5 sm:p-2 md:p-4 font-medium text-[#2C1810] dark:text-[#F5EDE3] text-xs sm:text-sm md:text-base max-w-[100px] sm:max-w-[150px] md:max-w-none truncate">
                                         {category.name}
                                     </td>
 
-                                    <td className="p-4 text-zinc-600 dark:text-zinc-400">
+                                    <td className="hidden md:table-cell p-1.5 sm:p-2 md:p-4 text-[#5C4033] dark:text-[#C4A882] text-xs sm:text-sm whitespace-nowrap">
                                         {new Date(
                                             category.createdAt
                                         ).toLocaleDateString()}
                                     </td>
 
-                                    <td className="p-4">
-                                        <div className="flex items-center gap-2">
+                                    <td className="p-1.5 sm:p-2 md:p-4">
+                                        <div className="flex items-center gap-0.5 sm:gap-1 md:gap-2">
+                                            {/* Edit Button */}
                                             <button
-                                                onClick={() =>
-                                                    handleEdit(category._id)
-                                                }
-                                                className="w-9 h-9 flex items-center justify-center border rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                                onClick={() => handleEdit(category._id)}
+                                                className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 flex items-center justify-center border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] rounded-md hover:bg-[#F5EDE3] dark:hover:bg-[#3D2317] transition-colors duration-200"
                                                 title="Edit category"
                                             >
-                                                
-                                                <FaEdit className="text-blue-500" />
+                                                <FaEdit className="text-[#6F4E37] dark:text-[#C68E5C] text-[10px] sm:text-xs md:text-sm" />
                                             </button>
 
+                                            {/* Delete Button */}
                                             <button
-                                                onClick={() =>
-                                                    handleDelete(category._id, category.name)
-                                                }
+                                                onClick={() => handleDelete(category._id, category.name)}
                                                 disabled={deleteLoading}
-                                                className="w-9 h-9 flex items-center justify-center border rounded-md text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 flex items-center justify-center border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] rounded-md text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                                                 title="Delete category"
                                             >
-                                                <FaTrash />
+                                                <FaTrash className="text-[10px] sm:text-xs md:text-sm" />
                                             </button>
                                         </div>
                                     </td>
@@ -173,7 +171,7 @@ const Category = () => {
                             <tr>
                                 <td
                                     colSpan="4"
-                                    className="text-center py-8 text-zinc-500"
+                                    className="text-center py-6 sm:py-8 text-[#8B7355] dark:text-[#C4A882] text-xs sm:text-sm"
                                 >
                                     {search ? "No categories found matching your search" : "No Categories Found"}
                                 </td>
