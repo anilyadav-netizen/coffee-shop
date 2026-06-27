@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
     createOrder,
     verifyPayment,
+    getMyOrders
 } from "../redux/Slicer/paymentSlice";
 import {
     getCart,
@@ -23,15 +24,20 @@ import {
 } from "lucide-react";
 
 const CartPage = () => {
+
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [paymentLoading, setPaymentLoading] = useState(false);
 
-    // ✅ Redux se cart data
+    // Get cart data from Redux store
     const { cartItems, totalItems, totalPrice, loading } = useSelector((state) => state.cart);
 
-    // ✅ Page load par cart fetch karo
+
+    // Get payment state from Redux store
+    const { order, paymentStatus, paymentError, loading: paymentProcessing } = useSelector((state) => state.payment);
+
     useEffect(() => {
         dispatch(getCart());
     }, [dispatch]);
@@ -52,6 +58,14 @@ const CartPage = () => {
             }
         };
     }, []);
+
+    // ✅ Handle display of backend errors from Redux state
+    useEffect(() => {
+        if (paymentError) {
+            setError(paymentError);
+            setPaymentLoading(false);
+        }
+    }, [paymentError]);
 
     // ✅ Increase quantity
     const handleIncrease = async (coffeeId) => {
@@ -172,6 +186,123 @@ const CartPage = () => {
         navigate("/menu");
     };
 
+    /**
+     * ✅ Handle Razorpay Payment Checkout
+     * This function orchestrates the entire payment flow:
+     * 1. Creates an order via backend API
+     * 2. Opens Razorpay checkout popup
+     * 3. Handles successful payment verification
+     * 4. Manages error states and user feedback
+     */
+    const handleCheckout = async () => {
+        try {
+
+            console.log("========== CHECKOUT START ==========");
+            console.log("cartItems:", cartItems);
+            console.log("totalItems:", totalItems);
+            console.log("totalPrice:", totalPrice);
+            // Set loading state and clear previous errors
+            setPaymentLoading(true);
+            setError(null);
+
+            console.log("🔄 Creating payment order...");
+
+            // 1️⃣ Create order using Redux thunk
+            // IMPORTANT: Pass totalPrice to backend so it can calculate the order
+            const result = await dispatch(createOrder(totalPrice)).unwrap();
+
+            // The backend returns: { success, message, order }
+            // where order contains: { id, amount, currency, receipt, status }
+            const orderData = result.order;
+
+            console.log("✅ Order created successfully:", orderData);
+
+            // Get Razorpay key from environment variable
+            const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_Rn6mAmy8ydPszM";
+
+            // 2️⃣ Configure Razorpay checkout options
+            const options = {
+                key: razorpayKey, // Use environment variable
+                amount: orderData.amount, // Amount in paise (already multiplied by 100 in backend)
+                currency: orderData.currency || "INR",
+                order_id: orderData.id, // Razorpay order ID from backend
+                name: "Coffee Shop",
+                description: `Order payment for ${totalItems} item(s)`,
+                image: "https://example.com/logo.png", // Optional: Add your logo URL
+                prefill: {
+                    name: "Customer", // You can get this from user state
+                    email: "customer@example.com", // You can get this from user state
+                    contact: "9999999999" // You can get this from user state
+                },
+                notes: {
+                    address: "Coffee Shop Order"
+                },
+                theme: {
+                    color: "#0D7C53" // Match your brand color
+                },
+                // 3️⃣ Payment success handler
+                handler: async function (response) {
+                    console.log("✅ Payment successful:", response);
+
+                    try {
+                        // Verify payment with backend
+                        const verificationData = {
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature
+                        };
+
+                        // Dispatch verifyPayment with all required fields
+                        await dispatch(verifyPayment(verificationData)).unwrap();
+
+                        console.log("✅ Payment verified successfully");
+
+                        // Show success message
+                        alert("🎉 Payment successful! Your order has been placed.");
+
+                        // Refresh cart data after successful payment
+                        await dispatch(getCart()).unwrap();
+
+                        // Navigate to orders page
+                        navigate("/orderDetails");
+
+                    } catch (error) {
+                        console.error("❌ Payment verification failed:", error);
+                        setError(error?.message || "Payment verification failed. Please contact support.");
+                        setPaymentLoading(false);
+                        // Don't navigate on verification failure
+                    }
+                },
+                // Payment modal dismissed handler
+                modal: {
+                    ondismiss: function () {
+                        console.log("❌ Razorpay modal closed by user");
+                        setPaymentLoading(false);
+                    }
+                }
+            };
+
+            // 4️⃣ Initialize and open Razorpay checkout
+            const razorpay = new window.Razorpay(options);
+
+            // Handle payment failure/error
+            razorpay.on('payment.failed', function (response) {
+                console.error("❌ Payment failed:", response.error);
+                setError(response.error?.description || "Payment failed. Please try again.");
+                setPaymentLoading(false);
+            });
+
+            // Open Razorpay popup
+            razorpay.open();
+
+        } catch (error) {
+            // 5️⃣ Handle order creation failure
+            console.error("❌ Order creation failed:", error);
+            setError(error?.message || "Failed to create order. Please try again.");
+            setPaymentLoading(false);
+        }
+    };
+
     // ✅ Loading state
     if (loading && cartItems.length === 0) {
         return (
@@ -180,50 +311,6 @@ const CartPage = () => {
             </div>
         );
     }
-
-    const handleCheckout = async () => {
-        try {
-            setIsLoading(true);
-            const order = await dispatch(
-                createOrder(totalPrice)
-            ).unwrap();
-            const options = {
-                key: "rzp_test_Rn6mAmy8ydPszM",
-                amount: order.amount,
-                currency: order.currency,
-                order_id: order.id,
-                name: "Coffee Shop",
-                description: "Coffee Order",
-                handler: async function (response) {
-                    try {
-                        await dispatch(
-                            verifyPayment({
-                                razorpay_order_id:
-                                    response.razorpay_order_id,
-                            })
-                        ).unwrap();
-
-                        navigate("/orderDetails");
-                    } catch (error) {
-                        console.error(
-                            "Payment verification failed",
-                            error
-                        );
-                    }
-                },
-            };
-            const razorpay =
-                new window.Razorpay(options);
-            razorpay.open();
-        } catch (error) {
-            console.error(
-                "Order creation failed",
-                error
-            );
-        } finally {
-            setIsLoading(false);
-        }
-    };
 
     // ✅ Empty cart
     if (cartItems.length === 0) {
@@ -274,12 +361,14 @@ const CartPage = () => {
                 </div>
 
                 <div className="max-w-7xl mx-auto relative z-10 mt-5">
-                    {/* Error Message */}
-                    {error && (
+                    {/* Error Message - Display backend errors from Redux state */}
+                    {(error || paymentError) && (
                         <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-                            {error}
+                            {error || paymentError}
                             <button
-                                onClick={() => setError(null)}
+                                onClick={() => {
+                                    setError(null);
+                                }}
                                 className="ml-2 text-red-700 font-bold"
                             >
                                 ×
@@ -344,7 +433,7 @@ const CartPage = () => {
                                                     <button
                                                         onClick={() => handleRemove(coffeeId)}
                                                         className="p-1 rounded-full bg-red-200 hover:bg-red-300 transition-all opacity-80 group-hover:opacity-100 flex-shrink-0"
-                                                        disabled={loading}
+                                                        disabled={loading || paymentLoading}
                                                     >
                                                         <Trash2 className="w-4 h-4 sm:w-5 sm:h-5 text-red-400 hover:text-red-600" />
                                                     </button>
@@ -362,7 +451,7 @@ const CartPage = () => {
                                                     <div className="flex items-center gap-1 sm:gap-2 bg-white/50 backdrop-blur-sm rounded-full p-0.5 sm:p-1 border border-white/30 flex-shrink-0">
                                                         <button
                                                             onClick={() => handleDecrease(coffeeId)}
-                                                            disabled={loading}
+                                                            disabled={loading || paymentLoading}
                                                             className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                                                         >
                                                             <Minus className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-gray-600" />
@@ -372,7 +461,7 @@ const CartPage = () => {
                                                         </span>
                                                         <button
                                                             onClick={() => handleIncrease(coffeeId)}
-                                                            disabled={loading}
+                                                            disabled={loading || paymentLoading}
                                                             className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-[#0D7C53] hover:bg-green-700 flex items-center justify-center transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                                                         >
                                                             <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 text-white" />
@@ -432,15 +521,21 @@ const CartPage = () => {
                                     </div>
                                 </div>
 
+                                {/* ✅ Updated Pay Now Button with proper loading states */}
                                 <button
                                     onClick={handleCheckout}
-                                    disabled={isLoading || loading || cartItems.length === 0}
+                                    disabled={paymentLoading || loading || cartItems.length === 0}
                                     className="w-full mt-4 sm:mt-6 py-2.5 sm:py-3.5 bg-gradient-to-r from-[#0D7C53] to-green-600 text-white rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed text-base sm:text-lg"
                                 >
-                                    {isLoading ? (
+                                    {paymentLoading ? (
                                         <>
                                             <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                                             Processing...
+                                        </>
+                                    ) : loading ? (
+                                        <>
+                                            <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                            Loading Cart...
                                         </>
                                     ) : (
                                         <>
@@ -449,6 +544,13 @@ const CartPage = () => {
                                         </>
                                     )}
                                 </button>
+
+                                {/* Display payment processing status */}
+                                {paymentLoading && (
+                                    <p className="text-xs text-gray-500 text-center mt-2">
+                                        Please wait while we process your payment...
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </div>

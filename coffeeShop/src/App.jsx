@@ -26,15 +26,16 @@ import OderDetailsPage from "./pages/OderDetailsPage";
 import Category from "./Admin/adpages/Category";
 import AddCategory from "./Admin/adpages/AddCategory";
 import { ToastContainer } from 'react-toastify';
+import OrderDetailsPage from "./pages/OderDetailsPage";
 
 
 function App() {
-  
+
   return (
     <BrowserRouter>
       <ScrollToTop />
-
-        <ToastContainer />
+  
+      <ToastContainer />
       <Routes>
         {/* User Layout */}
         <Route element={<UserLayouts />}>
@@ -72,7 +73,7 @@ function App() {
           <Route path="category" element={<Category />} />
           <Route path="add-category" element={<AddCategory />} />
           <Route path="/admin/update-product/:id" element={<AddProduct />} /> {/* ✅ Same component */}
-          <Route path="/admin/update-category/:id" element={<AddCategory/>} /> 
+          <Route path="/admin/update-category/:id" element={<AddCategory />} />
 
         </Route>
         <Route path="/login" element={<Login />} />

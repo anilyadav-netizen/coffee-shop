@@ -23,17 +23,17 @@ export const getCart = createAsyncThunk(
 // ================= ADD TO CART =================
 export const addToCart = createAsyncThunk(
     "cart/addToCart",
-    async ({ coffeeId, quantity }, { rejectWithValue }) => {
-        console.log("📦 ADD TO CART:", { coffeeId, quantity });
+    async ({ coffeeId, quantity, amount }, { rejectWithValue }) => {
         try {
             const { data } = await API.post("/cart", {
                 coffeeId,
                 quantity,
+                amount,
             });
-            console.log("✅ ADD TO CART response:", data);
+             console.log("✅ API RESPONSE:", data);
+
             return data;
         } catch (error) {
-            console.error("❌ ADD TO CART error:", error);
             return rejectWithValue(
                 error.response?.data?.message || "Failed to add item"
             );
@@ -190,7 +190,8 @@ const cartSlice = createSlice({
                 state.loading = false;
 
                 const cart = action.payload;
-                state.cartItems = cart?.items || [];
+                console.log()
+                state.cartItems = cart.data.items || [];
 
                 state.totalItems = state.cartItems.length;
 
@@ -217,16 +218,18 @@ const cartSlice = createSlice({
             })
             .addCase(addToCart.fulfilled, (state, action) => {
                 state.loading = false;
-                console.log("PAYLOAD =>", action.payload);
 
-                const cart = action.payload;
+                const cart = action.payload.data;
+
                 state.cartItems = cart?.items || [];
-                state.totalItems = state.cartItems.length;
-
+                state.totalItems = state.cartItems.reduce(
+                    (sum, item) => sum + item.quantity,
+                    0
+                );
 
                 state.totalPrice = state.cartItems.reduce(
                     (sum, item) =>
-                        sum + item.quantity * (item.coffee?.price || 0),
+                        sum + item.quantity * (item.amount || item.coffee?.price || 0),
                     0
                 );
             })

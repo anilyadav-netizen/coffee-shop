@@ -115,7 +115,7 @@ const WhyUs = () => {
                 </div>
 
                 {/* Features Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 backdrop-blur-xl rounded-2xl p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 backdrop-blur-xl rounded-2xl">
                     {features.map((feature) => (
                         <div
                             key={feature.id}

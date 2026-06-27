@@ -1,51 +1,34 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import API from "../../Api/Api";
 
-const API_URL = "http://localhost:5003/api/payment";
-
-// Create Order
+// ================= CREATE ORDER =================
 export const createOrder = createAsyncThunk(
     "payment/createOrder",
-    async (amount, { rejectWithValue }) => {
+    async (totalAmount, { rejectWithValue }) => {
         try {
-            const token = localStorage.getItem("token");
-
-            const { data } = await axios.post(
-                `${API_URL}/create-order`,
-                { amount },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
+            const { data } = await API.post("/payment/create-order", { totalAmount });
+            console.log("Sending Order Amount:", totalAmount);
+            console.log("Create Order Response:", data);
 
             return data;
         } catch (error) {
             return rejectWithValue(
+                
                 error.response?.data?.message || "Failed to create order"
             );
         }
     }
 );
 
-// Verify Payment
+// ================= VERIFY PAYMENT =================
 export const verifyPayment = createAsyncThunk(
     "payment/verifyPayment",
     async (paymentData, { rejectWithValue }) => {
         try {
-            const token = localStorage.getItem("token");
-
-            const { data } = await axios.post(
-                `${API_URL}/verify-payment`,
-                paymentData,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
+            const { data } = await API.post(
+                "/payment/verify-payment",
+                paymentData
             );
-
             return data;
         } catch (error) {
             return rejectWithValue(
@@ -55,22 +38,48 @@ export const verifyPayment = createAsyncThunk(
     }
 );
 
+// ================= GET MY ORDERS =================
+export const getMyOrders = createAsyncThunk(
+    "payment/getMyOrders",
+    async (_, { rejectWithValue }) => {
+        try {
+            const { data } = await API.get("/payment/orderDetails");
+            return data;
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data?.message || "Failed to fetch orders"
+            );
+        }
+    }
+);
+
+// ================= INITIAL STATE =================
+const initialState = {
+    order: null,
+    orders: [],
+    loading: false,
+    success: false,
+    error: null,
+};
+
+// ================= SLICE =================
 const paymentSlice = createSlice({
     name: "payment",
-
-    initialState: {
-        loading: false,
-        order: null,
-        verified: false,
-        success: false,
-        error: null,
-    },
+    initialState,
 
     reducers: {
+        clearPaymentError: (state) => {
+            state.error = null;
+        },
+
+        clearPaymentSuccess: (state) => {
+            state.success = false;
+        },
+
         resetPaymentState: (state) => {
-            state.loading = false;
             state.order = null;
-            state.verified = false;
+            state.orders = [];
+            state.loading = false;
             state.success = false;
             state.error = null;
         },
@@ -79,7 +88,7 @@ const paymentSlice = createSlice({
     extraReducers: (builder) => {
         builder
 
-            // CREATE ORDER
+            // ===== CREATE ORDER =====
             .addCase(createOrder.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -87,8 +96,7 @@ const paymentSlice = createSlice({
 
             .addCase(createOrder.fulfilled, (state, action) => {
                 state.loading = false;
-                state.order = action.payload;
-                state.success = true;
+                state.order = action.payload.order;
             })
 
             .addCase(createOrder.rejected, (state, action) => {
@@ -96,24 +104,44 @@ const paymentSlice = createSlice({
                 state.error = action.payload;
             })
 
-            // VERIFY PAYMENT
+            // ===== VERIFY PAYMENT =====
             .addCase(verifyPayment.pending, (state) => {
                 state.loading = true;
+                state.error = null;
             })
 
-            .addCase(verifyPayment.fulfilled, (state) => {
+            .addCase(verifyPayment.fulfilled, (state, action) => {
                 state.loading = false;
-                state.verified = true;
+                state.success = true;
             })
 
             .addCase(verifyPayment.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+
+            // ===== GET MY ORDERS =====
+            .addCase(getMyOrders.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+
+            .addCase(getMyOrders.fulfilled, (state, action) => {
+                state.loading = false;
+                state.orders = action.payload.orders;
+            })
+
+            .addCase(getMyOrders.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             });
     },
 });
 
-export const { resetPaymentState } =
-    paymentSlice.actions;
+export const {
+    clearPaymentError,
+    clearPaymentSuccess,
+    resetPaymentState,
+} = paymentSlice.actions;
 
 export default paymentSlice.reducer;

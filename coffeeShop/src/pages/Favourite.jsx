@@ -67,15 +67,19 @@ const Favourite = () => {
         loadFavourites();
     }, []);
 
-    // ✅ Handle Add to Cart
+    // ✅ Handle Add to Cart - FIXED: Added amount field
     const handleAddToCart = async (item, e) => {
         e.stopPropagation();
+
+        // Calculate the amount (use discountPrice if available, otherwise use price)
+        const amount = item.discountPrice || item.price;
 
         try {
             await dispatch(
                 addToCart({
                     coffeeId: item._id,
                     quantity: 1,
+                    amount: amount // ✅ Added amount field
                 })
             ).unwrap();
             toast.success("Item added to cart successfully!");
@@ -94,18 +98,20 @@ const Favourite = () => {
 
         } catch (error) {
             console.error("Add To Cart Error:", error);
+            toast.error("Failed to add to cart");
         }
     };
 
-    // ✅ Handle Wishlist Toggle
+    // ✅ Handle Wishlist Toggle - FIXED: Consistent ID handling
     const handleWishlistToggle = async (item, e) => {
         e.stopPropagation();
 
         try {
             const existingItem = wishlistItems.find(
-                (wish) =>
-                    wish.coffee?._id === item._id ||
-                    wish.coffee === item._id
+                (wish) => {
+                    const wishCoffeeId = wish.coffee?._id || wish.coffee;
+                    return wishCoffeeId === item._id;
+                }
             );
 
             if (existingItem) {
@@ -117,6 +123,7 @@ const Favourite = () => {
             }
         } catch (error) {
             console.error("Wishlist Error:", error);
+            toast.error("Failed to update wishlist");
         }
     };
 
@@ -196,7 +203,7 @@ const Favourite = () => {
                     </div>
                 </div>
 
-                <style jsx>{`
+                <style>{`
                     @keyframes pulse-slow {
                         0%, 100% { transform: scale(1); opacity: 0.5; }
                         50% { transform: scale(1.1); opacity: 0.8; }
@@ -218,25 +225,6 @@ const Favourite = () => {
 
     return (
         <section className="relative px-4 overflow-hidden pb-5">
-            {/* Glass Background */}
-            {/* <div className="absolute inset-0 -z-10 pointer-events-none">
-                <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-amber-400/10 rounded-full blur-[120px]" />
-                <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-orange-500/10 rounded-full blur-[100px]" />
-            </div> */}
-            {/* <div className="absolute inset-0 -z-10">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />
-                <div className="absolute inset-0 bg-gradient-to-tr from-[#EDE0D4]/20 via-transparent to-[#D4B896]/10" />
-                <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-amber-400/15 rounded-full blur-[120px] animate-pulse-slow" />
-                <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-amber-700/10 rounded-full blur-[100px] animate-pulse-slow-delay" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[150px] animate-pulse-slow" />
-                <div className="absolute inset-0 pointer-events-none opacity-10">
-                    <div className="absolute top-20 left-10 text-6xl rotate-12 animate-float">🫘</div>
-                    <div className="absolute bottom-32 right-20 text-6xl -rotate-12 animate-float-delay">🫘</div>
-                    <div className="absolute top-1/3 right-1/4 text-4xl rotate-45 animate-float-slow">☕</div>
-                    <div className="absolute bottom-1/4 left-1/3 text-5xl -rotate-45 animate-float-delay">🫘</div>
-                </div>
-            </div> */}
-
             {/* Content */}
             <div className="max-w-[104rem] mx-auto relative z-10">
                 {/* Header - Glass Effect */}
@@ -267,9 +255,16 @@ const Favourite = () => {
                             {displayItems.map((item) => {
                                 const isAdded = addedItems[item._id];
                                 const isWishlisted = wishlistItems.some(
-                                    (wish) => wish.coffee?._id === item._id || wish.coffee === item._id
+                                    (wish) => {
+                                        const wishCoffeeId = wish.coffee?._id || wish.coffee;
+                                        return wishCoffeeId === item._id;
+                                    }
                                 );
                                 const category = item.category;
+
+                                // Calculate amount for display
+                                const displayPrice = item.discountPrice || item.price;
+                                const originalPrice = item.price;
 
                                 return (
                                     <div
@@ -292,6 +287,17 @@ const Favourite = () => {
 
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
+                                            {/* Discount Badge */}
+                                            {item.discountPrice && item.discountPrice < item.price && (
+                                                <div className="absolute top-3 left-3 z-10 bg-gradient-to-r from-green-600 to-[#0D7C53] text-white text-xs px-3 py-1.5 rounded-full font-bold shadow-lg flex items-center gap-1">
+                                                    <span className="relative flex h-2 w-2">
+                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                                                    </span>
+                                                    {Math.round(((item.price - item.discountPrice) / item.price) * 100)}% OFF
+                                                </div>
+                                            )}
+
                                             {/* Wishlist Icon */}
                                             <button
                                                 onClick={(e) => handleWishlistToggle(item, e)}
@@ -308,20 +314,21 @@ const Favourite = () => {
                                                 />
                                             </button>
 
-                                            {/* Category Badge - Improved */}
-                                            <div className="absolute top-3 left-3 flex items-center gap-2 bg-white dark:bg-dark-card px-3 py-1.5 rounded-full border-2 border-[#4F46E5] dark:border-dark-primary shadow-md">
+                                            {/* Category Badge */}
+                                            <div className="absolute top-3 left-3 flex items-center gap-2 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md">
                                                 {category?.icon && (
                                                     <img
                                                         src={category.icon}
                                                         alt={category.name}
-                                                        className="w-6 h-6 rounded-full object-cover"
+                                                        className="w-5 h-5 rounded-full object-cover"
                                                     />
                                                 )}
-                                                <span className="text-xs font-semibold text-[#4F46E5] dark:text-dark-primary">
+                                                <span className="text-xs font-semibold text-[#0D7C53]">
                                                     {category?.name || 'Uncategorized'}
                                                 </span>
                                             </div>
-                                            {/* Quick View Button - Improved */}
+
+                                            {/* Quick View Button */}
                                             <button
                                                 onClick={() => handleItemClick(item)}
                                                 className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md text-gray-800 px-6 py-2.5 rounded-full font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-[#0D7C53] hover:text-white shadow-lg border border-white/30 hover:scale-105"
@@ -341,29 +348,29 @@ const Favourite = () => {
                                                 </h3>
                                             </div>
 
-                                            <p className="text-white/80 text-base mb-2 line-clamp-2">
+                                            <p className="text-white/80 text-sm mb-2 line-clamp-2">
                                                 {item.description}
                                             </p>
 
                                             <div className="flex items-center justify-between pt-1 border-t border-white/20">
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-xl font-bold text-white">
-                                                        ₹{item.price.toFixed(2)}
+                                                        ₹{displayPrice.toFixed(2)}
                                                     </span>
-                                                    {item.originalPrice && (
+                                                    {item.discountPrice && item.discountPrice < item.price && (
                                                         <span className="text-sm text-white/50 line-through">
-                                                            ₹{item.originalPrice.toFixed(2)}
+                                                            ₹{originalPrice.toFixed(2)}
                                                         </span>
                                                     )}
                                                 </div>
                                             </div>
 
-                                            {/* Add to Cart Button - Improved */}
+                                            {/* Add to Cart Button */}
                                             <button
                                                 onClick={(e) => handleAddToCart(item, e)}
                                                 className={`w-full mt-2 font-medium py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group/btn ${isAdded
-                                                    ? "bg-emerald-500 text-white hover:bg-emerald-600"
-                                                    : "bg-gradient-to-r from-[#0D7C53] to-[#169466] text-white hover:shadow-lg hover:shadow-[#0D7C53]/30 hover:scale-[1.02]"
+                                                        ? "bg-emerald-500 text-white hover:bg-emerald-600"
+                                                        : "bg-gradient-to-r from-[#0D7C53] to-[#169466] text-white hover:shadow-lg hover:shadow-[#0D7C53]/30 hover:scale-[1.02]"
                                                     }`}
                                             >
                                                 {isAdded ? (
@@ -424,7 +431,7 @@ const Favourite = () => {
             </div>
 
             {/* CSS Animations */}
-            <style >{`
+            <style>{`
                 @keyframes pulse-slow {
                     0%, 100% { transform: scale(1); opacity: 0.5; }
                     50% { transform: scale(1.1); opacity: 0.8; }

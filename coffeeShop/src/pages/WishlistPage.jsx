@@ -48,17 +48,25 @@ const WishlistPage = () => {
         };
     }, []);
 
-    // ✅ Handle add to cart from wishlist
+    // ✅ Handle add to cart from wishlist - FIXED: Added amount field
     const handleAddToCart = async (item) => {
         if (!isAuthenticated) {
             navigate('/login');
             return;
         }
 
+        // Get coffee data
+        const coffeeData = item.coffee || item;
+        const coffeeId = coffeeData._id || item._id || item.id;
+        
+        // Calculate amount (use discountPrice if available, otherwise use price)
+        const amount = coffeeData.discountPrice || coffeeData.price;
+
         try {
             const result = await dispatch(addToCart({
-                coffeeId: item.coffee?._id || item._id || item.id, // ✅ Backend structure
-                quantity: 1
+                coffeeId: coffeeId,
+                quantity: 1,
+                amount: amount // ✅ Added amount field
             }));
 
             if (addToCart.fulfilled.match(result)) {
@@ -73,7 +81,7 @@ const WishlistPage = () => {
         }
     };
 
-    // ✅ Handle add all to cart
+    // ✅ Handle add all to cart - FIXED: Added amount field
     const handleAddAllToCart = async () => {
         if (wishlistItems.length === 0) return;
 
@@ -85,9 +93,14 @@ const WishlistPage = () => {
         setIsLoading(true);
         try {
             for (const item of wishlistItems) {
+                const coffeeData = item.coffee || item;
+                const coffeeId = coffeeData._id || item._id || item.id;
+                const amount = coffeeData.discountPrice || coffeeData.price;
+                
                 await dispatch(addToCart({
-                    coffeeId: item.coffee?._id || item._id || item.id,
-                    quantity: 1
+                    coffeeId: coffeeId,
+                    quantity: 1,
+                    amount: amount // ✅ Added amount field
                 }));
             }
             await dispatch(getCart());
@@ -228,6 +241,10 @@ const WishlistPage = () => {
                                 const coffeeData = item.coffee || item;
                                 const itemId = item._id;
                                 const coffeeId = coffeeData._id || itemId;
+                                
+                                // Calculate display price
+                                const displayPrice = coffeeData.discountPrice || coffeeData.price || 0;
+                                const originalPrice = coffeeData.price;
 
                                 return (
                                     <div
@@ -267,11 +284,11 @@ const WishlistPage = () => {
                                                 <div className="flex flex-row items-center justify-between mt-2 sm:mt-3 gap-2">
                                                     <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
                                                         <span className="font-bold text-[#0D7C53] text-sm sm:text-base md:text-lg">
-                                                            ₹{(coffeeData.discountPrice || coffeeData.price || 0).toFixed(2)}
+                                                            ₹{displayPrice.toFixed(2)}
                                                         </span>
-                                                        {coffeeData.discountPrice && (
+                                                        {coffeeData.discountPrice && coffeeData.discountPrice < coffeeData.price && (
                                                             <span className="text-[10px] sm:text-xs text-gray-400 line-through">
-                                                                ₹{coffeeData.price.toFixed(2)}
+                                                                ₹{originalPrice.toFixed(2)}
                                                             </span>
                                                         )}
                                                     </div>
@@ -320,7 +337,8 @@ const WishlistPage = () => {
                                         <span className="font-medium text-gray-800">
                                             ₹{wishlistItems.reduce((sum, item) => {
                                                 const coffee = item.coffee || item;
-                                                return sum + (coffee.discountPrice || coffee.price || 0);
+                                                const price = coffee.discountPrice || coffee.price || 0;
+                                                return sum + price;
                                             }, 0).toFixed(2)}
                                         </span>
                                     </div>

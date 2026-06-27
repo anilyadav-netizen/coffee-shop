@@ -25,7 +25,7 @@ router.post(
 
 // Get Logged-in User Orders
 router.get(
-  "/my-orders",
+  "/orderDetails",
   protect,
   getMyOrders
 );

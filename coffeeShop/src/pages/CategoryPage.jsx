@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux"
 import {
   COFFEE_PRODUCTS,
   getDiscountPercentage,
@@ -67,16 +67,20 @@ const CategoryPage = () => {
     );
   };
 
-  // ✅ Handle Add to Cart from Card - FIXED: Use product._id instead of product.id
+  // ✅ Handle Add to Cart from Card - FIXED: Added amount field
   const handleAddToCart = (product, e) => {
     e.stopPropagation();
 
     // Use _id or id consistently
     const productId = product._id || product.id;
+    
+    // Calculate the amount (use discountPrice if available, otherwise use price)
+    const amount = product.discountPrice || product.price;
 
     dispatch(addToCart({
       coffeeId: productId,
-      quantity: 1
+      quantity: 1,
+      amount: amount // ✅ Added amount field
     }))
       .unwrap()
       .then(() => {
@@ -95,26 +99,33 @@ const CategoryPage = () => {
       })
       .catch((error) => {
         console.error("Failed to add to cart:", error);
+        toast.error("Failed to add to cart");
       });
   };
 
-  // ✅ Handle Add to Cart from Modal - FIXED: Use product._id
+  // ✅ Handle Add to Cart from Modal - FIXED: Added amount field with quantity
   const handleModalAddToCart = () => {
     if (!selectedProduct) return;
 
     const productId = selectedProduct._id || selectedProduct.id;
+    
+    // Calculate the amount (use discountPrice if available, otherwise use price)
+    const unitPrice = selectedProduct.discountPrice || selectedProduct.price;
+    const totalAmount = unitPrice * modalQuantity;
 
     dispatch(addToCart({
       coffeeId: productId,
-      quantity: modalQuantity
+      quantity: modalQuantity,
+      amount: totalAmount // ✅ Added amount field with total
     }))
       .unwrap()
       .then(() => {
         setSelectedProduct(null);
         setModalQuantity(1);
+        toast.success("Added to cart successfully!");
       })
       .catch((error) => {
-        console.error("Failed to add to cart:", error);
+        toast.error("Failed to add to cart");
       });
   };
 
@@ -167,44 +178,58 @@ const CategoryPage = () => {
     if (!selectedProduct) return;
     const productId = selectedProduct._id || selectedProduct.id;
 
-    dispatch(toggleWishlist({ coffee: productId }))
-      .unwrap()
-      .catch((error) => {
-        console.error("Failed to toggle wishlist:", error);
-      });
+    // Fix: Use addToWishlist/removeFromWishlist instead of toggleWishlist
+    const alreadyInWishlist = isInWishlist(productId);
+
+    if (alreadyInWishlist) {
+      const existingItem = wishlistItems.find(
+        (item) =>
+          (item.coffee?._id || item.coffee?.id || item._id || item.id) === productId
+      );
+      
+      if (existingItem) {
+        dispatch(removeFromWishlist(existingItem._id))
+          .unwrap()
+          .then(() => {
+            toast.info("Removed from wishlist");
+          })
+          .catch((error) => {
+            toast.error("Failed to remove from wishlist");
+          });
+      }
+    } else {
+      dispatch(addToWishlist({ coffeeId: productId }))
+        .unwrap()
+        .then(() => {
+          toast.success("Added to wishlist");
+        })
+        .catch((error) => {
+          toast.error("Failed to add to wishlist");
+        });
+    }
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+      </div>
+    );
+  }
 
   return (
     <>
       <section className="relative px-4 overflow-hidden">
-        {/* Background */}
-        {/* <div className="absolute inset-0 -z-10">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />
-          <div className="absolute inset-0 bg-gradient-to-tr from-[#EDE0D4]/20 via-transparent to-[#D4B896]/10" />
-          <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-amber-400/15 rounded-full blur-[120px] animate-pulse-slow" />
-          <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-amber-700/10 rounded-full blur-[100px] animate-pulse-slow-delay" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[150px] animate-pulse-slow" />
-          <div className="absolute inset-0 pointer-events-none opacity-10">
-            <div className="absolute top-20 left-10 text-6xl rotate-12 animate-float">🫘</div>
-            <div className="absolute bottom-32 right-20 text-6xl -rotate-12 animate-float-delay">🫘</div>
-            <div className="absolute top-1/3 right-1/4 text-4xl rotate-45 animate-float-slow">☕</div>
-            <div className="absolute bottom-1/4 left-1/3 text-5xl -rotate-45 animate-float-delay">🫘</div>
-          </div>
-        </div> */}
-
         <div className="max-w-[104rem] mx-auto relative">
           {/* Header */}
           <div className="rounded-2xl p-8 mb-2 text-center">
-            {/* <span className="inline-block px-4 py-1.5 bg-green-100/0 backdrop-blur-sm text-white text-xs font-semibold tracking-wider uppercase rounded-full mb-3">
-              Brewed Perfection
-            </span> */}
             <h2 className="text-2xl md:text-5xl font-extrabold text-white tracking-tight">
               Our Coffee Collection
             </h2>
             <p className="text-gray-300 mt-1 max-w-2xl mx-auto">
               Freshly brewed happiness in every cup — discover your perfect blend.
             </p>
-
           </div>
 
           {/* Swiper */}
@@ -277,15 +302,8 @@ const CategoryPage = () => {
                       </div>
                     </div>
 
-                    {/* Content Area - PERFECT BACKGROUND */}
+                    {/* Content Area */}
                     <div className="p-4 bg-gradient-to-b from-white/15 to-white/10 backdrop-blur-sm">
-                      {/* <div className="flex items-center gap-1.5 mb-2">
-                        <CoffeeIcon />
-                        <span className="text-xs font-medium text-white uppercase tracking-wider">
-                          Specialty Blend
-                        </span>
-                      </div> */}
-
                       <h3 className="font-bold text-lg text-white line-clamp-1 transition-colors">
                         {product.name}
                       </h3>
@@ -316,7 +334,7 @@ const CategoryPage = () => {
                       </div>
 
                       <button
-                        className="mt-2 w-full bg-gradient-to-r bg-emerald-500 hover:bg-emerald-600 text-white  from-[#0D7C53] to-[#169466] py-2.5 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 group/btn"
+                        className="mt-2 w-full bg-gradient-to-r bg-emerald-500 hover:bg-emerald-600 text-white from-[#0D7C53] to-[#169466] py-2.5 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 group/btn"
                         onClick={(e) => handleAddToCart(product, e)}
                       >
                         <svg className="w-4 h-4 group-hover/btn:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -428,20 +446,6 @@ const CategoryPage = () => {
                   </span>
                 </div>
               )}
-
-              {/* <div className="mt-4">
-                <span className="text-xs font-semibold text-gray-700 block mb-1.5">Select Size</span>
-                <div className="flex gap-1.5">
-                  {['250g', '500g', '1kg'].map((size) => (
-                    <button
-                      key={size}
-                      className="flex-1 py-1.5 px-2 rounded-lg border-2 border-gray-200 text-xs font-medium hover:border-[#0D7C53] hover:bg-green-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
-              </div> */}
 
               {/* Quantity and Add to Cart */}
               <div className="mt-4 flex gap-2">

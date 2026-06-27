@@ -168,14 +168,18 @@ const MenuPage = () => {
         }
     }, [searchTerm, categoryProducts]);
 
-    // Handle Add to Cart
+    // ✅ Handle Add to Cart - FIXED: Added amount field
     const handleAddToCart = (item, e) => {
         e.stopPropagation();
+
+        // Calculate the amount (use discountPrice if available, otherwise use price)
+        const amount = item.discountPrice || item.price;
 
         dispatch(
             addToCart({
                 coffeeId: item._id,
                 quantity: 1,
+                amount: amount // ✅ Added amount field
             })
         )
             .unwrap()
@@ -187,20 +191,27 @@ const MenuPage = () => {
             });
     };
 
+    // ✅ Check if item is in wishlist - FIXED: Consistent ID handling
     const isInWishlist = (productId) => {
         return wishlistItems?.some(
-            (item) =>
-                (item.coffee?._id || item.coffee) === productId
+            (item) => {
+                const wishCoffeeId = item.coffee?._id || item.coffee;
+                return wishCoffeeId === productId;
+            }
         );
     };
 
+    // ✅ Handle Wishlist Toggle - FIXED: Consistent ID handling
     const handleWishlistToggle = (item, e) => {
         e.stopPropagation();
 
         const coffeeId = item._id;
 
         const wishlistItem = wishlistItems.find(
-            (w) => (w.coffee?._id || w.coffee) === coffeeId
+            (w) => {
+                const wishCoffeeId = w.coffee?._id || w.coffee;
+                return wishCoffeeId === coffeeId;
+            }
         );
 
         if (wishlistItem) {
@@ -533,6 +544,10 @@ const MenuPage = () => {
                                     const isEven = index % 2 === 0;
                                     const direction = isEven ? 'left' : 'right';
 
+                                    // Calculate display price
+                                    const displayPrice = item.discountPrice || item.price;
+                                    const originalPrice = item.price;
+
                                     return (
                                         <div
                                             key={item._id}
@@ -559,6 +574,17 @@ const MenuPage = () => {
                                                 />
 
                                                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                                                {/* Discount Badge */}
+                                                {item.discountPrice && item.discountPrice < item.price && (
+                                                    <div className="absolute top-2 sm:top-3 left-2 sm:left-3 z-10 bg-gradient-to-r from-green-600 to-[#0D7C53] text-white text-[8px] sm:text-xs px-2 sm:px-3 py-0.5 sm:py-1.5 rounded-full font-bold shadow-lg flex items-center gap-0.5 sm:gap-1">
+                                                        <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
+                                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                                            <span className="relative inline-flex rounded-full h-full w-full bg-white"></span>
+                                                        </span>
+                                                        {Math.round(((item.price - item.discountPrice) / item.price) * 100)}% OFF
+                                                    </div>
+                                                )}
 
                                                 {item.isFeatured && (
                                                     <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-gradient-to-r from-[#0D7C53] to-green-500 text-white text-[8px] sm:text-xs font-bold px-2 sm:px-3 py-0.5 sm:py-1.5 rounded-full shadow-md flex items-center gap-0.5 sm:gap-1 backdrop-blur-sm">
@@ -603,11 +629,11 @@ const MenuPage = () => {
                                                 <div className="flex items-center justify-between border-t border-white/10 pt-2 mt-2">
                                                     <div className="flex items-center gap-1 sm:gap-2">
                                                         <span className="text-base sm:text-lg md:text-xl font-bold text-white">
-                                                            ₹{item.price.toFixed(2)}
+                                                            ₹{displayPrice.toFixed(2)}
                                                         </span>
-                                                        {item.originalPrice && (
+                                                        {item.discountPrice && item.discountPrice < item.price && (
                                                             <span className="text-[8px] sm:text-xs text-white/40 line-through">
-                                                                ₹{item.originalPrice.toFixed(2)}
+                                                                ₹{originalPrice.toFixed(2)}
                                                             </span>
                                                         )}
                                                     </div>
