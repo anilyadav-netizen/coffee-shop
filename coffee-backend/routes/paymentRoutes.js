@@ -6,18 +6,28 @@ const protect = require("../middleware/authMiddleware");
 const {
   createOrder,
   verifyPayment,
+  getMyOrders,
 } = require("../controllers/paymentController");
 
+// Create Razorpay Order
 router.post(
   "/create-order",
   protect,
   createOrder
 );
 
+// Verify Payment
 router.post(
   "/verify-payment",
   protect,
   verifyPayment
+);
+
+// Get Logged-in User Orders
+router.get(
+  "/my-orders",
+  protect,
+  getMyOrders
 );
 
 module.exports = router;

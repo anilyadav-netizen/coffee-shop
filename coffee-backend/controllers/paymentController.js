@@ -20,7 +20,6 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ message: "Cart is empty" });
     }
 
-    // ✅ Total amount: ہر item کی price × quantity
     const totalAmount = cart.items.reduce((sum, item) => {
       return sum + item.coffee.price * item.quantity;
     }, 0);
@@ -33,7 +32,6 @@ exports.createOrder = async (req, res) => {
 
     const order = await razorpay.orders.create(options);
 
-    // Payment record بنائیں
     await Payment.create({
       user: req.user._id,
       razorpayOrderId: order.id,
