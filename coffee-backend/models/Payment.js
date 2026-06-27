@@ -5,17 +5,18 @@ const paymentSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: true,
     },
 
-    coffee: {
+    cart: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Coffee",
+      ref: "Cart",          // ✅ coffee کی جگہ cart
       required: true,
     },
 
     razorpayOrderId: String,
 
-    amount: Number,
+    amount: Number,         // cart کا total amount
 
     status: {
       type: String,
