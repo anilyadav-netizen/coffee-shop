@@ -37,7 +37,7 @@ const Benefits = () => {
 
             {/* ========== CONTENT ========== */}
             <div className="max-w-[104rem] mx-auto relative z-10">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center backdrop-blur-xl p-6 rounded-xl">
 
                     {/* ========== LEFT SIDE - IMAGE WITH GLASS EFFECT ========== */}
                     <div className="relative order-1 lg:order-1">

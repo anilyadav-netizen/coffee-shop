@@ -105,7 +105,7 @@ const Journey = () => {
                 </div>
 
                 {/* ========== MAIN CONTENT - IMAGE LEFT + STEPS RIGHT ========== */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start backdrop-blur-xl rounded-3xl p-10">
                     {/* ===== LEFT SIDE - IMAGE ===== */}
                     <div className="relative order-2 lg:order-1">
                         <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-black/5 border border-white/30 backdrop-blur-xl bg-white/10">

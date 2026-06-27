@@ -2,19 +2,19 @@ import { useDispatch, useSelector } from "react-redux";
 import { getProducts } from "../../redux/Slicer/adminProductSlice";
 import { getCategories } from "../../redux/Slicer/categorySlice";
 import { useEffect, useState } from "react";
-import { 
-  FiPackage, 
-  FiGrid, 
-  FiUsers, 
-  FiShoppingBag, 
-  FiTrendingUp, 
-  FiDollarSign,
-  FiClock,
-  FiStar,
-  FiArrowUp,
-  FiArrowDown,
-  FiCoffee,
-  FiHeart
+import {
+    FiPackage,
+    FiGrid,
+    FiUsers,
+    FiShoppingBag,
+    FiTrendingUp,
+    FiDollarSign,
+    FiClock,
+    FiStar,
+    FiArrowUp,
+    FiArrowDown,
+    FiCoffee,
+    FiHeart
 } from "react-icons/fi";
 
 const Dashboard = () => {
@@ -31,7 +31,6 @@ const Dashboard = () => {
     useEffect(() => {
         dispatch(getProducts());
         dispatch(getCategories());
-        // Simulate fetching additional stats
         setStats({
             totalRevenue: 45280,
             ordersToday: 24,
@@ -48,64 +47,58 @@ const Dashboard = () => {
         });
     }, [dispatch]);
 
-    // Calculate total products and categories
     const totalProducts = products?.length || 0;
     const totalCategories = categories?.length || 0;
 
-    // Stats cards data
     const statCards = [
         {
             title: "Total Products",
             value: totalProducts,
             icon: FiPackage,
-            color: "from-blue-500 to-blue-600",
-            bgColor: "bg-blue-50 dark:bg-blue-900/20",
-            textColor: "text-blue-600 dark:text-blue-400"
+            bgColor: "bg-[#E2E8F0]/30 dark:bg-dark-card/50",
+            textColor: "text-[#4F46E5] dark:text-dark-primary"
         },
         {
             title: "Categories",
             value: totalCategories,
             icon: FiGrid,
-            color: "from-green-500 to-green-600",
-            bgColor: "bg-green-50 dark:bg-green-900/20",
-            textColor: "text-green-600 dark:text-green-400"
+            bgColor: "bg-[#E2E8F0]/30 dark:bg-dark-card/50",
+            textColor: "text-[#7C3AED] dark:text-dark-accent"
         },
         {
             title: "Total Users",
             value: "0",
             icon: FiUsers,
-            color: "from-purple-500 to-purple-600",
-            bgColor: "bg-purple-50 dark:bg-purple-900/20",
-            textColor: "text-purple-600 dark:text-purple-400"
+            bgColor: "bg-[#E2E8F0]/30 dark:bg-dark-card/50",
+            textColor: "text-[#4F46E5] dark:text-dark-primary"
         },
         {
             title: "Revenue Today",
             value: `$${stats.totalRevenue.toLocaleString()}`,
             icon: FiDollarSign,
-            color: "from-yellow-500 to-yellow-600",
-            bgColor: "bg-yellow-50 dark:bg-yellow-900/20",
-            textColor: "text-yellow-600 dark:text-yellow-400"
+            bgColor: "bg-[#E2E8F0]/30 dark:bg-dark-card/50",
+            textColor: "text-[#7C3AED] dark:text-dark-accent"
         }
     ];
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 bg-[#F8FAFC] dark:bg-dark-bg">
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-[#2C1810] dark:text-[#F5EDE3] flex items-center gap-3">
-                        <FiCoffee className="text-[#8B7355]" />
+                    <h1 className="text-3xl font-bold flex items-center gap-3 text-[#0F172A] dark:text-dark-heading">
+                        <FiCoffee className="text-[#4F46E5] dark:text-dark-primary" />
                         Welcome Back!
                     </h1>
-                    <p className="text-gray-500 dark:text-gray-400 mt-1">
+                    <p className="mt-1 text-[#64748B] dark:text-dark-text">
                         Here's what's happening with your food business today
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <div className="bg-white dark:bg-[#261810] px-4 py-2 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
-                        <span className="text-sm text-gray-500 dark:text-gray-400">Today's Date</span>
-                        <p className="font-medium text-gray-800 dark:text-white">
-                            {new Date().toLocaleDateString('en-US', { 
+                    <div className="px-4 py-2 rounded-lg shadow-sm border bg-white dark:bg-dark-card border-[#E2E8F0] dark:border-dark-border">
+                        <span className="text-sm text-[#64748B] dark:text-dark-text">Today's Date</span>
+                        <p className="font-medium text-[#0F172A] dark:text-dark-heading">
+                            {new Date().toLocaleDateString('en-US', {
                                 weekday: 'long',
                                 year: 'numeric',
                                 month: 'long',
@@ -121,16 +114,16 @@ const Dashboard = () => {
                 {statCards.map((stat, index) => {
                     const Icon = stat.icon;
                     return (
-                        <div 
+                        <div
                             key={index}
-                            className="bg-white dark:bg-[#261810] p-6 rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300 border border-gray-100 dark:border-gray-700"
+                            className="p-6 rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300 border bg-white dark:bg-dark-card border-[#E2E8F0] dark:border-dark-border"
                         >
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                                    <p className="text-sm font-medium text-[#64748B] dark:text-dark-text">
                                         {stat.title}
                                     </p>
-                                    <p className="text-2xl font-bold mt-2 text-gray-800 dark:text-white">
+                                    <p className="text-2xl font-bold mt-2 text-[#0F172A] dark:text-dark-heading">
                                         {stat.value}
                                     </p>
                                 </div>
@@ -139,11 +132,11 @@ const Dashboard = () => {
                                 </div>
                             </div>
                             <div className="mt-4 flex items-center gap-2">
-                                <span className="text-green-500 text-xs font-medium flex items-center gap-1">
+                                <span className="text-[#4F46E5] dark:text-dark-primary text-xs font-medium flex items-center gap-1">
                                     <FiArrowUp className="w-3 h-3" />
                                     12.5%
                                 </span>
-                                <span className="text-gray-400 text-xs">vs last week</span>
+                                <span className="text-xs text-[#64748B] dark:text-dark-text">vs last week</span>
                             </div>
                         </div>
                     );
@@ -152,7 +145,7 @@ const Dashboard = () => {
 
             {/* Quick Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-gradient-to-br from-orange-500 to-red-500 p-6 rounded-2xl text-white">
+                <div className="p-6 rounded-2xl text-white bg-gradient-to-br from-[#4F46E5] to-[#6366F1] dark:from-dark-primary dark:to-[#818CF8]">
                     <div className="flex items-center gap-3">
                         <FiShoppingBag className="w-8 h-8" />
                         <div>
@@ -166,7 +159,7 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-purple-500 to-pink-500 p-6 rounded-2xl text-white">
+                <div className="p-6 rounded-2xl text-white bg-gradient-to-br from-[#7C3AED] to-[#8B5CF6] dark:from-dark-accent dark:to-[#A78BFA]">
                     <div className="flex items-center gap-3">
                         <FiTrendingUp className="w-8 h-8" />
                         <div>
@@ -180,7 +173,7 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-yellow-400 to-orange-400 p-6 rounded-2xl text-white">
+                <div className="p-6 rounded-2xl text-white bg-gradient-to-br from-[#4F46E5] to-[#7C3AED] dark:from-dark-primary dark:to-dark-accent">
                     <div className="flex items-center gap-3">
                         <FiStar className="w-8 h-8" />
                         <div>
@@ -198,23 +191,25 @@ const Dashboard = () => {
             {/* Popular Items & Recent Orders */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Popular Items */}
-                <div className="bg-white dark:bg-[#261810] p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-                    <h3 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                        <FiTrendingUp className="text-orange-500" />
+                <div className="p-6 rounded-2xl shadow-sm border bg-white dark:bg-dark-card border-[#E2E8F0] dark:border-dark-border">
+                    <h3 className="text-lg font-bold flex items-center gap-2 text-[#0F172A] dark:text-dark-heading">
+                        <FiTrendingUp className="text-[#4F46E5] dark:text-dark-primary" />
                         Popular Items
                     </h3>
                     <div className="mt-4 space-y-3">
                         {stats.popularItems.map((item, idx) => (
-                            <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+                            <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-[#F8FAFC] dark:bg-dark-bg/50">
                                 <div className="flex items-center gap-3">
-                                    <span className="text-sm font-bold text-gray-400">{idx + 1}</span>
+                                    <span className="text-sm font-bold text-[#64748B] dark:text-dark-text">{idx + 1}</span>
                                     <div>
-                                        <p className="font-medium text-gray-800 dark:text-white">{item.name}</p>
-                                        <p className="text-sm text-gray-500">{item.orders} orders</p>
+                                        <p className="font-medium text-[#0F172A] dark:text-dark-heading">{item.name}</p>
+                                        <p className="text-sm text-[#64748B] dark:text-dark-text">{item.orders} orders</p>
                                     </div>
                                 </div>
                                 <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                                    item.growth > 0 ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
+                                    item.growth > 0 
+                                        ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400' 
+                                        : 'bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400'
                                 }`}>
                                     {item.growth > 0 ? <FiArrowUp className="w-3 h-3" /> : <FiArrowDown className="w-3 h-3" />}
                                     {Math.abs(item.growth)}%
@@ -225,24 +220,26 @@ const Dashboard = () => {
                 </div>
 
                 {/* Recent Orders */}
-                <div className="bg-white dark:bg-[#261810] p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-                    <h3 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                        <FiClock className="text-blue-500" />
+                <div className="p-6 rounded-2xl shadow-sm border bg-white dark:bg-dark-card border-[#E2E8F0] dark:border-dark-border">
+                    <h3 className="text-lg font-bold flex items-center gap-2 text-[#0F172A] dark:text-dark-heading">
+                        <FiClock className="text-[#4F46E5] dark:text-dark-primary" />
                         Recent Orders
                     </h3>
                     <div className="mt-4 space-y-3">
                         {stats.recentOrders.map((order) => (
-                            <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+                            <div key={order.id} className="flex items-center justify-between p-3 rounded-xl bg-[#F8FAFC] dark:bg-dark-bg/50">
                                 <div>
-                                    <p className="font-medium text-gray-800 dark:text-white">{order.id}</p>
-                                    <p className="text-sm text-gray-500">{order.customer} • {order.items} items</p>
+                                    <p className="font-medium text-[#0F172A] dark:text-dark-heading">{order.id}</p>
+                                    <p className="text-sm text-[#64748B] dark:text-dark-text">{order.customer} • {order.items} items</p>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <span className="font-bold text-gray-800 dark:text-white">${order.total}</span>
+                                    <span className="font-bold text-[#0F172A] dark:text-dark-heading">${order.total}</span>
                                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                        order.status === 'Completed' ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' :
-                                        order.status === 'Processing' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
-                                        'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400'
+                                        order.status === 'Completed' 
+                                            ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400'
+                                            : order.status === 'Processing' 
+                                            ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400'
+                                            : 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400'
                                     }`}>
                                         {order.status}
                                     </span>
@@ -254,7 +251,7 @@ const Dashboard = () => {
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-gradient-to-br from-[#2C1810] to-[#4A2C1A] dark:from-[#1A0F0A] dark:to-[#2C1810] p-6 rounded-2xl text-white">
+            <div className="p-6 rounded-2xl text-white bg-gradient-to-br from-[#4F46E5] to-[#7C3AED] dark:from-dark-primary dark:to-dark-accent">
                 <h3 className="text-lg font-bold mb-4">Quick Actions</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <button className="bg-white/10 hover:bg-white/20 transition-colors p-4 rounded-xl text-center backdrop-blur-sm">

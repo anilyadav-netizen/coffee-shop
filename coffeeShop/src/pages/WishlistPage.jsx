@@ -98,7 +98,6 @@ const WishlistPage = () => {
         }
     };
 
-    // ✅ Handle remove from wishlist (Redux)
     const handleRemove = (itemId) => {
         dispatch(removeFromWishlist(itemId))
             .unwrap()
@@ -110,7 +109,6 @@ const WishlistPage = () => {
             });
     };
 
-    // ✅ Handle clear wishlist
     const handleClearWishlist = () => {
         if (window.confirm('Remove all items from wishlist?')) {
             // ✅ Saare items ek-ek karke remove karo
@@ -120,7 +118,6 @@ const WishlistPage = () => {
         }
     };
 
-    // ✅ Handle continue shopping
     const handleContinueShopping = () => {
         navigate("/menu");
     };
