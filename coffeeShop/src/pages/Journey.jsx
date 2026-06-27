@@ -72,9 +72,9 @@ const Journey = () => {
     const currentStep = journeySteps[activeStep];
 
     return (
-        <section ref={sectionRef} className="relative py-6 px-4 overflow-hidden">
+        <section ref={sectionRef} className="relative py-2 md:py-6 px-4 overflow-hidden">
             {/* ========== GLASS BACKGROUND ========== */}
-            <div className="absolute inset-0 -z-10">
+            {/* <div className="absolute inset-0 -z-10">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />
                 <div className="absolute inset-0 bg-gradient-to-tr from-[#EDE0D4]/20 via-transparent to-[#D4B896]/10" />
                 <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-amber-400/15 rounded-full blur-[120px] animate-pulse-slow" />
@@ -83,25 +83,25 @@ const Journey = () => {
                     <div className="absolute top-20 left-10 text-6xl rotate-12 animate-float">🫘</div>
                     <div className="absolute bottom-32 right-20 text-6xl -rotate-12 animate-float-delay">☕</div>
                 </div>
-            </div>
+            </div> */}
 
             <div className="max-w-[104rem] mx-auto relative z-10">
                 {/* ========== HEADER ========== */}
-                <div className="text-center mb-12">
-                    <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10 backdrop-blur-sm px-4 py-1.5 rounded-full mb-4 border border-white/20">
-                        <span className="text-[#0D7C53] text-sm font-semibold tracking-wider">{sectionData.badge}</span>
+                <div className="text-center mb-8">
+                    <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10 backdrop-blur-sm rounded-full mb-2 border border-white/20">
+                        <span className="flex items-center gap-2 px-6 py-2.5 bg-[#0D7C53]/20 backdrop-blur-sm text-white rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30">{sectionData.badge}</span>
                     </div>
-                    <h2 className="text-3xl md:text-5xl font-bold text-gray-800">
+                    <h2 className="text-3xl md:text-5xl font-bold text-white">
                         {sectionData.title.split(' ').map((word, index) => (
                             word === sectionData.titleHighlight ?
                                 <span key={index} className="text-[#0D7C53]">{word} </span> :
                                 <span key={index}>{word} </span>
                         ))}
                     </h2>
-                    <p className="text-gray-500 mt-3 max-w-2xl mx-auto">
+                    <p className="text-gray-200 mt-3 max-w-2xl mx-auto">
                         {sectionData.subtitle}
                     </p>
-                    <div className="w-16 h-1 bg-[#0D7C53] mx-auto mt-4 rounded-full"></div>
+                    <div className="w-16 h-1 bg-[#0D7C53] mx-auto mt-2 rounded-full"></div>
                 </div>
 
                 {/* ========== MAIN CONTENT - IMAGE LEFT + STEPS RIGHT ========== */}
@@ -127,16 +127,16 @@ const Journey = () => {
 
                             {/* Duration Badge */}
                             <div className="absolute top-4 right-4 backdrop-blur-xl bg-white/40 border border-white/30 rounded-full px-4 py-1.5 shadow-xl flex items-center gap-2">
-                                <Clock className="w-4 h-4 text-[#0D7C53]" />
-                                <span className="text-sm font-medium text-gray-700">{currentStep.duration}</span>
+                                <Clock className="w-4 h-4 text-white" />
+                                <span className="text-sm font-medium text-gray-200">{currentStep.duration}</span>
                             </div>
                         </div>
                     </div>
 
                     {/* ===== RIGHT SIDE - VERTICAL STEP ROADMAP ===== */}
                     <div className="order-1 lg:order-2">
-                        <div className="backdrop-blur-xl bg-white/20 border border-white/30 rounded-3xl p-6 shadow-2xl shadow-black/5">
-                            <h3 className="text-xl font-bold text-gray-800 mb-6 text-center">
+                        <div className="backdrop-blur-xl border border-white/30 rounded-3xl p-6 shadow-2xl shadow-black/5">
+                            <h3 className="text-xl font-bold text-white mb-6 text-center">
                                 Journey Steps
                             </h3>
 
@@ -194,39 +194,39 @@ const Journey = () => {
                                                     <div className="flex items-center gap-2">
                                                         <span className={`
                                                             font-semibold text-sm transition-colors duration-300
-                                                            ${isActive ? 'text-gray-800' : isPast ? 'text-gray-600' : 'text-gray-500'}
+                                                            ${isActive ? 'text-white' : isPast ? 'text-white' : 'text-white'}
                                                         `}>
                                                             {step.title}
                                                         </span>
                                                         {isActive && (
-                                                            <span className="text-xs text-[#0D7C53] font-medium bg-[#0D7C53]/10 px-2 py-0.5 rounded-full">
+                                                            <span className="text-xs flex items-center gap-2 px-2 py-0.5 bg-[#0D7C53]/20 backdrop-blur-sm text-white rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30">
                                                                 Active
                                                             </span>
                                                         )}
                                                         {isPast && (
-                                                            <span className="text-xs text-green-600 font-medium bg-green-100/60 px-2 py-0.5 rounded-full">
+                                                            <span className="text-xs px-2 py-0.5 flex items-center gap-2 bg-[#0D7C53]/20 backdrop-blur-sm text-white rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30">
                                                                 Done
                                                             </span>
                                                         )}
                                                     </div>
                                                     <p className={`
                                                         text-xs mt-0.5 line-clamp-2 transition-colors duration-300
-                                                        ${isActive ? 'text-gray-600' : 'text-gray-400'}
+                                                        ${isActive ? 'text-gray-200' : 'text-gray-100'}
                                                     `}>
                                                         {step.subtitle}
                                                     </p>
                                                     {/* Show icon for active step */}
                                                     {isActive && (
                                                         <div className="flex items-center gap-1 mt-1">
-                                                            {getIcon(step.icon, "w-3.5 h-3.5 text-[#0D7C53]")}
-                                                            <span className="text-xs text-gray-500">{step.duration}</span>
+                                                            {getIcon(step.icon, "w-3.5 h-3.5 text-white")}
+                                                            <span className="text-xs text-gray-200">{step.duration}</span>
                                                         </div>
                                                     )}
                                                 </div>
 
                                                 {/* Arrow indicator for active */}
                                                 {isActive && (
-                                                    <ChevronRight className="w-5 h-5 text-[#0D7C53] flex-shrink-0 animate-pulse" />
+                                                    <ChevronRight className="w-5 h-5 text-white flex-shrink-0 animate-pulse" />
                                                 )}
                                             </button>
                                         );

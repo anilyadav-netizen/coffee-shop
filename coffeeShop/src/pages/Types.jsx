@@ -1,114 +1,103 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { CATEGORIES } from "../data/menuData";
+import { getCategories } from "../redux/Slicer/categorySlice";
+import { useDispatch, useSelector } from "react-redux";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 
 const Types = () => {
-    const navigate = useNavigate();
 
+    const dispatch = useDispatch()
+    const { categories } = useSelector(
+        (state) => state.category
+    )
+
+    useEffect(() => {
+        dispatch(getCategories())
+    }, [dispatch])
+    console.log(categories)
+
+    const navigate = useNavigate();
     const handleCategoryClick = (category) => {
         console.log("Selected:", category.name);
-        // Navigate to MenuPage with category ID
-        navigate(`/menu/${category.id}`);
+        navigate(`/menu/${category._id}`);
     };
 
     return (
-        <section className="relative px-4 overflow-hidden">
-            {/* ========== SAME GLASS EFFECT BACKGROUND ========== */}
-            <div className="absolute inset-0 -z-10">
-                {/* Main Gradient - Same as CategoryPage */}
-                <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />
-                
-                {/* Secondary Warm Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-[#EDE0D4]/20 via-transparent to-[#D4B896]/10" />
-
-                {/* Floating Glow 1 - Warm Gold */}
-                <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-amber-400/15 rounded-full blur-[120px] animate-pulse-slow" />
-
-                {/* Floating Glow 2 - Coffee Brown */}
-                <div className="absolute bottom-0 right-0 w-[350px] h-[350px] bg-amber-700/10 rounded-full blur-[100px] animate-pulse-slow-delay" />
-
-                {/* Decorative Beans - Same as CategoryPage */}
-                <div className="absolute inset-0 pointer-events-none opacity-10">
-                    <div className="absolute top-10 left-10 text-5xl rotate-12 animate-float">🫘</div>
-                    <div className="absolute bottom-10 right-10 text-5xl -rotate-12 animate-float-delay">☕</div>
-                </div>
-            </div>
-
-            {/* ========== CONTENT WITH GLASS EFFECT ========== */}
-            <div className="container mx-auto px-4 items-center justify-between text-center relative mb-6">
-                {/* Header - Glass Effect Same as CategoryPage */}
-                <div className="backdrop-blur-md rounded-2xl p-6 ">
-                    <h2 className="text-3xl font-bold text-[#0D7C53]">
+        <section className="relative px-2 overflow-hidden">
+            {/* ========== CONTENT ========== */}
+            <div className="container mx-auto relative">
+                {/* Header */}
+                <div className=" rounded-2xl p-6 text-center mb-3">
+                    <h2 className="text-4xl font-bold text-white">
                         Categories
                     </h2>
-                    <p className="text-gray-500 text-sm mt-1">
+                    <p className="text-gray-300 text-sm mt-1">
                         Explore our delicious coffee categories
                     </p>
                 </div>
 
-                {/* Categories Grid - Glass Cards */}
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
-                    {CATEGORIES.map((category) => {
-                        const Icon = category.icon;
-
-                        return (
+                {/* Swiper Slider */}
+                <Swiper
+                    modules={[Autoplay]}
+                    navigation
+                    pagination={{ clickable: true }}
+                    autoplay={{
+                        delay: 3000,
+                        disableOnInteraction: false,
+                    }}
+                    loop={true}
+                    breakpoints={{
+                        320: {
+                            slidesPerView: 3,
+                            spaceBetween: 10,
+                        },
+                        640: {
+                            slidesPerView: 4,
+                            spaceBetween: 15,
+                        },
+                        768: {
+                            slidesPerView: 5,
+                            spaceBetween: 20,
+                        },
+                        1024: {
+                            slidesPerView: 7,
+                            spaceBetween: 25,
+                        },
+                        1280: {
+                            slidesPerView: 9,
+                            spaceBetween: 30,
+                        },
+                    }}
+                    className="mySwiper"
+                >
+                    {categories.map((category) => (
+                        <SwiperSlide key={category._id}>
                             <div
-                                key={category.id}
                                 onClick={() => handleCategoryClick(category)}
-                                className="backdrop-blur-md bg-white/40 border border-white/30 rounded-2xl px-4 py-3 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-3 md:gap-5 cursor-pointer hover:scale-105 active:scale-95"
+                                className="flex flex-col items-center justify-center cursor-pointer hover:scale-105 transition-transform duration-300"
                             >
-                                {/* Icon LEFT */}
-                                <Icon className="text-2xl text-green-400 flex-shrink-0" />
+                                {/* Image - Circle */}
+                                <div className="w-20 h-20 md:w-24 md:h-24 lg:w-[108px] lg:h-[108px] rounded-full overflow-hidden border-4 border-white/50 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                                    <img
+                                        src={category.icon}
+                                        alt={category.name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
 
-                                {/* Title RIGHT */}
-                                <h3 className="font-semibold text-green-700 dark:text-white text-lg">
+                                {/* Text - Niche (Alag se) */}
+                                <h3 className="mt-2 text-white font-semibold text-base md:text-lg lg:text-[18px] text-center">
                                     {category.name}
                                 </h3>
                             </div>
-                        );
-                    })}
-                </div>
+                        </SwiperSlide>
+                    ))}
+                </Swiper>
             </div>
-
-            {/* ========== SAME CSS ANIMATIONS ========== */}
-            <style 
-            >{`
-                @keyframes pulse-slow {
-                    0%, 100% { transform: scale(1); opacity: 0.5; }
-                    50% { transform: scale(1.1); opacity: 0.8; }
-                }
-                
-                @keyframes pulse-slow-delay {
-                    0%, 100% { transform: scale(1); opacity: 0.5; }
-                    50% { transform: scale(1.15); opacity: 0.7; }
-                }
-                
-                @keyframes float {
-                    0%, 100% { transform: translateY(0px) rotate(12deg); }
-                    50% { transform: translateY(-20px) rotate(15deg); }
-                }
-                
-                @keyframes float-delay {
-                    0%, 100% { transform: translateY(0px) rotate(-12deg); }
-                    50% { transform: translateY(20px) rotate(-15deg); }
-                }
-                
-                .animate-pulse-slow {
-                    animation: pulse-slow 8s ease-in-out infinite;
-                }
-                
-                .animate-pulse-slow-delay {
-                    animation: pulse-slow-delay 10s ease-in-out infinite;
-                }
-                
-                .animate-float {
-                    animation: float 6s ease-in-out infinite;
-                }
-                
-                .animate-float-delay {
-                    animation: float-delay 7s ease-in-out infinite;
-                }
-            `}</style>
         </section>
     );
 };

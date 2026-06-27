@@ -5,7 +5,7 @@ import {
   getDiscountPercentage,
 } from "../data/coffeeData";
 import { addToCart } from "../redux/Slicer/cartSlice";
-import { toggleWishlist, getWishlist, addToWishlist } from "../redux/Slicer/wishlistSlice";
+import { toggleWishlist, getWishlist, addToWishlist, removeFromWishlist } from "../redux/Slicer/wishlistSlice";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import { getProducts } from "../redux/Slicer/adminProductSlice";
@@ -13,6 +13,7 @@ import { getProducts } from "../redux/Slicer/adminProductSlice";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import { toast } from "react-toastify";
 
 // Icons
 const HeartIcon = ({ isWishlisted = false, className = "" }) => (
@@ -33,8 +34,8 @@ const CoffeeIcon = () => (
 );
 
 const CategoryPage = () => {
-
   const dispatch = useDispatch();
+
   const { products, loading } = useSelector((state) => state.adminProducts);
 
   useEffect(() => {
@@ -69,10 +70,10 @@ const CategoryPage = () => {
   // ✅ Handle Add to Cart from Card - FIXED: Use product._id instead of product.id
   const handleAddToCart = (product, e) => {
     e.stopPropagation();
-    
+
     // Use _id or id consistently
     const productId = product._id || product.id;
-    
+
     dispatch(addToCart({
       coffeeId: productId,
       quantity: 1
@@ -100,9 +101,9 @@ const CategoryPage = () => {
   // ✅ Handle Add to Cart from Modal - FIXED: Use product._id
   const handleModalAddToCart = () => {
     if (!selectedProduct) return;
-    
+
     const productId = selectedProduct._id || selectedProduct.id;
-    
+
     dispatch(addToCart({
       coffeeId: productId,
       quantity: modalQuantity
@@ -125,21 +126,47 @@ const CategoryPage = () => {
   // ✅ Handle Wishlist Toggle (Redux) - FIXED: Consistent ID
   const handleWishlistToggle = (product, e) => {
     e.stopPropagation();
+
     const coffeeId = product._id || product.id;
 
-    
-    dispatch(addToWishlist( {coffeeId} ))
-      .unwrap()
-      .catch((error) => {
-        console.error("Failed to toggle wishlist:", error);
-      });
+    const alreadyInWishlist = isInWishlist(coffeeId);
+
+    if (alreadyInWishlist) {
+      // ❌ REMOVE FROM WISHLIST
+      const existingItem = wishlistItems.find(
+        (item) =>
+          (item.coffee?._id || item.coffee?.id || item._id || item.id) === coffeeId
+      );
+
+      if (!existingItem) return;
+
+      dispatch(removeFromWishlist(existingItem._id))
+        .unwrap()
+        .then(() => {
+          toast.info("Item Removed from wishlist");
+        })
+        .catch((error) => {
+          toast.error("Failed to remove from wishlist");
+        });
+
+    } else {
+      // ✅ ADD TO WISHLIST
+      dispatch(addToWishlist({ coffeeId }))
+        .unwrap()
+        .then(() => {
+          toast.success("Item Added to wishlist");
+        })
+        .catch((error) => {
+          toast.error("Failed to add to wishlist");
+        });
+    }
   };
 
   // ✅ Handle Modal Wishlist Toggle - FIXED: Consistent ID
   const handleModalWishlistToggle = () => {
     if (!selectedProduct) return;
     const productId = selectedProduct._id || selectedProduct.id;
-    
+
     dispatch(toggleWishlist({ coffee: productId }))
       .unwrap()
       .catch((error) => {
@@ -151,7 +178,7 @@ const CategoryPage = () => {
     <>
       <section className="relative px-4 overflow-hidden">
         {/* Background */}
-        <div className="absolute inset-0 -z-10">
+        {/* <div className="absolute inset-0 -z-10">
           <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />
           <div className="absolute inset-0 bg-gradient-to-tr from-[#EDE0D4]/20 via-transparent to-[#D4B896]/10" />
           <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-amber-400/15 rounded-full blur-[120px] animate-pulse-slow" />
@@ -163,27 +190,21 @@ const CategoryPage = () => {
             <div className="absolute top-1/3 right-1/4 text-4xl rotate-45 animate-float-slow">☕</div>
             <div className="absolute bottom-1/4 left-1/3 text-5xl -rotate-45 animate-float-delay">🫘</div>
           </div>
-        </div>
+        </div> */}
 
         <div className="max-w-[104rem] mx-auto relative">
           {/* Header */}
-          <div className="rounded-2xl p-8 mb-5 text-center">
-            <span className="inline-block px-4 py-1.5 bg-green-100/80 backdrop-blur-sm text-green-800 text-xs font-semibold tracking-wider uppercase rounded-full mb-3">
+          <div className="rounded-2xl p-8 mb-2 text-center">
+            {/* <span className="inline-block px-4 py-1.5 bg-green-100/0 backdrop-blur-sm text-white text-xs font-semibold tracking-wider uppercase rounded-full mb-3">
               Brewed Perfection
-            </span>
-            <h2 className="text-3xl md:text-5xl font-extrabold text-[#0D7C53] tracking-tight">
+            </span> */}
+            <h2 className="text-2xl md:text-5xl font-extrabold text-white tracking-tight">
               Our Coffee Collection
             </h2>
-            <p className="text-gray-500 mt-1 max-w-2xl mx-auto">
+            <p className="text-gray-300 mt-1 max-w-2xl mx-auto">
               Freshly brewed happiness in every cup — discover your perfect blend.
             </p>
-            {/* ✅ Cart Badge */}
-            {totalItems > 0 && (
-              <div className="mt-3 inline-flex items-center gap-2 bg-[#0D7C53]/10 text-[#0D7C53] px-4 py-2 rounded-full text-sm font-medium">
-                <span>🛒</span>
-                <span>{totalItems} item{totalItems > 1 ? 's' : ''} in cart</span>
-              </div>
-            )}
+
           </div>
 
           {/* Swiper */}
@@ -220,13 +241,13 @@ const CategoryPage = () => {
                     onMouseEnter={() => setHoveredId(productId)}
                     onMouseLeave={() => setHoveredId(null)}
                     onClick={() => setSelectedProduct(product)}
-                    className="group relative cursor-pointer bg-white/40 backdrop-blur-md rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-500 hover:-translate-y-1 border border-white/30"
+                    className="group backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl overflow-hidden shadow-2xl shadow-black/10 hover:shadow-[#0D7C53]/20 transition-all duration-500 hover:-translate-y-2 hover:bg-white/15 relative"
                   >
                     <div className="relative overflow-hidden aspect-[4/3]">
                       <img
                         src={product.image}
                         alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition duration-700 ease-out"
+                        className="w-full h-full object-cover group-hover:scale-[1.02] transition duration-700 ease-out"
                       />
 
                       <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -256,40 +277,46 @@ const CategoryPage = () => {
                       </div>
                     </div>
 
-                    <div className="p-5 relative">
-                      <div className="flex items-center gap-1.5 mb-2">
+                    {/* Content Area - PERFECT BACKGROUND */}
+                    <div className="p-4 bg-gradient-to-b from-white/15 to-white/10 backdrop-blur-sm">
+                      {/* <div className="flex items-center gap-1.5 mb-2">
                         <CoffeeIcon />
-                        <span className="text-xs font-medium text-green-600 uppercase tracking-wider">
+                        <span className="text-xs font-medium text-white uppercase tracking-wider">
                           Specialty Blend
                         </span>
-                      </div>
+                      </div> */}
 
-                      <h3 className="font-bold text-lg text-gray-800 line-clamp-1 group-hover:text-green-700 transition-colors">
+                      <h3 className="font-bold text-lg text-white line-clamp-1 transition-colors">
                         {product.name}
                       </h3>
+                      <p className="text-white/80 text-base mb-2 line-clamp-2">
+                        {product.description}
+                      </p>
 
-                      <div className="flex items-center gap-3 mt-3">
-                        {product.discountPrice ? (
-                          <>
-                            <span className="font-bold text-2xl text-[#0D7C53] tracking-tight">
-                              ₹{product.discountPrice}
-                            </span>
-                            <span className="text-sm text-gray-400 line-through">
+                      <div className="flex items-center justify-between pt-1 border-t border-white/20">
+                        <div className="flex items-center gap-3 mt-0">
+                          {product.discountPrice ? (
+                            <>
+                              <span className="font-bold text-2xl text-white tracking-tight">
+                                ₹{product.discountPrice}
+                              </span>
+                              <span className="text-sm text-white line-through">
+                                ₹{product.price}
+                              </span>
+                              <span className="ml-auto text-xs bg-green-100 text-white px-2 py-0.5 rounded-full font-semibold">
+                                Save ₹{product.price - product.discountPrice}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="font-bold text-2xl text-white tracking-tight">
                               ₹{product.price}
                             </span>
-                            <span className="ml-auto text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">
-                              Save ₹{product.price - product.discountPrice}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="font-bold text-2xl text-[#0D7C53] tracking-tight">
-                            ₹{product.price}
-                          </span>
-                        )}
+                          )}
+                        </div>
                       </div>
 
                       <button
-                        className="mt-4 w-full bg-gradient-to-r from-[#0D7C53] to-green-600 hover:from-green-600 hover:to-[#0D7C53] text-white py-2.5 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 group/btn"
+                        className="mt-2 w-full bg-gradient-to-r bg-emerald-500 hover:bg-emerald-600 text-white  from-[#0D7C53] to-[#169466] py-2.5 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 group/btn"
                         onClick={(e) => handleAddToCart(product, e)}
                       >
                         <svg className="w-4 h-4 group-hover/btn:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -316,11 +343,11 @@ const CategoryPage = () => {
           }}
         >
           <div
-            className="bg-white rounded-2xl max-w-md w-full max-h-[85vh] overflow-y-auto animate-in zoom-in-95 duration-300 shadow-2xl"
+            className="bg-white rounded-2xl max-w-md w-full max-h-[80vh] overflow-y-auto animate-in zoom-in-95 duration-300 shadow-2xl mt-12"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Image Section */}
-            <div className="relative w-full h-80 sm:h-96 bg-green-50/30">
+            <div className="relative w-full h-[310px] sm:h-96 bg-green-50/30">
               <img
                 src={selectedProduct.image}
                 alt={selectedProduct.name}
@@ -402,7 +429,7 @@ const CategoryPage = () => {
                 </div>
               )}
 
-              <div className="mt-4">
+              {/* <div className="mt-4">
                 <span className="text-xs font-semibold text-gray-700 block mb-1.5">Select Size</span>
                 <div className="flex gap-1.5">
                   {['250g', '500g', '1kg'].map((size) => (
@@ -414,7 +441,7 @@ const CategoryPage = () => {
                     </button>
                   ))}
                 </div>
-              </div>
+              </div> */}
 
               {/* Quantity and Add to Cart */}
               <div className="mt-4 flex gap-2">

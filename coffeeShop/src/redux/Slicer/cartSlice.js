@@ -44,12 +44,12 @@ export const addToCart = createAsyncThunk(
 // ================= REMOVE CART ITEM =================
 export const removeCartItem = createAsyncThunk(
     "cart/removeCartItem",
-    async (id, { rejectWithValue }) => {
-        console.log("🗑️ REMOVE ITEM:", id);
+    async (coffeeId, { rejectWithValue }) => {
+        console.log("🗑️ REMOVE ITEM:", coffeeId);
         try {
-            const { data } = await API.delete(`/cart/${id}`);
+            const { data } = await API.delete(`/cart/${coffeeId}`);
             console.log("✅ REMOVE response:", data);
-            return id;
+            return coffeeId;
         } catch (error) {
             console.error("❌ REMOVE error:", error);
             return rejectWithValue(
@@ -62,14 +62,46 @@ export const removeCartItem = createAsyncThunk(
 // ================= INCREASE QUANTITY =================
 export const increaseQuantity = createAsyncThunk(
     "cart/increaseQuantity",
-    async (id, { rejectWithValue }) => {
+    async (coffeeId, { rejectWithValue, getState }) => {
+        console.log("⬆️ INCREASE QUANTITY for coffeeId:", coffeeId);
         try {
-            const { data } = await API.patch(`/cart/increase/${id}`);
-            return data.data;
+            const { data } = await API.patch(`/cart/increase/${coffeeId}`);
+            console.log("⬆️ INCREASE response:", data);
+
+            // If we get a success response with cart data
+            if (data.success && data.data) {
+                return {
+                    coffeeId,
+                    cart: data.data,
+                    success: true
+                };
+            } else {
+                // If backend returns different structure, try to fetch fresh cart
+                const cartResponse = await API.get("/cart");
+                return {
+                    coffeeId,
+                    cart: cartResponse.data,
+                    success: true,
+                    refetched: true
+                };
+            }
         } catch (error) {
-            return rejectWithValue(
-                error.response?.data?.message || "Failed to increase quantity"
-            );
+            console.error("❌ INCREASE error:", error);
+            // On error, try to refetch cart to maintain consistency
+            try {
+                const cartResponse = await API.get("/cart");
+                return {
+                    coffeeId,
+                    cart: cartResponse.data,
+                    success: true,
+                    refetched: true,
+                    error: error.response?.data?.message
+                };
+            } catch (refetchError) {
+                return rejectWithValue(
+                    error.response?.data?.message || "Failed to increase quantity"
+                );
+            }
         }
     }
 );
@@ -77,17 +109,48 @@ export const increaseQuantity = createAsyncThunk(
 // ================= DECREASE QUANTITY =================
 export const decreaseQuantity = createAsyncThunk(
     "cart/decreaseQuantity",
-    async (id, { rejectWithValue }) => {
+    async (coffeeId, { rejectWithValue, getState }) => {
+        console.log("⬇️ DECREASE QUANTITY for coffeeId:", coffeeId);
         try {
-            const { data } = await API.patch(`/cart/decrease/${id}`);
-            if (data.message === "Item removed from cart") {
-                return { id, removed: true };
+            const { data } = await API.patch(`/cart/decrease/${coffeeId}`);
+            console.log("⬇️ DECREASE response:", data);
+
+            if (data.success && data.data) {
+                return {
+                    coffeeId,
+                    cart: data.data,
+                    success: true,
+                    removed: data.message === "Item removed from cart"
+                };
+            } else {
+                // If backend returns different structure, try to fetch fresh cart
+                const cartResponse = await API.get("/cart");
+                return {
+                    coffeeId,
+                    cart: cartResponse.data,
+                    success: true,
+                    refetched: true,
+                    removed: false
+                };
             }
-            return { id, data: data.data, removed: false };
         } catch (error) {
-            return rejectWithValue(
-                error.response?.data?.message || "Failed to decrease quantity"
-            );
+            console.error("❌ DECREASE error:", error);
+            // On error, try to refetch cart to maintain consistency
+            try {
+                const cartResponse = await API.get("/cart");
+                return {
+                    coffeeId,
+                    cart: cartResponse.data,
+                    success: true,
+                    refetched: true,
+                    removed: false,
+                    error: error.response?.data?.message
+                };
+            } catch (refetchError) {
+                return rejectWithValue(
+                    error.response?.data?.message || "Failed to decrease quantity"
+                );
+            }
         }
     }
 );
@@ -125,18 +188,20 @@ const cartSlice = createSlice({
             })
             .addCase(getCart.fulfilled, (state, action) => {
                 state.loading = false;
-                state.cartItems = action.payload;
 
-                // ✅ FIX: Use cartItems.length for unique items count
-                state.totalItems = state.cartItems.length;  // <--- CHANGE HERE
-                
+                const cart = action.payload;
+                state.cartItems = cart?.items || [];
+
+                state.totalItems = state.cartItems.length;
+
                 state.totalPrice = state.cartItems.reduce(
-                    (sum, item) => sum + ((item.coffee?.price || 0) * (item.quantity || 0)), 0
+                    (sum, item) =>
+                        sum + item.quantity * (item.coffee?.price || 0),
+                    0
                 );
                 console.log("📊 Cart loaded:", {
-                    totalItems: state.totalItems,  // Now shows unique products count
-                    totalPrice: state.totalPrice,
-                    items: state.cartItems.length
+                    totalItems: state.totalItems,
+                    totalPrice: state.totalPrice
                 });
             })
             .addCase(getCart.rejected, (state, action) => {
@@ -152,23 +217,17 @@ const cartSlice = createSlice({
             })
             .addCase(addToCart.fulfilled, (state, action) => {
                 state.loading = false;
-                const newItem = action.payload;
+                console.log("PAYLOAD =>", action.payload);
 
-                const existingIndex = state.cartItems.findIndex(
-                    item => item.coffee?._id === newItem.coffee?._id
-                );
+                const cart = action.payload;
+                state.cartItems = cart?.items || [];
+                state.totalItems = state.cartItems.length;
 
-                if (existingIndex !== -1) {
-                    state.cartItems[existingIndex] = newItem;
-                } else {
-                    state.cartItems.push(newItem);
-                }
 
-                // ✅ FIX: Use cartItems.length (already correct)
-                state.totalItems = state.cartItems.length;  // <--- KEEP AS IS
-                
                 state.totalPrice = state.cartItems.reduce(
-                    (sum, item) => sum + ((item.coffee?.price || 0) * (item.quantity || 0)), 0
+                    (sum, item) =>
+                        sum + item.quantity * (item.coffee?.price || 0),
+                    0
                 );
             })
             .addCase(addToCart.rejected, (state, action) => {
@@ -184,16 +243,22 @@ const cartSlice = createSlice({
             })
             .addCase(removeCartItem.fulfilled, (state, action) => {
                 state.loading = false;
+                const coffeeId = action.payload;
+
                 state.cartItems = state.cartItems.filter(
-                    (item) => item._id !== action.payload
+                    (item) => item.coffee?._id !== coffeeId
                 );
 
-                // ✅ FIX: Use cartItems.length
-                state.totalItems = state.cartItems.length;  // <--- CHANGE HERE
-                
-                state.totalPrice = state.cartItems.reduce(
-                    (sum, item) => sum + ((item.coffee?.price || 0) * (item.quantity || 0)), 0
+                state.totalItems = state.cartItems.reduce(
+                    (sum, item) => sum + item.quantity,
+                    0
                 );
+
+                state.totalPrice = state.cartItems.reduce(
+                    (sum, item) => sum + item.quantity * (item.coffee?.price || 0),
+                    0
+                );
+
                 console.log("🗑️ Item removed, new totals:", {
                     totalItems: state.totalItems,
                     totalPrice: state.totalPrice
@@ -214,41 +279,37 @@ const cartSlice = createSlice({
             .addCase(increaseQuantity.fulfilled, (state, action) => {
                 state.loading = false;
 
-                const updatedItem = action.payload;
-                console.log("⬆️ Updated item:", updatedItem);
+                const { coffeeId, cart, refetched } = action.payload;
 
-                if (!updatedItem || !updatedItem._id) {
-                    console.error("❌ Invalid updated item:", updatedItem);
-                    return;
+                // Update cart items from the response
+                if (cart && cart.items) {
+                    state.cartItems = cart.items;
                 }
 
-                const index = state.cartItems.findIndex(
-                    (item) => item._id === updatedItem._id
+                state.totalItems = new Set(
+                    state.cartItems.map(item => item.coffee?._id)
+                ).size;
+
+                state.totalPrice = state.cartItems.reduce(
+                    (sum, item) => sum + item.quantity * (item.coffee?.price || 0),
+                    0
                 );
 
-                if (index !== -1) {
-                    state.cartItems[index].quantity = updatedItem.quantity;
+                console.log(`⬆️ Quantity increased ${refetched ? '(refetched)' : ''}:`, {
+                    totalItems: state.totalItems,
+                    totalPrice: state.totalPrice
+                });
 
-                    // ✅ FIX: Use cartItems.length (quantity change should NOT affect totalItems)
-                    state.totalItems = state.cartItems.length;  // <--- CHANGE HERE
-                    
-                    state.totalPrice = state.cartItems.reduce(
-                        (sum, item) => sum + ((item.coffee?.price || 0) * (item.quantity || 0)), 0
-                    );
-
-                    console.log("⬆️ Quantity increased:", {
-                        newQuantity: updatedItem.quantity,
-                        totalItems: state.totalItems,  // Now unchanged by quantity change
-                        totalPrice: state.totalPrice
-                    });
-                } else {
-                    console.warn("⚠️ Item not found in cart:", updatedItem._id);
+                if (action.payload.error) {
+                    state.error = action.payload.error;
                 }
             })
             .addCase(increaseQuantity.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
                 console.error("❌ INCREASE rejected:", action.payload);
+                // Refetch cart on error to ensure consistency
+                // This will be handled in the component
             });
 
         // ========== DECREASE QUANTITY ==========
@@ -260,51 +321,39 @@ const cartSlice = createSlice({
             .addCase(decreaseQuantity.fulfilled, (state, action) => {
                 state.loading = false;
 
-                console.log("⬇️ Decrease payload:", action.payload);
+                const { coffeeId, cart, removed, refetched } = action.payload;
 
-                if (action.payload.removed) {
-                    state.cartItems = state.cartItems.filter(
-                        (item) => item._id !== action.payload.id
-                    );
-                    console.log("🗑️ Item removed due to quantity 0");
-                } else {
-                    const updatedItem = action.payload.data;
-
-                    if (!updatedItem || !updatedItem._id) {
-                        console.error("❌ Invalid updated item:", updatedItem);
-                        return;
-                    }
-
-                    const index = state.cartItems.findIndex(
-                        (item) => item._id === updatedItem._id
-                    );
-
-                    if (index !== -1) {
-                        state.cartItems[index].quantity = updatedItem.quantity;
-                        console.log("⬇️ Quantity decreased:", {
-                            newQuantity: updatedItem.quantity
-                        });
-                    } else {
-                        console.warn("⚠️ Item not found in cart:", updatedItem._id);
-                    }
+                // Update cart items from the response
+                if (cart && cart.items) {
+                    state.cartItems = cart.items;
                 }
 
-                // ✅ FIX: Use cartItems.length
-                state.totalItems = state.cartItems.length;  // <--- CHANGE HERE
-                
-                state.totalPrice = state.cartItems.reduce(
-                    (sum, item) => sum + ((item.coffee?.price || 0) * (item.quantity || 0)), 0
+                state.totalItems = state.cartItems.reduce(
+                    (sum, item) => sum + item.quantity,
+                    0
                 );
 
-                console.log("📊 Updated totals:", {
-                    totalItems: state.totalItems,  // Now unchanged by quantity change
+                state.totalPrice = state.cartItems.reduce(
+                    (sum, item) => sum + item.quantity * (item.coffee?.price || 0),
+                    0
+                );
+
+                console.log(`⬇️ Quantity decreased ${refetched ? '(refetched)' : ''}:`, {
+                    removed,
+                    totalItems: state.totalItems,
                     totalPrice: state.totalPrice
                 });
+
+                if (action.payload.error) {
+                    state.error = action.payload.error;
+                }
             })
             .addCase(decreaseQuantity.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
                 console.error("❌ DECREASE rejected:", action.payload);
+                // Refetch cart on error to ensure consistency
+                // This will be handled in the component
             });
     },
 });

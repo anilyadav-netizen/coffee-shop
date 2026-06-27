@@ -123,42 +123,31 @@ const Review = () => {
     return (
         <section className="relative px-4 py-6 overflow-hidden">
             {/* ========== GLASS EFFECT BACKGROUND ========== */}
-            <div className="absolute inset-0 -z-10">
-                {/* Main Gradient - Same as CategoryPage */}
+            {/* <div className="absolute inset-0 -z-10">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />
-                
-                {/* Secondary Warm Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-tr from-[#EDE0D4]/20 via-transparent to-[#D4B896]/10" />
-
-                {/* Floating Glow 1 - Warm Gold */}
                 <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-amber-400/15 rounded-full blur-[120px] animate-pulse-slow" />
-
-                {/* Floating Glow 2 - Coffee Brown */}
                 <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-amber-700/10 rounded-full blur-[100px] animate-pulse-slow-delay" />
-
-                {/* Floating Glow 3 - Green accent */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[150px] animate-pulse-slow" />
-
-                {/* Decorative Beans */}
                 <div className="absolute inset-0 pointer-events-none opacity-10">
                     <div className="absolute top-20 left-10 text-6xl rotate-12 animate-float">🫘</div>
                     <div className="absolute bottom-32 right-20 text-6xl -rotate-12 animate-float-delay">🫘</div>
                     <div className="absolute top-1/3 right-1/4 text-4xl rotate-45 animate-float-slow">☕</div>
                     <div className="absolute bottom-1/4 left-1/3 text-5xl -rotate-45 animate-float-delay">🫘</div>
                 </div>
-            </div>
+            </div> */}
 
             {/* ========== CONTENT ========== */}
             <div className="max-w-[104rem] mx-auto relative z-10">
                 {/* Header - Glass Effect */}
-                <div className="text-center mb-10">
-                    <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10 backdrop-blur-sm px-4 py-1.5 rounded-full mb-3 border border-white/20">
-                        <span className="text-[#0D7C53] text-sm font-semibold tracking-wider">TESTIMONIALS</span>
+                <div className="text-center mb-6">
+                    <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10 backdrop-blur-sm rounded-full mb-3 border border-white/20">
+                        <span className="flex items-center gap-2 px-6 py-2.5 bg-[#0D7C53]/20 backdrop-blur-sm text-white rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30">TESTIMONIALS</span>
                     </div>
-                    <h2 className="text-3xl md:text-4xl font-bold text-gray-800">
-                        What Our <span className="text-[#0D7C53]">Coffee Lovers</span> Say
+                    <h2 className="text-3xl md:text-4xl font-bold text-white">
+                        What Our <span className="text-white">Coffee Lovers</span> Say
                     </h2>
-                    <div className="w-16 h-1 bg-[#0D7C53] mx-auto mt-4 rounded-full"></div>
+                    <div className="w-16 h-1 bg-[#0D7C53] mx-auto mt-2 rounded-full"></div>
                 </div>
 
                 {/* Reviews Carousel */}
@@ -181,7 +170,7 @@ const Review = () => {
                     </button>
 
                     {/* Cards Grid */}
-                    <div className="overflow-hidden px-2 pb-5">
+                    <div className="overflow-hidden px-2 pb-2">
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
                             {visibleReviews.map((review) => (
                                 <div
@@ -201,10 +190,10 @@ const Review = () => {
 
                                         {/* Name and Location */}
                                         <div className="min-w-0 flex-1">
-                                            <h3 className="font-bold text-lg text-gray-800 truncate">
+                                            <h3 className="font-bold text-lg text-white truncate">
                                                 {review.name}
                                             </h3>
-                                            <p className="text-base text-gray-600 truncate flex items-center gap-1">
+                                            <p className="text-base text-gray-200 truncate flex items-center gap-1">
                                                 {review.location}
                                             </p>
                                         </div>
@@ -213,18 +202,18 @@ const Review = () => {
                                     {/* Rating */}
                                     <div className="flex items-center gap-1 mb-2">
                                         {renderStars(review.rating)}
-                                        <span className="text-sm font-semibold text-gray-600 ml-1">
+                                        <span className="text-sm font-semibold text-gray-200 ml-1">
                                             {review.rating}.0
                                         </span>
                                     </div>
 
                                     {/* Review Text */}
-                                    <p className="text-gray-600 leading-relaxed text-base line-clamp-3">
+                                    <p className="text-gray-200 leading-relaxed text-base line-clamp-3">
                                         "{review.review}"
                                     </p>
 
                                     {/* Date */}
-                                    <div className="mt-3 text-sm text-gray-500">
+                                    <div className="mt-3 text-sm text-gray-200">
                                         {new Date(review.date).toLocaleDateString('en-US', {
                                             year: 'numeric',
                                             month: 'short',
@@ -238,23 +227,22 @@ const Review = () => {
                 </div>
 
                 {/* Dots Indicator - Glass Effect */}
-                <div className="flex justify-center gap-2 mt-6">
+                <div className="flex justify-center gap-2">
                     {[...Array(totalSlides)].map((_, index) => (
                         <button
                             key={index}
                             onClick={() => goToSlide(index)}
-                            className={`h-2 rounded-full transition-all duration-300 ${
-                                index === currentIndex
+                            className={`h-1 rounded-full transition-all duration-300 ${index === currentIndex
                                     ? 'w-8 bg-[#0D7C53]'
-                                    : 'w-2 bg-gray-300/60 backdrop-blur-sm hover:bg-gray-400'
-                            }`}
+                                    : 'w-2 bg-gray-100/80 backdrop-blur-sm hover:bg-gray-200'
+                                }`}
                             aria-label={`Go to slide ${index + 1}`}
                         />
                     ))}
                 </div>
 
                 {/* Slide Counter */}
-                <div className="text-center mt-3 text-sm text-gray-400">
+                <div className="text-center mt-1 text-sm text-white">
                     {currentIndex + 1} / {totalSlides}
                 </div>
             </div>

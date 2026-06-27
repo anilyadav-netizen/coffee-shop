@@ -384,7 +384,7 @@ const Contact = () => {
             </div>
 
             {/* CSS Animations */}
-            <style jsx>{`
+            <style>{`
                 @keyframes fade-in-down {
                     from {
                         opacity: 0;

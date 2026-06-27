@@ -32,7 +32,7 @@ const Hero = () => {
     };
 
     return (
-        <div className="relative  h-[50vh] md:h-[80vh] min-h-[400px] md:min-h-[500px] lg:min-h-screen overflow-hidden">
+        <div className="relative h-[48vh] md:h-[80vh] min-h-[400px] md:min-h-[500px] lg:min-h-screen overflow-hidden">
             {/* ✅ Navbar Component */}
             <Navbar />
 
@@ -65,10 +65,10 @@ const Hero = () => {
             </div>
 
             {/* Hero Content */}
-            <div className="relative z-20 w-full h-[55vh] md:h-screen flex flex-col items-center justify-center px-4">
+            <div className="relative z-20 w-full h-[53vh] md:h-screen flex flex-col items-center justify-center px-4">
                 <div className="text-center max-w-4xl mx-auto">
                     {/* Badge */}
-                    <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-lg border border-white/20 px-6 py-2 rounded-full mb-4 md:mb-6 animate-fade-in-down">
+                    <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-lg border border-white/20 px-6 py-2 rounded-full mb-1 md:mb-6 animate-fade-in-down">
                         <span className="w-2 h-2 bg-green-400 rounded-full animate-ping"></span>
                         <span className="text-white/90 text-sm font-medium">Now Open - 20% Off First Order</span>
                     </div>
@@ -131,7 +131,7 @@ const Hero = () => {
             </div>
 
             {/* Scroll Indicator */}
-            <div className="absolute bottom-5 md:bottom-8 left-1/2 -translate-x-1/2 z-20 animate-bounce">
+            <div className="absolute bottom-8 md:bottom-8 left-1/2 -translate-x-1/2 z-20 animate-bounce">
                 <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center p-1">
                     <div className="w-1 h-2 bg-white/50 rounded-full animate-scroll"></div>
                 </div>

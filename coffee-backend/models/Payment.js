@@ -8,12 +8,6 @@ const paymentSchema = new mongoose.Schema(
       required: true,
     },
 
-    cart: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Cart",          // ✅ coffee کی جگہ cart
-      required: true,
-    },
-
     razorpayOrderId: String,
 
     amount: Number,         // cart کا total amount

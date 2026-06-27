@@ -1,131 +1,239 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getCategoryById, getItemsByCategory, CATEGORIES } from "../data/menuData";
 import Banner from '../assets/Images/Banner.png';
-import Banner2 from '../assets/Images/Banner2.png';
-import Banner3 from '../assets/Images/Banner3.png';
-import Banner4 from '../assets/Images/Banner4.png';
-import Banner5 from '../assets/Images/Banner5.png';
+import imagebg from '../assets/Images/imagebg.jpg';
+
 import { getProducts } from "../redux/Slicer/adminProductSlice";
+import { getCategories } from "../redux/Slicer/categorySlice";
+import { toast } from "react-toastify";
 import {
     ArrowLeft,
     Star,
     TrendingUp,
     ShoppingBag,
     Heart,
-    Share2,
-    ChevronRight,
     Search,
-    X
+    X,
+    Grid3x3
 } from "lucide-react";
-import Footer from "../component/Footer";
-import Navbar from "../component/Navbar";
 import { useDispatch, useSelector } from "react-redux";
+import { addToCart } from "../redux/slicer/cartSlice";
+import { addToWishlist, removeFromWishlist, getWishlist } from "../redux/slicer/wishlistSlice";
 
 const MenuPage = () => {
-
-    const dispatch = useDispatch()
-    const { products, loading } = useSelector(
-        (state) => state.adminProducts
-    )
-
-    useEffect(() => {
-        dispatch(getProducts())
-    }, [dispatch])
-
-    const { categoryId } = useParams();
+    const dispatch = useDispatch();
     const navigate = useNavigate();
-    const [isLoading, setIsLoading] = useState(true);
+    const { categoryId } = useParams();
+
+    // Get categories from Redux
+    const { categories, loading: categoriesLoading } = useSelector(
+        (state) => state.category
+    );
+
+    // Get products from Redux
+    const { products, loading: productsLoading } = useSelector(
+        (state) => state.adminProducts
+    );
+
+    const { items: wishlistItems } = useSelector((state) => state.wishlist);
+
+    // State
     const [searchTerm, setSearchTerm] = useState("");
     const [filteredItems, setFilteredItems] = useState([]);
-    const [addedItems, setAddedItems] = useState({});
-    const [likedItems, setLikedItems] = useState({});
+    const [isLoading, setIsLoading] = useState(true);
+    const [visibleCards, setVisibleCards] = useState(new Set());
+    const cardRefs = useRef({});
+    const [isAnimating, setIsAnimating] = useState(false);
 
-    const effectiveCategoryId = categoryId ? parseInt(categoryId) : 1;
-
-    const category = useMemo(() => {
-        const cat = getCategoryById(effectiveCategoryId);
-        return cat;
-    }, [effectiveCategoryId]);
-
-    const items = useMemo(() => {
-        const itemsList = getItemsByCategory(effectiveCategoryId);
-        return itemsList || [];
-    }, [effectiveCategoryId]);
-
-    const categoryBanners = {
-        1: Banner,
-        2: Banner2,
-        3: Banner3,
-        4: Banner4,
-        5: Banner5
-    };
-
-    const currentBanner = categoryBanners[effectiveCategoryId] || Banner;
-
-    // ✅ Handle Add to Cart
-    const handleAddToCart = (item, e) => {
-        e.stopPropagation();
-        const cartItem = {
-            id: item.id,
-            name: item.name,
-            price: item.price,
-            originalPrice: item.originalPrice,
-            image: item.image,
-            category: category?.name || 'Coffee',
-            quantity: 1
-        };
-        addToCart(cartItem);
-
-        // Show feedback
-        setAddedItems(prev => ({ ...prev, [item.id]: true }));
-        setTimeout(() => {
-            setAddedItems(prev => ({ ...prev, [item.id]: false }));
-        }, 1500);
-    };
-
-    // ✅ Handle Wishlist Toggle
-    const handleWishlistToggle = (item, e) => {
-        e.stopPropagation();
-        setLikedItems(prev => ({
-            ...prev,
-            [item.id]: !prev[item.id]
-        }));
-    };
-
+    // Fetch data
     useEffect(() => {
+        dispatch(getCategories());
+        dispatch(getProducts());
+        dispatch(getWishlist());
+    }, [dispatch]);
+
+    // ===== AUTO ANIMATE ITEMS ON CATEGORY CHANGE OR SEARCH =====
+    useEffect(() => {
+        if (filteredItems.length === 0) {
+            setVisibleCards(new Set());
+            return;
+        }
+
+        // Reset visibility
+        setVisibleCards(new Set());
+        setIsAnimating(true);
+
+        // Auto show items with delay (2-3 seconds)
         const timer = setTimeout(() => {
-            setIsLoading(false);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, []);
+            const allIds = filteredItems.map(item => item._id);
+            setVisibleCards(new Set(allIds));
+            setIsAnimating(false);
+        }, 300); // 300ms delay for smooth appearance
 
+        return () => {
+            clearTimeout(timer);
+            setIsAnimating(false);
+        };
+    }, [filteredItems, categoryId, searchTerm]);
+
+    // ===== Create "All" category =====
+    const allCategories = useMemo(() => {
+        if (!categories || categories.length === 0) return [];
+
+        const allCategory = {
+            _id: 'all',
+            name: 'All',
+            icon: null,
+            isAll: true
+        };
+
+        return [allCategory, ...categories];
+    }, [categories]);
+
+    // Find the current category from URL param
+    const currentCategory = useMemo(() => {
+        if (!categories || categories.length === 0) return null;
+
+        if (!categoryId || categoryId === 'all') {
+            return allCategories[0];
+        }
+
+        const found = categories.find(cat => String(cat._id) === String(categoryId));
+        return found || allCategories[0];
+    }, [categories, categoryId, allCategories]);
+
+    // Redirect if no categoryId
     useEffect(() => {
-        if (!items || items.length === 0) {
+        if (categories && categories.length > 0 && !categoryId) {
+            navigate(`/menu/all`, { replace: true });
+        }
+    }, [categories, categoryId, navigate]);
+
+    // Filter products based on category
+    const categoryProducts = useMemo(() => {
+        if (!products || products.length === 0) return [];
+
+        if (!categoryId || categoryId === 'all') {
+            return products;
+        }
+
+        return products.filter(product => {
+            if (product.category && typeof product.category === 'object') {
+                return String(product.category._id) === String(categoryId);
+            }
+            if (product.category && typeof product.category === 'string') {
+                return String(product.category) === String(categoryId);
+            }
+            if (product.categoryId) {
+                return String(product.categoryId) === String(categoryId);
+            }
+            return false;
+        });
+    }, [products, categoryId]);
+
+    // Category banners mapping
+    const categoryBanners = {
+        'all': Banner,
+    };
+
+    const currentBanner = useMemo(() => {
+        if (!currentCategory) return Banner;
+        return categoryBanners[currentCategory._id] || Banner;
+    }, [currentCategory]);
+
+    // Handle loading state
+    useEffect(() => {
+        if (!categoriesLoading && !productsLoading) {
+            const timer = setTimeout(() => {
+                setIsLoading(false);
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [categoriesLoading, productsLoading]);
+
+    // Handle search
+    useEffect(() => {
+        if (!categoryProducts || categoryProducts.length === 0) {
             setFilteredItems([]);
             return;
         }
 
         if (searchTerm.trim() === "") {
-            setFilteredItems(items);
+            setFilteredItems(categoryProducts);
         } else {
-            const filtered = items.filter(item =>
+            const filtered = categoryProducts.filter(item =>
                 item.name.toLowerCase().includes(searchTerm.toLowerCase().trim())
             );
             setFilteredItems(filtered);
         }
-    }, [searchTerm, items]);
+    }, [searchTerm, categoryProducts]);
+
+    // Handle Add to Cart
+    const handleAddToCart = (item, e) => {
+        e.stopPropagation();
+
+        dispatch(
+            addToCart({
+                coffeeId: item._id,
+                quantity: 1,
+            })
+        )
+            .unwrap()
+            .then(() => {
+                toast.success("Item added successfully in cart");
+            })
+            .catch((err) => {
+                toast.error(err || "Failed to add cart");
+            });
+    };
+
+    const isInWishlist = (productId) => {
+        return wishlistItems?.some(
+            (item) =>
+                (item.coffee?._id || item.coffee) === productId
+        );
+    };
+
+    const handleWishlistToggle = (item, e) => {
+        e.stopPropagation();
+
+        const coffeeId = item._id;
+
+        const wishlistItem = wishlistItems.find(
+            (w) => (w.coffee?._id || w.coffee) === coffeeId
+        );
+
+        if (wishlistItem) {
+            dispatch(removeFromWishlist(wishlistItem._id))
+                .unwrap()
+                .then(() => {
+                    toast.success("Item Removed from wishlist");
+                })
+                .catch((err) => {
+                    toast.error(err || "Failed to remove wishlist");
+                });
+        } else {
+            dispatch(addToWishlist({ coffeeId }))
+                .unwrap()
+                .then(() => {
+                    toast.success("Item added successfully in wishlist");
+                })
+                .catch((err) => {
+                    toast.error(err || "Failed to add wishlist");
+                });
+        }
+    };
 
     const clearSearch = () => {
         setSearchTerm("");
     };
 
+    // ============ LOADING STATE ============
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#1A0F0A] to-[#3D2013] overflow-x-hidden">
                 <div className="text-center">
                     <div className="relative w-48 h-64 mx-auto">
-                        {/* Coffee pouring animation - Same as before */}
                         <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                             <div className="w-16 h-12 bg-[#6B4F3A] rounded-t-full rounded-b-lg shadow-lg relative">
                                 <div className="absolute -bottom-2 right-0 w-6 h-3 bg-[#6B4F3A] rounded-br-full"></div>
@@ -173,11 +281,11 @@ const MenuPage = () => {
                     </div>
 
                     <p className="mt-6 text-[#D4A574] font-medium text-lg tracking-wider">
-                        Pouring...
+                        Loading Menu...
                     </p>
                 </div>
 
-                <style jsx>{`
+                <style>{`
                     @keyframes pour {
                         0% { transform: scaleY(0.5); opacity: 0.7; }
                         50% { transform: scaleY(1); opacity: 1; }
@@ -268,7 +376,8 @@ const MenuPage = () => {
         );
     }
 
-    if (!category) {
+    // ===== No categories case =====
+    if (!categories || categories.length === 0) {
         return (
             <div className="min-h-screen flex items-center justify-center overflow-x-hidden">
                 <div className="absolute inset-0 -z-10">
@@ -277,12 +386,12 @@ const MenuPage = () => {
                 </div>
                 <div className="text-center max-w-md mx-auto p-8 relative z-10">
                     <div className="backdrop-blur-xl bg-white/20 border border-white/30 rounded-3xl p-12 shadow-2xl shadow-black/5">
-                        <div className="w-24 h-24 bg-red-100/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <span className="text-4xl">🔍</span>
+                        <div className="w-24 h-24 bg-yellow-100/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span className="text-4xl">📋</span>
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-700 mb-2">Category Not Found</h2>
+                        <h2 className="text-2xl font-bold text-gray-700 mb-2">No Categories Available</h2>
                         <p className="text-gray-500 mb-6">
-                            The category you're looking for doesn't exist or has been removed.
+                            Please add some categories to get started.
                         </p>
                         <button
                             onClick={() => navigate('/')}
@@ -296,6 +405,7 @@ const MenuPage = () => {
         );
     }
 
+    // ============ MAIN CONTENT ============
     return (
         <>
             <div className="min-h-screen overflow-x-hidden">
@@ -304,7 +414,7 @@ const MenuPage = () => {
                     <div className="absolute inset-0 w-full h-full">
                         <img
                             src={currentBanner}
-                            alt={`${category.name} Banner`}
+                            alt={currentCategory?.name || 'Menu'}
                             className="w-full h-full object-cover"
                         />
                         <div className="absolute inset-0 bg-black/50"></div>
@@ -325,27 +435,36 @@ const MenuPage = () => {
 
                         <div className="text-center">
                             <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold text-white mb-4 drop-shadow-lg">
-                                {category.name}
+                                {currentCategory?.name || 'Menu'}
                             </h1>
                             <div className="w-24 h-1 bg-gradient-to-r from-transparent via-white to-transparent mx-auto mb-4"></div>
                             <p className="text-white/90 text-center max-w-2xl mx-auto text-base sm:text-lg drop-shadow">
-                                Explore our delicious {category.name.toLowerCase()} items
+                                {currentCategory?.isAll
+                                    ? 'Explore our complete menu'
+                                    : `Explore our delicious ${currentCategory?.name?.toLowerCase()} items`}
                             </p>
                         </div>
                     </div>
                 </div>
 
-                {/* Content Section */}
+                {/* ===== CONTENT SECTION WITH BACKGROUND IMAGE ===== */}
                 <div className="relative -mt-16 pb-12">
+                    {/* ===== BACKGROUND IMAGE ===== */}
                     <div className="absolute inset-0 -z-10 overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />
-                        <div className="absolute inset-0 bg-gradient-to-tr from-[#EDE0D4]/20 via-transparent to-[#D4B896]/10" />
+                        <img
+                            src={imagebg}
+                            alt="Menu Background"
+                            className="absolute inset-0 w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/60"></div>
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#0D7C53]/30 via-transparent to-[#169466]/20"></div>
 
-                        <div className="absolute -top-40 -left-40 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-amber-400/15 rounded-full blur-[80px] sm:blur-[120px] animate-pulse-slow"></div>
-                        <div className="absolute -bottom-40 -right-40 w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] bg-amber-700/10 rounded-full blur-[70px] sm:blur-[100px] animate-pulse-slow-delay"></div>
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-emerald-500/5 rounded-full blur-[100px] sm:blur-[150px] animate-pulse-slow"></div>
+                        {/* Decorative Glows */}
+                        <div className="absolute -top-40 -left-40 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-amber-400/20 rounded-full blur-[80px] sm:blur-[120px] animate-pulse-slow"></div>
+                        <div className="absolute -bottom-40 -right-40 w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] bg-amber-700/20 rounded-full blur-[70px] sm:blur-[100px] animate-pulse-slow-delay"></div>
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-emerald-500/10 rounded-full blur-[100px] sm:blur-[150px] animate-pulse-slow"></div>
 
-                        <div className="absolute inset-0 pointer-events-none opacity-10">
+                        <div className="absolute inset-0 pointer-events-none opacity-20">
                             <div className="absolute top-20 left-10 text-2xl sm:text-6xl rotate-12 animate-float">🫘</div>
                             <div className="absolute bottom-32 right-20 text-2xl sm:text-6xl -rotate-12 animate-float-delay">🫘</div>
                             <div className="absolute top-1/3 right-[15%] text-xl sm:text-4xl rotate-45 animate-float-slow">☕</div>
@@ -355,16 +474,20 @@ const MenuPage = () => {
 
                     <div className="container mx-auto px-3 sm:px-4 relative z-10">
                         {/* Category Selector */}
-                        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-4 sm:mb-6 backdrop-blur-xl bg-white/20 border border-white/30 p-2 sm:p-3 rounded-xl sm:rounded-2xl shadow-2xl shadow-black/5">
-                            {CATEGORIES.map((cat) => (
+                        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-4 sm:mb-6 backdrop-blur-xl bg-white/10 border border-white/20 p-2 sm:p-3 rounded-xl sm:rounded-2xl shadow-2xl shadow-black/5">
+                            {allCategories.map((cat) => (
                                 <button
-                                    key={cat.id}
-                                    onClick={() => navigate(`/menu/${cat.id}`)}
-                                    className={`px-2 sm:px-4 py-1 sm:py-2 rounded-full text-[10px] sm:text-sm font-medium transition-all duration-300 ${effectiveCategoryId === cat.id
+                                    key={cat._id}
+                                    onClick={() => {
+                                        navigate(`/menu/${cat._id}`);
+                                        setVisibleCards(new Set());
+                                    }}
+                                    className={`px-2 sm:px-4 py-1 sm:py-2 rounded-full text-[10px] sm:text-sm font-medium transition-all duration-300 flex items-center gap-1 ${String(currentCategory?._id) === String(cat._id)
                                         ? 'bg-[#0D7C53] text-white shadow-lg'
-                                        : 'backdrop-blur-sm bg-white/40 border border-white/20 text-gray-600 hover:bg-white/60'
+                                        : 'backdrop-blur-sm bg-white/20 border border-white/20 text-white hover:bg-white/30'
                                         }`}
                                 >
+                                    {cat.isAll && <Grid3x3 size={14} />}
                                     {cat.name}
                                 </button>
                             ))}
@@ -373,18 +496,18 @@ const MenuPage = () => {
                         {/* Search Bar */}
                         <div className="max-w-md mx-auto mb-6 sm:mb-8">
                             <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60" size={18} />
                                 <input
                                     type="text"
-                                    placeholder={`Search ${category.name}...`}
+                                    placeholder={`Search ${currentCategory?.isAll ? 'Menu' : currentCategory?.name}...`}
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full pl-9 sm:pl-10 pr-8 sm:pr-10 py-2 sm:py-3 backdrop-blur-xl bg-white/30 border-2 border-white/30 rounded-full shadow-xl shadow-black/5 focus:outline-none focus:ring-2 focus:ring-[#0D7C53] focus:border-transparent transition-all text-gray-800 placeholder:text-gray-400 text-sm sm:text-base"
+                                    className="w-full pl-9 sm:pl-10 pr-8 sm:pr-10 py-2 sm:py-3 backdrop-blur-xl bg-white/10 border-2 border-white/20 rounded-full shadow-xl shadow-black/5 focus:outline-none focus:ring-2 focus:ring-[#0D7C53] focus:border-transparent transition-all text-white placeholder:text-white/60"
                                 />
                                 {searchTerm && (
                                     <button
                                         onClick={clearSearch}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white"
                                     >
                                         <X size={16} />
                                     </button>
@@ -392,17 +515,40 @@ const MenuPage = () => {
                             </div>
                         </div>
 
-                        {/* Items Grid */}
+                        {/* Items Grid with Auto Animation */}
                         {filteredItems && filteredItems.length > 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 pb-12">
-                                {products.map((item) => {
+                                {filteredItems.map((item, index) => {
+                                    let itemCategoryName = 'Uncategorized';
+                                    if (item.category && typeof item.category === 'object') {
+                                        itemCategoryName = item.category.name;
+                                    } else if (item.category && typeof item.category === 'string') {
+                                        const found = categories.find(c => String(c._id) === String(item.category));
+                                        itemCategoryName = found?.name || 'Uncategorized';
+                                    }
+
+                                    const isVisible = visibleCards.has(item._id);
+
+                                    // Alternate between left and right
+                                    const isEven = index % 2 === 0;
+                                    const direction = isEven ? 'left' : 'right';
+
                                     return (
                                         <div
-                                            key={item.id}
-                                            className="group backdrop-blur-xl bg-white/20 border border-white/30 rounded-xl sm:rounded-2xl shadow-md shadow-black/5 hover:shadow-lg transition-all duration-500 overflow-hidden hover:-translate-y-1 flex flex-col h-full"
+                                            key={item._id}
+                                            ref={(el) => (cardRefs.current[item._id] = el)}
+                                            data-id={item._id}
+                                            className={`group backdrop-blur-xl bg-white/10 border border-white/20 rounded-xl sm:rounded-2xl shadow-md shadow-black/10 hover:shadow-lg hover:shadow-[#0D7C53]/20 transition-all duration-700 overflow-hidden hover:-translate-y-1 flex flex-col h-full hover:bg-white/15
+                                                ${isVisible
+                                                    ? 'opacity-100 translate-x-0'
+                                                    : `opacity-0 ${direction === 'left' ? '-translate-x-16' : 'translate-x-16'}`
+                                                }`}
+                                            style={{
+                                                transitionDelay: `${index * 80}ms`,
+                                            }}
                                         >
                                             {/* Image Container */}
-                                            <div className="relative h-40 sm:h-48 md:h-56 overflow-hidden bg-gray-100/50 flex-shrink-0">
+                                            <div className="relative h-40 sm:h-48 md:h-56 overflow-hidden bg-black/30 flex-shrink-0">
                                                 <img
                                                     src={item.image}
                                                     alt={item.name}
@@ -412,7 +558,7 @@ const MenuPage = () => {
                                                     }}
                                                 />
 
-                                                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
                                                 {item.isFeatured && (
                                                     <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-gradient-to-r from-[#0D7C53] to-green-500 text-white text-[8px] sm:text-xs font-bold px-2 sm:px-3 py-0.5 sm:py-1.5 rounded-full shadow-md flex items-center gap-0.5 sm:gap-1 backdrop-blur-sm">
@@ -421,17 +567,22 @@ const MenuPage = () => {
                                                     </div>
                                                 )}
 
-                                                {/* Wishlist Button - Top Right */}
+                                                {currentCategory?.isAll && (
+                                                    <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm text-white text-[8px] sm:text-xs px-2 py-0.5 sm:py-1 rounded-full">
+                                                        {itemCategoryName}
+                                                    </div>
+                                                )}
+
+                                                {/* Wishlist Button */}
                                                 <button
                                                     onClick={(e) => handleWishlistToggle(item, e)}
                                                     className="absolute top-2 sm:top-3 right-2 sm:right-3 z-10 w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:bg-white transition-all duration-300 hover:scale-110"
                                                 >
                                                     <Heart
                                                         size={16}
-                                                        className={`sm:w-[18px] sm:h-[18px] transition-colors
-                                                            ${likedItems[item.id]
-                                                                ? 'fill-red-500 text-red-500'
-                                                                : 'text-gray-400 hover:text-red-500'
+                                                        className={`sm:w-[18px] sm:h-[18px] transition-colors ${isInWishlist(item._id)
+                                                            ? 'fill-red-500 text-red-500'
+                                                            : 'text-gray-600 hover:text-red-500'
                                                             }`}
                                                     />
                                                 </button>
@@ -439,37 +590,37 @@ const MenuPage = () => {
 
                                             {/* Content */}
                                             <div className="p-3 sm:p-4 md:p-5 flex flex-col flex-1">
-                                                <h3 className="font-bold text-gray-800 text-sm sm:text-base md:text-lg group-hover:text-[#0D7C53] transition-colors mb-0.5 sm:mb-1 truncate">
+                                                <h3 className="font-bold text-white text-sm sm:text-base md:text-lg group-hover:text-[#169466] transition-colors mb-0.5 sm:mb-1 truncate">
                                                     {item.name}
                                                 </h3>
 
-                                                {/* Fixed height description */}
                                                 <div className="h-8 sm:h-10 md:h-12 overflow-hidden">
-                                                    <p className="text-gray-600 text-[10px] sm:text-sm line-clamp-2">
-                                                        {item.description}
+                                                    <p className="text-white/70 text-[10px] sm:text-sm line-clamp-2">
+                                                        {item.description || 'Delicious item from our menu'}
                                                     </p>
                                                 </div>
-                                                <div className="flex items-center justify-between border-t border-white/20">
+
+                                                <div className="flex items-center justify-between border-t border-white/10 pt-2 mt-2">
                                                     <div className="flex items-center gap-1 sm:gap-2">
-                                                        <span className="text-base sm:text-lg md:text-xl font-bold text-[#0D7C53]">
+                                                        <span className="text-base sm:text-lg md:text-xl font-bold text-white">
                                                             ₹{item.price.toFixed(2)}
                                                         </span>
                                                         {item.originalPrice && (
-                                                            <span className="text-[8px] sm:text-xs text-gray-400 line-through">
+                                                            <span className="text-[8px] sm:text-xs text-white/40 line-through">
                                                                 ₹{item.originalPrice.toFixed(2)}
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <div className="flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-xs font-medium text-green-600 bg-green-100/60 backdrop-blur-sm px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full flex-shrink-0">
+                                                    <div className="flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-xs font-medium text-green-400 bg-green-500/20 backdrop-blur-sm px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full flex-shrink-0">
                                                         <TrendingUp size={10} className="sm:w-3 sm:h-3" />
-                                                        {item.points} Pts
+                                                        {item.points || 0} Pts
                                                     </div>
                                                 </div>
 
                                                 {/* Add to Cart Button */}
                                                 <button
                                                     onClick={(e) => handleAddToCart(item, e)}
-                                                    className="w-full mt-2 sm:mt-3 md:mt-4 bg-gradient-to-r from-[#0D7C53] to-green-600 text-white font-medium py-2.5 rounded-lg sm:rounded-xl hover:shadow-lg hover:shadow-[#0D7C53]/30 transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base flex-shrink-0"
+                                                    className="w-full mt-2 sm:mt-3 md:mt-4 font-medium py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base flex-shrink-0 bg-gradient-to-r from-[#0D7C53] to-[#169466] text-white hover:shadow-lg hover:shadow-[#0D7C53]/40 hover:scale-[1.02]"
                                                 >
                                                     <ShoppingBag size={16} />
                                                     Add to Cart
@@ -481,14 +632,14 @@ const MenuPage = () => {
                             </div>
                         ) : (
                             <div className="text-center py-12 sm:py-20">
-                                <div className="backdrop-blur-xl bg-white/20 border border-white/30 rounded-2xl sm:rounded-3xl p-6 sm:p-12 shadow-2xl shadow-black/5 max-w-2xl mx-auto">
-                                    <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gray-100/50 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                                        <Search size={28} className="sm:w-10 sm:h-10 text-gray-400" />
+                                <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl sm:rounded-3xl p-6 sm:p-12 shadow-2xl shadow-black/5 max-w-2xl mx-auto">
+                                    <div className="w-16 h-16 sm:w-24 sm:h-24 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                                        <Search size={28} className="sm:w-10 sm:h-10 text-white/40" />
                                     </div>
-                                    <h3 className="text-lg sm:text-2xl font-bold text-gray-700">No Items Found</h3>
-                                    <p className="text-sm sm:text-base text-gray-500 mt-1 sm:mt-2">
+                                    <h3 className="text-lg sm:text-2xl font-bold text-white">No Items Found</h3>
+                                    <p className="text-sm sm:text-base text-white/60 mt-1 sm:mt-2">
                                         {searchTerm ? (
-                                            <>No results for "<span className="font-medium">{searchTerm}</span>"</>
+                                            <>No results for "<span className="font-medium text-white/80">{searchTerm}</span>"</>
                                         ) : (
                                             <>This category is currently empty. Check back later!</>
                                         )}
@@ -496,7 +647,7 @@ const MenuPage = () => {
                                     {searchTerm && (
                                         <button
                                             onClick={clearSearch}
-                                            className="mt-3 sm:mt-4 px-4 sm:px-6 py-1.5 sm:py-2 backdrop-blur-sm bg-white/40 border border-white/20 text-gray-700 rounded-full hover:bg-white/60 transition-colors text-sm sm:text-base"
+                                            className="mt-3 sm:mt-4 px-4 sm:px-6 py-1.5 sm:py-2 backdrop-blur-sm bg-white/20 border border-white/20 text-white rounded-full hover:bg-white/30 transition-colors text-sm sm:text-base"
                                         >
                                             Clear Search
                                         </button>
@@ -507,8 +658,8 @@ const MenuPage = () => {
                     </div>
                 </div>
             </div>
-            {/* CSS Animations */}
-            <style >{`
+
+            <style>{`
                 @keyframes pulse-slow {
                     0%, 100% { transform: scale(1); opacity: 0.5; }
                     50% { transform: scale(1.1); opacity: 0.8; }

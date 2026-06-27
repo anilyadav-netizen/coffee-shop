@@ -17,34 +17,23 @@ const Benefits = () => {
     };
 
     return (
-        
-        <section className="relative py-10 px-4 overflow-hidden">
-            
+
+        <section className="relative py-6 px-4 overflow-hidden">
+
             {/* ========== GLASS EFFECT BACKGROUND ========== */}
-            <div className="absolute inset-0 -z-10">
-                {/* Main Gradient - Same as CategoryPage */}
+            {/* <div className="absolute inset-0 -z-10">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />
-
-                {/* Secondary Warm Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-tr from-[#EDE0D4]/20 via-transparent to-[#D4B896]/10" />
-
-                {/* Floating Glow 1 - Warm Gold */}
                 <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-amber-400/15 rounded-full blur-[120px] animate-pulse-slow" />
-
-                {/* Floating Glow 2 - Coffee Brown */}
                 <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-amber-700/10 rounded-full blur-[100px] animate-pulse-slow-delay" />
-
-                {/* Floating Glow 3 - Green accent */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[150px] animate-pulse-slow" />
-
-                {/* Decorative Beans */}
                 <div className="absolute inset-0 pointer-events-none opacity-10">
                     <div className="absolute top-20 left-10 text-6xl rotate-12 animate-float">🫘</div>
                     <div className="absolute bottom-32 right-20 text-6xl -rotate-12 animate-float-delay">🫘</div>
                     <div className="absolute top-1/3 right-1/4 text-4xl rotate-45 animate-float-slow">☕</div>
                     <div className="absolute bottom-1/4 left-1/3 text-5xl -rotate-45 animate-float-delay">🫘</div>
                 </div>
-            </div>
+            </div> */}
 
             {/* ========== CONTENT ========== */}
             <div className="max-w-[104rem] mx-auto relative z-10">
@@ -73,12 +62,12 @@ const Benefits = () => {
                     <div className="order-2 lg:order-2">
                         {/* Header - NO EXTRA SHADOW OR EFFECTS */}
                         <div className="mb-8">
-                            <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10 backdrop-blur-sm px-4 py-1.5 rounded-full mb-4 border border-white/20">
-                                <span className="text-[#0D7C53] text-sm font-semibold tracking-wider">COFFEE BENEFITS</span>
+                            <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10 backdrop-blur-sm rounded-full mb-2 border border-white/20">
+                                <span className="text-sm tracking-wider flex items-center gap-2 px-6 py-2.5 bg-[#0D7C53]/20 backdrop-blur-sm text-white rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30">COFFEE BENEFITS</span>
                             </div>
 
-                            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3">
-                                The Benefits of <span className="text-[#0D7C53]">Good Coffee</span>
+                            <h2 className="text-3xl md:text-4xl font-bold text-white mb-1">
+                                The Benefits of <span className="text-white">Good Coffee</span>
                             </h2>
                             <div className="w-16 h-1 bg-[#0D7C53] rounded-full"></div>
                         </div>
@@ -95,7 +84,7 @@ const Benefits = () => {
                                             {getIcon(benefit.icon, `w-5 h-5 ${benefit.iconColor}`)}
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-gray-800 text-lg">
+                                            <h3 className="font-bold text-white text-lg">
                                                 {benefit.title.split('\n').map((line, i) => (
                                                     <React.Fragment key={i}>
                                                         {line}
@@ -103,7 +92,7 @@ const Benefits = () => {
                                                     </React.Fragment>
                                                 ))}
                                             </h3>
-                                            <p className="text-base text-gray-600 mt-1 leading-relaxed">
+                                            <p className="text-base text-gray-300 mt-1 leading-relaxed">
                                                 {benefit.description}
                                             </p>
                                         </div>
@@ -114,8 +103,8 @@ const Benefits = () => {
 
                         {/* Bottom Quote - Glass Effect */}
                         <div className="mt-6 p-4 backdrop-blur-xl bg-gradient-to-r from-[#0D7C53]/10 to-green-500/10 border border-white/30 rounded-2xl shadow-xl shadow-black/5">
-                            <p className="text-base text-gray-600 italic flex items-center gap-2">
-                                <Sparkles className="w-4 h-4 text-[#0D7C53]" />
+                            <p className="text-base text-gray-200 italic flex items-center gap-2">
+                                <Sparkles className="w-4 h-4 text-gray-300" />
                                 "Life is too short for bad coffee — start your day right"
                             </p>
                         </div>

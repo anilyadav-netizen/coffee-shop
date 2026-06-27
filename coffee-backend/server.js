@@ -13,6 +13,7 @@ const coffeeRoutes = require("./routes/coffeeRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const wishlistRoute = require("./routes/wishlistRoute")
+const categoryRoute = require('./routes/category.routes')
 
 app.use(express.json({ limit: "500mb" }));
 app.use(express.urlencoded({ limit: "500mb", extended: true }));
@@ -29,6 +30,7 @@ app.use("/api/coffee", coffeeRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use('/api/wishlist',wishlistRoute)
+app.use('/api/category',categoryRoute)
 connectDB()
 
 
