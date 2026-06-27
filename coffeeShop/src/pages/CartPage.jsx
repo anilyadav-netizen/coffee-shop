@@ -202,7 +202,7 @@ const CartPage = () => {
                                     response.razorpay_order_id,
                             })
                         ).unwrap();
-                        
+
                         navigate("/orderDetails");
                     } catch (error) {
                         console.error(

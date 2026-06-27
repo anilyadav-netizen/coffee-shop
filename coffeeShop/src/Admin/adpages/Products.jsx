@@ -40,28 +40,28 @@ const Products = () => {
 
     if (loading) {
         return (
-            <div className="bg-white dark:bg-[#261810] rounded-xl p-6 border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] shadow-[0_2px_8px_rgba(44,24,16,0.06)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.4)] flex items-center justify-center min-h-[400px]">
-                <div className="w-10 h-10 border-4 border-[#6F4E37] dark:border-[#C68E5C] border-t-transparent rounded-full animate-spin"></div>
+            <div className="bg-white dark:bg-dark-card rounded-xl p-6 border border-[#E2E8F0] dark:border-dark-border shadow-sm dark:shadow-xl flex items-center justify-center min-h-[400px]">
+                <div className="w-10 h-10 border-4 border-[#4F46E5] dark:border-dark-primary border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
     }
 
     return (
-        <div className="bg-white dark:bg-[#261810] rounded-xl p-4 md:p-6 border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] shadow-[0_2px_8px_rgba(44,24,16,0.06)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
+        <div className="bg-white dark:bg-dark-card rounded-xl p-4 md:p-6 border border-[#E2E8F0] dark:border-dark-border shadow-sm dark:shadow-xl">
             {/* Header - Responsive */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
-                    <h1 className="text-xl md:text-2xl font-semibold text-[#2C1810] dark:text-[#F5EDE3]">
+                    <h1 className="text-2xl md:text-3xl font-semibold text-[#0F172A] dark:text-dark-heading">
                         Products
                     </h1>
-                    <p className="text-sm text-[#8B7355] dark:text-[#C4A882]">
+                    <p className="text-base text-[#64748B] dark:text-dark-text">
                         Total {totalProducts} products
                     </p>
                 </div>
 
                 <Link
                     to="/admin/add-product"
-                    className="flex items-center justify-center gap-2 px-4 py-2 bg-[#6F4E37] dark:bg-[#C68E5C] text-[#F5EDE3] dark:text-[#1A0F0A] rounded-lg hover:bg-[#5C4033] dark:hover:bg-[#D4A574] transition-colors duration-200 text-sm md:text-base"
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-[#4F46E5] dark:bg-dark-primary text-white rounded-xl hover:bg-[#4338CA] dark:hover:bg-[#6366F1] transition-colors duration-200 text-base md:text-lg"
                 >
                     <FaPlus />
                     Add Product
@@ -70,41 +70,41 @@ const Products = () => {
 
             {/* Filters - Responsive */}
             <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
-                <div className="flex flex-wrap gap-2 md:gap-4 text-xs md:text-sm text-[#5C4033] dark:text-[#C4A882]">
-                    <span className="dark:bg-[#3D2317] px-3 py-1 rounded-full">All ({products.length})</span>
-                    <span className="dark:bg-[#3D2317] px-3 py-1 rounded-full">
+                <div className="flex flex-wrap gap-2 md:gap-4 text-base md:text-lg text-[#64748B] dark:text-dark-text">
+                    <span className="bg-[#F8FAFC] dark:bg-dark-bg/50 px-3 py-1 rounded-full border border-[#E2E8F0] dark:border-dark-border">All ({products.length})</span>
+                    <span className="bg-[#F8FAFC] dark:bg-dark-bg/50 px-3 py-1 rounded-full border border-[#E2E8F0] dark:border-dark-border">
                         In Stock ({products.filter((p) => p.stock > 0).length})
                     </span>
-                    <span className="dark:bg-[#3D2317] px-3 py-1 rounded-full">
+                    <span className="bg-[#F8FAFC] dark:bg-dark-bg/50 px-3 py-1 rounded-full border border-[#E2E8F0] dark:border-dark-border">
                         Out Of Stock ({products.filter((p) => p.stock === 0).length})
                     </span>
                 </div>
 
                 <div className="w-full sm:w-auto">
                     <div className="relative w-full sm:w-auto">
-                        <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B7355] dark:text-[#C4A882]" />
+                        <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-[#64748B] dark:text-dark-text" />
                         <input
                             type="text"
                             placeholder="Search Product"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full sm:w-[200px] md:w-[250px] pl-9 pr-4 py-2 border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] rounded-md outline-none text-[#2C1810] dark:text-[#F5EDE3] placeholder-[#8B7355] dark:placeholder-[#C4A882] text-sm bg-white dark:bg-[#1A0F0A]"
+                            className="w-full sm:w-[200px] md:w-[250px] pl-9 pr-4 py-2 border border-[#E2E8F0] dark:border-dark-border rounded-md outline-none text-[#0F172A] dark:text-dark-heading placeholder-[#64748B] dark:placeholder-dark-text text-base bg-white dark:bg-dark-bg"
                         />
                     </div>
                 </div>
             </div>
 
             {/* Table with Horizontal Scroll */}
-            <div className="overflow-x-auto border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] rounded-lg">
+            <div className="overflow-x-auto border border-[#E2E8F0] dark:border-dark-border rounded-lg">
                 <table className="w-full min-w-[750px]">
                     <thead>
-                        <tr className="border-b border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] bg-[#F5EDE3] dark:bg-[#3D2317]">
-                            <th className="p-3 md:p-4 text-left text-xs md:text-sm text-[#5C4033] dark:text-[#C4A882]">Image</th>
-                            <th className="p-3 md:p-4 text-left text-xs md:text-sm text-[#5C4033] dark:text-[#C4A882]">Name</th>
-                            <th className="p-3 md:p-4 text-left text-xs md:text-sm text-[#5C4033] dark:text-[#C4A882]">Price</th>
-                            <th className="p-3 md:p-4 text-left text-xs md:text-sm text-[#5C4033] dark:text-[#C4A882]">Stock</th>
-                            <th className="p-3 md:p-4 text-left text-xs md:text-sm text-[#5C4033] dark:text-[#C4A882]">Status</th>
-                            <th className="p-3 md:p-4 text-left text-xs md:text-sm text-[#5C4033] dark:text-[#C4A882]">Actions</th>
+                        <tr className="border-b border-[#E2E8F0] dark:border-dark-border bg-[#F8FAFC] dark:bg-dark-bg/50">
+                            <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Image</th>
+                            <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Name</th>
+                            <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Price</th>
+                            <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Stock</th>
+                            <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Status</th>
+                            <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Actions</th>
                         </tr>
                     </thead>
 
@@ -113,7 +113,7 @@ const Products = () => {
                             filteredProducts.map((product) => (
                                 <tr
                                     key={product._id}
-                                    className="border-b border-[rgba(44,24,16,0.05)] dark:border-[rgba(245,237,227,0.05)] hover:bg-[#FDF8F3] dark:hover:bg-[#3D2317] transition-colors duration-150"
+                                    className="border-b border-[#E2E8F0] dark:border-dark-border hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-colors duration-150"
                                 >
                                     <td className="p-2 md:p-4">
                                         <img
@@ -123,21 +123,20 @@ const Products = () => {
                                         />
                                     </td>
 
-                                    <td className="p-2 md:p-4 font-medium text-[#2C1810] dark:text-[#F5EDE3] text-sm md:text-base">
+                                    <td className="p-2 md:p-4 font-medium text-[#0F172A] dark:text-dark-heading text-base md:text-lg">
                                         {product.name}
                                     </td>
 
-                                    <td className="p-2 md:p-4 text-[#2C1810] dark:text-[#F5EDE3] text-sm md:text-base whitespace-nowrap">
+                                    <td className="p-2 md:p-4 text-[#0F172A] dark:text-dark-heading text-base md:text-lg whitespace-nowrap">
                                         ₹{product.price}
                                     </td>
 
                                     <td className="p-2 md:p-4">
                                         <span
-                                            className={`px-2 py-1 text-xs border rounded-md ${
-                                                product.stock === 0
-                                                    ? "text-red-600 border-red-300 dark:border-red-700"
-                                                    : "text-[#6F4E37] dark:text-[#C68E5C] border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)]"
-                                            }`}
+                                            className={`px-2 py-1 text-sm border rounded-md ${product.stock === 0
+                                                ? "text-red-600 dark:text-red-400 border-red-300 dark:border-red-700"
+                                                : "text-[#0F172A] dark:text-dark-heading border-[#E2E8F0] dark:border-dark-border"
+                                                }`}
                                         >
                                             {product.stock}
                                         </span>
@@ -145,11 +144,10 @@ const Products = () => {
 
                                     <td className="p-2 md:p-4">
                                         <span
-                                            className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                                product.status === "active"
-                                                    ? "bg-[#F5EDE3] dark:bg-[#3D2317] text-[#6F4E37] dark:text-[#C68E5C]"
-                                                    : "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400"
-                                            }`}
+                                            className={`px-2 py-1 text-sm font-medium rounded-full ${product.status === "active"
+                                                ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400"
+                                                : "bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400"
+                                                }`}
                                         >
                                             {product.status === "active" ? "Active" : "Inactive"}
                                         </span>
@@ -159,18 +157,18 @@ const Products = () => {
                                         <div className="flex items-center gap-1 md:gap-2">
                                             <button
                                                 onClick={() => handleEdit(product._id)}
-                                                className="w-8 h-8 md:w-9 md:h-9 flex items-center justify-center border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] rounded-md hover:bg-[#F5EDE3] dark:hover:bg-[#3D2317] transition-colors duration-200"
+                                                className="w-8 h-8 md:w-9 md:h-9 flex items-center justify-center border border-[#E2E8F0] dark:border-dark-border rounded-md hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-colors duration-200"
                                                 title="Edit Product"
                                             >
-                                                <FaEye className="text-[#6F4E37] dark:text-[#C68E5C] text-xs md:text-sm" />
+                                                <FaEye className="text-[#4F46E5] dark:text-dark-primary text-sm md:text-base" />
                                             </button>
 
                                             <button
                                                 onClick={() => handleDelete(product._id)}
-                                                className="w-8 h-8 md:w-9 md:h-9 flex items-center justify-center border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] rounded-md text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200"
+                                                className="w-8 h-8 md:w-9 md:h-9 flex items-center justify-center border border-[#E2E8F0] dark:border-dark-border rounded-md text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors duration-200"
                                                 title="Delete Product"
                                             >
-                                                <FaTrash className="text-xs md:text-sm" />
+                                                <FaTrash className="text-sm md:text-base" />
                                             </button>
                                         </div>
                                     </td>
@@ -178,7 +176,7 @@ const Products = () => {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="6" className="text-center py-8 text-[#8B7355] dark:text-[#C4A882] text-sm">
+                                <td colSpan="6" className="text-center py-8 text-[#64748B] dark:text-dark-text text-base">
                                     No Products Found
                                 </td>
                             </tr>

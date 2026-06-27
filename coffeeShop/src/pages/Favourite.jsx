@@ -56,6 +56,7 @@ const Favourite = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [addedItems, setAddedItems] = useState({});
+    const [showAll, setShowAll] = useState(false);
 
     useEffect(() => {
         const loadFavourites = () => {
@@ -131,6 +132,25 @@ const Favourite = () => {
     const handleViewAll = () => {
         navigate('/menu');
     };
+
+    // ✅ Get unique category items (1 item per category)
+    const getUniqueCategoryItems = () => {
+        const uniqueItems = [];
+        const seenCategories = new Set();
+
+        products.forEach(item => {
+            const categoryId = item.category?._id || item.categoryId;
+            if (!seenCategories.has(categoryId)) {
+                seenCategories.add(categoryId);
+                uniqueItems.push(item);
+            }
+        });
+
+        return uniqueItems;
+    };
+
+    const uniqueCategoryItems = getUniqueCategoryItems();
+    const displayItems = showAll ? uniqueCategoryItems : uniqueCategoryItems.slice(0, 10);
 
     if (isLoading) {
         return (
@@ -241,132 +261,155 @@ const Favourite = () => {
                 </div>
 
                 {/* Favourites Grid */}
-                {products.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-                        {products.map((item) => {
-                            const isAdded = addedItems[item._id];
-                            const isWishlisted = wishlistItems.some(
-                                (wish) => wish.coffee?._id === item._id || wish.coffee === item._id
-                            );
-                            const category = item.category;
+                {uniqueCategoryItems.length > 0 ? (
+                    <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                            {displayItems.map((item) => {
+                                const isAdded = addedItems[item._id];
+                                const isWishlisted = wishlistItems.some(
+                                    (wish) => wish.coffee?._id === item._id || wish.coffee === item._id
+                                );
+                                const category = item.category;
 
-                            return (
-                                <div
-                                    key={item._id}
-                                    className="group backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl overflow-hidden shadow-2xl shadow-black/10 hover:shadow-[#0D7C53]/20 transition-all duration-500 hover:-translate-y-2 hover:bg-white/15 relative"
-                                >
-                                    {/* Image Container */}
+                                return (
                                     <div
-                                        className="relative h-56 overflow-hidden bg-gray-900/30 cursor-pointer"
-                                        onClick={() => handleItemClick(item)}
+                                        key={item._id}
+                                        className="group backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl overflow-hidden shadow-2xl shadow-black/10 hover:shadow-[#0D7C53]/20 transition-all duration-500 hover:-translate-y-2 hover:bg-white/15 relative"
                                     >
-                                        <img
-                                            src={item.image}
-                                            alt={item.name}
-                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                                            onError={(e) => {
-                                                e.target.src = "https://placehold.co/400x300/e2e8f0/64748b?text=No+Image";
-                                            }}
-                                        />
-
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
-                                        {/* Wishlist Icon */}
-                                        <button
-                                            onClick={(e) => handleWishlistToggle(item, e)}
-                                            className={`absolute top-3 right-3 z-10 w-9 h-9 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-110 hover:bg-white ${isWishlisted ? "bg-red-50" : ""
-                                                }`}
-                                        >
-                                            <Heart
-                                                size={18}
-                                                className={
-                                                    isWishlisted
-                                                        ? "fill-red-500 text-red-500"
-                                                        : "text-gray-700"
-                                                }
-                                            />
-                                        </button>
-
-                                        {/* Category Badge - Improved */}
-                                        <div className="absolute top-3 left-3 bg-white/70 backdrop-blur-md text-xs font-semibold px-3 py-1.5 rounded-full shadow-md flex items-center gap-2 border border-white/70">
-                                            {category?.icon && (
-                                                <img
-                                                    src={category.icon}
-                                                    alt={category.name}
-                                                    className="w-6 h-6 rounded-full object-cover"
-                                                />
-                                            )}
-                                            <span className="text-gray-900">
-                                                {category?.name || 'Uncategorized'}
-                                            </span>
-                                        </div>
-
-                                        {/* Quick View Button - Improved */}
-                                        <button
+                                        {/* Image Container */}
+                                        <div
+                                            className="relative h-56 overflow-hidden bg-gray-900/30 cursor-pointer"
                                             onClick={() => handleItemClick(item)}
-                                            className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md text-gray-800 px-6 py-2.5 rounded-full font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-[#0D7C53] hover:text-white shadow-lg border border-white/30 hover:scale-105"
                                         >
-                                            View Item
-                                        </button>
-                                    </div>
+                                            <img
+                                                src={item.image}
+                                                alt={item.name}
+                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                                onError={(e) => {
+                                                    e.target.src = "https://placehold.co/400x300/e2e8f0/64748b?text=No+Image";
+                                                }}
+                                            />
 
-                                    {/* Content */}
-                                    <div className="p-4 bg-gradient-to-b from-white/15 to-white/10 backdrop-blur-sm">
-                                        <div className="flex items-start justify-between">
-                                            <h3
-                                                className="font-bold text-white text-lg transition-colors cursor-pointer line-clamp-1"
-                                                onClick={() => handleItemClick(item)}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                                            {/* Wishlist Icon */}
+                                            <button
+                                                onClick={(e) => handleWishlistToggle(item, e)}
+                                                className={`absolute top-3 right-3 z-10 w-9 h-9 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-110 hover:bg-white ${isWishlisted ? "bg-red-50" : ""
+                                                    }`}
                                             >
-                                                {item.name}
-                                            </h3>
-                                        </div>
+                                                <Heart
+                                                    size={18}
+                                                    className={
+                                                        isWishlisted
+                                                            ? "fill-red-500 text-red-500"
+                                                            : "text-gray-700"
+                                                    }
+                                                />
+                                            </button>
 
-                                        <p className="text-white/80 text-base mb-2 line-clamp-2">
-                                            {item.description}
-                                        </p>
-
-                                        <div className="flex items-center justify-between pt-1 border-t border-white/20">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-xl font-bold text-white">
-                                                    ₹{item.price.toFixed(2)}
-                                                </span>
-                                                {item.originalPrice && (
-                                                    <span className="text-sm text-white/50 line-through">
-                                                        ₹{item.originalPrice.toFixed(2)}
-                                                    </span>
+                                            {/* Category Badge - Improved */}
+                                            <div className="absolute top-3 left-3 flex items-center gap-2 bg-white dark:bg-dark-card px-3 py-1.5 rounded-full border-2 border-[#4F46E5] dark:border-dark-primary shadow-md">
+                                                {category?.icon && (
+                                                    <img
+                                                        src={category.icon}
+                                                        alt={category.name}
+                                                        className="w-6 h-6 rounded-full object-cover"
+                                                    />
                                                 )}
+                                                <span className="text-xs font-semibold text-[#4F46E5] dark:text-dark-primary">
+                                                    {category?.name || 'Uncategorized'}
+                                                </span>
                                             </div>
+                                            {/* Quick View Button - Improved */}
+                                            <button
+                                                onClick={() => handleItemClick(item)}
+                                                className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md text-gray-800 px-6 py-2.5 rounded-full font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-[#0D7C53] hover:text-white shadow-lg border border-white/30 hover:scale-105"
+                                            >
+                                                View Item
+                                            </button>
                                         </div>
 
-                                        {/* Add to Cart Button - Improved */}
-                                        <button
-                                            onClick={(e) => handleAddToCart(item, e)}
-                                            className={`w-full mt-2 font-medium py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group/btn ${isAdded
-                                                ? "bg-emerald-500 text-white hover:bg-emerald-600"
-                                                : "bg-gradient-to-r from-[#0D7C53] to-[#169466] text-white hover:shadow-lg hover:shadow-[#0D7C53]/30 hover:scale-[1.02]"
-                                                }`}
-                                        >
-                                            {isAdded ? (
-                                                <span>Added ✓</span>
-                                            ) : (
-                                                <>
-                                                    <ShoppingBag
-                                                        size={18}
-                                                        className="group-hover/btn:scale-110 transition-transform"
-                                                    />
-                                                    Add to Cart
-                                                    <ChevronRight
-                                                        size={16}
-                                                        className="group-hover/btn:translate-x-1 transition-transform"
-                                                    />
-                                                </>
-                                            )}
-                                        </button>
+                                        {/* Content */}
+                                        <div className="p-4 bg-gradient-to-b from-white/15 to-white/10 backdrop-blur-sm">
+                                            <div className="flex items-start justify-between">
+                                                <h3
+                                                    className="font-bold text-white text-lg transition-colors cursor-pointer line-clamp-1"
+                                                    onClick={() => handleItemClick(item)}
+                                                >
+                                                    {item.name}
+                                                </h3>
+                                            </div>
+
+                                            <p className="text-white/80 text-base mb-2 line-clamp-2">
+                                                {item.description}
+                                            </p>
+
+                                            <div className="flex items-center justify-between pt-1 border-t border-white/20">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-xl font-bold text-white">
+                                                        ₹{item.price.toFixed(2)}
+                                                    </span>
+                                                    {item.originalPrice && (
+                                                        <span className="text-sm text-white/50 line-through">
+                                                            ₹{item.originalPrice.toFixed(2)}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Add to Cart Button - Improved */}
+                                            <button
+                                                onClick={(e) => handleAddToCart(item, e)}
+                                                className={`w-full mt-2 font-medium py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group/btn ${isAdded
+                                                    ? "bg-emerald-500 text-white hover:bg-emerald-600"
+                                                    : "bg-gradient-to-r from-[#0D7C53] to-[#169466] text-white hover:shadow-lg hover:shadow-[#0D7C53]/30 hover:scale-[1.02]"
+                                                    }`}
+                                            >
+                                                {isAdded ? (
+                                                    <span>Added ✓</span>
+                                                ) : (
+                                                    <>
+                                                        <ShoppingBag
+                                                            size={18}
+                                                            className="group-hover/btn:scale-110 transition-transform"
+                                                        />
+                                                        Add to Cart
+                                                        <ChevronRight
+                                                            size={16}
+                                                            className="group-hover/btn:translate-x-1 transition-transform"
+                                                        />
+                                                    </>
+                                                )}
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            );
-                        })}
-                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* View More / Show Less Button */}
+                        {uniqueCategoryItems.length > 10 && (
+                            <div className="flex justify-center mt-8">
+                                <button
+                                    onClick={() => setShowAll(!showAll)}
+                                    className="flex items-center gap-2 px-8 py-3 bg-[#0D7C53]/20 backdrop-blur-sm text-white rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30 hover:scale-105"
+                                >
+                                    {showAll ? (
+                                        <>
+                                            Show Less
+                                            <ChevronRight size={18} className="rotate-90" />
+                                        </>
+                                    ) : (
+                                        <>
+                                            View More ({uniqueCategoryItems.length - 10} more)
+                                            <ChevronRight size={18} />
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        )}
+                    </>
                 ) : (
                     <div className="text-center py-16">
                         <div className="backdrop-blur-xl bg-white/20 border border-white/30 rounded-3xl p-12 shadow-2xl shadow-black/5 max-w-2xl mx-auto">

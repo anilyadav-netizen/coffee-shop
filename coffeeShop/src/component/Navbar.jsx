@@ -13,6 +13,7 @@ import {
     Heart
 } from "lucide-react";
 import { getCart } from '../redux/Slicer/cartSlice';
+import { getWishlist } from '../redux/Slicer/wishlistSlice';
 
 const Navbar = () => {
     const location = useLocation();
@@ -29,7 +30,7 @@ const Navbar = () => {
     const { totalItems } = useSelector((state) => state.cart);
     const { wishlistCount } = useSelector((state) => state.wishlist);
 
-   
+
 
     const navItems = [
         { name: "Home", path: "/" },
@@ -72,10 +73,11 @@ const Navbar = () => {
         return null;
     }
 
-        useEffect(() => {
-            dispatch(getCart());
-        }, [dispatch]);
-    
+    useEffect(() => {
+        dispatch(getCart());
+        dispatch(getWishlist())
+    }, [dispatch]);
+
 
     return (
         <nav className={`fixed w-full top-0 left-0 z-50 transition-all duration-500 ${isScrolled ? 'bg-black/90 backdrop-blur-xl shadow-2xl' : 'bg-transparent'}`}>
@@ -112,7 +114,7 @@ const Navbar = () => {
                 </ul>
 
                 {/* Right Side */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-4">
                     {/* Wishlist Button */}
                     <button
                         onClick={handleWishlistClick}

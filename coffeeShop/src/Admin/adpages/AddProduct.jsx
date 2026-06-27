@@ -18,7 +18,7 @@ const AddProduct = () => {
     const { categories } = useSelector(
         (state) => state.category
     )
-    
+
     useEffect(() => {
         dispatch(getCategories())
     }, [dispatch])
@@ -174,29 +174,29 @@ const AddProduct = () => {
 
     if (isFetching || loading) {
         return (
-            <div className="min-h-screen bg-[#FDF8F3] dark:bg-[#1A0F0A] p-4 md:p-6 flex items-center justify-center">
-                <div className="w-10 h-10 border-4 border-[#6F4E37] dark:border-[#C68E5C] border-t-transparent rounded-full animate-spin"></div>
+            <div className="min-h-screen bg-[#F8FAFC] dark:bg-dark-bg p-4 md:p-6 flex items-center justify-center">
+                <div className="w-10 h-10 border-4 border-[#4F46E5] dark:border-dark-primary border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-[#FDF8F3] dark:bg-[#1A0F0A] p-4 md:p-6">
+        <div className="min-h-screen bg-[#F8FAFC] dark:bg-dark-bg p-4 md:p-6">
             <div className="max-w-4xl mx-auto">
                 {/* HEADER */}
                 <div className="flex items-center gap-4 mb-6">
                     <button
                         onClick={() => navigate("/admin/products")}
-                        className="w-10 h-10 rounded-xl border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] flex items-center justify-center hover:bg-[#F5EDE3] dark:hover:bg-[#3D2317] transition-colors duration-200"
+                        className="w-10 h-10 rounded-xl border border-[#E2E8F0] dark:border-dark-border flex items-center justify-center hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-colors duration-200"
                     >
-                        <FaArrowLeft className="text-[#5C4033] dark:text-[#C4A882]" />
+                        <FaArrowLeft className="text-[#64748B] dark:text-dark-text" />
                     </button>
 
                     <div>
-                        <h1 className="text-2xl md:text-3xl font-bold text-[#2C1810] dark:text-[#F5EDE3]">
+                        <h1 className="text-2xl md:text-3xl font-bold text-[#0F172A] dark:text-dark-heading">
                             {isEditMode ? "Update Product" : "Add Product"}
                         </h1>
-                        <p className="text-sm text-[#8B7355] dark:text-[#C4A882]">
+                        <p className="text-sm text-[#64748B] dark:text-dark-text">
                             {isEditMode ? "Edit product details" : "Create a new coffee product for your store"}
                         </p>
                     </div>
@@ -205,12 +205,12 @@ const AddProduct = () => {
                 {/* FORM */}
                 <form
                     onSubmit={handleSubmit}
-                    className="bg-white dark:bg-[#261810] rounded-2xl border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] shadow-[0_2px_8px_rgba(44,24,16,0.06)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.4)] p-6 md:p-8"
+                    className="bg-white dark:bg-dark-card rounded-2xl border border-[#E2E8F0] dark:border-dark-border shadow-sm dark:shadow-xl p-6 md:p-8"
                 >
                     <div className="space-y-6">
                         {/* IMAGE UPLOAD */}
                         <div>
-                            <label className="block text-sm font-semibold text-[#2C1810] dark:text-[#F5EDE3] mb-2">
+                            <label className="block text-sm font-semibold text-[#0F172A] dark:text-dark-heading mb-2">
                                 Product Image {!isEditMode && <span className="text-red-500">*</span>}
                             </label>
 
@@ -219,7 +219,7 @@ const AddProduct = () => {
                                     <img
                                         src={imagePreview}
                                         alt="Product Preview"
-                                        className="w-48 h-48 rounded-xl object-cover border-2 border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)]"
+                                        className="w-48 h-48 rounded-xl object-cover border-2 border-[#E2E8F0] dark:border-dark-border"
                                     />
                                     <button
                                         type="button"
@@ -232,7 +232,7 @@ const AddProduct = () => {
                             ) : (
                                 <div
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="relative border-2 border-dashed border-[rgba(44,24,16,0.15)] dark:border-[rgba(245,237,227,0.15)] rounded-xl p-8 text-center cursor-pointer hover:border-[#6F4E37] dark:hover:border-[#C68E5C] transition-all duration-300"
+                                    className="relative border-2 border-dashed border-[#E2E8F0] dark:border-dark-border rounded-xl p-8 text-center cursor-pointer hover:border-[#4F46E5] dark:hover:border-dark-primary transition-all duration-300"
                                 >
                                     <input
                                         ref={fileInputRef}
@@ -241,11 +241,11 @@ const AddProduct = () => {
                                         onChange={handleImageChange}
                                         className="hidden"
                                     />
-                                    <FaImage className="w-12 h-12 mx-auto text-[#8B7355] dark:text-[#C4A882] mb-3" />
-                                    <p className="text-[#5C4033] dark:text-[#C4A882] font-medium">
+                                    <FaImage className="w-12 h-12 mx-auto text-[#64748B] dark:text-dark-text mb-3" />
+                                    <p className="text-[#0F172A] dark:text-dark-heading font-medium">
                                         {isEditMode ? "Click to change image" : "Click to upload image"}
                                     </p>
-                                    <p className="text-sm text-[#8B7355] dark:text-[#C4A882] mt-1">
+                                    <p className="text-sm text-[#64748B] dark:text-dark-text mt-1">
                                         PNG, JPG, WEBP (Max 5MB)
                                     </p>
                                 </div>
@@ -254,7 +254,7 @@ const AddProduct = () => {
 
                         {/* PRODUCT NAME */}
                         <div>
-                            <label className="block text-sm font-semibold text-[#2C1810] dark:text-[#F5EDE3] mb-2">
+                            <label className="block text-sm font-semibold text-[#0F172A] dark:text-dark-heading mb-2">
                                 Product Name <span className="text-red-500">*</span>
                             </label>
                             <input
@@ -263,14 +263,14 @@ const AddProduct = () => {
                                 value={formData.name}
                                 onChange={handleChange}
                                 placeholder="e.g., Classic Espresso"
-                                className="w-full px-4 py-3 bg-[#FDF8F3] dark:bg-[#1A0F0A] border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] rounded-xl text-[#2C1810] dark:text-[#F5EDE3] placeholder-[#8B7355] dark:placeholder-[#C4A882] focus:outline-none focus:ring-2 focus:ring-[#6F4E37] dark:focus:ring-[#C68E5C] focus:border-transparent transition-all duration-300"
+                                className="w-full px-4 py-3 bg-[#F8FAFC] dark:bg-dark-bg border border-[#E2E8F0] dark:border-dark-border rounded-xl text-[#0F172A] dark:text-dark-heading placeholder-[#64748B] dark:placeholder-dark-text focus:outline-none focus:ring-2 focus:ring-[#4F46E5] dark:focus:ring-dark-primary focus:border-transparent transition-all duration-300"
                                 required
                             />
                         </div>
 
                         {/* DESCRIPTION */}
                         <div>
-                            <label className="block text-sm font-semibold text-[#2C1810] dark:text-[#F5EDE3] mb-2">
+                            <label className="block text-sm font-semibold text-[#0F172A] dark:text-dark-heading mb-2">
                                 Description <span className="text-red-500">*</span>
                             </label>
                             <textarea
@@ -279,32 +279,32 @@ const AddProduct = () => {
                                 value={formData.description}
                                 onChange={handleChange}
                                 placeholder="Write a brief description of the product..."
-                                className="w-full px-4 py-3 bg-[#FDF8F3] dark:bg-[#1A0F0A] border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] rounded-xl text-[#2C1810] dark:text-[#F5EDE3] placeholder-[#8B7355] dark:placeholder-[#C4A882] focus:outline-none focus:ring-2 focus:ring-[#6F4E37] dark:focus:ring-[#C68E5C] focus:border-transparent resize-none transition-all duration-300"
+                                className="w-full px-4 py-3 bg-[#F8FAFC] dark:bg-dark-bg border border-[#E2E8F0] dark:border-dark-border rounded-xl text-[#0F172A] dark:text-dark-heading placeholder-[#64748B] dark:placeholder-dark-text focus:outline-none focus:ring-2 focus:ring-[#4F46E5] dark:focus:ring-dark-primary focus:border-transparent resize-none transition-all duration-300"
                                 required
                             />
                         </div>
 
                         {/* CATEGORY DROPDOWN */}
                         <div>
-                            <label className="block text-sm font-semibold text-[#2C1810] dark:text-[#F5EDE3] mb-2">
+                            <label className="block text-sm font-semibold text-[#0F172A] dark:text-dark-heading mb-2">
                                 Category <span className="text-red-500">*</span>
                             </label>
                             <select
                                 name="category"
                                 value={formData.category}
                                 onChange={handleChange}
-                                className="w-full px-4 py-3 bg-[#FDF8F3] dark:bg-[#1A0F0A] border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] rounded-xl text-[#2C1810] dark:text-[#F5EDE3] focus:outline-none focus:ring-2 focus:ring-[#6F4E37] dark:focus:ring-[#C68E5C] focus:border-transparent transition-all duration-300 appearance-none"
+                                className="w-full px-4 py-3 bg-[#F8FAFC] dark:bg-dark-bg border border-[#E2E8F0] dark:border-dark-border rounded-xl text-[#0F172A] dark:text-dark-heading focus:outline-none focus:ring-2 focus:ring-[#4F46E5] dark:focus:ring-dark-primary focus:border-transparent transition-all duration-300 appearance-none"
                                 required
                             >
-                                <option value="" className="dark:bg-[#1A0F0A]">Select a category</option>
+                                <option value="" className="dark:bg-dark-bg">Select a category</option>
                                 {categories && categories.map((category) => (
-                                    <option key={category._id} value={category._id} className="dark:bg-[#1A0F0A]">
+                                    <option key={category._id} value={category._id} className="dark:bg-dark-bg">
                                         {category.name}
                                     </option>
                                 ))}
                             </select>
                             {categories && categories.length === 0 && (
-                                <p className="text-sm text-[#C68E5C] mt-1">
+                                <p className="text-sm text-[#4F46E5] dark:text-dark-primary mt-1">
                                     No categories found. Please add a category first.
                                 </p>
                             )}
@@ -313,7 +313,7 @@ const AddProduct = () => {
                         {/* PRICE & STOCK */}
                         <div className="grid md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-semibold text-[#2C1810] dark:text-[#F5EDE3] mb-2">
+                                <label className="block text-sm font-semibold text-[#0F172A] dark:text-dark-heading mb-2">
                                     Price (₹) <span className="text-red-500">*</span>
                                 </label>
                                 <input
@@ -324,13 +324,13 @@ const AddProduct = () => {
                                     placeholder="199"
                                     min="0"
                                     step="1"
-                                    className="w-full px-4 py-3 bg-[#FDF8F3] dark:bg-[#1A0F0A] border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] rounded-xl text-[#2C1810] dark:text-[#F5EDE3] placeholder-[#8B7355] dark:placeholder-[#C4A882] focus:outline-none focus:ring-2 focus:ring-[#6F4E37] dark:focus:ring-[#C68E5C] focus:border-transparent transition-all duration-300"
+                                    className="w-full px-4 py-3 bg-[#F8FAFC] dark:bg-dark-bg border border-[#E2E8F0] dark:border-dark-border rounded-xl text-[#0F172A] dark:text-dark-heading placeholder-[#64748B] dark:placeholder-dark-text focus:outline-none focus:ring-2 focus:ring-[#4F46E5] dark:focus:ring-dark-primary focus:border-transparent transition-all duration-300"
                                     required
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-semibold text-[#2C1810] dark:text-[#F5EDE3] mb-2">
+                                <label className="block text-sm font-semibold text-[#0F172A] dark:text-dark-heading mb-2">
                                     Stock <span className="text-red-500">*</span>
                                 </label>
                                 <input
@@ -341,7 +341,7 @@ const AddProduct = () => {
                                     placeholder="20"
                                     min="0"
                                     step="1"
-                                    className="w-full px-4 py-3 bg-[#FDF8F3] dark:bg-[#1A0F0A] border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] rounded-xl text-[#2C1810] dark:text-[#F5EDE3] placeholder-[#8B7355] dark:placeholder-[#C4A882] focus:outline-none focus:ring-2 focus:ring-[#6F4E37] dark:focus:ring-[#C68E5C] focus:border-transparent transition-all duration-300"
+                                    className="w-full px-4 py-3 bg-[#F8FAFC] dark:bg-dark-bg border border-[#E2E8F0] dark:border-dark-border rounded-xl text-[#0F172A] dark:text-dark-heading placeholder-[#64748B] dark:placeholder-dark-text focus:outline-none focus:ring-2 focus:ring-[#4F46E5] dark:focus:ring-dark-primary focus:border-transparent transition-all duration-300"
                                     required
                                 />
                             </div>
@@ -349,7 +349,7 @@ const AddProduct = () => {
 
                         {/* STATUS */}
                         <div>
-                            <label className="block text-sm font-semibold text-[#2C1810] dark:text-[#F5EDE3] mb-2">
+                            <label className="block text-sm font-semibold text-[#0F172A] dark:text-dark-heading mb-2">
                                 Status
                             </label>
                             <div className="flex gap-4">
@@ -360,9 +360,9 @@ const AddProduct = () => {
                                         value="active"
                                         checked={formData.status === "active"}
                                         onChange={handleChange}
-                                        className="w-4 h-4 text-[#6F4E37] dark:text-[#C68E5C] focus:ring-[#6F4E37] dark:focus:ring-[#C68E5C]"
+                                        className="w-4 h-4 text-[#4F46E5] dark:text-dark-primary focus:ring-[#4F46E5] dark:focus:ring-dark-primary"
                                     />
-                                    <span className="text-[#5C4033] dark:text-[#C4A882]">Active</span>
+                                    <span className="text-[#64748B] dark:text-dark-text">Active</span>
                                 </label>
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input
@@ -373,17 +373,17 @@ const AddProduct = () => {
                                         onChange={handleChange}
                                         className="w-4 h-4 text-red-500 focus:ring-red-500"
                                     />
-                                    <span className="text-[#5C4033] dark:text-[#C4A882]">Inactive</span>
+                                    <span className="text-[#64748B] dark:text-dark-text">Inactive</span>
                                 </label>
                             </div>
                         </div>
 
                         {/* BUTTONS */}
-                        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)]">
+                        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-[#E2E8F0] dark:border-dark-border">
                             <button
                                 type="button"
                                 onClick={() => navigate("/admin/products")}
-                                className="px-6 py-3 border border-[rgba(44,24,16,0.08)] dark:border-[rgba(245,237,227,0.08)] rounded-xl text-[#5C4033] dark:text-[#C4A882] hover:bg-[#F5EDE3] dark:hover:bg-[#3D2317] transition-all duration-200 font-medium"
+                                className="px-6 py-3 border border-[#E2E8F0] dark:border-dark-border rounded-xl text-[#64748B] dark:text-dark-text hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-all duration-200 font-medium"
                             >
                                 Cancel
                             </button>
@@ -391,11 +391,11 @@ const AddProduct = () => {
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="px-6 py-3 bg-[#6F4E37] dark:bg-[#C68E5C] hover:bg-[#5C4033] dark:hover:bg-[#D4A574] text-[#F5EDE3] dark:text-[#1A0F0A] rounded-xl font-semibold transition-all duration-200 shadow-[0_2px_8px_rgba(44,24,16,0.15)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.4)] hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[140px]"
+                                className="px-6 py-3 bg-[#4F46E5] dark:bg-dark-primary hover:bg-[#4338CA] dark:hover:bg-[#6366F1] text-white rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[140px]"
                             >
                                 {isLoading ? (
                                     <>
-                                        <svg className="animate-spin h-5 w-5 text-[#F5EDE3] dark:text-[#1A0F0A]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>

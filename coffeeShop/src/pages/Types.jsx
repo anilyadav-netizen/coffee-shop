@@ -72,13 +72,13 @@ const Types = () => {
                             spaceBetween: 30,
                         },
                     }}
-                    className="mySwiper"
+                    className="mySwiper backdrop-blur-xl rounded-3xl p-12"
                 >
                     {categories.map((category) => (
                         <SwiperSlide key={category._id}>
                             <div
                                 onClick={() => handleCategoryClick(category)}
-                                className="flex flex-col items-center justify-center cursor-pointer hover:scale-105 transition-transform duration-300"
+                                className="flex flex-col items-center justify-center cursor-pointer hover:scale-105 transition-transform duration-300 mt-3  "
                             >
                                 {/* Image - Circle */}
                                 <div className="w-20 h-20 md:w-24 md:h-24 lg:w-[108px] lg:h-[108px] rounded-full overflow-hidden border-4 border-white/50 shadow-lg hover:shadow-xl transition-shadow duration-300">
@@ -90,7 +90,7 @@ const Types = () => {
                                 </div>
 
                                 {/* Text - Niche (Alag se) */}
-                                <h3 className="mt-2 text-white font-semibold text-base md:text-lg lg:text-[18px] text-center">
+                                <h3 className="mt-2 text-white font-semibold text-base md:text-lg lg:text-[18px] text-center mb-3">
                                     {category.name}
                                 </h3>
                             </div>

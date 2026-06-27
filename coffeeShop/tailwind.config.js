@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  darkMode: 'class', // 👈 YEH ADD KARO
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -8,32 +8,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Coffee Brand Colors
-        coffee: {
-          dark: '#2C1810',
-          DEFAULT: '#6F4E37',
-          light: '#8B6914',
-          mild: '#A67B5B',
-        },
-        accent: {
-          caramel: '#D4A574',
-          gold: '#C68E5C',
-        },
-        bg: {
-          primary: '#FDF8F3',
-          secondary: '#F5EDE3',
-          card: '#FFFFFF',
-          hover: 'rgba(111, 78, 55, 0.05)',
-        },
-        text: {
-          primary: '#2C1810',
-          secondary: '#5C4033',
-          muted: '#8B7355',
-        },
-        border: {
-          DEFAULT: 'rgba(44, 24, 16, 0.08)',
-        },
-      },
+        // ===== SIRF DARK MODE KE LIYE =====
+        dark: {
+          bg: '#0F172A',        // Page background
+          card: '#1E293B',      // Cards
+          border: '#334155',    // Borders
+          heading: '#F1F5F9',   // Headings
+          text: '#94A3B8',      // Body text
+          muted: '#64748B',     // Muted text
+          primary: '#818CF8',   // Primary buttons
+          accent: '#A78BFA',    // Accent elements
+        }
+      }
     },
   },
   plugins: [],

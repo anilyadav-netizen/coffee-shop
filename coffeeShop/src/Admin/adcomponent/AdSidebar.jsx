@@ -40,28 +40,30 @@ const AdSidebar = ({ onClose }) => {
   ];
 
   return (
-    <aside className="w-72 min-h-screen bg-[#F5EDE3] dark:bg-[#1A0F0A] text-[#2C1810] dark:text-[#F5EDE3] border-r border-[#D4A574] dark:border-[rgba(245,237,227,0.08)] shadow-xl relative">
-
+    <aside className="w-72 min-h-screen border-r shadow-xl relative bg-white dark:bg-dark-bg border-[#E2E8F0] dark:border-dark-border">
       {/* Close Button - Mobile Only */}
       <button
         onClick={onClose}
-        className="lg:hidden absolute top-4 right-4 p-2 rounded-lg hover:bg-[#D4A574] dark:hover:bg-[#3D2317] transition-colors duration-200 z-10"
+        className="lg:hidden absolute top-4 right-4 p-2 rounded-lg transition-colors duration-200 z-10 text-[#64748B] dark:text-dark-text hover:bg-[#F8FAFC] dark:hover:bg-dark-card"
         aria-label="Close Sidebar"
       >
-        <FaTimes className="text-[#2C1810] dark:text-[#F5EDE3] text-xl" />
+        <FaTimes className="text-xl" />
       </button>
 
       {/* Logo */}
-      <div className="p-6 border-b border-[#D4A574] dark:border-[rgba(245,237,227,0.08)]">
+      <div className="p-6 border-b border-[#E2E8F0] dark:border-dark-border">
         <div className="flex items-center gap-3">
-          <div className="bg-[#6F4E37] dark:bg-[#C68E5C] p-3 rounded-xl">
-            <FaCoffee className="text-[#F5EDE3] dark:text-[#1A0F0A] text-xl" />
+          <div className="p-3 rounded-xl bg-[#4F46E5] dark:bg-dark-primary">
+            <FaCoffee className="text-xl text-white" />
           </div>
           <div>
-            <Link to ="/admin" lassName="text-xl font-bold text-[#2C1810] dark:text-[#F5EDE3]">
+            <Link
+              to="/admin"
+              className="text-xl font-bold text-[#0F172A] dark:text-dark-heading"
+            >
               Coffee Admin
             </Link>
-            <p className="text-xs text-[#5C4033] dark:text-[#C4A882]">
+            <p className="text-xs text-[#64748B] dark:text-dark-text">
               Management Panel
             </p>
           </div>
@@ -75,17 +77,17 @@ const AdSidebar = ({ onClose }) => {
             key={item.path}
             to={item.path}
             end={item.path === "/admin"}
-            onClick={onClose} // 👈 Mobile pe link click karne par bhi close ho jaye
+            onClick={onClose}
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
                 isActive
-                  ? "bg-[#6F4E37] dark:bg-[#C68E5C] text-[#F5EDE3] dark:text-[#1A0F0A] font-semibold shadow-lg"
-                  : "text-[#5C4033] dark:text-[#C4A882] hover:bg-[#D4A574] dark:hover:bg-[#3D2317] hover:text-[#2C1810] dark:hover:text-[#F5EDE3]"
+                  ? "font-semibold shadow-lg bg-[#4F46E5] dark:bg-dark-primary text-white"
+                  : "text-[#64748B] dark:text-dark-text hover:bg-[#F8FAFC] dark:hover:bg-dark-card"
               }`
             }
           >
-            {item.icon}
-            <span>{item.name}</span>
+            <span className="text-inherit">{item.icon}</span>
+            <span className="text-inherit">{item.name}</span>
           </NavLink>
         ))}
       </nav>
