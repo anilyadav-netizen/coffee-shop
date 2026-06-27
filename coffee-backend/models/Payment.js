@@ -10,7 +10,7 @@ const paymentSchema = new mongoose.Schema(
 
     cart: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Cart",          // ✅ coffee کی جگہ cart
+      ref: "Cart",       
       required: true,
     },
 
@@ -20,7 +20,7 @@ const paymentSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      default: "pending",
+      default: "paid",
     },
   },
   {
