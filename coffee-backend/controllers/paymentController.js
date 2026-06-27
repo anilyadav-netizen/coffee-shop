@@ -24,10 +24,24 @@ exports.createOrder = async (req, res) => {
       });
     }
 
-    // Calculate total amount
-    const totalAmount = cart.items.reduce((sum, item) => {
-      return sum + item.coffee.price * item.quantity;
-    }, 0);
+    let totalAmount = 0;
+
+    // Snapshot of products
+    const products = cart.items.map((item) => {
+      const subtotal = item.coffee.price * item.quantity;
+      totalAmount += subtotal;
+
+      return {
+        coffee: item.coffee._id,
+        name: item.coffee.name,
+        image: item.coffee.image,
+        description: item.coffee.description,
+        category: item.coffee.category,
+        price: item.coffee.price,
+        quantity: item.quantity,
+        subtotal,
+      };
+    });
 
     // Create Razorpay Order
     const order = await razorpay.orders.create({
@@ -39,20 +53,21 @@ exports.createOrder = async (req, res) => {
     // Save Payment
     await Payment.create({
       user: userId,
-      cart: cart._id,
+      products,
       razorpayOrderId: order.id,
       amount: totalAmount,
       status: "pending",
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
+      message: "Order created successfully",
       order,
     });
   } catch (error) {
     console.error(error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -88,6 +103,7 @@ exports.verifyPayment = async (req, res) => {
       },
       {
         status: "paid",
+        razorpayPaymentId: razorpay_payment_id,
       },
       {
         new: true,
@@ -101,20 +117,25 @@ exports.verifyPayment = async (req, res) => {
       });
     }
 
-    // Remove all items from cart
-    await Cart.findByIdAndUpdate(payment.cart, {
-      $set: {
-        items: [],
-      },
-    });
+    // Clear user's cart
+    await Cart.findOneAndUpdate(
+      { user: payment.user },
+      {
+        $set: {
+          items: [],
+        },
+      }
+    );
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Payment verified successfully",
       payment,
     });
   } catch (error) {
-    res.status(500).json({
+    console.error(error);
+
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -127,22 +148,46 @@ exports.getMyOrders = async (req, res) => {
     const orders = await Payment.find({
       user: req.user._id,
       status: "paid",
-    })
-      .populate({
-        path: "cart",
-        populate: {
-          path: "items.coffee",
-        },
-      })
-      .sort({ createdAt: -1 });
+    }).sort({ createdAt: -1 });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       count: orders.length,
       orders,
     });
   } catch (error) {
-    res.status(500).json({
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// ================= GET SINGLE ORDER =================
+exports.getOrderById = async (req, res) => {
+  try {
+    const order = await Payment.findOne({
+      _id: req.params.id,
+      user: req.user._id,
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      order,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
       success: false,
       message: error.message,
     });

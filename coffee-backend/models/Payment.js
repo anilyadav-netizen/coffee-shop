@@ -8,19 +8,32 @@ const paymentSchema = new mongoose.Schema(
       required: true,
     },
 
-    cart: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Cart",       
+    products: [
+      {
+        coffee: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Coffee",
+        },
+        name: String,
+        image: String,
+        price: Number,
+        quantity: Number,
+        subtotal: Number,
+      },
+    ],
+
+    amount: {
+      type: Number,
       required: true,
     },
 
     razorpayOrderId: String,
-
-    amount: Number,         
+    razorpayPaymentId: String,
 
     status: {
       type: String,
-      default: "paid",
+      enum: ["pending", "paid", "failed"],
+      default: "pending",
     },
   },
   {
