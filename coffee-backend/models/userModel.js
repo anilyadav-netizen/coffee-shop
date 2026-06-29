@@ -87,6 +87,17 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
 
+    password: {
+      type: String,
+      required: true,
+    },
+
+    role: {
+      type: String,
+      enum: ["user", "admin", "rider"],
+      default: "user",
+    },
+
     amount: {
       type: Number,
       default: 0,
@@ -94,9 +105,26 @@ const userSchema = new mongoose.Schema(
 
     addresses: [addressSchema],
 
-    password: {
-      type: String,
-      required: true,
+    // Rider ki current live location
+    currentLocation: {
+      latitude: {
+        type: Number,
+        default: null,
+      },
+      longitude: {
+        type: Number,
+        default: null,
+      },
+      updatedAt: {
+        type: Date,
+        default: null,
+      },
+    },
+
+    // Rider online/offline
+    isAvailable: {
+      type: Boolean,
+      default: false,
     },
   },
   {
