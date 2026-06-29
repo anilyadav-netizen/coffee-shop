@@ -72,7 +72,7 @@ const Types = () => {
                             spaceBetween: 30,
                         },
                     }}
-                    className="mySwiper backdrop-blur-xl rounded-3xl p-12"
+                    className="mySwiper bg-black/50 rounded-3xl p-12"
                 >
                     {categories.map((category) => (
                         <SwiperSlide key={category._id}>

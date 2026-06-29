@@ -150,9 +150,9 @@ const WishlistPage = () => {
             <>
                 <div className="min-h-screen bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3] pt-20 sm:pt-24 px-3 sm:px-4 overflow-x-hidden">
                     <div className="max-w-7xl mx-auto">
-                        <div className="backdrop-blur-xl bg-white/30 border border-white/40 rounded-2xl sm:rounded-3xl p-6 sm:p-12 text-center shadow-2xl shadow-black/5">
+                        <div className=" bg-white/30 border border-white/40 rounded-2xl sm:rounded-3xl p-6 sm:p-12 text-center shadow-2xl shadow-black/5">
                             <div className="flex flex-col items-center justify-center py-8 sm:py-16">
-                                <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white/40 backdrop-blur-sm rounded-full flex items-center justify-center mb-4 sm:mb-6 border border-white/30">
+                                <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white/40  rounded-full flex items-center justify-center mb-4 sm:mb-6 border border-white/30">
                                     <Heart className="w-12 h-12 sm:w-16 sm:h-16 text-[#0D7C53]" />
                                 </div>
                                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2 sm:mb-3">
@@ -207,7 +207,7 @@ const WishlistPage = () => {
                         <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
                             <button
                                 onClick={handleClearWishlist}
-                                className="text-sm sm:text-base text-red-500 hover:text-red-600 font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-red-50/50 backdrop-blur-sm border border-red-200/50 hover:bg-red-100/50 transition-all flex-shrink-0"
+                                className="text-sm sm:text-base text-red-500 hover:text-red-600 font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-red-50/50  border border-red-200/50 hover:bg-red-100/50 transition-all flex-shrink-0"
                             >
                                 Clear All
                             </button>
@@ -249,7 +249,7 @@ const WishlistPage = () => {
                                 return (
                                     <div
                                         key={itemId}
-                                        className="group backdrop-blur-xl bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-md shadow-black/5 hover:shadow-lg transition-all duration-300"
+                                        className="group  bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-md shadow-black/5 hover:shadow-lg transition-all duration-300"
                                     >
                                         <div className="flex gap-3 sm:gap-4">
                                             {/* Image */}
@@ -322,7 +322,7 @@ const WishlistPage = () => {
 
                         {/* Wishlist Summary */}
                         <div className="lg:col-span-1">
-                            <div className="sticky top-20 sm:top-24 backdrop-blur-xl bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl shadow-black/5">
+                            <div className="sticky top-20 sm:top-24  bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl shadow-black/5">
                                 <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-3 sm:mb-4">
                                     Wishlist Summary
                                 </h3>

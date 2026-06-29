@@ -396,7 +396,7 @@ const MenuPage = () => {
                     <div className="absolute inset-0 bg-gradient-to-tr from-[#EDE0D4]/20 via-transparent to-[#D4B896]/10" />
                 </div>
                 <div className="text-center max-w-md mx-auto p-8 relative z-10">
-                    <div className="backdrop-blur-xl bg-white/20 border border-white/30 rounded-3xl p-12 shadow-2xl shadow-black/5">
+                    <div className=" bg-white/20 border border-white/30 rounded-3xl p-12 shadow-2xl shadow-black/5">
                         <div className="w-24 h-24 bg-yellow-100/50 rounded-full flex items-center justify-center mx-auto mb-4">
                             <span className="text-4xl">📋</span>
                         </div>
@@ -438,7 +438,7 @@ const MenuPage = () => {
                     <div className="container mx-auto px-4 relative z-10">
                         <button
                             onClick={() => navigate('/')}
-                            className="mb-6 inline-flex items-center gap-2 text-white/90 hover:text-white transition-colors bg-white/20 backdrop-blur px-3 sm:px-4 py-1.5 sm:py-2 rounded-full hover:bg-white/30 text-sm sm:text-base"
+                            className="mb-6 inline-flex items-center gap-2 text-white/90 hover:text-white transition-colors bg-white/20 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full hover:bg-white/30 text-sm sm:text-base"
                         >
                             <ArrowLeft size={18} className="sm:w-5 sm:h-5" />
                             Back to Home
@@ -485,7 +485,7 @@ const MenuPage = () => {
 
                     <div className="container mx-auto px-3 sm:px-4 relative z-10">
                         {/* Category Selector */}
-                        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-4 sm:mb-6 backdrop-blur-xl bg-white/10 border border-white/20 p-2 sm:p-3 rounded-xl sm:rounded-2xl shadow-2xl shadow-black/5">
+                        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-4 sm:mb-6  bg-white/10 border border-white/20 p-2 sm:p-3 rounded-xl sm:rounded-2xl shadow-2xl shadow-black/5">
                             {allCategories.map((cat) => (
                                 <button
                                     key={cat._id}
@@ -495,7 +495,7 @@ const MenuPage = () => {
                                     }}
                                     className={`px-2 sm:px-4 py-1 sm:py-2 rounded-full text-[10px] sm:text-sm font-medium transition-all duration-300 flex items-center gap-1 ${String(currentCategory?._id) === String(cat._id)
                                         ? 'bg-[#0D7C53] text-white shadow-lg'
-                                        : 'backdrop-blur-sm bg-white/20 border border-white/20 text-white hover:bg-white/30'
+                                        : ' bg-white/20 border border-white/20 text-white hover:bg-white/30'
                                         }`}
                                 >
                                     {cat.isAll && <Grid3x3 size={14} />}
@@ -513,7 +513,7 @@ const MenuPage = () => {
                                     placeholder={`Search ${currentCategory?.isAll ? 'Menu' : currentCategory?.name}...`}
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full pl-9 sm:pl-10 pr-8 sm:pr-10 py-2 sm:py-3 backdrop-blur-xl bg-white/10 border-2 border-white/20 rounded-full shadow-xl shadow-black/5 focus:outline-none focus:ring-2 focus:ring-[#0D7C53] focus:border-transparent transition-all text-white placeholder:text-white/60"
+                                    className="w-full pl-9 sm:pl-10 pr-8 sm:pr-10 py-2 sm:py-3  bg-white/10 border-2 border-white/20 rounded-full shadow-xl shadow-black/5 focus:outline-none focus:ring-2 focus:ring-[#0D7C53] focus:border-transparent transition-all text-white placeholder:text-white/60"
                                 />
                                 {searchTerm && (
                                     <button
@@ -553,7 +553,7 @@ const MenuPage = () => {
                                             key={item._id}
                                             ref={(el) => (cardRefs.current[item._id] = el)}
                                             data-id={item._id}
-                                            className={`group backdrop-blur-xl bg-white/10 border border-white/20 rounded-xl sm:rounded-2xl shadow-md shadow-black/10 hover:shadow-lg hover:shadow-[#0D7C53]/20 transition-all duration-700 overflow-hidden hover:-translate-y-1 flex flex-col h-full hover:bg-white/15
+                                            className={`group  bg-white/10 border border-white/20 rounded-xl sm:rounded-2xl shadow-md shadow-black/10 hover:shadow-lg hover:shadow-[#0D7C53]/20 transition-all duration-700 overflow-hidden hover:-translate-y-1 flex flex-col h-full hover:bg-white/15
                                                 ${isVisible
                                                     ? 'opacity-100 translate-x-0'
                                                     : `opacity-0 ${direction === 'left' ? '-translate-x-16' : 'translate-x-16'}`
@@ -587,14 +587,14 @@ const MenuPage = () => {
                                                 )}
 
                                                 {item.isFeatured && (
-                                                    <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-gradient-to-r from-[#0D7C53] to-green-500 text-white text-[8px] sm:text-xs font-bold px-2 sm:px-3 py-0.5 sm:py-1.5 rounded-full shadow-md flex items-center gap-0.5 sm:gap-1 backdrop-blur-sm">
+                                                    <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-gradient-to-r from-[#0D7C53] to-green-500 text-white text-[8px] sm:text-xs font-bold px-2 sm:px-3 py-0.5 sm:py-1.5 rounded-full shadow-md flex items-center gap-0.5 sm:gap-1 ">
                                                         <Star size={10} className="sm:w-3 sm:h-3 fill-yellow-400" />
                                                         Featured
                                                     </div>
                                                 )}
 
                                                 {currentCategory?.isAll && (
-                                                    <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm text-white text-[8px] sm:text-xs px-2 py-0.5 sm:py-1 rounded-full">
+                                                    <div className="absolute bottom-2 left-2 bg-black/60  text-white text-[8px] sm:text-xs px-2 py-0.5 sm:py-1 rounded-full">
                                                         {itemCategoryName}
                                                     </div>
                                                 )}
@@ -602,7 +602,7 @@ const MenuPage = () => {
                                                 {/* Wishlist Button */}
                                                 <button
                                                     onClick={(e) => handleWishlistToggle(item, e)}
-                                                    className="absolute top-2 sm:top-3 right-2 sm:right-3 z-10 w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:bg-white transition-all duration-300 hover:scale-110"
+                                                    className="absolute top-2 sm:top-3 right-2 sm:right-3 z-10 w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 bg-white/80  rounded-full flex items-center justify-center shadow-md hover:bg-white transition-all duration-300 hover:scale-110"
                                                 >
                                                     <Heart
                                                         size={16}
@@ -615,7 +615,7 @@ const MenuPage = () => {
                                             </div>
 
                                             {/* Content */}
-                                            <div className="p-3 sm:p-4 md:p-5 flex flex-col flex-1">
+                                            <div className="p-3 sm:p-4 md:p-5 flex flex-col flex-1 bg-white/10">
                                                 <h3 className="font-bold text-white text-sm sm:text-base md:text-lg group-hover:text-[#169466] transition-colors mb-0.5 sm:mb-1 truncate">
                                                     {item.name}
                                                 </h3>
@@ -637,7 +637,7 @@ const MenuPage = () => {
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <div className="flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-xs font-medium text-green-400 bg-green-500/20 backdrop-blur-sm px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full flex-shrink-0">
+                                                    <div className="flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-xs font-medium text-green-400 bg-green-500/20  px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full flex-shrink-0">
                                                         <TrendingUp size={10} className="sm:w-3 sm:h-3" />
                                                         {item.points || 0} Pts
                                                     </div>
@@ -658,7 +658,7 @@ const MenuPage = () => {
                             </div>
                         ) : (
                             <div className="text-center py-12 sm:py-20">
-                                <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl sm:rounded-3xl p-6 sm:p-12 shadow-2xl shadow-black/5 max-w-2xl mx-auto">
+                                <div className=" bg-white/10 border border-white/20 rounded-2xl sm:rounded-3xl p-6 sm:p-12 shadow-2xl shadow-black/5 max-w-2xl mx-auto">
                                     <div className="w-16 h-16 sm:w-24 sm:h-24 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
                                         <Search size={28} className="sm:w-10 sm:h-10 text-white/40" />
                                     </div>
@@ -673,7 +673,7 @@ const MenuPage = () => {
                                     {searchTerm && (
                                         <button
                                             onClick={clearSearch}
-                                            className="mt-3 sm:mt-4 px-4 sm:px-6 py-1.5 sm:py-2 backdrop-blur-sm bg-white/20 border border-white/20 text-white rounded-full hover:bg-white/30 transition-colors text-sm sm:text-base"
+                                            className="mt-3 sm:mt-4 px-4 sm:px-6 py-1.5 sm:py-2  bg-white/20 border border-white/20 text-white rounded-full hover:bg-white/30 transition-colors text-sm sm:text-base"
                                         >
                                             Clear Search
                                         </button>

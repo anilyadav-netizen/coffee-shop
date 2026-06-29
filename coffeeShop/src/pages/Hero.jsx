@@ -68,7 +68,7 @@ const Hero = () => {
             <div className="relative z-20 w-full h-[53vh] md:h-screen flex flex-col items-center justify-center px-4">
                 <div className="text-center max-w-4xl mx-auto">
                     {/* Badge */}
-                    <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-lg border border-white/20 px-6 py-2 rounded-full mb-1 md:mb-6 animate-fade-in-down">
+                    <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 px-6 py-2 rounded-full mb-1 md:mb-6 animate-fade-in-down">
                         <span className="w-2 h-2 bg-green-400 rounded-full animate-ping"></span>
                         <span className="text-white/90 text-sm font-medium">Now Open - 20% Off First Order</span>
                     </div>
@@ -115,7 +115,7 @@ const Hero = () => {
                 </div>
 
                 {/* Stats */}
-                <div className="absolute bottom-16 md:bottom-32 left-1/2 -translate-x-1/2 z-20 hidden md:flex gap-8 bg-black/40 backdrop-blur-xl px-8 py-4 rounded-2xl border border-white/10">                    {stats.map((stat, index) => (
+                <div className="absolute bottom-16 md:bottom-32 left-1/2 -translate-x-1/2 z-20 hidden md:flex gap-8 bg-black/40 px-8 py-4 rounded-2xl border border-white/10">                    {stats.map((stat, index) => (
                     <div key={index} className="flex items-center gap-3 text-white">
                         <span className="text-[#0D7C53]">{stat.icon}</span>
                         <div>

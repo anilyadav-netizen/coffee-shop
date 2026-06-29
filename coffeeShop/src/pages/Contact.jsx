@@ -137,7 +137,7 @@ const Contact = () => {
                     {/* Content */}
                     <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4">
                         {/* Badge */}
-                        <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-lg border border-white/20 px-6 py-2 rounded-full mb-6 animate-fade-in-down">
+                        <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 px-6 py-2 rounded-full mb-6 animate-fade-in-down">
                             <span className="w-2 h-2 bg-green-400 rounded-full animate-ping"></span>
                             <span className="text-white/90 text-sm font-medium tracking-wider">
                                 {heroData.badge}
@@ -184,7 +184,7 @@ const Contact = () => {
                         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
                             {/* Contact Info - Left Side - Glass Effect */}
                             <div className="lg:col-span-2 space-y-6">
-                                <div className="backdrop-blur-xl bg-white/20 border border-white/30 rounded-3xl p-8 shadow-2xl shadow-black/5">
+                                <div className=" bg-white/20 border border-white/30 rounded-3xl p-8 shadow-2xl shadow-black/5">
                                     <h2 className="text-2xl font-bold text-[#0D7C53] mb-2">
                                         Get in <span className="text-[#0D7C53]">Touch</span>
                                     </h2>
@@ -198,7 +198,7 @@ const Contact = () => {
                                             return (
                                                 <div
                                                     key={info.id}
-                                                    className="flex items-start gap-4 p-3 rounded-xl backdrop-blur-sm bg-white/40 border border-white/20 hover:bg-white/60 transition-all duration-300 group shadow-sm hover:shadow-md"
+                                                    className="flex items-start gap-4 p-3 rounded-xl  bg-white/40 border border-white/20 hover:bg-white/60 transition-all duration-300 group shadow-sm hover:shadow-md"
                                                 >
                                                     <div className={`p-3 rounded-xl bg-gradient-to-br ${info.color} text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                                                         <IconComponent className="w-6 h-6" />
@@ -224,7 +224,7 @@ const Contact = () => {
                                                     <a
                                                         key={social.id}
                                                         href={social.url}
-                                                        className={`p-3 backdrop-blur-sm bg-white/40 border border-white/20 rounded-xl text-gray-600 transition-all duration-300 hover:text-white ${social.color} hover:shadow-lg hover:scale-110`}
+                                                        className={`p-3  bg-white/40 border border-white/20 rounded-xl text-gray-600 transition-all duration-300 hover:text-white ${social.color} hover:shadow-lg hover:scale-110`}
                                                         aria-label={social.label}
                                                     >
                                                         <IconComponent className="w-5 h-5" />
@@ -238,7 +238,7 @@ const Contact = () => {
 
                             {/* Contact Form - Right Side - Glass Effect */}
                             <div className="lg:col-span-3">
-                                <div className="backdrop-blur-xl bg-white/20 border border-white/30 rounded-3xl p-10 shadow-2xl shadow-black/5">
+                                <div className=" bg-white/20 border border-white/30 rounded-3xl p-10 shadow-2xl shadow-black/5">
                                     <div className="mb-7">
                                         <h3 className="text-2xl font-bold text-[#0D7C53]">
                                             {formDataConfig.title.split(' ').map((word, index) => (
@@ -253,7 +253,7 @@ const Contact = () => {
                                     </div>
 
                                     {isSubmitted ? (
-                                        <div className="backdrop-blur-sm bg-green-50/60 border border-green-200/50 rounded-xl p-6 text-center animate-fade-in-up">
+                                        <div className=" bg-green-50/60 border border-green-200/50 rounded-xl p-6 text-center animate-fade-in-up">
                                             <div className="w-16 h-16 bg-green-100/80 rounded-full flex items-center justify-center mx-auto mb-4">
                                                 <CheckCircle className="w-8 h-8 text-green-500" />
                                             </div>
@@ -289,7 +289,7 @@ const Contact = () => {
                                                                 onBlur={() => setActiveField(null)}
                                                                 required={field.required}
                                                                 placeholder={field.placeholder}
-                                                                className="w-full pl-10 pr-4 py-3 backdrop-blur-sm bg-white/40 border rounded-lg focus:outline-none  border-green-200 transition-all duration-300 text-gray-800 placeholder:text-gray-400"
+                                                                className="w-full pl-10 pr-4 py-3  bg-white/40 border rounded-lg focus:outline-none  border-green-200 transition-all duration-300 text-gray-800 placeholder:text-gray-400"
                                                             />
                                                         </div>
                                                     </div>
@@ -313,7 +313,7 @@ const Contact = () => {
                                                         required={formDataConfig.messageField.required}
                                                         rows={formDataConfig.messageField.rows}
                                                         placeholder={formDataConfig.messageField.placeholder}
-                                                        className="w-full pl-10 pr-4 py-3 backdrop-blur-sm bg-white/40 border rounded-lg focus:outline-none  border-green-200 transition-all duration-300 text-gray-800 placeholder:text-gray-400"
+                                                        className="w-full pl-10 pr-4 py-3  bg-white/40 border rounded-lg focus:outline-none  border-green-200 transition-all duration-300 text-gray-800 placeholder:text-gray-400"
                                                     ></textarea>
                                                 </div>
                                             </div>
@@ -368,7 +368,7 @@ const Contact = () => {
                             </h2>
                             <div className="w-16 h-1 bg-[#0D7C53] mx-auto mt-3 rounded-full"></div>
                         </div>
-                        <div className="w-full overflow-hidden rounded-3xl shadow-2xl border-4 border-white/30 backdrop-blur-sm">
+                        <div className="w-full overflow-hidden rounded-3xl shadow-2xl border-4 border-white/30 ">
                             <iframe
                                 src={mapData.embedUrl}
                                 className="w-full h-[400px]"
