@@ -260,7 +260,7 @@ const CategoryPage = () => {
                     onMouseEnter={() => setHoveredId(productId)}
                     onMouseLeave={() => setHoveredId(null)}
                     onClick={() => setSelectedProduct(product)}
-                    className="group backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl overflow-hidden shadow-2xl shadow-black/10 hover:shadow-[#0D7C53]/20 transition-all duration-500 hover:-translate-y-2 hover:bg-white/15 relative"
+                    className="group bg-white/20 border border-white/20 rounded-3xl overflow-hidden shadow-2xl shadow-black/10 hover:shadow-[#0D7C53]/20 transition-all duration-500 hover:-translate-y-2 hover:bg-white/15 relative"
                   >
                     <div className="relative overflow-hidden aspect-[4/3]">
                       <img
@@ -283,21 +283,21 @@ const CategoryPage = () => {
 
                       {/* Wishlist Button */}
                       <button
-                        className="absolute top-3 right-3 z-10 w-9 h-9 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:bg-white transition-all duration-300 hover:scale-110"
+                        className="absolute top-3 right-3 z-10 w-9 h-9 bg-white/80 rounded-full flex items-center justify-center shadow-md hover:bg-white transition-all duration-300 hover:scale-110"
                         onClick={(e) => handleWishlistToggle(product, e)}
                       >
                         <HeartIcon isWishlisted={isWishlisted} />
                       </button>
 
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                        <span className="bg-[#0D7C53]/90 backdrop-blur-sm text-white px-5 py-2 rounded-full text-sm font-semibold shadow-lg transform scale-90 group-hover:scale-100 transition-transform duration-300">
+                        <span className="bg-[#0D7C53]/90 text-white px-5 py-2 rounded-full text-sm font-semibold shadow-lg transform scale-90 group-hover:scale-100 transition-transform duration-300">
                           Quick View
                         </span>
                       </div>
                     </div>
 
                     {/* Content Area */}
-                    <div className="p-4 bg-gradient-to-b from-white/15 to-white/10 backdrop-blur-sm">
+                    <div className="p-4 bg-gradient-to-b from-white/15 to-white/10 ">
                       <h3 className="font-bold text-lg text-white line-clamp-1 transition-colors">
                         {product.name}
                       </h3>
@@ -348,7 +348,7 @@ const CategoryPage = () => {
       {/* Modal */}
       {selectedProduct && (
         <div
-          className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-300"
+          className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 animate-in fade-in duration-300"
           onClick={() => {
             setSelectedProduct(null);
             setModalQuantity(1);
@@ -371,7 +371,7 @@ const CategoryPage = () => {
                   setSelectedProduct(null);
                   setModalQuantity(1);
                 }}
-                className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm p-2 rounded-full shadow-lg hover:bg-white transition hover:scale-105 border border-gray-100"
+                className="absolute top-3 right-3 bg-white/95 p-2 rounded-full shadow-lg hover:bg-white transition hover:scale-105 border border-gray-100"
               >
                 <svg className="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -390,7 +390,7 @@ const CategoryPage = () => {
 
               {/* Modal Wishlist Button */}
               <button
-                className="absolute bottom-3 right-3 bg-white/95 backdrop-blur-sm p-2.5 rounded-full shadow-lg hover:bg-white transition hover:scale-105 border border-gray-100"
+                className="absolute bottom-3 right-3 bg-white/95 p-2.5 rounded-full shadow-lg hover:bg-white transition hover:scale-105 border border-gray-100"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleModalWishlistToggle();

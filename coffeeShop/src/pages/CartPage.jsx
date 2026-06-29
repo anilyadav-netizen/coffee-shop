@@ -317,9 +317,9 @@ const CartPage = () => {
         return (
             <div className="min-h-screen bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3] pt-20 sm:pt-24 px-3 sm:px-4 overflow-x-hidden">
                 <div className="max-w-7xl mx-auto">
-                    <div className="backdrop-blur-xl bg-white/30 border border-white/40 rounded-2xl sm:rounded-3xl p-6 sm:p-12 text-center shadow-2xl shadow-black/5">
+                    <div className=" bg-white/30 border border-white/40 rounded-2xl sm:rounded-3xl p-6 sm:p-12 text-center shadow-2xl shadow-black/5">
                         <div className="flex flex-col items-center justify-center py-8 sm:py-16">
-                            <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white/40 backdrop-blur-sm rounded-full flex items-center justify-center mb-4 sm:mb-6 border border-white/30">
+                            <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white/40  rounded-full flex items-center justify-center mb-4 sm:mb-6 border border-white/30">
                                 <ShoppingBag className="w-12 h-12 sm:w-16 sm:h-16 text-[#0D7C53]" />
                             </div>
                             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2 sm:mb-3">
@@ -388,7 +388,7 @@ const CartPage = () => {
                         </div>
                         <button
                             onClick={handleClearCart}
-                            className="text-sm sm:text-base text-red-500 hover:text-red-600 font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-red-50/50 backdrop-blur-sm border border-red-200/50 hover:bg-red-100/50 transition-all flex-shrink-0"
+                            className="text-sm sm:text-base text-red-500 hover:text-red-600 font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-red-50/50  border border-red-200/50 hover:bg-red-100/50 transition-all flex-shrink-0"
                         >
                             Clear All
                         </button>
@@ -407,7 +407,7 @@ const CartPage = () => {
                                 return (
                                     <div
                                         key={coffeeId}
-                                        className="group backdrop-blur-xl bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-md shadow-black/5 hover:shadow-lg transition-all duration-300"
+                                        className="group  bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-md shadow-black/5 hover:shadow-lg transition-all duration-300"
                                     >
                                         <div className="flex gap-3 sm:gap-4">
                                             {/* Image */}
@@ -448,7 +448,7 @@ const CartPage = () => {
                                                     </div>
 
                                                     {/* Quantity Controls */}
-                                                    <div className="flex items-center gap-1 sm:gap-2 bg-white/50 backdrop-blur-sm rounded-full p-0.5 sm:p-1 border border-white/30 flex-shrink-0">
+                                                    <div className="flex items-center gap-1 sm:gap-2 bg-white/50  rounded-full p-0.5 sm:p-1 border border-white/30 flex-shrink-0">
                                                         <button
                                                             onClick={() => handleDecrease(coffeeId)}
                                                             disabled={loading || paymentLoading}
@@ -477,7 +477,7 @@ const CartPage = () => {
 
                         {/* Order Summary */}
                         <div className="lg:col-span-1">
-                            <div className="sticky top-20 sm:top-24 backdrop-blur-xl bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl shadow-black/5">
+                            <div className="sticky top-20 sm:top-24  bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl shadow-black/5">
                                 <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">
                                     Order Summary
                                 </h3>
@@ -494,7 +494,7 @@ const CartPage = () => {
                                         </span>
                                     </div>
                                     {totalPrice > 500 && (
-                                        <div className="flex justify-between text-[10px] sm:text-xs text-green-600 bg-green-50/50 backdrop-blur-sm px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg border border-green-200/50">
+                                        <div className="flex justify-between text-[10px] sm:text-xs text-green-600 bg-green-50/50  px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg border border-green-200/50">
                                             <span>🎉 Free delivery on orders above ₹500</span>
                                         </div>
                                     )}
@@ -513,7 +513,7 @@ const CartPage = () => {
                                         <input
                                             type="text"
                                             placeholder="Coupon code"
-                                            className="flex-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-white/40 backdrop-blur-sm border border-white/30 rounded-full text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#0D7C53] focus:border-transparent placeholder:text-xs sm:placeholder:text-sm"
+                                            className="flex-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-white/40  border border-white/30 rounded-full text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#0D7C53] focus:border-transparent placeholder:text-xs sm:placeholder:text-sm"
                                         />
                                         <button className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#0D7C53]/10 text-[#0D7C53] rounded-full text-[12px] sm:text-sm font-semibold hover:bg-[#0D7C53] hover:text-white transition-all duration-300 whitespace-nowrap">
                                             Apply

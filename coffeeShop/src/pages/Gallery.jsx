@@ -172,7 +172,7 @@ const Gallery = () => {
 
                 {/* Content */}
                 <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4 mt-5 md:mt-10">
-                    <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-lg border border-white/20 px-6 py-2 rounded-full mb-1 md:mb-6 animate-fade-in-down">
+                    <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 px-6 py-2 rounded-full mb-1 md:mb-6 animate-fade-in-down">
                         <span className="w-2 h-2 bg-green-400 rounded-full animate-ping"></span>
                         <span className="text-white/90 text-sm font-medium tracking-wider">SHARE YOUR MOMENTS</span>
                     </div>
@@ -215,7 +215,7 @@ const Gallery = () => {
                 <div className="max-w-[95rem] mx-auto relative z-10">
                     {/* Header */}
                     <div className="text-center mb-12">
-                        <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10 backdrop-blur-sm px-4 py-1.5 rounded-full mb-4 border border-white/20">
+                        <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10  px-4 py-1.5 rounded-full mb-4 border border-white/20">
                             <span className="text-[#0D7C53] text-sm font-semibold tracking-wider">COMMUNITY GALLERY</span>
                         </div>
                         <h2 className="text-4xl md:text-5xl font-bold text-gray-800">
@@ -230,11 +230,11 @@ const Gallery = () => {
                     {/* Gallery Stats */}
                     <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
                         <div className="flex items-center gap-6">
-                            <div className="backdrop-blur-xl bg-white/20 border border-white/30 rounded-2xl px-4 py-2 shadow-xl">
+                            <div className=" bg-white/20 border border-white/30 rounded-2xl px-4 py-2 shadow-xl">
                                 <span className="text-sm text-gray-600">Total Photos</span>
                                 <span className="ml-2 font-bold text-[#0D7C53]">{allImages.length}</span>
                             </div>
-                            <div className="backdrop-blur-xl bg-white/20 border border-white/30 rounded-2xl px-4 py-2 shadow-xl">
+                            <div className=" bg-white/20 border border-white/30 rounded-2xl px-4 py-2 shadow-xl">
                                 <span className="text-sm text-gray-600">Community Uploads</span>
                                 <span className="ml-2 font-bold text-[#0D7C53]">{userImages.length}</span>
                             </div>
@@ -254,7 +254,7 @@ const Gallery = () => {
                             <div
                                 key={item.id}
                                 onClick={() => handleImageClick(item)}
-                                className="group relative rounded-2xl overflow-hidden cursor-pointer aspect-square backdrop-blur-xl bg-white/20 border border-white/30 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1"
+                                className="group relative rounded-2xl overflow-hidden cursor-pointer aspect-square  bg-white/20 border border-white/30 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1"
                             >
                                 <img
                                     src={item.image}
@@ -265,7 +265,7 @@ const Gallery = () => {
 
                                 {/* User Image Badge */}
                                 {item.isUserImage && (
-                                    <div className="absolute top-3 left-3 bg-[#0D7C53]/80 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                                    <div className="absolute top-3 left-3 bg-[#0D7C53]/80  text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
                                         <Camera size={12} />
                                         Community
                                     </div>
@@ -314,7 +314,7 @@ const Gallery = () => {
                             <button
                                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                                 disabled={currentPage === 1}
-                                className="p-2 rounded-lg backdrop-blur-xl bg-white/20 border border-white/30 hover:bg-white/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl"
+                                className="p-2 rounded-lg  bg-white/20 border border-white/30 hover:bg-white/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl"
                             >
                                 <ChevronLeft size={18} className="text-gray-600" />
                             </button>
@@ -325,7 +325,7 @@ const Gallery = () => {
                                     onClick={() => setCurrentPage(i + 1)}
                                     className={`w-10 h-10 rounded-lg font-medium transition-all shadow-xl ${currentPage === i + 1
                                         ? 'bg-[#0D7C53] text-white shadow-lg shadow-[#0D7C53]/30'
-                                        : 'backdrop-blur-xl bg-white/20 border border-white/30 text-gray-600 hover:bg-white/40'
+                                        : ' bg-white/20 border border-white/30 text-gray-600 hover:bg-white/40'
                                         }`}
                                 >
                                     {i + 1}
@@ -335,7 +335,7 @@ const Gallery = () => {
                             <button
                                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                                 disabled={currentPage === totalPages}
-                                className="p-2 rounded-lg backdrop-blur-xl bg-white/20 border border-white/30 hover:bg-white/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl"
+                                className="p-2 rounded-lg  bg-white/20 border border-white/30 hover:bg-white/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl"
                             >
                                 <ChevronRight size={18} className="text-gray-600" />
                             </button>
@@ -347,11 +347,11 @@ const Gallery = () => {
             {/* ========== UPLOAD MODAL - GLASS EFFECT ========== */}
             {showUploadModal && (
                 <div
-                    className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
+                    className="fixed inset-0 z-50 bg-black/60  flex items-center justify-center p-4 animate-fade-in"
                     onClick={() => setShowUploadModal(false)}
                 >
                     <div
-                        className="backdrop-blur-xl bg-white/30 border border-white/40 rounded-3xl max-w-md w-full p-8 shadow-2xl shadow-black/20"
+                        className=" bg-white border border-white/40 rounded-3xl max-w-md w-full p-8 shadow-2xl shadow-black/20"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between mb-6">
@@ -371,7 +371,7 @@ const Gallery = () => {
 
                         {/* Image Upload Area */}
                         <div
-                            className="relative border-2 border-dashed border-white/40 rounded-2xl p-8 text-center cursor-pointer hover:border-[#0D7C53] transition-all bg-white/20 backdrop-blur-sm"
+                            className="relative border-2 border-dashed border-white/40 rounded-2xl p-8 text-center cursor-pointer hover:border-[#0D7C53] transition-all bg-white/20 "
                             onClick={() => fileInputRef.current?.click()}
                         >
                             {newImagePreview ? (
@@ -406,7 +406,7 @@ const Gallery = () => {
                                 value={newImageTitle}
                                 onChange={(e) => setNewImageTitle(e.target.value)}
                                 placeholder="e.g., Morning Coffee Bliss"
-                                className="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0D7C53] focus:border-transparent transition-all"
+                                className="w-full px-4 py-3 bg-white/40  border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0D7C53] focus:border-transparent transition-all"
                             />
                         </div>
 
@@ -420,7 +420,7 @@ const Gallery = () => {
                                 value={newImageDesc}
                                 onChange={(e) => setNewImageDesc(e.target.value)}
                                 placeholder="Tell us about your coffee moment..."
-                                className="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0D7C53] focus:border-transparent transition-all"
+                                className="w-full px-4 py-3 bg-white/40  border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0D7C53] focus:border-transparent transition-all"
                             />
                         </div>
 
@@ -444,7 +444,7 @@ const Gallery = () => {
                     onClick={closeLightbox}
                 >
                     <div
-                        className="relative max-w-5xl w-full max-h-[90vh] backdrop-blur-xl bg-black/40 border border-white/10 rounded-3xl overflow-hidden shadow-2xl"
+                        className="relative max-w-5xl w-full max-h-[90vh]  bg-black/40 border border-white/10 rounded-3xl overflow-hidden shadow-2xl"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Close Button */}

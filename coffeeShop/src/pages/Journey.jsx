@@ -88,8 +88,8 @@ const Journey = () => {
             <div className="max-w-[104rem] mx-auto relative z-10">
                 {/* ========== HEADER ========== */}
                 <div className="text-center mb-8">
-                    <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10 backdrop-blur-sm rounded-full mb-2 border border-white/20">
-                        <span className="flex items-center gap-2 px-6 py-2.5 bg-[#0D7C53]/20 backdrop-blur-sm text-white rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30">{sectionData.badge}</span>
+                    <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10  rounded-full mb-2 border border-white/20">
+                        <span className="flex items-center gap-2 px-6 py-2.5 bg-[#0D7C53]/20  text-white rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30">{sectionData.badge}</span>
                     </div>
                     <h2 className="text-3xl md:text-5xl font-bold text-white">
                         {sectionData.title.split(' ').map((word, index) => (
@@ -105,10 +105,10 @@ const Journey = () => {
                 </div>
 
                 {/* ========== MAIN CONTENT - IMAGE LEFT + STEPS RIGHT ========== */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start backdrop-blur-xl rounded-3xl">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start  rounded-3xl">
                     {/* ===== LEFT SIDE - IMAGE ===== */}
                     <div className="relative order-2 lg:order-1">
-                        <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-black/5 border border-white/30 backdrop-blur-xl bg-white/10">
+                        <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-black/5 border border-white/30  bg-white/10">
                             <img
                                 src={currentStep.image}
                                 alt={currentStep.title}
@@ -118,7 +118,7 @@ const Journey = () => {
                             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
 
                             {/* Step Badge */}
-                            <div className="absolute bottom-4 left-4 backdrop-blur-xl bg-white/40 border border-white/30 rounded-xl px-4 py-2 shadow-xl">
+                            <div className="absolute bottom-4 left-4  bg-white/40 border border-white/30 rounded-xl px-4 py-2 shadow-xl">
                                 <div className="flex items-center gap-2">
                                     <span className="text-white font-bold text-lg">Step {currentStep.stepNumber}</span>
                                     <span className="text-white/60 text-sm">/ {totalSteps}</span>
@@ -126,7 +126,7 @@ const Journey = () => {
                             </div>
 
                             {/* Duration Badge */}
-                            <div className="absolute top-4 right-4 backdrop-blur-xl bg-white/40 border border-white/30 rounded-full px-4 py-1.5 shadow-xl flex items-center gap-2">
+                            <div className="absolute top-4 right-4  bg-white/40 border border-white/30 rounded-full px-4 py-1.5 shadow-xl flex items-center gap-2">
                                 <Clock className="w-4 h-4 text-white" />
                                 <span className="text-sm font-medium text-gray-200">{currentStep.duration}</span>
                             </div>
@@ -135,7 +135,7 @@ const Journey = () => {
 
                     {/* ===== RIGHT SIDE - VERTICAL STEP ROADMAP ===== */}
                     <div className="order-1 lg:order-2">
-                        <div className="backdrop-blur-xl border border-white/30 rounded-3xl p-6 shadow-2xl shadow-black/5">
+                        <div className=" border border-white/30 rounded-3xl p-6 shadow-2xl shadow-black/5">
                             <h3 className="text-xl font-bold text-white mb-6 text-center">
                                 Journey Steps
                             </h3>
@@ -157,10 +157,10 @@ const Journey = () => {
                                                 className={`
                                                     w-full flex items-start gap-4 p-3 rounded-2xl transition-all duration-300 text-left
                                                     ${isActive
-                                                        ? 'backdrop-blur-xl bg-white/40 border-2 border-[#0D7C53] shadow-xl'
+                                                        ? ' bg-white/40 border-2 border-[#0D7C53] shadow-xl'
                                                         : isPast
-                                                            ? 'backdrop-blur-sm bg-white/20 border border-white/30 opacity-70'
-                                                            : 'backdrop-blur-sm bg-white/10 border border-white/20 hover:bg-white/30'}
+                                                            ? ' bg-white/20 border border-white/30 opacity-70'
+                                                            : ' bg-white/10 border border-white/20 hover:bg-white/30'}
                                                 `}
                                             >
                                                 {/* Step Circle with Number */}
@@ -199,12 +199,12 @@ const Journey = () => {
                                                             {step.title}
                                                         </span>
                                                         {isActive && (
-                                                            <span className="text-xs flex items-center gap-2 px-2 py-0.5 bg-[#0D7C53]/20 backdrop-blur-sm text-white rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30">
+                                                            <span className="text-xs flex items-center gap-2 px-2 py-0.5 bg-[#0D7C53]/20  text-white rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30">
                                                                 Active
                                                             </span>
                                                         )}
                                                         {isPast && (
-                                                            <span className="text-xs px-2 py-0.5 flex items-center gap-2 bg-[#0D7C53]/20 backdrop-blur-sm text-white rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30">
+                                                            <span className="text-xs px-2 py-0.5 flex items-center gap-2 bg-[#0D7C53]/20  text-white rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30">
                                                                 Done
                                                             </span>
                                                         )}

@@ -80,7 +80,7 @@ const Navbar = () => {
 
 
     return (
-        <nav className={`fixed w-full top-0 left-0 z-50 transition-all duration-500 ${isScrolled ? 'bg-black/90 backdrop-blur-xl shadow-2xl' : 'bg-transparent'}`}>
+        <nav className={`fixed w-full top-0 left-0 z-50 transition-all duration-500 ${isScrolled ? 'bg-black/90 shadow-2xl' : 'bg-transparent'}`}>
             <div className="max-w-[109rem] mx-auto px-2.5 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
 
                 {/* Logo */}
