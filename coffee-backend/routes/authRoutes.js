@@ -9,8 +9,8 @@ const {
   updateAddress,
   getAllUsers,
 } = require("../controllers/authController");
+const { protect } = require("../middleware/authMiddleware");
 
-const protect = require("../middleware/authMiddleware");
 
 // Public Routes
 router.post("/register", register);

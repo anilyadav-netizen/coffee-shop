@@ -4,7 +4,7 @@ const router = express.Router();
 const {
   updateOrderStatus,
 } = require("../controllers/riderController");
-const protect = require("../middleware/authMiddleware");
+const {protect} = require("../middleware/authMiddleware");
 
 
 // Update Order Status
