@@ -27,14 +27,14 @@ import Category from "./Admin/adpages/Category";
 import AddCategory from "./Admin/adpages/AddCategory";
 import { ToastContainer } from 'react-toastify';
 import OrderDetailsPage from "./pages/OderDetailsPage";
-import Orders from "./Admin/adpages/Orders";
+
 
 function App() {
 
   return (
     <BrowserRouter>
       <ScrollToTop />
-  
+
       <ToastContainer />
       <Routes>
         {/* User Layout */}
@@ -73,7 +73,7 @@ function App() {
           <Route path="category" element={<Category />} />
           <Route path="add-category" element={<AddCategory />} />
           <Route path="/admin/update-product/:id" element={<AddProduct />} /> {/* ✅ Same component */}
-          <Route path="/admin/orders" element={<Orders />} />
+          <Route path="/admin/update-category/:id" element={<AddCategory />} />
 
         </Route>
         <Route path="/login" element={<Login />} />

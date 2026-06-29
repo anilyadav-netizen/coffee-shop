@@ -28,8 +28,8 @@ const AdSidebar = ({ onClose }) => {
       icon: <FaTags size={18} />,
     },
     {
-      name: "Orders",
-      path: "/admin/orders",
+      name: "Ordered Items",
+      path: "/admin/ordered-items",
       icon: <FaShoppingBag size={18} />,
     },
     {

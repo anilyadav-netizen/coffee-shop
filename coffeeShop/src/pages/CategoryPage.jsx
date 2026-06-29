@@ -49,6 +49,10 @@ const CategoryPage = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [hoveredId, setHoveredId] = useState(null);
   const [modalQuantity, setModalQuantity] = useState(1);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+
+  // ✅ NEW: Track which product is showing "Added ✓" state
+  const [addedProductId, setAddedProductId] = useState(null);
 
   // ✅ Page load par wishlist fetch karo
   useEffect(() => {
@@ -67,9 +71,13 @@ const CategoryPage = () => {
     );
   };
 
-  // ✅ Handle Add to Cart from Card - FIXED: Added amount field
-  const handleAddToCart = (product, e) => {
+  // ✅ Handle Add to Cart from Card - FIXED: Using React state instead of DOM manipulation
+  const handleAddToCart = async (product, e) => {
     e.stopPropagation();
+
+    // Prevent multiple clicks
+    if (isAddingToCart) return;
+    setIsAddingToCart(true);
 
     // Use _id or id consistently
     const productId = product._id || product.id;
@@ -84,22 +92,31 @@ const CategoryPage = () => {
     }))
       .unwrap()
       .then(() => {
-  toast.success("Item added successfully");
-})
-.catch((error) => {
-  console.error(error);
-  toast.error(error?.message || "Failed to add to cart");
-})
+        const btn = e.currentTarget;
+        btn.textContent = "Added ✓";
+        btn.style.background = "linear-gradient(to right, #16a34a, #22c55e)";
+        setTimeout(() => {
+          btn.innerHTML = `
+          <svg class="w-4 h-4 group-hover/btn:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+          Add to Cart
+        `;
+          btn.style.background = "linear-gradient(to right, #0D7C53, #16a34a)";
+        }, 1500);
+      })
       .catch((error) => {
-        console.log("FULL ERROR =>", error);
-        console.log("TYPE =>", typeof error);
-        toast.error(error?.message || error || "Failed to add to cart");
+        console.error("Failed to add to cart:", error);
+        toast.error("Failed to add to cart");
       });
   };
 
-  // ✅ Handle Add to Cart from Modal - FIXED: Added amount field with quantity
-  const handleModalAddToCart = () => {
+  // ✅ Handle Add to Cart from Modal - FIXED: No DOM manipulation needed
+  const handleModalAddToCart = async () => {
     if (!selectedProduct) return;
+    if (isAddingToCart) return;
+
+    setIsAddingToCart(true);
 
     const productId = selectedProduct._id || selectedProduct.id;
 
@@ -107,20 +124,31 @@ const CategoryPage = () => {
     const unitPrice = selectedProduct.discountPrice || selectedProduct.price;
     const totalAmount = unitPrice * modalQuantity;
 
-    dispatch(addToCart({
-      coffeeId: productId,
-      quantity: modalQuantity,
-      amount: totalAmount // ✅ Added amount field with total
-    }))
-      .unwrap()
-      .then(() => {
-        setSelectedProduct(null);
-        setModalQuantity(1);
-        toast.success("Added to cart successfully!");
-      })
-      .catch((error) => {
-        toast.error("Failed to add to cart");
-      });
+    try {
+      await dispatch(addToCart({
+        coffeeId: productId,
+        quantity: modalQuantity,
+        amount: totalAmount
+      })).unwrap();
+
+      // ✅ Show "Added ✓" for modal using React state
+      setAddedProductId(productId);
+
+      toast.success("Added to cart successfully!");
+      setSelectedProduct(null);
+      setModalQuantity(1);
+
+      // ✅ Clear "Added ✓" state after 1.5 seconds
+      setTimeout(() => {
+        setAddedProductId(null);
+        setIsAddingToCart(false);
+      }, 1500);
+
+    } catch (error) {
+      console.error("Failed to add to cart:", error);
+      toast.error(error?.message || "Failed to add to cart");
+      setIsAddingToCart(false);
+    }
   };
 
   // ✅ Handle quantity change in modal
@@ -129,50 +157,45 @@ const CategoryPage = () => {
   };
 
   // ✅ Handle Wishlist Toggle (Redux) - FIXED: Consistent ID
-  const handleWishlistToggle = (product, e) => {
+  const handleWishlistToggle = async (product, e) => {
     e.stopPropagation();
 
     const coffeeId = product._id || product.id;
 
     const alreadyInWishlist = isInWishlist(coffeeId);
 
-    if (alreadyInWishlist) {
-      // ❌ REMOVE FROM WISHLIST
-      const existingItem = wishlistItems.find(
-        (item) =>
-          (item.coffee?._id || item.coffee?.id || item._id || item.id) === coffeeId
-      );
+    try {
+      if (alreadyInWishlist) {
+        // ❌ REMOVE FROM WISHLIST
+        const existingItem = wishlistItems.find(
+          (item) =>
+            (item.coffee?._id || item.coffee?.id || item._id || item.id) === coffeeId
+        );
 
-      if (!existingItem) return;
+        if (!existingItem) {
+          toast.error("Item not found in wishlist");
+          return;
+        }
 
-      dispatch(removeFromWishlist(existingItem._id))
-        .unwrap()
-        .then(() => {
-          toast.info("Item Removed from wishlist");
-        })
-        .catch((error) => {
-          toast.error("Failed to remove from wishlist");
-        });
+        await dispatch(removeFromWishlist(existingItem._id)).unwrap();
+        toast.info("Item Removed from wishlist");
 
-    } else {
-      // ✅ ADD TO WISHLIST
-      dispatch(addToWishlist({ coffeeId }))
-        .unwrap()
-        .then(() => {
-          toast.success("Item Added to wishlist");
-        })
-        .catch((error) => {
-          toast.error("Failed to add to wishlist");
-        });
+      } else {
+        // ✅ ADD TO WISHLIST
+        await dispatch(addToWishlist({ coffeeId })).unwrap();
+        toast.success("Item Added to wishlist ❤️");
+      }
+    } catch (error) {
+      console.error("Wishlist error:", error);
+      toast.error(error?.message || "Failed to update wishlist");
     }
   };
 
   // ✅ Handle Modal Wishlist Toggle - FIXED: Consistent ID
-  const handleModalWishlistToggle = () => {
+  const handleModalWishlistToggle = async () => {
     if (!selectedProduct) return;
     const productId = selectedProduct._id || selectedProduct.id;
 
-    // Fix: Use addToWishlist/removeFromWishlist instead of toggleWishlist
     const alreadyInWishlist = isInWishlist(productId);
 
     if (alreadyInWishlist) {
@@ -180,7 +203,7 @@ const CategoryPage = () => {
         (item) =>
           (item.coffee?._id || item.coffee?.id || item._id || item.id) === productId
       );
-
+      
       if (existingItem) {
         dispatch(removeFromWishlist(existingItem._id))
           .unwrap()
@@ -253,6 +276,9 @@ const CategoryPage = () => {
                 product.discountPrice
               );
               const isWishlisted = isInWishlist(productId);
+
+              // ✅ NEW: Check if this product is in "Added ✓" state
+              const isAdded = addedProductId === productId;
 
               return (
                 <SwiperSlide key={productId}>
@@ -327,14 +353,28 @@ const CategoryPage = () => {
                         </div>
                       </div>
 
+                      {/* ✅ CHANGED: Button now uses React state for "Added ✓" state */}
                       <button
-                        className="mt-2 w-full bg-gradient-to-r bg-emerald-500 hover:bg-emerald-600 text-white from-[#0D7C53] to-[#169466] py-2.5 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 group/btn"
+                        className="mt-2 w-full bg-gradient-to-r bg-emerald-500 hover:bg-emerald-600 text-white from-[#0D7C53] to-[#169466] py-2.5 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 group/btn disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={(e) => handleAddToCart(product, e)}
+                        disabled={isAddingToCart || isAdded}
                       >
-                        <svg className="w-4 h-4 group-hover/btn:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                        Add to Cart
+                        {/* ✅ Conditional rendering based on React state */}
+                        {isAdded ? (
+                          <>
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            Added ✓
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4 group-hover/btn:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            Add to Cart
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>
@@ -461,14 +501,32 @@ const CategoryPage = () => {
                   </button>
                 </div>
 
+                {/* ✅ CHANGED: Modal button uses React state for "Added ✓" */}
                 <button
                   onClick={handleModalAddToCart}
-                  className="flex-1 bg-[#0D7C53] text-white py-2.5 rounded-lg font-semibold hover:bg-green-800 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm"
+                  disabled={isAddingToCart || (addedProductId === (selectedProduct?._id || selectedProduct?.id))}
+                  className="flex-1 bg-[#0D7C53] text-white py-2.5 rounded-lg font-semibold hover:bg-green-800 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                  Add to Cart
+                  {addedProductId === (selectedProduct?._id || selectedProduct?.id) ? (
+                    <>
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      Added ✓
+                    </>
+                  ) : isAddingToCart ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Adding...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                      Add to Cart
+                    </>
+                  )}
                 </button>
               </div>
             </div>

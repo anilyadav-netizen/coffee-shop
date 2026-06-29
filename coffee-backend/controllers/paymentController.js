@@ -147,6 +147,8 @@ exports.verifyPayment = async (req, res) => {
       });
     }
 
+    console.log(payment.user)
+
     // Check if order already exists
     const existingOrder = await Order.findOne({
       payment: payment._id,
