@@ -14,7 +14,7 @@ const cartRoutes = require("./routes/cartRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const wishlistRoute = require("./routes/wishlistRoute")
 const categoryRoute = require('./routes/category.routes')
-const updatedeliveryRoute = require('./routes/updatedeliveryRoute')
+const updatedeliveryRoute = require('./routes/orderRoutes')
 
 
 app.use(express.json({ limit: "500mb" }));

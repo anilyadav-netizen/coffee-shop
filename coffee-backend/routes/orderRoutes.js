@@ -3,7 +3,7 @@ const router = express.Router();
 
 const {
   updateOrderStatus,
-} = require("../controllers/orderController");
+} = require("../controllers/riderController");
 const protect = require("../middleware/authMiddleware");
 
 
