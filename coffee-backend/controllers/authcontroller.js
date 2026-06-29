@@ -134,9 +134,84 @@ const getProfile = async (req, res) => {
   }
 };
 
+const updateAddress = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { addressId } = req.params;
+
+    const {
+      type,
+      fullName,
+      email,
+      phone,
+      secondPhone,
+      address,
+      city,
+      state,
+      pincode,
+      landmark,
+      isDefault,
+    } = req.body;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const addressData = user.addresses.id(addressId);
+
+    if (!addressData) {
+      return res.status(404).json({
+        success: false,
+        message: "Address not found",
+      });
+    }
+
+    // Update fields
+    if (type !== undefined) addressData.type = type;
+    if (fullName !== undefined) addressData.fullName = fullName;
+    if (email !== undefined) addressData.email = email;
+    if (phone !== undefined) addressData.phone = phone;
+    if (secondPhone !== undefined) addressData.secondPhone = secondPhone;
+    if (address !== undefined) addressData.address = address;
+    if (city !== undefined) addressData.city = city;
+    if (state !== undefined) addressData.state = state;
+    if (pincode !== undefined) addressData.pincode = pincode;
+    if (landmark !== undefined) addressData.landmark = landmark;
+
+    // Default address handling
+    if (isDefault === true) {
+      user.addresses.forEach((addr) => {
+        addr.isDefault = false;
+      });
+      addressData.isDefault = true;
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Address updated successfully",
+      address: addressData,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   register,
   login,
   logout,
   getProfile,
+  updateAddress
 };

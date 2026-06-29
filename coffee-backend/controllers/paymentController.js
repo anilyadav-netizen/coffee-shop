@@ -13,33 +13,52 @@ const razorpay = new Razorpay({
 exports.createOrder = async (req, res) => {
   try {
     const userId = req.user.id;
-    // Get user's cart with populated coffee details
+
+    const { orderType, deliveryAddress } = req.body;
+
+    if (!["delivery", "dine_in"].includes(orderType)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid order type",
+      });
+    }
+
+    // Delivery address required
+    if (orderType === "delivery") {
+      if (
+        !deliveryAddress ||
+        !deliveryAddress.fullName ||
+        !deliveryAddress.phone ||
+        !deliveryAddress.addressLine1 ||
+        !deliveryAddress.city ||
+        !deliveryAddress.state ||
+        !deliveryAddress.pincode
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "Delivery address is required",
+        });
+      }
+    }
+
     const cart = await Cart.findOne({ user: userId }).populate("items.coffee");
-    console.log("========== CREATE ORDER ==========");
-    console.log(JSON.stringify(cart, null, 2));
-    if (!cart || !cart.items || cart.items.length === 0) {
+
+    if (!cart || cart.items.length === 0) {
       return res.status(400).json({
         success: false,
         message: "Cart is empty",
       });
     }
+
     let totalAmount = 0;
+
     const products = cart.items.map((item) => {
-      if (!item.coffee) {
-        throw new Error("Coffee product not found");
-      }
-      // Debug: log raw amount value
-      console.log(`Item: ${item.coffee.name} | amount: "${item.amount}" | type: ${typeof item.amount}`);
-      // amount is stored as String in cart schema, convert to Number
       const price = Number(item.amount);
-      if (isNaN(price) || price <= 0) {
-        throw new Error(
-          `Invalid amount found for "${item.coffee.name}": value was "${item.amount}"`
-        );
-      }
-      const quantity = Number(item.quantity) || 1;
+      const quantity = Number(item.quantity);
       const subtotal = price * quantity;
+
       totalAmount += subtotal;
+
       return {
         coffee: item.coffee._id,
         name: item.coffee.name,
@@ -51,29 +70,23 @@ exports.createOrder = async (req, res) => {
         subtotal,
       };
     });
-    console.log("Products:", products);
-    console.log("Total Amount:", totalAmount);
-    if (totalAmount <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid order amount",
-      });
-    }
-    // Razorpay amount must be in paise (multiply by 100)
+
     const razorpayOrder = await razorpay.orders.create({
-      amount: Math.round(totalAmount * 100),
+      amount: totalAmount * 100,
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
     });
-    console.log("Razorpay Order Created:", razorpayOrder.id);
-    // Save payment record in DB
+
     await Payment.create({
       user: userId,
+      orderType,
+      deliveryAddress: orderType === "delivery" ? deliveryAddress : null,
       products,
-      razorpayOrderId: razorpayOrder.id,
       amount: totalAmount,
+      razorpayOrderId: razorpayOrder.id,
       status: "pending",
     });
+
     return res.status(200).json({
       success: true,
       message: "Order created successfully",
@@ -81,7 +94,8 @@ exports.createOrder = async (req, res) => {
       amount: totalAmount,
     });
   } catch (error) {
-    console.error("CREATE ORDER ERROR:", error);
+    console.log(error);
+
     return res.status(500).json({
       success: false,
       message: error.message,
