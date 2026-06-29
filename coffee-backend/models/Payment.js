@@ -16,6 +16,8 @@ const paymentSchema = new mongoose.Schema(
         },
         name: String,
         image: String,
+        description: String,
+        category: String,
         price: Number,
         quantity: Number,
         subtotal: Number,
@@ -27,8 +29,15 @@ const paymentSchema = new mongoose.Schema(
       required: true,
     },
 
-    razorpayOrderId: String,
-    razorpayPaymentId: String,
+    razorpayOrderId: {
+      type: String,
+      required: true,
+    },
+
+    razorpayPaymentId: {
+      type: String,
+      default: null,
+    },
 
     status: {
       type: String,
