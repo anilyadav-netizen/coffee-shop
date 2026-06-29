@@ -13,12 +13,12 @@ const cartItemSchema = new mongoose.Schema(
       default: 1,
       min: 1,
     },
-    amount:{
-      type:String,
-      require:true
-    }
+    amount: {
+      type: String,
+      required: true, // fixed typo: was "require"
+    },
   },
-  { _id: true } // ہر item کا اپنا _id ہوگا
+  { _id: true } // each item has its own _id
 );
 
 const cartSchema = new mongoose.Schema(
@@ -34,13 +34,14 @@ const cartSchema = new mongoose.Schema(
       required: true,
     },
 
-    items: [cartItemSchema], // ✅ سب items ایک array میں
+    items: [cartItemSchema],
   },
   {
     timestamps: true,
   }
 );
 
+// Unique index: one cart per user per date
 cartSchema.index({ user: 1, date: 1 }, { unique: true });
 
 module.exports = mongoose.model("Cart", cartSchema);

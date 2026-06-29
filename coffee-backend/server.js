@@ -14,6 +14,8 @@ const cartRoutes = require("./routes/cartRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const wishlistRoute = require("./routes/wishlistRoute")
 const categoryRoute = require('./routes/category.routes')
+const updatedeliveryRoute = require('./routes/orderRoutes')
+
 
 app.use(express.json({ limit: "500mb" }));
 app.use(express.urlencoded({ limit: "500mb", extended: true }));
@@ -31,6 +33,7 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use('/api/wishlist',wishlistRoute)
 app.use('/api/category',categoryRoute)
+app.use('/api/updatedelivery',updatedeliveryRoute)
 connectDB()
 
 

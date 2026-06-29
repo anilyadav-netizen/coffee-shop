@@ -3,6 +3,7 @@ const crypto = require("crypto");
 const Razorpay = require("razorpay");
 const Payment = require("../models/Payment");
 const Cart = require("../models/Cart");
+const Order = require("../models/orderModel");
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -14,14 +15,36 @@ exports.createOrder = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // Get user's cart
-    const cart = await Cart.findOne({ user: userId })
-      .populate("items.coffee");
+    const { orderType, deliveryAddress } = req.body;
 
-    console.log("========== CREATE ORDER ==========");
-    console.log(JSON.stringify(cart, null, 2));
+    if (!["delivery", "dine_in"].includes(orderType)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid order type",
+      });
+    }
 
-    if (!cart || !cart.items || cart.items.length === 0) {
+    // Delivery address required
+    if (orderType === "delivery") {
+      if (
+        !deliveryAddress ||
+        !deliveryAddress.fullName ||
+        !deliveryAddress.phone ||
+        !deliveryAddress.addressLine1 ||
+        !deliveryAddress.city ||
+        !deliveryAddress.state ||
+        !deliveryAddress.pincode
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "Delivery address is required",
+        });
+      }
+    }
+
+    const cart = await Cart.findOne({ user: userId }).populate("items.coffee");
+
+    if (!cart || cart.items.length === 0) {
       return res.status(400).json({
         success: false,
         message: "Cart is empty",
@@ -31,20 +54,8 @@ exports.createOrder = async (req, res) => {
     let totalAmount = 0;
 
     const products = cart.items.map((item) => {
-      if (!item.coffee) {
-        throw new Error("Coffee product not found");
-      }
-
-      // amount cart item me string hai
       const price = Number(item.amount);
-
-      if (isNaN(price)) {
-        throw new Error(
-          `Invalid amount found for ${item.coffee.name}`
-        );
-      }
-
-      const quantity = Number(item.quantity) || 1;
+      const quantity = Number(item.quantity);
       const subtotal = price * quantity;
 
       totalAmount += subtotal;
@@ -61,31 +72,19 @@ exports.createOrder = async (req, res) => {
       };
     });
 
-    console.log("Products:", products);
-    console.log("Total Amount:", totalAmount);
-
-    if (totalAmount <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid order amount",
-      });
-    }
-
-    // Razorpay amount must be in paise
     const razorpayOrder = await razorpay.orders.create({
-      amount: Math.round(totalAmount * 100),
+      amount: totalAmount * 100,
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
     });
 
-    console.log("Razorpay Order Created:", razorpayOrder.id);
-
-    // Save payment record
     await Payment.create({
       user: userId,
+      orderType,
+      deliveryAddress: orderType === "delivery" ? deliveryAddress : null,
       products,
-      razorpayOrderId: razorpayOrder.id,
       amount: totalAmount,
+      razorpayOrderId: razorpayOrder.id,
       status: "pending",
     });
 
@@ -96,7 +95,7 @@ exports.createOrder = async (req, res) => {
       amount: totalAmount,
     });
   } catch (error) {
-    console.error("CREATE ORDER ERROR:", error);
+    console.log(error);
 
     return res.status(500).json({
       success: false,
@@ -104,7 +103,6 @@ exports.createOrder = async (req, res) => {
     });
   }
 };
-
 // ================= VERIFY PAYMENT =================
 exports.verifyPayment = async (req, res) => {
   try {
@@ -114,7 +112,7 @@ exports.verifyPayment = async (req, res) => {
       razorpay_signature,
     } = req.body;
 
-    // Verify Signature
+    // Verify Razorpay Signature
     const generatedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(`${razorpay_order_id}|${razorpay_payment_id}`)
@@ -129,26 +127,52 @@ exports.verifyPayment = async (req, res) => {
 
     // Update Payment
     const payment = await Payment.findOneAndUpdate(
-      {
-        razorpayOrderId: razorpay_order_id,
-      },
+      { razorpayOrderId: razorpay_order_id },
       {
         status: "paid",
         razorpayPaymentId: razorpay_payment_id,
       },
-      {
-        new: true,
-      }
+      { new: true }
     );
 
     if (!payment) {
       return res.status(404).json({
         success: false,
-        message: "Payment not found",
+        message: "Payment record not found",
       });
     }
 
-    // Clear user's cart
+    // Check if order already exists
+    const existingOrder = await Order.findOne({
+      payment: payment._id,
+    });
+
+    if (!existingOrder) {
+      await Order.create({
+        user: payment.user,
+        payment: payment._id,
+
+        orderType: payment.orderType,
+        deliveryAddress: payment.deliveryAddress,
+
+        products: payment.products,
+
+        amount: payment.amount,
+
+        paymentStatus: "paid",
+
+        orderStatus: "pending",
+
+        tracking: [
+          {
+            status: "pending",
+            message: "Order placed successfully",
+          },
+        ],
+      });
+    }
+
+    // Clear Cart
     await Cart.findOneAndUpdate(
       { user: payment.user },
       {
@@ -160,11 +184,10 @@ exports.verifyPayment = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Payment verified successfully",
-      payment,
+      message: "Payment verified and order created successfully",
     });
   } catch (error) {
-    console.error(error);
+    console.error("VERIFY PAYMENT ERROR:", error);
 
     return res.status(500).json({
       success: false,
