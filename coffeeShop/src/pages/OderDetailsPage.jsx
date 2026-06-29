@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useLocation } from "react-router-dom";
-import { getMyOrders } from "../redux/Slicer/paymentSlice";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import {
     ArrowLeft,
     Package,
@@ -10,53 +9,67 @@ import {
     Coffee,
     Clock,
     Calendar,
-    CreditCard
+    CreditCard,
+    Home,
+    MapPin,
+    Phone,
+    Truck,
+    Store,
+    User,
+    ChevronDown,
+    ChevronUp,
+    Filter,
+    PackageCheck,
+    Truck as TruckIcon,
+    MapPinCheck,
+    CircleCheck,
+    Loader2,
+    AlertCircle,
+    Utensils,
+    ChefHat
 } from "lucide-react";
-import { useDispatch, useSelector } from "react-redux";
+import { getMyOrders } from "../redux/Slicer/paymentSlice";
+import { getProducts } from "../redux/Slicer/adminProductSlice";
 
 const OrderDetailsPage = () => {
-
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();
-    
-    // ✅ Get orders from Redux
+
+    // Get orders from Redux
     const { orders, loading } = useSelector((state) => state.payment);
-    
-    // ✅ State for selected order (from navigation state or first order)
-    const [selectedOrder, setSelectedOrder] = useState(null);
-    const [orderItems, setOrderItems] = useState([]);
+    // Get products from Redux
+    const { products } = useSelector((state) => state.adminProducts);
+
+    // State for expanded orders
+    const [expandedOrders, setExpandedOrders] = useState({});
+    // State for filter
+    const [filterType, setFilterType] = useState('all'); // 'all', 'delivery', 'dine_in'
 
     useEffect(() => {
         dispatch(getMyOrders());
+        dispatch(getProducts());
     }, [dispatch]);
 
-    // ✅ Process orders when they arrive
+    // Process orders when they arrive
     useEffect(() => {
-        if (orders && orders.length > 0) {
+        if (orders && orders.length > 0 && products && products.length > 0) {
             // Check if we have a specific order from navigation state
             const orderFromState = location.state?.order;
             
             if (orderFromState) {
-                // Find the full order data from the orders list
-                const fullOrder = orders.find(o => o._id === orderFromState._id);
-                if (fullOrder) {
-                    setSelectedOrder(fullOrder);
-                    setOrderItems(fullOrder.products || []);
-                } else {
-                    // If not found, use the first order
-                    setSelectedOrder(orders[0]);
-                    setOrderItems(orders[0].products || []);
-                }
+                // Expand only the specific order
+                setExpandedOrders({ [orderFromState._id]: true });
             } else {
-                // Use the first order by default
-                setSelectedOrder(orders[0]);
-                setOrderItems(orders[0].products || []);
+                // Expand the first order by default
+                if (orders.length > 0) {
+                    setExpandedOrders({ [orders[0]._id]: true });
+                }
             }
         }
-    }, [orders, location.state]);
+    }, [orders, products, location.state]);
 
-    // ✅ NAVBAR DARK - Same as WishlistPage
+    // NAVBAR DARK
     useEffect(() => {
         const navbar = document.querySelector('nav');
         if (navbar) {
@@ -73,7 +86,7 @@ const OrderDetailsPage = () => {
         };
     }, []);
 
-    // ✅ Format date
+    // Format date
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
         const date = new Date(dateString);
@@ -86,7 +99,178 @@ const OrderDetailsPage = () => {
         });
     };
 
-    // ✅ Loading state
+    // Format price
+    const formatPrice = (price) => {
+        return `₹${price?.toLocaleString('en-IN') || 0}`;
+    };
+
+    // Get order status display with icon based on orderStatus field
+    const getOrderStatusDisplay = (order) => {
+        const status = order.orderStatus?.toLowerCase() || 'pending';
+        const statusMap = {
+            'pending': {
+                label: 'Pending ⏳',
+                icon: Clock,
+                color: 'text-yellow-600',
+                bg: 'bg-yellow-100/80',
+                border: 'border-yellow-200',
+                step: 0,
+                description: 'Order placed, waiting for confirmation'
+            },
+            'confirmed': {
+                label: 'Confirmed ✅',
+                icon: CircleCheck,
+                color: 'text-green-600',
+                bg: 'bg-green-100/80',
+                border: 'border-green-200',
+                step: 1,
+                description: 'Order has been confirmed'
+            },
+            'preparing': {
+                label: 'Preparing 👨‍🍳',
+                icon: ChefHat,
+                color: 'text-orange-600',
+                bg: 'bg-orange-100/80',
+                border: 'border-orange-200',
+                step: 2,
+                description: 'Your order is being prepared'
+            },
+            'out_for_delivery': {
+                label: 'Out for Delivery 🚚',
+                icon: TruckIcon,
+                color: 'text-purple-600',
+                bg: 'bg-purple-100/80',
+                border: 'border-purple-200',
+                step: 3,
+                description: 'Your order is on the way!'
+            },
+            'delivered': {
+                label: 'Delivered ✅',
+                icon: PackageCheck,
+                color: 'text-green-700',
+                bg: 'bg-green-100/80',
+                border: 'border-green-300',
+                step: 4,
+                description: 'Order has been delivered successfully'
+            },
+            'cancelled': {
+                label: 'Cancelled ❌',
+                icon: AlertCircle,
+                color: 'text-red-600',
+                bg: 'bg-red-100/80',
+                border: 'border-red-200',
+                step: -1,
+                description: 'Order has been cancelled'
+            }
+        };
+        return statusMap[status] || statusMap['pending'];
+    };
+
+    // Get tracking steps based on order status
+    const getTrackingSteps = (order) => {
+        const status = order.orderStatus?.toLowerCase() || 'pending';
+        const isDelivery = order.orderType?.toLowerCase() === 'delivery';
+        
+        // Different steps for delivery and dine-in
+        const deliverySteps = [
+            { id: 'pending', label: 'Order Placed', icon: Clock, color: 'text-yellow-500' },
+            { id: 'confirmed', label: 'Confirmed', icon: CircleCheck, color: 'text-green-500' },
+            { id: 'preparing', label: 'Preparing', icon: ChefHat, color: 'text-orange-500' },
+            { id: 'out_for_delivery', label: 'Out for Delivery', icon: TruckIcon, color: 'text-purple-500' },
+            { id: 'delivered', label: 'Delivered', icon: PackageCheck, color: 'text-green-600' }
+        ];
+
+        const dineInSteps = [
+            { id: 'pending', label: 'Order Placed', icon: Clock, color: 'text-yellow-500' },
+            { id: 'confirmed', label: 'Confirmed', icon: CircleCheck, color: 'text-green-500' },
+            { id: 'preparing', label: 'Preparing', icon: ChefHat, color: 'text-orange-500' },
+            { id: 'delivered', label: 'Ready for Pickup', icon: Utensils, color: 'text-green-600' }
+        ];
+
+        const steps = isDelivery ? deliverySteps : dineInSteps;
+
+        // Find the current step index
+        const currentStepIndex = steps.findIndex(s => s.id === status);
+        
+        // If order is cancelled, show cancelled status
+        if (status === 'cancelled') {
+            return steps.map((step, index) => ({
+                ...step,
+                isCompleted: false,
+                isCurrent: index === 0,
+                isCancelled: true
+            }));
+        }
+
+        return steps.map((step, index) => ({
+            ...step,
+            isCompleted: index <= currentStepIndex,
+            isCurrent: index === currentStepIndex,
+            isCancelled: false
+        }));
+    };
+
+    // Toggle order expansion
+    const toggleOrderExpansion = (orderId) => {
+        setExpandedOrders(prev => ({
+            ...prev,
+            [orderId]: !prev[orderId]
+        }));
+    };
+
+    // Get matched items for an order
+    const getOrderItems = (order) => {
+        if (!order || !products || products.length === 0) return [];
+        
+        return order.products.map((item) => {
+            const productDetails = item.coffee || {};
+            
+            return {
+                ...item,
+                name: productDetails?.name || item.name || 'Unknown Item',
+                image: productDetails?.image || 'https://placehold.co/100x100/e2e8f0/64748b?text=☕',
+                description: productDetails?.description || '',
+                price: item.price || 0,
+                quantity: item.quantity || 1,
+                subtotal: item.subtotal || (item.price * item.quantity) || 0
+            };
+        });
+    };
+
+    // Filter orders based on type
+    const filteredOrders = orders.filter(order => {
+        if (filterType === 'all') return true;
+        if (filterType === 'delivery') return order.orderType?.toLowerCase() === 'delivery';
+        if (filterType === 'dine_in') return order.orderType?.toLowerCase() === 'dine_in';
+        return true;
+    });
+
+    // Get counts for each type
+    const deliveryCount = orders.filter(o => o.orderType?.toLowerCase() === 'delivery').length;
+    const dineInCount = orders.filter(o => o.orderType?.toLowerCase() === 'dine_in').length;
+
+    // Expand all orders of a specific type
+    const expandAllByType = (type) => {
+        const ordersToExpand = orders.filter(order => {
+            if (type === 'all') return true;
+            if (type === 'delivery') return order.orderType?.toLowerCase() === 'delivery';
+            if (type === 'dine_in') return order.orderType?.toLowerCase() === 'dine_in';
+            return true;
+        });
+
+        const newState = {};
+        ordersToExpand.forEach(order => {
+            newState[order._id] = true;
+        });
+        setExpandedOrders(newState);
+    };
+
+    // Collapse all orders
+    const collapseAll = () => {
+        setExpandedOrders({});
+    };
+
+    // Loading state
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -95,7 +279,7 @@ const OrderDetailsPage = () => {
         );
     }
 
-    // ✅ No orders state
+    // No orders state
     if (!orders || orders.length === 0) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3] pt-20 sm:pt-24 px-3 sm:px-4 overflow-x-hidden">
@@ -124,26 +308,6 @@ const OrderDetailsPage = () => {
             </div>
         );
     }
-
-    // ✅ No selected order
-    if (!selectedOrder) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="text-center">
-                    <p className="text-gray-500">No order selected</p>
-                    <button
-                        onClick={() => navigate('/orders')}
-                        className="mt-4 px-4 py-2 bg-[#0D7C53] text-white rounded-lg"
-                    >
-                        Back to Orders
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
-    // ✅ Calculate total items
-    const totalItems = orderItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
 
     return (
         <>
@@ -174,233 +338,519 @@ const OrderDetailsPage = () => {
                             </button>
                             <div className="min-w-0 flex-1">
                                 <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 truncate">
-                                    Order <span className="text-[#0D7C53]">Details</span>
+                                    My <span className="text-[#0D7C53]">Orders</span>
                                 </h1>
-                                <p className="text-sm text-gray-500">#{selectedOrder._id?.slice(-8) || 'N/A'}</p>
+                                <p className="text-sm text-gray-500">{orders.length} order{orders.length > 1 ? 's' : ''} found</p>
                             </div>
-                        </div>
-                        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                            <span className={`inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 backdrop-blur-sm border rounded-full text-[10px] sm:text-sm font-medium ${
-                                selectedOrder.status === 'paid' 
-                                    ? 'bg-green-100/60 border-green-200/50 text-green-700'
-                                    : 'bg-yellow-100/60 border-yellow-200/50 text-yellow-700'
-                            }`}>
-                                <CheckCircle size={14} className="sm:w-4 sm:h-4" />
-                                {selectedOrder.status || 'Processing'}
-                            </span>
                         </div>
                     </div>
 
-                    {/* Success Message */}
-                    {selectedOrder.status === 'paid' && (
-                        <div className="backdrop-blur-xl bg-green-50/60 border border-green-200/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 shadow-lg shadow-black/5">
-                            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4">
-                                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-green-100/80 rounded-full flex items-center justify-center flex-shrink-0">
-                                    <CheckCircle size={28} className="sm:w-8 sm:h-8 text-green-600" />
-                                </div>
-                                <div className="text-center sm:text-left">
-                                    <h2 className="text-lg sm:text-xl font-bold text-green-700">
-                                        Order Placed Successfully 🎉
-                                    </h2>
-                                    <p className="text-sm sm:text-base text-green-600 mt-0.5 sm:mt-1">
-                                        Your payment has been completed successfully on {formatDate(selectedOrder.createdAt)}
-                                    </p>
-                                </div>
-                            </div>
+                    {/* Filter Toggle Buttons */}
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                        {/* All Orders Button */}
+                        <button
+                            onClick={() => {
+                                setFilterType('all');
+                                collapseAll();
+                            }}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 ${
+                                filterType === 'all'
+                                    ? 'bg-gradient-to-r from-[#0D7C53] to-green-600 text-white shadow-lg shadow-[#0D7C53]/30'
+                                    : 'bg-white/30 backdrop-blur-sm border border-white/40 text-gray-700 hover:bg-white/50'
+                            }`}
+                        >
+                            <Filter size={16} />
+                            All Orders
+                            <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
+                                filterType === 'all'
+                                    ? 'bg-white/20 text-white'
+                                    : 'bg-gray-200/50 text-gray-600'
+                            }`}>
+                                {orders.length}
+                            </span>
+                        </button>
+
+                        {/* Delivery Button */}
+                        <button
+                            onClick={() => {
+                                setFilterType('delivery');
+                                expandAllByType('delivery');
+                            }}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 ${
+                                filterType === 'delivery'
+                                    ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30'
+                                    : 'bg-white/30 backdrop-blur-sm border border-white/40 text-gray-700 hover:bg-white/50'
+                            }`}
+                        >
+                            <Truck size={16} />
+                            Delivery
+                            <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
+                                filterType === 'delivery'
+                                    ? 'bg-white/20 text-white'
+                                    : 'bg-gray-200/50 text-gray-600'
+                            }`}>
+                                {deliveryCount}
+                            </span>
+                        </button>
+
+                        {/* Dine In Button */}
+                        <button
+                            onClick={() => {
+                                setFilterType('dine_in');
+                                expandAllByType('dine_in');
+                            }}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 ${
+                                filterType === 'dine_in'
+                                    ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30'
+                                    : 'bg-white/30 backdrop-blur-sm border border-white/40 text-gray-700 hover:bg-white/50'
+                            }`}
+                        >
+                            <Store size={16} />
+                            Dine In
+                            <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
+                                filterType === 'dine_in'
+                                    ? 'bg-white/20 text-white'
+                                    : 'bg-gray-200/50 text-gray-600'
+                            }`}>
+                                {dineInCount}
+                            </span>
+                        </button>
+
+                        {/* Expand/Collapse All Button */}
+                        <div className="ml-auto flex gap-2">
+                            <button
+                                onClick={() => {
+                                    if (filterType === 'all') {
+                                        const allExpanded = Object.values(expandedOrders).every(v => v === true);
+                                        if (allExpanded) {
+                                            collapseAll();
+                                        } else {
+                                            expandAllByType('all');
+                                        }
+                                    } else {
+                                        expandAllByType(filterType);
+                                    }
+                                }}
+                                className="px-3 py-2 bg-white/30 backdrop-blur-sm border border-white/40 rounded-lg text-sm font-medium text-gray-700 hover:bg-white/50 transition-all flex items-center gap-2"
+                            >
+                                {Object.values(expandedOrders).some(v => v === true) ? (
+                                    <>
+                                        <ChevronUp size={16} />
+                                        Collapse
+                                    </>
+                                ) : (
+                                    <>
+                                        <ChevronDown size={16} />
+                                        Expand
+                                    </>
+                                )}
+                            </button>
                         </div>
-                    )}
+                    </div>
 
-                    <div className="grid lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-
-                        {/* Left Section - Order Items */}
-                        <div className="lg:col-span-2 space-y-3 sm:space-y-4">
-
-                            {/* Order Information */}
-                            <div className="backdrop-blur-xl bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-md shadow-black/5 hover:shadow-lg transition-all duration-300">
-                                <div className="flex items-center gap-2 mb-4 sm:mb-5">
-                                    <div className="p-1.5 sm:p-2 bg-amber-100/60 rounded-lg">
-                                        <Package size={18} className="sm:w-5 sm:h-5 text-amber-600" />
-                                    </div>
-                                    <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
-                                        Order Information
-                                    </h2>
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                                    <div className="backdrop-blur-sm bg-white/20 rounded-lg p-3 sm:p-4 border border-white/30">
-                                        <p className="text-[10px] sm:text-xs text-gray-500 uppercase tracking-wider">
-                                            Order ID
-                                        </p>
-                                        <p className="font-semibold text-sm sm:text-base text-gray-800 mt-0.5 truncate">
-                                            {selectedOrder._id}
-                                        </p>
-                                    </div>
-
-                                    <div className="backdrop-blur-sm bg-white/20 rounded-lg p-3 sm:p-4 border border-white/30">
-                                        <p className="text-[10px] sm:text-xs text-gray-500 uppercase tracking-wider">
-                                            Order Date
-                                        </p>
-                                        <p className="font-semibold text-sm sm:text-base text-gray-800 mt-0.5 flex items-center gap-1.5">
-                                            <Calendar size={14} className="text-gray-400" />
-                                            {formatDate(selectedOrder.createdAt)}
-                                        </p>
-                                    </div>
-
-                                    {selectedOrder.razorpayPaymentId && (
-                                        <div className="backdrop-blur-sm bg-white/20 rounded-lg p-3 sm:p-4 border border-white/30">
-                                            <p className="text-[10px] sm:text-xs text-gray-500 uppercase tracking-wider">
-                                                Payment ID
-                                            </p>
-                                            <p className="font-semibold text-sm sm:text-base text-gray-800 mt-0.5 truncate flex items-center gap-1.5">
-                                                <CreditCard size={14} className="text-gray-400" />
-                                                {selectedOrder.razorpayPaymentId}
-                                            </p>
-                                        </div>
-                                    )}
-
-                                    <div className="backdrop-blur-sm bg-white/20 rounded-lg p-3 sm:p-4 border border-white/30">
-                                        <p className="text-[10px] sm:text-xs text-gray-500 uppercase tracking-wider">
-                                            Status
-                                        </p>
-                                        <span className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 mt-0.5 rounded-full text-[10px] sm:text-xs font-medium border ${
-                                            selectedOrder.status === 'paid'
-                                                ? 'bg-green-100/60 text-green-700 border-green-200/50'
-                                                : 'bg-yellow-100/60 text-yellow-700 border-yellow-200/50'
-                                        }`}>
-                                            <CheckCircle size={12} className="sm:w-3 sm:h-3" />
-                                            {selectedOrder.status || 'Processing'}
-                                        </span>
-                                    </div>
-                                </div>
+                    {/* Orders List */}
+                    <div className="space-y-4 sm:space-y-6">
+                        {filteredOrders.length === 0 ? (
+                            <div className="backdrop-blur-xl bg-white/30 border border-white/40 rounded-xl p-8 text-center">
+                                <p className="text-gray-500">No {filterType === 'delivery' ? 'Delivery' : filterType === 'dine_in' ? 'Dine In' : ''} orders found</p>
                             </div>
+                        ) : (
+                            filteredOrders.map((order) => {
+                                const orderItems = getOrderItems(order);
+                                const totalItems = orderItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
+                                const isDeliveryOrder = order.orderType?.toLowerCase() === 'delivery';
+                                const deliveryAddress = order.deliveryAddress;
+                                const isExpanded = expandedOrders[order._id] || false;
+                                const statusInfo = getOrderStatusDisplay(order);
+                                const StatusIcon = statusInfo.icon;
+                                const trackingSteps = getTrackingSteps(order);
+                                const isCancelled = order.orderStatus?.toLowerCase() === 'cancelled';
+                                const status = order.orderStatus?.toLowerCase() || 'pending';
 
-                            {/* Purchased Items */}
-                            <div className="backdrop-blur-xl bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-md shadow-black/5 hover:shadow-lg transition-all duration-300">
-                                <div className="flex items-center gap-2 mb-4 sm:mb-5">
-                                    <div className="p-1.5 sm:p-2 bg-amber-100/60 rounded-lg">
-                                        <ShoppingBag size={18} className="sm:w-5 sm:h-5 text-amber-600" />
-                                    </div>
-                                    <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
-                                        Ordered Items
-                                    </h2>
-                                    <span className="ml-auto text-xs sm:text-sm text-gray-500">
-                                        {totalItems} {totalItems === 1 ? 'item' : 'items'}
-                                    </span>
-                                </div>
+                                return (
+                                    <div 
+                                        key={order._id}
+                                        className={`backdrop-blur-xl bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 ${
+                                            isCancelled ? 'opacity-75' : ''
+                                        }`}
+                                    >
+                                        {/* Order Header - Always Visible */}
+                                        <div className="p-4 sm:p-6">
+                                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                                                        {/* Order ID */}
+                                                        <span className="font-mono text-xs sm:text-sm font-semibold text-gray-700 bg-white/50 px-2 py-1 rounded-lg">
+                                                            #{order._id?.slice(-8)}
+                                                        </span>
+                                                        
+                                                        {/* Order Type Badge */}
+                                                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 backdrop-blur-sm border-2 rounded-full text-[10px] sm:text-xs font-bold shadow-sm ${
+                                                            isDeliveryOrder
+                                                                ? 'bg-blue-500/90 border-blue-600 text-white'
+                                                                : 'bg-purple-500/90 border-purple-600 text-white'
+                                                        }`}>
+                                                            {isDeliveryOrder ? <Truck size={12} /> : <Store size={12} />}
+                                                            {isDeliveryOrder ? 'Delivery' : 'Dine In'}
+                                                        </span>
 
-                                <div className="space-y-3 sm:space-y-4">
-                                    {orderItems.map((item, index) => (
-                                        <div
-                                            key={item._id || index}
-                                            className="flex flex-col sm:flex-row gap-3 sm:gap-4 backdrop-blur-sm bg-white/20 rounded-lg p-3 sm:p-4 border border-white/30 hover:bg-white/30 transition-all duration-300"
-                                        >
-                                            <img
-                                                src={item.image || 'https://placehold.co/100x100/e2e8f0/64748b?text=☕'}
-                                                alt={item.name}
-                                                className="w-full sm:w-20 md:w-24 h-20 sm:h-20 md:h-24 object-cover rounded-lg sm:rounded-xl flex-shrink-0"
-                                                onError={(e) => {
-                                                    e.target.src = 'https://placehold.co/100x100/e2e8f0/64748b?text=☕';
-                                                }}
-                                            />
+                                                        {/* Order Status Badge - Using orderStatus */}
+                                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 backdrop-blur-sm border-2 rounded-full text-xs font-bold shadow-lg ${
+                                                            isCancelled
+                                                                ? 'bg-red-500/90 border-red-600 text-white'
+                                                                : statusInfo.bg + ' ' + statusInfo.border + ' ' + statusInfo.color
+                                                        }`}>
+                                                            <StatusIcon size={14} className={
+                                                                status === 'preparing' ? 'animate-spin' : 
+                                                                status === 'out_for_delivery' ? 'animate-bounce-slow' : ''
+                                                            } />
+                                                            {statusInfo.label}
+                                                        </span>
 
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-1 sm:gap-2">
-                                                    <div className="min-w-0 flex-1">
-                                                        <h3 className="font-semibold text-gray-800 text-sm sm:text-base truncate">
-                                                            {item.name}
-                                                        </h3>
-                                                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-0.5 sm:mt-1">
-                                                            <span className="text-[10px] sm:text-xs text-gray-500">
-                                                                Qty: {item.quantity || 1}
+                                                        {/* Payment Status */}
+                                                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium ${
+                                                            order.paymentStatus === 'paid'
+                                                                ? 'bg-green-100 text-green-700'
+                                                                : 'bg-yellow-100 text-yellow-700'
+                                                        }`}>
+                                                            {order.paymentStatus === 'paid' ? '💳 Paid' : '💳 Pending'}
+                                                        </span>
+
+                                                        {/* Status Description - New */}
+                                                        {statusInfo.description && (
+                                                            <span className="hidden sm:inline-block text-[10px] text-gray-500 bg-white/50 px-2 py-0.5 rounded-full">
+                                                                {statusInfo.description}
                                                             </span>
-                                                            <span className="text-[10px] sm:text-xs text-gray-500">
-                                                                ₹{item.price || 0} each
+                                                        )}
+                                                    </div>
+
+                                                    {/* Order Info */}
+                                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs sm:text-sm text-gray-600">
+                                                        <span className="flex items-center gap-1">
+                                                            <Calendar size={14} className="text-gray-400" />
+                                                            {formatDate(order.createdAt)}
+                                                        </span>
+                                                        <span className="flex items-center gap-1">
+                                                            <ShoppingBag size={14} className="text-gray-400" />
+                                                            {totalItems} {totalItems === 1 ? 'item' : 'items'}
+                                                        </span>
+                                                        <span className="font-semibold text-[#0D7C53]">
+                                                            {formatPrice(order.amount)}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Toggle Button */}
+                                                <button
+                                                    onClick={() => toggleOrderExpansion(order._id)}
+                                                    className="flex items-center gap-2 px-4 py-2 bg-white/40 backdrop-blur-sm border border-white/50 rounded-lg hover:bg-white/60 transition-all duration-300 text-sm font-medium text-gray-700 flex-shrink-0"
+                                                >
+                                                    {isExpanded ? (
+                                                        <>
+                                                            <ChevronUp size={18} />
+                                                            <span className="hidden sm:inline">Collapse</span>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <ChevronDown size={18} />
+                                                            <span className="hidden sm:inline">Expand</span>
+                                                        </>
+                                                    )}
+                                                    <span className="sm:hidden">
+                                                        {isExpanded ? '▲' : '▼'}
+                                                    </span>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Order Details - Expandable */}
+                                        {isExpanded && (
+                                            <div className="border-t border-white/30 p-4 sm:p-6 bg-white/10 animate-fadeIn">
+                                                {/* Order Status Timeline - Using tracking data */}
+                                                {!isCancelled && (
+                                                    <div className={`backdrop-blur-xl border rounded-xl p-4 mb-4 ${
+                                                        isDeliveryOrder 
+                                                            ? 'bg-blue-50/40 border-blue-200/50'
+                                                            : 'bg-purple-50/40 border-purple-200/50'
+                                                    }`}>
+                                                        <h4 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                                                            {isDeliveryOrder ? <TruckIcon size={18} className="text-blue-600" /> : <Utensils size={18} className="text-purple-600" />}
+                                                            {isDeliveryOrder ? 'Delivery Tracking' : 'Order Progress'}
+                                                            <span className="ml-auto text-xs font-normal text-gray-500">
+                                                                Updated: {formatDate(order.updatedAt)}
                                                             </span>
+                                                        </h4>
+                                                        
+                                                        {/* Tracking Timeline */}
+                                                        <div className="relative">
+                                                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-0">
+                                                                {trackingSteps.map((step, index) => (
+                                                                    <React.Fragment key={step.id}>
+                                                                        <div className="flex items-center gap-2 sm:gap-3">
+                                                                            <div className="flex flex-col items-center">
+                                                                                <div className={`w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
+                                                                                    step.isCompleted
+                                                                                        ? 'bg-green-500 border-green-600 text-white shadow-lg shadow-green-500/30'
+                                                                                        : step.isCurrent
+                                                                                        ? 'bg-blue-500 border-blue-600 text-white shadow-lg shadow-blue-500/30 animate-pulse'
+                                                                                        : 'bg-gray-200 border-gray-300 text-gray-400'
+                                                                                }`}>
+                                                                                    <step.icon size={16} className={
+                                                                                        step.isCurrent && step.id === 'preparing' ? 'animate-spin' :
+                                                                                        step.isCurrent && step.id === 'out_for_delivery' ? 'animate-bounce-slow' : ''
+                                                                                    } />
+                                                                                </div>
+                                                                                <span className={`text-[10px] font-medium mt-1 text-center ${
+                                                                                    step.isCompleted ? 'text-green-600' : step.isCurrent ? 'text-blue-600' : 'text-gray-400'
+                                                                                }`}>
+                                                                                    {step.label}
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                        {index < trackingSteps.length - 1 && (
+                                                                            <div className="flex-1 min-w-[20px] sm:min-w-[40px] h-0.5 mx-2">
+                                                                                <div className={`h-full transition-all duration-500 ${
+                                                                                    step.isCompleted ? 'bg-green-500' : 'bg-gray-300'
+                                                                                }`}></div>
+                                                                            </div>
+                                                                        )}
+                                                                    </React.Fragment>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Tracking Messages */}
+                                                        {order.tracking && order.tracking.length > 0 && (
+                                                            <div className="mt-4 pt-3 border-t border-blue-200/50">
+                                                                <div className="flex flex-col gap-1">
+                                                                    <p className="text-xs text-gray-500 flex items-center gap-2">
+                                                                        <Clock size={12} />
+                                                                        Latest update: {order.tracking[order.tracking.length - 1]?.message || 'Order placed'}
+                                                                    </p>
+                                                                    <p className="text-xs text-gray-400 ml-6">
+                                                                        {formatDate(order.tracking[order.tracking.length - 1]?.time)}
+                                                                    </p>
+                                                                    {order.tracking.length > 1 && (
+                                                                        <button className="text-xs text-blue-600 hover:text-blue-800 transition-colors ml-6">
+                                                                            View all updates ({order.tracking.length})
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+
+                                                {/* Cancelled Order Message */}
+                                                {isCancelled && (
+                                                    <div className="backdrop-blur-xl bg-red-50/40 border border-red-200/50 rounded-xl p-4 mb-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-10 h-10 bg-red-100/80 rounded-full flex items-center justify-center">
+                                                                <AlertCircle size={20} className="text-red-600" />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-sm font-semibold text-red-700">
+                                                                    Order Cancelled ❌
+                                                                </p>
+                                                                <p className="text-xs text-red-600">
+                                                                    This order has been cancelled and will not be processed.
+                                                                </p>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div className="font-bold text-[#0D7C53] text-sm sm:text-base md:text-lg flex-shrink-0">
-                                                        ₹{(item.price || 0) * (item.quantity || 1)}
+                                                )}
+
+                                                <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
+                                                    {/* Left Section - Order Items & Delivery Info */}
+                                                    <div className="lg:col-span-2 space-y-3 sm:space-y-4">
+                                                        {/* Delivery Address for Delivery Orders */}
+                                                        {isDeliveryOrder && deliveryAddress && (
+                                                            <div className="backdrop-blur-xl bg-blue-50/40 border border-blue-200/50 rounded-xl p-3 sm:p-4">
+                                                                <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                                                                    <div className="p-1 bg-blue-100/60 rounded-lg">
+                                                                        <Truck size={16} className="text-blue-600" />
+                                                                    </div>
+                                                                    <h3 className="text-sm sm:text-base font-semibold text-gray-800">
+                                                                        Delivery Address
+                                                                    </h3>
+                                                                </div>
+                                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                                    <div className="bg-white/20 rounded-lg p-2 sm:p-3">
+                                                                        <p className="text-[10px] text-gray-500 uppercase tracking-wider">Full Name</p>
+                                                                        <p className="font-semibold text-sm text-gray-800">{deliveryAddress.fullName || 'N/A'}</p>
+                                                                    </div>
+                                                                    <div className="bg-white/20 rounded-lg p-2 sm:p-3">
+                                                                        <p className="text-[10px] text-gray-500 uppercase tracking-wider">Phone</p>
+                                                                        <p className="font-semibold text-sm text-gray-800">{deliveryAddress.phone || 'N/A'}</p>
+                                                                    </div>
+                                                                    <div className="sm:col-span-2 bg-white/20 rounded-lg p-2 sm:p-3">
+                                                                        <p className="text-[10px] text-gray-500 uppercase tracking-wider">Address</p>
+                                                                        <p className="font-semibold text-sm text-gray-800">
+                                                                            {deliveryAddress.addressLine1}
+                                                                            {deliveryAddress.addressLine2 && `, ${deliveryAddress.addressLine2}`}
+                                                                        </p>
+                                                                        <p className="text-xs text-gray-600 mt-0.5">
+                                                                            {deliveryAddress.city}, {deliveryAddress.state} - {deliveryAddress.pincode}
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {/* Dine In Info */}
+                                                        {!isDeliveryOrder && (
+                                                            <div className="backdrop-blur-xl bg-purple-50/40 border border-purple-200/50 rounded-xl p-3 sm:p-4">
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="p-1 bg-purple-100/60 rounded-lg">
+                                                                        <Store size={16} className="text-purple-600" />
+                                                                    </div>
+                                                                    <h3 className="text-sm sm:text-base font-semibold text-gray-800">
+                                                                        Dine In Order
+                                                                    </h3>
+                                                                </div>
+                                                                <p className="text-xs sm:text-sm text-gray-600 mt-1 ml-7">
+                                                                    This order is for dine-in at our cafe.
+                                                                </p>
+                                                                {status === 'delivered' && (
+                                                                    <p className="text-xs text-green-600 mt-1 ml-7 flex items-center gap-1">
+                                                                        <CircleCheck size={14} />
+                                                                        Ready for pickup!
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        )}
+
+                                                        {/* Order Items */}
+                                                        <div className="backdrop-blur-xl bg-white/30 border border-white/40 rounded-xl p-3 sm:p-4">
+                                                            <div className="flex items-center gap-2 mb-3">
+                                                                <div className="p-1 bg-amber-100/60 rounded-lg">
+                                                                    <ShoppingBag size={16} className="text-amber-600" />
+                                                                </div>
+                                                                <h3 className="text-sm sm:text-base font-semibold text-gray-800">
+                                                                    Items
+                                                                </h3>
+                                                                <span className="ml-auto text-xs text-gray-500">
+                                                                    {totalItems} {totalItems === 1 ? 'item' : 'items'}
+                                                                </span>
+                                                            </div>
+
+                                                            <div className="space-y-2">
+                                                                {orderItems.map((item, index) => (
+                                                                    <div
+                                                                        key={item._id || index}
+                                                                        className="flex gap-3 bg-white/20 rounded-lg p-2 sm:p-3 hover:bg-white/30 transition-all"
+                                                                    >
+                                                                        <img
+                                                                            src={item.image}
+                                                                            alt={item.name}
+                                                                            className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
+                                                                            onError={(e) => {
+                                                                                e.target.src = 'https://placehold.co/100x100/e2e8f0/64748b?text=☕';
+                                                                            }}
+                                                                        />
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <h4 className="font-semibold text-sm text-gray-800 truncate">
+                                                                                {item.name}
+                                                                            </h4>
+                                                                            <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500 mt-0.5">
+                                                                                <span>Qty: {item.quantity}</span>
+                                                                                <span>{formatPrice(item.price)} each</span>
+                                                                            </div>
+                                                                            <div className="font-bold text-[#0D7C53] text-sm mt-0.5">
+                                                                                {formatPrice(item.subtotal || item.price * item.quantity)}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Right Section - Order Summary */}
+                                                    <div className="lg:col-span-1">
+                                                        <div className="backdrop-blur-xl bg-white/30 border border-white/40 rounded-xl p-4">
+                                                            <h3 className="text-lg font-bold text-gray-800 mb-3">
+                                                                Order Summary
+                                                            </h3>
+
+                                                            <div className="space-y-2 text-sm">
+                                                                <div className="flex justify-between">
+                                                                    <span className="text-gray-500">Order Type</span>
+                                                                    <span className={`font-semibold flex items-center gap-1 ${isDeliveryOrder ? 'text-blue-600' : 'text-purple-600'}`}>
+                                                                        {isDeliveryOrder ? <Truck size={14} /> : <Store size={14} />}
+                                                                        {isDeliveryOrder ? 'Delivery' : 'Dine In'}
+                                                                    </span>
+                                                                </div>
+
+                                                                <div className="flex justify-between">
+                                                                    <span className="text-gray-500">Total Items</span>
+                                                                    <span className="font-medium text-gray-800">{totalItems}</span>
+                                                                </div>
+
+                                                                <div className="flex justify-between items-center">
+                                                                    <span className="text-gray-500">Order Status</span>
+                                                                    <span className={`font-semibold flex items-center gap-1.5 ${isCancelled ? 'text-red-600' : statusInfo.color}`}>
+                                                                        <StatusIcon size={14} className={
+                                                                            status === 'preparing' ? 'animate-spin' :
+                                                                            status === 'out_for_delivery' ? 'animate-bounce-slow' : ''
+                                                                        } />
+                                                                        {statusInfo.label}
+                                                                    </span>
+                                                                </div>
+
+                                                                <div className="flex justify-between">
+                                                                    <span className="text-gray-500">Payment</span>
+                                                                    <span className={`font-medium ${order.paymentStatus === 'paid' ? 'text-green-600' : 'text-yellow-600'}`}>
+                                                                        {order.paymentStatus === 'paid' ? 'Paid ✅' : 'Pending ⏳'}
+                                                                    </span>
+                                                                </div>
+
+                                                                {order.payment?._id && (
+                                                                    <div className="flex justify-between">
+                                                                        <span className="text-gray-500">Payment ID</span>
+                                                                        <span className="text-xs text-gray-600 truncate max-w-[100px]">
+                                                                            {order.payment._id.slice(-8)}
+                                                                        </span>
+                                                                    </div>
+                                                                )}
+
+                                                                {/* Status Description */}
+                                                                <div className="flex justify-between">
+                                                                    <span className="text-gray-500">Status Info</span>
+                                                                    <span className="text-xs text-gray-600 text-right max-w-[150px]">
+                                                                        {statusInfo.description}
+                                                                    </span>
+                                                                </div>
+
+                                                                <div className="border-t border-gray-200/50 pt-2 mt-2">
+                                                                    <div className="flex justify-between text-base font-bold">
+                                                                        <span className="text-gray-800">Total</span>
+                                                                        <span className="text-[#0D7C53]">
+                                                                            {formatPrice(order.amount)}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    navigate('/menu');
+                                                                }}
+                                                                className="w-full mt-3 py-2 bg-gradient-to-r from-[#0D7C53] to-green-600 text-white rounded-lg font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 text-sm"
+                                                            >
+                                                                <Coffee size={16} />
+                                                                Order Again
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Right Section - Order Summary */}
-                        <div className="lg:col-span-1">
-                            <div className="sticky top-20 sm:top-24 backdrop-blur-xl bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl shadow-black/5">
-                                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-3 sm:mb-4">
-                                    Order Summary
-                                </h3>
-
-                                <div className="space-y-2 sm:space-y-3">
-                                    <div className="flex justify-between text-sm sm:text-base">
-                                        <span className="text-gray-500">Total Items</span>
-                                        <span className="font-medium text-gray-800">{totalItems}</span>
+                                        )}
                                     </div>
-
-                                    <div className="flex justify-between text-sm sm:text-base">
-                                        <span className="text-gray-500">Order Status</span>
-                                        <span className={`font-semibold flex items-center gap-1 ${
-                                            selectedOrder.status === 'paid' ? 'text-green-600' : 'text-yellow-600'
-                                        }`}>
-                                            <CheckCircle size={14} />
-                                            {selectedOrder.status || 'Processing'}
-                                        </span>
-                                    </div>
-
-                                    {selectedOrder.razorpayPaymentId && (
-                                        <div className="flex justify-between text-sm sm:text-base">
-                                            <span className="text-gray-500">Transaction ID</span>
-                                            <span className="text-sm sm:text-base text-gray-600 truncate max-w-[120px] sm:max-w-[150px]">
-                                                {selectedOrder.razorpayPaymentId.slice(-8)}
-                                            </span>
-                                        </div>
-                                    )}
-
-                                    <div className="flex justify-between text-sm sm:text-base">
-                                        <span className="text-gray-500">Payment Method</span>
-                                        <span className="font-medium text-gray-800">Online (Razorpay)</span>
-                                    </div>
-
-                                    <div className="flex justify-between text-sm sm:text-base">
-                                        <span className="text-gray-500">Order Date</span>
-                                        <span className="text-gray-600 text-right text-xs sm:text-sm">
-                                            {formatDate(selectedOrder.createdAt)}
-                                        </span>
-                                    </div>
-
-                                    <div className="border-t border-gray-200/50 pt-2 sm:pt-3 mt-2 sm:mt-3">
-                                        <div className="flex justify-between text-lg sm:text-xl font-bold">
-                                            <span className="text-gray-800">Total Paid</span>
-                                            <span className="text-[#0D7C53]">
-                                                ₹{selectedOrder.amount || 0}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Action Buttons */}
-                                <button
-                                    onClick={() => navigate('/menu')}
-                                    className="w-full mt-4 sm:mt-6 py-2.5 sm:py-3.5 bg-gradient-to-r from-[#0D7C53] to-green-600 text-white rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 group text-sm sm:text-base"
-                                >
-                                    <Coffee className="w-5 h-5 sm:w-6 sm:h-6" />
-                                    <span>Order Again</span>
-                                </button>
-
-                                <button
-                                    onClick={() => navigate('/orders')}
-                                    className="w-full mt-2 sm:mt-3 text-center text-[10px] sm:text-sm text-gray-500 hover:text-[#0D7C53] transition-all"
-                                >
-                                    ← Back to Orders
-                                </button>
-                            </div>
-                        </div>
-
+                                );
+                            })
+                        )}
                     </div>
                 </div>
             </div>
@@ -423,10 +873,36 @@ const OrderDetailsPage = () => {
                     0%, 100% { transform: translateY(0px) rotate(-12deg); }
                     50% { transform: translateY(20px) rotate(-15deg); }
                 }
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-10px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                @keyframes pulse {
+                    0%, 100% { opacity: 1; }
+                    50% { opacity: 0.5; }
+                }
+                @keyframes bounce-slow {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-5px); }
+                }
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
                 .animate-pulse-slow { animation: pulse-slow 8s ease-in-out infinite; }
                 .animate-pulse-slow-delay { animation: pulse-slow-delay 10s ease-in-out infinite; }
                 .animate-float { animation: float 6s ease-in-out infinite; }
                 .animate-float-delay { animation: float-delay 7s ease-in-out infinite; }
+                .animate-fadeIn { animation: fadeIn 0.3s ease-out; }
+                .animate-pulse { animation: pulse 2s ease-in-out infinite; }
+                .animate-bounce-slow { animation: bounce-slow 2s ease-in-out infinite; }
+                .animate-spin { animation: spin 2s linear infinite; }
             `}</style>
         </>
     );

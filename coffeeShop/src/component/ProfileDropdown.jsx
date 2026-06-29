@@ -133,7 +133,7 @@ const ProfileDropdown = () => {
                             {/* Menu Items */}
                             <div className="p-1">
                                 <Link
-                                    to="/orders"
+                                    to="/orderDetails"
                                     onClick={() => setOpen(false)}
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:text-[#0D7C53] hover:bg-[#0D7C53]/10 transition-all duration-300 group"
                                 >

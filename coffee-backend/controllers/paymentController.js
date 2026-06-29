@@ -13,11 +13,16 @@ const razorpay = new Razorpay({
 // ================= CREATE ORDER =================
 exports.createOrder = async (req, res) => {
   try {
+    console.log("========== CREATE ORDER ==========");
+
     const userId = req.user.id;
-    //  const today = getTodayDate();
+    const { orderType, deliveryAddress, amount } = req.body;
 
-    const { orderType, deliveryAddress } = req.body;
+    console.log(orderType,deliveryAddress, amount)
 
+    console.log("UserId:", userId);
+
+    // ---------------- VALIDATE ORDER TYPE ----------------
     if (!["delivery", "dine_in"].includes(orderType)) {
       return res.status(400).json({
         success: false,
@@ -25,17 +30,16 @@ exports.createOrder = async (req, res) => {
       });
     }
 
-    
-    // Delivery address required
+    // ---------------- VALIDATE DELIVERY ADDRESS ----------------
     if (orderType === "delivery") {
       if (
-        !deliveryAddress ||
-        !deliveryAddress.fullName ||
-        !deliveryAddress.phone ||
-        !deliveryAddress.addressLine1 ||
-        !deliveryAddress.city ||
-        !deliveryAddress.state ||
-        !deliveryAddress.pincode
+        !deliveryAddress?.fullName ||
+        !deliveryAddress?.phone ||
+        !deliveryAddress?.addressLine1 ||
+        !deliveryAddress?.city ||
+        !deliveryAddress?.state ||
+        !deliveryAddress?.pincode||
+        !deliveryAddress?.addressLine2
       ) {
         return res.status(400).json({
           success: false,
@@ -44,9 +48,10 @@ exports.createOrder = async (req, res) => {
       }
     }
 
-    console.log("========== CREATE ORDER ==========");
-console.log("UserId:", userId);
-    const cart = await Cart.findOne({ user: userId }).populate("items.coffee");
+    // ---------------- FIND CART ----------------
+    const cart = await Cart.findOne({ user: userId });
+
+    console.log("CART FOUND =>", cart);
 
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({
@@ -54,41 +59,49 @@ console.log("UserId:", userId);
         message: "Cart is empty",
       });
     }
-    console.log("FOUND CART =>", JSON.stringify(cart, null, 2));
 
-    let totalAmount = 0;
+    // ---------------- USE FRONTEND AMOUNT (with safety check) ----------------
+    const frontendAmount = Number(amount);
+
+    if (!frontendAmount || isNaN(frontendAmount)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid amount from frontend",
+      });
+    }
+
+    // OPTIONAL SAFETY: compare with server calculation (recommended)
+    let serverTotal = 0;
 
     const products = cart.items.map((item) => {
-      const price = Number(item.amount);
-      const quantity = Number(item.quantity);
-      const subtotal = price * quantity;
+      const price = Number(item.amount || 0);
+      const quantity = Number(item.quantity || 1);
 
-      totalAmount += subtotal;
+      const subtotal = price * quantity;
+      serverTotal += subtotal;
 
       return {
-        coffee: item.coffee._id,
-        name: item.coffee.name,
-        image: item.coffee.image,
-        description: item.coffee.description,
-        category: item.coffee.category,
-        price,
+        coffee: item.coffee,
         quantity,
+        price,
         subtotal,
       };
     });
 
+    // ---------------- RAZORPAY ORDER ----------------
     const razorpayOrder = await razorpay.orders.create({
-      amount: totalAmount * 100,
+      amount: Math.round(frontendAmount * 100),
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
     });
 
-    await Payment.create({
+    // ---------------- SAVE PAYMENT ----------------
+    const payment = await Payment.create({
       user: userId,
       orderType,
       deliveryAddress: orderType === "delivery" ? deliveryAddress : null,
       products,
-      amount: totalAmount,
+      amount: frontendAmount,
       razorpayOrderId: razorpayOrder.id,
       status: "pending",
     });
@@ -97,11 +110,11 @@ console.log("UserId:", userId);
       success: true,
       message: "Order created successfully",
       order: razorpayOrder,
-      amount: totalAmount,
+      amount: frontendAmount,
     });
-  } catch (error) {
-    console.log(error);
 
+  } catch (error) {
+    console.error("CREATE ORDER ERROR:", error);
     return res.status(500).json({
       success: false,
       message: error.message,
@@ -227,27 +240,32 @@ exports.getMyOrders = async (req, res) => {
 };
 
 // ================= GET SINGLE ORDER =================
-exports.getOrderById = async (req, res) => {
+exports.getUserOrders = async (req, res) => {
   try {
-    const order = await Payment.findOne({
-      _id: req.params.id,
+    const orders = await Order.find({
       user: req.user._id,
-    });
-
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        message: "Order not found",
-      });
-    }
+    })
+      .select(
+        "orderType amount paymentStatus orderStatus deliveryAddress products tracking createdAt updatedAt payment"
+      )
+      .populate({
+        path: "products.coffee",
+        select: "name image description category price discountPrice stock",
+      })
+      .populate({
+        path: "payment",
+        select: "paymentId orderId signature method status createdAt",
+      })
+      .sort({ createdAt: -1 })
+      .lean();
 
     return res.status(200).json({
       success: true,
-      order,
+      count: orders.length,
+      orders,
     });
   } catch (error) {
-    console.error(error);
-
+    console.error("GET USER ORDERS ERROR:", error);
     return res.status(500).json({
       success: false,
       message: error.message,

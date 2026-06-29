@@ -187,7 +187,6 @@ const CartPage = () => {
         navigate("/menu");
     };
 
-
     const handleSaveAddress = (address) => {
         console.log("📦 Address saved:", address);
         setDeliveryAddress(address);
@@ -196,45 +195,14 @@ const CartPage = () => {
         processPayment(address);
     };
 
-    console.log("Sending createOrder =>", {
-        orderType,
-        deliveryAddress,
-    });
-    console.log("Current cart =>", cartItems);
-    const handleCheckout = async () => {
-        try {
-            console.log("========== CHECKOUT START ==========");
-            console.log("Order Type:", orderType);
-            console.log("cartItems:", cartItems);
-            console.log("totalItems:", totalItems);
-            console.log("totalPrice:", totalPrice);
-
-            // ✅ Check order type
-            if (orderType === "delivery") {
-                console.log("📦 Delivery order - Opening Address Modal");
-                // Open Address Modal
-                setIsAddressModalOpen(true);
-                return;
-            }
-
-            // ✅ For dine_in, continue with payment flow
-            if (orderType === "dine_in") {
-                console.log("☕ Dine-in order - Proceeding to payment");
-                await processPayment(null); // No address needed for dine-in
-            }
-
-        } catch (error) {
-            console.error("❌ Checkout failed:", error);
-            setError(error?.message || "Checkout failed. Please try again.");
-            setPaymentLoading(false);
-        }
-    };
-
+    // ✅ FIXED: Process Payment with correct amount field
     const processPayment = async (address) => {
         console.log("========== PROCESS PAYMENT ==========");
         console.log("Address:", address);
         console.log("Order Type:", orderType);
-        console.log("Redux Cart:", cartItems);
+        console.log("Cart Items:", cartItems);
+        console.log("Total Price:", totalPrice);
+
         try {
             setPaymentLoading(true);
             setError(null);
@@ -245,9 +213,12 @@ const CartPage = () => {
             const deliveryFee = calculateDeliveryFee(totalPrice, orderType);
             const totalAmount = totalPrice + deliveryFee;
 
-            // ✅ Prepare order payload
+            console.log("💰 Total Amount to charge:", totalAmount);
+            console.log("📦 Delivery Fee:", deliveryFee);
+
+            // ✅ FIXED: Use 'amount' instead of 'totalAmount' - matches backend expectation
             const orderPayload = {
-                totalAmount: totalAmount,
+                amount: totalAmount,  // ✅ This matches the backend field name
                 orderType: orderType
             };
 
@@ -256,23 +227,28 @@ const CartPage = () => {
                 orderPayload.deliveryAddress = address;
             }
 
-            console.log("📦 Order Payload:", orderPayload);
+            console.log("📦 Order Payload being sent:", JSON.stringify(orderPayload, null, 2));
 
             // ✅ Create order with updated payload
-             const result = await dispatch(createOrder(orderPayload)).unwrap();
+            const result = await dispatch(createOrder(orderPayload)).unwrap();
+            console.log("✅ Order creation result:", result);
 
             const orderData = result.order;
             console.log("✅ Order created successfully:", orderData);
 
             const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_Rn6mAmy8ydPszM";
 
+            // ✅ Initialize Razorpay options
             const options = {
                 key: razorpayKey,
                 amount: orderData.amount,
                 currency: orderData.currency || "INR",
                 order_id: orderData.id,
                 name: "Coffee Shop",
-                description: `${orderType === 'dine_in' ? '☕ Dine-in' : '🚚 Delivery'} order for ${totalItems} item(s)`,
+                description:
+                    orderType === "dine_in"
+                        ? `Dine-in order for ${totalItems} item(s)`
+                        : `Delivery order for ${totalItems} item(s)`,
                 image: "https://example.com/logo.png",
                 prefill: {
                     name: "Customer",
@@ -316,6 +292,14 @@ const CartPage = () => {
                 }
             };
 
+            // ✅ Check if Razorpay is loaded
+            if (typeof window.Razorpay === 'undefined') {
+                console.error("❌ Razorpay SDK not loaded!");
+                setError("Payment gateway not loaded. Please refresh and try again.");
+                setPaymentLoading(false);
+                return;
+            }
+
             const razorpay = new window.Razorpay(options);
 
             razorpay.on('payment.failed', function (response) {
@@ -328,8 +312,38 @@ const CartPage = () => {
 
         } catch (error) {
             console.error("❌ Payment processing failed:", error);
-            setError(error?.message || "Failed to process payment. Please try again.");
+            console.error("Error details:", error.response?.data || error.message);
+            setError(error?.response?.data?.message || error?.message || "Failed to process payment. Please try again.");
             setPaymentLoading(false);
+        }
+    };
+
+    // ✅ Handle Checkout - Opens address modal for delivery, proceeds directly for dine-in
+    const handleCheckout = async () => {
+        console.log("========== CHECKOUT START ==========");
+        console.log("Order Type:", orderType);
+        console.log("Cart Items:", cartItems);
+        console.log("Total Items:", totalItems);
+        console.log("Total Price:", totalPrice);
+
+        // ✅ Check if cart is empty
+        if (cartItems.length === 0) {
+            setError("Your cart is empty. Please add items before checking out.");
+            return;
+        }
+
+        // ✅ Check order type
+        if (orderType === "delivery") {
+            console.log("📦 Delivery order - Opening Address Modal");
+            // Open Address Modal
+            setIsAddressModalOpen(true);
+            return;
+        }
+
+        // ✅ For dine_in, continue with payment flow
+        if (orderType === "dine_in") {
+            console.log("☕ Dine-in order - Proceeding to payment");
+            await processPayment(null); // No address needed for dine-in
         }
     };
 
@@ -376,9 +390,9 @@ const CartPage = () => {
         return (
             <div className="min-h-screen bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3] pt-20 sm:pt-24 px-3 sm:px-4 overflow-x-hidden">
                 <div className="max-w-7xl mx-auto">
-                    <div className=" bg-white/30 border border-white/40 rounded-2xl sm:rounded-3xl p-6 sm:p-12 text-center shadow-2xl shadow-black/5">
+                    <div className="bg-white/30 border border-white/40 rounded-2xl sm:rounded-3xl p-6 sm:p-12 text-center shadow-2xl shadow-black/5">
                         <div className="flex flex-col items-center justify-center py-8 sm:py-16">
-                            <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white/40  rounded-full flex items-center justify-center mb-4 sm:mb-6 border border-white/30">
+                            <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white/40 rounded-full flex items-center justify-center mb-4 sm:mb-6 border border-white/30">
                                 <ShoppingBag className="w-12 h-12 sm:w-16 sm:h-16 text-[#0D7C53]" />
                             </div>
                             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2 sm:mb-3">
@@ -452,7 +466,7 @@ const CartPage = () => {
                         </div>
                         <button
                             onClick={handleClearCart}
-                            className="text-sm sm:text-base text-red-500 hover:text-red-600 font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-red-50/50  border border-red-200/50 hover:bg-red-100/50 transition-all flex-shrink-0"
+                            className="text-sm sm:text-base text-red-500 hover:text-red-600 font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-red-50/50 border border-red-200/50 hover:bg-red-100/50 transition-all flex-shrink-0"
                         >
                             Clear All
                         </button>
@@ -471,7 +485,7 @@ const CartPage = () => {
                                 return (
                                     <div
                                         key={coffeeId}
-                                        className="group  bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-md shadow-black/5 hover:shadow-lg transition-all duration-300"
+                                        className="group bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-md shadow-black/5 hover:shadow-lg transition-all duration-300"
                                     >
                                         <div className="flex gap-3 sm:gap-4">
                                             {/* Image */}
@@ -512,7 +526,7 @@ const CartPage = () => {
                                                     </div>
 
                                                     {/* Quantity Controls */}
-                                                    <div className="flex items-center gap-1 sm:gap-2 bg-white/50  rounded-full p-0.5 sm:p-1 border border-white/30 flex-shrink-0">
+                                                    <div className="flex items-center gap-1 sm:gap-2 bg-white/50 rounded-full p-0.5 sm:p-1 border border-white/30 flex-shrink-0">
                                                         <button
                                                             onClick={() => handleDecrease(coffeeId)}
                                                             disabled={loading || paymentLoading}
@@ -541,7 +555,7 @@ const CartPage = () => {
 
                         {/* Order Summary */}
                         <div className="lg:col-span-1">
-                            <div className="sticky top-20 sm:top-24  bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl shadow-black/5">
+                            <div className="sticky top-20 sm:top-24 bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl shadow-black/5">
                                 <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">
                                     Order Summary
                                 </h3>
@@ -556,8 +570,8 @@ const CartPage = () => {
                                         {/* Delivery Option */}
                                         <label
                                             className={`cursor-pointer rounded-xl border p-3 transition-all ${orderType === "delivery"
-                                                    ? "border-[#0D7C53] bg-green-50 shadow-sm"
-                                                    : "border-gray-200 bg-white/40 hover:border-gray-300"
+                                                ? "border-[#0D7C53] bg-green-50 shadow-sm"
+                                                : "border-gray-200 bg-white/40 hover:border-gray-300"
                                                 }`}
                                         >
                                             <input
@@ -581,8 +595,8 @@ const CartPage = () => {
                                         {/* Dine In Option */}
                                         <label
                                             className={`cursor-pointer rounded-xl border p-3 transition-all ${orderType === "dine_in"
-                                                    ? "border-[#0D7C53] bg-green-50 shadow-sm"
-                                                    : "border-gray-200 bg-white/40 hover:border-gray-300"
+                                                ? "border-[#0D7C53] bg-green-50 shadow-sm"
+                                                : "border-gray-200 bg-white/40 hover:border-gray-300"
                                                 }`}
                                         >
                                             <input
@@ -617,7 +631,7 @@ const CartPage = () => {
                                             {deliveryFeeDisplay}
                                         </span>
                                     </div>
-                                    {totalPrice > 500 && (
+                                    {totalPrice > 500 && orderType === "delivery" && (
                                         <div className="flex justify-between text-[10px] sm:text-xs text-green-600 bg-green-50/50 backdrop-blur-sm px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg border border-green-200/50">
                                             <span>🎉 Free delivery on orders above ₹500</span>
                                         </div>
@@ -643,7 +657,7 @@ const CartPage = () => {
                                         <input
                                             type="text"
                                             placeholder="Coupon code"
-                                            className="flex-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-white/40  border border-white/30 rounded-full text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#0D7C53] focus:border-transparent placeholder:text-xs sm:placeholder:text-sm"
+                                            className="flex-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-white/40 border border-white/30 rounded-full text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#0D7C53] focus:border-transparent placeholder:text-xs sm:placeholder:text-sm"
                                         />
                                         <button className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#0D7C53]/10 text-[#0D7C53] rounded-full text-[12px] sm:text-sm font-semibold hover:bg-[#0D7C53] hover:text-white transition-all duration-300 whitespace-nowrap">
                                             Apply
