@@ -29,7 +29,7 @@ const AdSidebar = ({ onClose }) => {
     },
     {
       name: "Ordered Items",
-      path: "/admin/ordered-items",
+      path: "/admin/orders",
       icon: <FaShoppingBag size={18} />,
     },
     {
@@ -79,10 +79,9 @@ const AdSidebar = ({ onClose }) => {
             end={item.path === "/admin"}
             onClick={onClose}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
-                isActive
-                  ? "font-semibold shadow-lg bg-[#4F46E5] dark:bg-dark-primary text-white"
-                  : "text-[#64748B] dark:text-dark-text hover:bg-[#F8FAFC] dark:hover:bg-dark-card"
+              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${isActive
+                ? "font-semibold shadow-lg bg-[#4F46E5] dark:bg-dark-primary text-white"
+                : "text-[#64748B] dark:text-dark-text hover:bg-[#F8FAFC] dark:hover:bg-dark-card"
               }`
             }
           >
