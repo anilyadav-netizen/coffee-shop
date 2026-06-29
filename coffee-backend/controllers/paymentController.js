@@ -3,6 +3,7 @@ const crypto = require("crypto");
 const Razorpay = require("razorpay");
 const Payment = require("../models/Payment");
 const Cart = require("../models/Cart");
+const Order = require("../models/orderModel");
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -110,18 +111,21 @@ exports.verifyPayment = async (req, res) => {
       razorpay_payment_id,
       razorpay_signature,
     } = req.body;
-    // Step 1: Verify Razorpay Signature
+
+    // Verify Razorpay Signature
     const generatedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(`${razorpay_order_id}|${razorpay_payment_id}`)
       .digest("hex");
+
     if (generatedSignature !== razorpay_signature) {
       return res.status(400).json({
         success: false,
         message: "Invalid payment signature",
       });
     }
-    // Step 2: Update Payment record in DB
+
+    // Update Payment
     const payment = await Payment.findOneAndUpdate(
       { razorpayOrderId: razorpay_order_id },
       {
@@ -130,30 +134,61 @@ exports.verifyPayment = async (req, res) => {
       },
       { new: true }
     );
-    // FIX: Check payment BEFORE accessing payment.user
-    // Previously, console.log(payment.user) was called before this check
-    // which caused a crash (TypeError) if payment was null
+
     if (!payment) {
       return res.status(404).json({
         success: false,
-        message: "Payment record not found. Make sure razorpay_order_id is correct.",
+        message: "Payment record not found",
       });
     }
-    console.log("Payment verified for user:", payment.user);
-    // Step 3: Clear user's cart after successful payment
-    const cartUpdate = await Cart.findOneAndUpdate(
+
+    // Check if order already exists
+    const existingOrder = await Order.findOne({
+      payment: payment._id,
+    });
+
+    if (!existingOrder) {
+      await Order.create({
+        user: payment.user,
+        payment: payment._id,
+
+        orderType: payment.orderType,
+        deliveryAddress: payment.deliveryAddress,
+
+        products: payment.products,
+
+        amount: payment.amount,
+
+        paymentStatus: "paid",
+
+        orderStatus: "pending",
+
+        tracking: [
+          {
+            status: "pending",
+            message: "Order placed successfully",
+          },
+        ],
+      });
+    }
+
+    // Clear Cart
+    await Cart.findOneAndUpdate(
       { user: payment.user },
-      { $set: { items: [] } },
-      { new: true }
+      {
+        $set: {
+          items: [],
+        },
+      }
     );
-    console.log("Cart cleared:", cartUpdate);
+
     return res.status(200).json({
       success: true,
-      message: "Payment verified successfully",
-      payment,
+      message: "Payment verified and order created successfully",
     });
   } catch (error) {
     console.error("VERIFY PAYMENT ERROR:", error);
+
     return res.status(500).json({
       success: false,
       message: error.message,
