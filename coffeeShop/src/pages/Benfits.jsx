@@ -37,12 +37,12 @@ const Benefits = () => {
 
             {/* ========== CONTENT ========== */}
             <div className="max-w-[104rem] mx-auto relative z-10">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center backdrop-blur-xl rounded-xl">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center rounded-xl">
 
                     {/* ========== LEFT SIDE - IMAGE WITH GLASS EFFECT ========== */}
                     <div className="relative order-1 lg:order-1">
                         {/* Main Image - Glass Effect */}
-                        <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-black/5 border border-white/30 backdrop-blur-xl bg-white/10">
+                        <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-black/5 border border-white/30 bg-white/10">
                             <img
                                 src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&h=900&fit=crop&auto=format"
                                 alt="Coffee Benefits"
@@ -62,8 +62,8 @@ const Benefits = () => {
                     <div className="order-2 lg:order-2">
                         {/* Header - NO EXTRA SHADOW OR EFFECTS */}
                         <div className="mb-8">
-                            <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10 backdrop-blur-sm rounded-full mb-2 border border-white/20">
-                                <span className="text-sm tracking-wider flex items-center gap-2 px-6 py-2.5 bg-[#0D7C53]/20 backdrop-blur-sm text-white rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30">COFFEE BENEFITS</span>
+                            <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10 rounded-full mb-2 border border-white/20">
+                                <span className="text-sm tracking-wider flex items-center gap-2 px-6 py-2.5 bg-[#0D7C53]/20 text-white rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30">COFFEE BENEFITS</span>
                             </div>
 
                             <h2 className="text-3xl md:text-4xl font-bold text-white mb-1">
@@ -77,10 +77,10 @@ const Benefits = () => {
                             {benefits.map((benefit) => (
                                 <div
                                     key={benefit.id}
-                                    className="group backdrop-blur-xl bg-white/20 border border-white/30 rounded-2xl p-5 shadow-sm shadow-black/5 hover:shadow-md transition-all duration-500 hover:-translate-y-1"
+                                    className="group bg-white/20 border border-white/30 rounded-2xl p-5 shadow-sm shadow-black/5 hover:shadow-md transition-all duration-500 hover:-translate-y-1"
                                 >
                                     <div className="flex items-start gap-3">
-                                        <div className={`p-2.5 ${benefit.bgColor} rounded-xl ${benefit.hoverBgColor} transition-colors backdrop-blur-sm`}>
+                                        <div className={`p-2.5 ${benefit.bgColor} rounded-xl ${benefit.hoverBgColor} transition-colors`}>
                                             {getIcon(benefit.icon, `w-5 h-5 ${benefit.iconColor}`)}
                                         </div>
                                         <div>
@@ -102,7 +102,7 @@ const Benefits = () => {
                         </div>
 
                         {/* Bottom Quote - Glass Effect */}
-                        <div className="mt-6 p-4 backdrop-blur-xl bg-gradient-to-r from-[#0D7C53]/10 to-green-500/10 border border-white/30 rounded-2xl shadow-xl shadow-black/5">
+                        <div className="mt-6 p-4 bg-gradient-to-r from-[#0D7C53]/10 to-green-500/10 border border-white/30 rounded-2xl shadow-xl shadow-black/5">
                             <p className="text-base text-gray-200 italic flex items-center gap-2">
                                 <Sparkles className="w-4 h-4 text-gray-300" />
                                 "Life is too short for bad coffee — start your day right"

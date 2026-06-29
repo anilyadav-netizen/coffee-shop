@@ -90,7 +90,7 @@ const Review = () => {
                     <div className="absolute inset-0 bg-gradient-to-tr from-[#EDE0D4]/20 via-transparent to-[#D4B896]/10" />
                 </div>
                 <div className="max-w-7xl mx-auto text-center relative z-10">
-                    <div className="backdrop-blur-xl bg-white/20 border border-white/30 rounded-3xl p-12 shadow-2xl shadow-black/5">
+                    <div className=" bg-white/20 border border-white/30 rounded-3xl p-12 shadow-2xl shadow-black/5">
                         <div className="w-12 h-12 border-4 border-[#0D7C53] border-t-transparent rounded-full animate-spin mx-auto"></div>
                         <p className="mt-4 text-gray-600">Loading reviews...</p>
                     </div>
@@ -108,7 +108,7 @@ const Review = () => {
                     <div className="absolute inset-0 bg-gradient-to-tr from-[#EDE0D4]/20 via-transparent to-[#D4B896]/10" />
                 </div>
                 <div className="max-w-7xl mx-auto text-center relative z-10">
-                    <div className="backdrop-blur-xl bg-white/20 border border-white/30 rounded-3xl p-12 shadow-2xl shadow-black/5">
+                    <div className=" bg-white/20 border border-white/30 rounded-3xl p-12 shadow-2xl shadow-black/5">
                         <Coffee className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                         <h3 className="text-xl font-bold text-gray-700">No Reviews Yet</h3>
                         <p className="text-gray-500 mt-2">Be the first to share your experience!</p>
@@ -141,8 +141,8 @@ const Review = () => {
             <div className="max-w-[104rem] mx-auto relative z-10">
                 {/* Header - Glass Effect */}
                 <div className="text-center mb-6">
-                    <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10 backdrop-blur-sm rounded-full mb-3 border border-white/20">
-                        <span className="flex items-center gap-2 px-6 py-2.5 bg-[#0D7C53]/20 backdrop-blur-sm text-white rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30">TESTIMONIALS</span>
+                    <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10  rounded-full mb-3 border border-white/20">
+                        <span className="flex items-center gap-2 px-6 py-2.5 bg-[#0D7C53]/20  text-white rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30">TESTIMONIALS</span>
                     </div>
                     <h2 className="text-3xl md:text-4xl font-bold text-white">
                         What Our <span className="text-white">Coffee Lovers</span> Say
@@ -155,7 +155,7 @@ const Review = () => {
                     {/* Navigation Buttons - Glass Effect */}
                     <button
                         onClick={goToPrevious}
-                        className="absolute -left-3 md:-left-5 top-1/2 -translate-y-1/2 z-10 p-2 backdrop-blur-xl bg-white/40 border border-white/30 rounded-full shadow-xl shadow-black/5 hover:bg-[#0D7C53] hover:text-white hover:border-[#0D7C53] transition-all duration-300 hover:scale-105"
+                        className="absolute -left-3 md:-left-5 top-1/2 -translate-y-1/2 z-10 p-2  bg-white/40 border border-white/30 rounded-full shadow-xl shadow-black/5 hover:bg-[#0D7C53] hover:text-white hover:border-[#0D7C53] transition-all duration-300 hover:scale-105"
                         aria-label="Previous"
                     >
                         <ChevronLeft size={22} />
@@ -163,7 +163,7 @@ const Review = () => {
 
                     <button
                         onClick={goToNext}
-                        className="absolute -right-3 md:-right-5 top-1/2 -translate-y-1/2 z-10 p-2 backdrop-blur-xl bg-white/40 border border-white/30 rounded-full shadow-xl shadow-black/5 hover:bg-[#0D7C53] hover:text-white hover:border-[#0D7C53] transition-all duration-300 hover:scale-105"
+                        className="absolute -right-3 md:-right-5 top-1/2 -translate-y-1/2 z-10 p-2  bg-white/40 border border-white/30 rounded-full shadow-xl shadow-black/5 hover:bg-[#0D7C53] hover:text-white hover:border-[#0D7C53] transition-all duration-300 hover:scale-105"
                         aria-label="Next"
                     >
                         <ChevronRight size={22} />
@@ -175,7 +175,7 @@ const Review = () => {
                             {visibleReviews.map((review) => (
                                 <div
                                     key={review.id}
-                                    className="backdrop-blur-xl bg-white/20 border border-white/30 rounded-2xl p-5 shadow-sm shadow-black/5 hover:shadow-md transition-all duration-300 hover:-translate-y-1"
+                                    className=" bg-black/40 border border-white/30 rounded-2xl p-5 shadow-sm shadow-black/5 hover:shadow-md transition-all duration-300 hover:-translate-y-1"
                                 >
                                     {/* Top Section: Image + Name + Location */}
                                     <div className="flex items-center gap-3 mb-3">
@@ -234,7 +234,7 @@ const Review = () => {
                             onClick={() => goToSlide(index)}
                             className={`h-1 rounded-full transition-all duration-300 ${index === currentIndex
                                     ? 'w-8 bg-[#0D7C53]'
-                                    : 'w-2 bg-gray-100/80 backdrop-blur-sm hover:bg-gray-200'
+                                    : 'w-2 bg-gray-100/80  hover:bg-gray-200'
                                 }`}
                             aria-label={`Go to slide ${index + 1}`}
                         />

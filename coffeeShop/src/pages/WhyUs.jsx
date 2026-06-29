@@ -93,7 +93,7 @@ const WhyUs = () => {
             <div className="max-w-[104rem] mx-auto relative z-10">
                 {/* Header Section */}
                 <div className="text-center mb-5">
-                    <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10 backdrop-blur-sm rounded-full px-1 py-1 border border-white/20 mb-4">
+                    <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10 rounded-full px-1 py-1 border border-white/20 mb-4">
                         <span className="px-6 py-2 bg-gradient-to-r from-[#0D7C53] to-[#169466] text-white text-xs font-semibold rounded-full tracking-wider">
                             WHY CHOOSE US
                         </span>
@@ -115,11 +115,11 @@ const WhyUs = () => {
                 </div>
 
                 {/* Features Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 backdrop-blur-xl rounded-2xl">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 rounded-2xl">
                     {features.map((feature) => (
                         <div
                             key={feature.id}
-                            className="group backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-4 hover:bg-white/15 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#0D7C53]/10 relative overflow-hidden"
+                            className="group bg-black/50 border border-white/20 rounded-2xl p-4 hover:bg-white/15 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#0D7C53]/10 relative overflow-hidden"
                         >
                             {/* Glow Effect */}
                             <div className={`absolute -right-20 -top-20 w-40 h-40 ${feature.bgColor} rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
@@ -146,7 +146,7 @@ const WhyUs = () => {
                     {stats.map((stat, index) => (
                         <div
                             key={index}
-                            className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-3 text-center hover:bg-white/10 transition-all duration-300 hover:-translate-y-1 group"
+                            className="bg-black/40 border border-white/10 rounded-2xl p-3 text-center hover:bg-white/10 transition-all duration-300 hover:-translate-y-1 group"
                         >
                             <div className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#0D7C53] to-[#169466] group-hover:scale-110 transition-transform duration-300">
                                 {stat.value}
@@ -160,7 +160,7 @@ const WhyUs = () => {
 
                 {/* Bottom CTA */}
                 <div className="mt-12 text-center">
-                    <div className="inline-flex items-center gap-3 backdrop-blur-xl bg-gradient-to-r from-[#0D7C53]/20 to-[#169466]/20 border border-white/20 rounded-full px-6 py-3">
+                    <div className="inline-flex items-center gap-3 bg-gradient-to-r from-[#0D7C53]/20 to-[#169466]/20 border border-white/20 rounded-full px-6 py-3">
                         <Sparkles className="w-5 h-5 text-[#169466]" />
                         <span className="text-white/80 text-sm font-medium">
                             Join thousands of happy coffee lovers

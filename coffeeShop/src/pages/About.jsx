@@ -103,7 +103,7 @@ const About = () => {
                     </div>
 
                     <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4">
-                        <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-lg border border-white/20 px-6 py-2 rounded-full mb-6 animate-fade-in-down">
+                        <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 px-6 py-2 rounded-full mb-6 animate-fade-in-down">
                             <span className="w-2 h-2 bg-green-400 rounded-full animate-ping"></span>
                             <span className="text-white/90 text-sm font-medium tracking-wider">{hero.badge}</span>
                         </div>
@@ -149,14 +149,14 @@ const About = () => {
                     <div className="max-w-[104rem] mx-auto relative z-10">
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                             <div className="relative order-2 lg:order-1">
-                                <div className="relative rounded-3xl overflow-hidden shadow-md shadow-black/5 border border-white/30 backdrop-blur-xl bg-white/10">
+                                <div className="relative rounded-3xl overflow-hidden shadow-md shadow-black/5 border border-white/30  bg-white/10">
                                     <img
                                         src={story.image}
                                         alt="Our Story"
                                         className="w-full h-[440px] object-cover"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-                                    <div className="absolute bottom-6 left-6 backdrop-blur-xl bg-white/40 border border-white/30 rounded-xl p-4 shadow-md">
+                                    <div className="absolute bottom-6 left-6  bg-white/40 border border-white/30 rounded-xl p-4 shadow-md">
                                         <div className="flex items-center gap-3">
                                             <div className="bg-[#0D7C53] p-2 rounded-lg">
                                                 <Coffee className="w-6 h-6 text-white" />
@@ -173,7 +173,7 @@ const About = () => {
                             </div>
 
                             <div className="order-1 lg:order-2">
-                                <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10 backdrop-blur-sm px-4 py-1.5 rounded-full mb-4 border border-white/20">
+                                <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10  px-4 py-1.5 rounded-full mb-4 border border-white/20">
                                     <span className="text-[#0D7C53] text-sm font-semibold tracking-wider">{story.badge}</span>
                                 </div>
                                 <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
@@ -189,7 +189,7 @@ const About = () => {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     {story.highlights.map((highlight, index) => (
-                                        <div key={index} className="flex items-center gap-2 backdrop-blur-xl bg-white/20 border border-white/30 p-3 rounded-xl shadow-xl shadow-black/5">
+                                        <div key={index} className="flex items-center gap-2  bg-white/20 border border-white/30 p-3 rounded-xl shadow-xl shadow-black/5">
                                             {getIcon(highlight.icon, "w-5 h-5 text-[#0D7C53]")}
                                             <span className="text-base font-medium text-gray-700">{highlight.label}</span>
                                         </div>
@@ -231,9 +231,9 @@ const About = () => {
                             {values.map((value, index) => (
                                 <div
                                     key={index}
-                                    className="group backdrop-blur-xl bg-white/20 border border-white/30 rounded-2xl p-6 shadow-md shadow-black/5 hover:shadow-lg transition-all duration-500 hover:-translate-y-2 text-center"
+                                    className="group  bg-white/20 border border-white/30 rounded-2xl p-6 shadow-md shadow-black/5 hover:shadow-lg transition-all duration-500 hover:-translate-y-2 text-center"
                                 >
-                                    <div className="inline-flex items-center justify-center w-16 h-16 bg-[#0D7C53]/20 backdrop-blur-sm rounded-2xl text-[#0D7C53] group-hover:bg-[#0D7C53] group-hover:text-white transition-all duration-300 mb-4">
+                                    <div className="inline-flex items-center justify-center w-16 h-16 bg-[#0D7C53]/20  rounded-2xl text-[#0D7C53] group-hover:bg-[#0D7C53] group-hover:text-white transition-all duration-300 mb-4">
                                         {getIcon(value.icon, "w-8 h-8")}
                                     </div>
                                     <h3 className="text-lg font-bold text-gray-800 mb-2">{value.title}</h3>
@@ -260,7 +260,7 @@ const About = () => {
 
                     <div className="max-w-[100rem] mx-auto relative z-10">
                         <div className="text-center mb-14">
-                            <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10 backdrop-blur-sm px-4 py-1.5 rounded-full mb-4 border border-white/20">
+                            <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10  px-4 py-1.5 rounded-full mb-4 border border-white/20">
                                 <span className="text-[#0D7C53] text-sm font-semibold tracking-wider">{teamSection.badge}</span>
                             </div>
                             <h2 className="text-3xl md:text-4xl font-bold text-gray-800">
@@ -274,7 +274,7 @@ const About = () => {
                             {team.map((member) => (
                                 <div
                                     key={member.id}
-                                    className="group backdrop-blur-xl bg-white/20 border border-white/30 rounded-2xl overflow-hidden shadow-md shadow-black/5 hover:shadow-lg transition-all duration-500 hover:-translate-y-1"
+                                    className="group  bg-white/20 border border-white/30 rounded-2xl overflow-hidden shadow-md shadow-black/5 hover:shadow-lg transition-all duration-500 hover:-translate-y-1"
                                 >
                                     <div className="relative h-64 overflow-hidden">
                                         <img

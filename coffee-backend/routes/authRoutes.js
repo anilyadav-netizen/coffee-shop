@@ -7,9 +7,10 @@ const {
   logout,
   getProfile,
   updateAddress,
+  getAllUsers,
 } = require("../controllers/authController");
+const { protect } = require("../middleware/authMiddleware");
 
-const protect = require("../middleware/authMiddleware");
 
 // Public Routes
 router.post("/register", register);
@@ -19,6 +20,8 @@ router.post("/login", login);
 router.post("/logout", protect, logout);
 router.get("/profile", protect, getProfile);
 router.put("/address/:addressId", protect, updateAddress);
+router.get("/all", protect, getAllUsers);
+
 
 
 module.exports = router;

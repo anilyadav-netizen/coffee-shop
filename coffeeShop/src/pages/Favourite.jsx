@@ -181,7 +181,7 @@ const Favourite = () => {
                 </div>
 
                 <div className="max-w-7xl mx-auto text-center relative z-10">
-                    <div className="backdrop-blur-xl bg-white/20 border border-white/30 rounded-3xl p-12 shadow-2xl shadow-black/5 max-w-2xl mx-auto">
+                    <div className=" bg-white/20 border border-white/30 rounded-3xl p-12 shadow-2xl shadow-black/5 max-w-2xl mx-auto">
                         <div className="relative inline-block">
                             <div className="w-32 h-32 bg-[#0D7C53]/10 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <Heart className="w-16 h-16 text-[#0D7C53]" />
@@ -228,7 +228,7 @@ const Favourite = () => {
             {/* Content */}
             <div className="max-w-[104rem] mx-auto relative z-10">
                 {/* Header - Glass Effect */}
-                <div className="backdrop-blur-xl rounded-3xl p-6">
+                <div className="rounded-3xl p-6">
                     <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                         <div>
                             <div className="flex items-center gap-3">
@@ -240,7 +240,7 @@ const Favourite = () => {
                         </div>
                         <button
                             onClick={handleViewAll}
-                            className="flex items-center gap-2 px-6 py-2.5 bg-[#0D7C53]/20 backdrop-blur-sm text-white rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30"
+                            className="flex items-center gap-2 px-6 py-2.5 bg-[#0D7C53]/20 text-white rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30"
                         >
                             View All Menu
                             <ChevronRight size={18} />
@@ -269,7 +269,7 @@ const Favourite = () => {
                                 return (
                                     <div
                                         key={item._id}
-                                        className="group backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl overflow-hidden shadow-2xl shadow-black/10 hover:shadow-[#0D7C53]/20 transition-all duration-500 hover:-translate-y-2 hover:bg-white/15 relative"
+                                        className="group bg-white/30 border border-white/20 rounded-3xl overflow-hidden shadow-2xl shadow-black/10 hover:shadow-[#0D7C53]/20 transition-all duration-500 hover:-translate-y-2 hover:bg-white/15 relative"
                                     >
                                         {/* Image Container */}
                                         <div
@@ -301,7 +301,7 @@ const Favourite = () => {
                                             {/* Wishlist Icon */}
                                             <button
                                                 onClick={(e) => handleWishlistToggle(item, e)}
-                                                className={`absolute top-3 right-3 z-10 w-9 h-9 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-110 hover:bg-white ${isWishlisted ? "bg-red-50" : ""
+                                                className={`absolute top-3 right-3 z-10 w-9 h-9 bg-white/80 rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-110 hover:bg-white ${isWishlisted ? "bg-red-50" : ""
                                                     }`}
                                             >
                                                 <Heart
@@ -315,7 +315,7 @@ const Favourite = () => {
                                             </button>
 
                                             {/* Category Badge */}
-                                            <div className="absolute top-3 left-3 flex items-center gap-2 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md">
+                                            <div className="absolute top-3 left-3 flex items-center gap-2 bg-white/90 px-3 py-1.5 rounded-full shadow-md">
                                                 {category?.icon && (
                                                     <img
                                                         src={category.icon}
@@ -331,14 +331,14 @@ const Favourite = () => {
                                             {/* Quick View Button */}
                                             <button
                                                 onClick={() => handleItemClick(item)}
-                                                className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md text-gray-800 px-6 py-2.5 rounded-full font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-[#0D7C53] hover:text-white shadow-lg border border-white/30 hover:scale-105"
+                                                className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 text-gray-800 px-6 py-2.5 rounded-full font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-[#0D7C53] hover:text-white shadow-lg border border-white/30 hover:scale-105"
                                             >
                                                 View Item
                                             </button>
                                         </div>
 
                                         {/* Content */}
-                                        <div className="p-4 bg-gradient-to-b from-white/15 to-white/10 backdrop-blur-sm">
+                                        <div className="p-4 bg-gradient-to-b from-white/15 to-white/10">
                                             <div className="flex items-start justify-between">
                                                 <h3
                                                     className="font-bold text-white text-lg transition-colors cursor-pointer line-clamp-1"
@@ -400,7 +400,7 @@ const Favourite = () => {
                             <div className="flex justify-center mt-8">
                                 <button
                                     onClick={() => setShowAll(!showAll)}
-                                    className="flex items-center gap-2 px-8 py-3 bg-[#0D7C53]/20 backdrop-blur-sm text-white rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30 hover:scale-105"
+                                    className="flex items-center gap-2 px-8 py-3 bg-[#0D7C53]/20 text-white rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30 hover:scale-105"
                                 >
                                     {showAll ? (
                                         <>
@@ -419,7 +419,7 @@ const Favourite = () => {
                     </>
                 ) : (
                     <div className="text-center py-16">
-                        <div className="backdrop-blur-xl bg-white/20 border border-white/30 rounded-3xl p-12 shadow-2xl shadow-black/5 max-w-2xl mx-auto">
+                        <div className=" bg-white/20 border border-white/30 rounded-3xl p-12 shadow-2xl shadow-black/5 max-w-2xl mx-auto">
                             <div className="w-20 h-20 bg-gray-100/50 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Search size={32} className="text-gray-400" />
                             </div>
