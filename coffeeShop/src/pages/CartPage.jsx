@@ -23,6 +23,8 @@ import {
     ShoppingBag,
 } from "lucide-react";
 
+import AddressModal from '../Admin/adcomponent/AddressModel';
+
 const CartPage = () => {
 
     const dispatch = useDispatch();
@@ -31,9 +33,15 @@ const CartPage = () => {
     const [error, setError] = useState(null);
     const [paymentLoading, setPaymentLoading] = useState(false);
 
+    // ✅ Order type state - Default to "delivery"
+    const [orderType, setOrderType] = useState("delivery");
+
+    // ✅ Address modal state
+    const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+    const [deliveryAddress, setDeliveryAddress] = useState(null);
+
     // Get cart data from Redux store
     const { cartItems, totalItems, totalPrice, loading } = useSelector((state) => state.cart);
-
 
     // Get payment state from Redux store
     const { order, paymentStatus, paymentError, loading: paymentProcessing } = useSelector((state) => state.payment);
@@ -82,7 +90,6 @@ const CartPage = () => {
             const result = await dispatch(increaseQuantity(coffeeId)).unwrap();
             console.log("✅ Increase successful:", result);
 
-            // If there was an error in the response but still succeeded
             if (result.error) {
                 setError(result.error);
             }
@@ -90,7 +97,6 @@ const CartPage = () => {
             console.error("❌ Failed to increase:", error);
             setError(error || "Failed to increase quantity. Please try again.");
 
-            // 🔥 Refetch cart to ensure consistency
             try {
                 await dispatch(getCart()).unwrap();
                 console.log("✅ Cart refetched after error");
@@ -115,7 +121,6 @@ const CartPage = () => {
             const result = await dispatch(decreaseQuantity(coffeeId)).unwrap();
             console.log("✅ Decrease successful:", result);
 
-            // If there was an error in the response but still succeeded
             if (result.error) {
                 setError(result.error);
             }
@@ -123,7 +128,6 @@ const CartPage = () => {
             console.error("❌ Failed to decrease:", error);
             setError(error || "Failed to decrease quantity. Please try again.");
 
-            // 🔥 Refetch cart to ensure consistency
             try {
                 await dispatch(getCart()).unwrap();
                 console.log("✅ Cart refetched after error");
@@ -151,7 +155,6 @@ const CartPage = () => {
             console.error("❌ Failed to remove:", error);
             setError(error || "Failed to remove item. Please try again.");
 
-            // Refetch cart on error
             try {
                 await dispatch(getCart()).unwrap();
             } catch (refetchError) {
@@ -165,7 +168,6 @@ const CartPage = () => {
         if (window.confirm('Are you sure you want to clear your cart?')) {
             setError(null);
             try {
-                // Remove all items one by one
                 for (const item of cartItems) {
                     const coffeeId = item.coffee?._id;
                     if (coffeeId) {
@@ -173,7 +175,6 @@ const CartPage = () => {
                     }
                 }
                 console.log("✅ Cart cleared successfully");
-                // Refetch cart to ensure it's empty
                 await dispatch(getCart()).unwrap();
             } catch (error) {
                 console.error("❌ Failed to clear cart:", error);
@@ -186,94 +187,127 @@ const CartPage = () => {
         navigate("/menu");
     };
 
-    /**
-     * ✅ Handle Razorpay Payment Checkout
-     * This function orchestrates the entire payment flow:
-     * 1. Creates an order via backend API
-     * 2. Opens Razorpay checkout popup
-     * 3. Handles successful payment verification
-     * 4. Manages error states and user feedback
-     */
+
+    const handleSaveAddress = (address) => {
+        console.log("📦 Address saved:", address);
+        setDeliveryAddress(address);
+        setIsAddressModalOpen(false);
+        // After saving address, proceed with payment
+        processPayment(address);
+    };
+
+    console.log("Sending createOrder =>", {
+        orderType,
+        deliveryAddress,
+    });
+    console.log("Current cart =>", cartItems);
     const handleCheckout = async () => {
         try {
-
             console.log("========== CHECKOUT START ==========");
+            console.log("Order Type:", orderType);
             console.log("cartItems:", cartItems);
             console.log("totalItems:", totalItems);
             console.log("totalPrice:", totalPrice);
-            // Set loading state and clear previous errors
+
+            // ✅ Check order type
+            if (orderType === "delivery") {
+                console.log("📦 Delivery order - Opening Address Modal");
+                // Open Address Modal
+                setIsAddressModalOpen(true);
+                return;
+            }
+
+            // ✅ For dine_in, continue with payment flow
+            if (orderType === "dine_in") {
+                console.log("☕ Dine-in order - Proceeding to payment");
+                await processPayment(null); // No address needed for dine-in
+            }
+
+        } catch (error) {
+            console.error("❌ Checkout failed:", error);
+            setError(error?.message || "Checkout failed. Please try again.");
+            setPaymentLoading(false);
+        }
+    };
+
+    const processPayment = async (address) => {
+        console.log("========== PROCESS PAYMENT ==========");
+        console.log("Address:", address);
+        console.log("Order Type:", orderType);
+        console.log("Redux Cart:", cartItems);
+        try {
             setPaymentLoading(true);
             setError(null);
 
             console.log("🔄 Creating payment order...");
 
-            // 1️⃣ Create order using Redux thunk
-            // IMPORTANT: Pass totalPrice to backend so it can calculate the order
-            const result = await dispatch(createOrder(totalPrice)).unwrap();
+            // ✅ Calculate delivery fee based on order type
+            const deliveryFee = calculateDeliveryFee(totalPrice, orderType);
+            const totalAmount = totalPrice + deliveryFee;
 
-            // The backend returns: { success, message, order }
-            // where order contains: { id, amount, currency, receipt, status }
+            // ✅ Prepare order payload
+            const orderPayload = {
+                totalAmount: totalAmount,
+                orderType: orderType
+            };
+
+            // ✅ Add deliveryAddress only if it's a delivery order
+            if (orderType === "delivery" && address) {
+                orderPayload.deliveryAddress = address;
+            }
+
+            console.log("📦 Order Payload:", orderPayload);
+
+            // ✅ Create order with updated payload
+             const result = await dispatch(createOrder(orderPayload)).unwrap();
+
             const orderData = result.order;
-
             console.log("✅ Order created successfully:", orderData);
 
-            // Get Razorpay key from environment variable
             const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_Rn6mAmy8ydPszM";
 
-            // 2️⃣ Configure Razorpay checkout options
             const options = {
-                key: razorpayKey, // Use environment variable
-                amount: orderData.amount, // Amount in paise (already multiplied by 100 in backend)
+                key: razorpayKey,
+                amount: orderData.amount,
                 currency: orderData.currency || "INR",
-                order_id: orderData.id, // Razorpay order ID from backend
+                order_id: orderData.id,
                 name: "Coffee Shop",
-                description: `Order payment for ${totalItems} item(s)`,
-                image: "https://example.com/logo.png", // Optional: Add your logo URL
+                description: `${orderType === 'dine_in' ? '☕ Dine-in' : '🚚 Delivery'} order for ${totalItems} item(s)`,
+                image: "https://example.com/logo.png",
                 prefill: {
-                    name: "Customer", // You can get this from user state
-                    email: "customer@example.com", // You can get this from user state
-                    contact: "9999999999" // You can get this from user state
+                    name: "Customer",
+                    email: "customer@example.com",
+                    contact: "9999999999"
                 },
                 notes: {
-                    address: "Coffee Shop Order"
+                    orderType: orderType,
+                    deliveryAddress: address ? JSON.stringify(address) : 'N/A'
                 },
                 theme: {
-                    color: "#0D7C53" // Match your brand color
+                    color: "#0D7C53"
                 },
-                // 3️⃣ Payment success handler
                 handler: async function (response) {
                     console.log("✅ Payment successful:", response);
 
                     try {
-                        // Verify payment with backend
                         const verificationData = {
                             razorpay_order_id: response.razorpay_order_id,
                             razorpay_payment_id: response.razorpay_payment_id,
                             razorpay_signature: response.razorpay_signature
                         };
 
-                        // Dispatch verifyPayment with all required fields
                         await dispatch(verifyPayment(verificationData)).unwrap();
-
                         console.log("✅ Payment verified successfully");
-
-                        // Show success message
                         alert("🎉 Payment successful! Your order has been placed.");
-
-                        // Refresh cart data after successful payment
                         await dispatch(getCart()).unwrap();
-
-                        // Navigate to orders page
                         navigate("/orderDetails");
 
                     } catch (error) {
                         console.error("❌ Payment verification failed:", error);
                         setError(error?.message || "Payment verification failed. Please contact support.");
                         setPaymentLoading(false);
-                        // Don't navigate on verification failure
                     }
                 },
-                // Payment modal dismissed handler
                 modal: {
                     ondismiss: function () {
                         console.log("❌ Razorpay modal closed by user");
@@ -282,25 +316,50 @@ const CartPage = () => {
                 }
             };
 
-            // 4️⃣ Initialize and open Razorpay checkout
             const razorpay = new window.Razorpay(options);
 
-            // Handle payment failure/error
             razorpay.on('payment.failed', function (response) {
                 console.error("❌ Payment failed:", response.error);
                 setError(response.error?.description || "Payment failed. Please try again.");
                 setPaymentLoading(false);
             });
 
-            // Open Razorpay popup
             razorpay.open();
 
         } catch (error) {
-            // 5️⃣ Handle order creation failure
-            console.error("❌ Order creation failed:", error);
-            setError(error?.message || "Failed to create order. Please try again.");
+            console.error("❌ Payment processing failed:", error);
+            setError(error?.message || "Failed to process payment. Please try again.");
             setPaymentLoading(false);
         }
+    };
+
+    /**
+     * ✅ Calculate delivery fee based on order type and subtotal
+     */
+    const calculateDeliveryFee = (subtotal, type) => {
+        if (type === "dine_in") {
+            return 0; // Free delivery for dine-in
+        }
+        // For delivery
+        return subtotal > 500 ? 0 : 50; // Free if subtotal > 500, else ₹50
+    };
+
+    /**
+     * ✅ Get delivery fee display text
+     */
+    const getDeliveryFeeDisplay = (subtotal, type) => {
+        const fee = calculateDeliveryFee(subtotal, type);
+        if (type === "dine_in") {
+            return "FREE";
+        }
+        return fee === 0 ? 'FREE' : `₹${fee}.00`;
+    };
+
+    /**
+     * ✅ Calculate total amount
+     */
+    const calculateTotal = (subtotal, type) => {
+        return subtotal + calculateDeliveryFee(subtotal, type);
     };
 
     // ✅ Loading state
@@ -344,6 +403,11 @@ const CartPage = () => {
         );
     }
 
+    // ✅ Calculate dynamic values based on order type
+    const deliveryFee = calculateDeliveryFee(totalPrice, orderType);
+    const totalAmount = calculateTotal(totalPrice, orderType);
+    const deliveryFeeDisplay = getDeliveryFeeDisplay(totalPrice, orderType);
+
     return (
         <>
             <div className="min-h-screen bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3] pt-20 sm:pt-24 px-3 sm:px-4 pb-10 overflow-hidden">
@@ -361,7 +425,7 @@ const CartPage = () => {
                 </div>
 
                 <div className="max-w-7xl mx-auto relative z-10 mt-5">
-                    {/* Error Message - Display backend errors from Redux state */}
+                    {/* Error Message */}
                     {(error || paymentError) && (
                         <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
                             {error || paymentError}
@@ -482,6 +546,65 @@ const CartPage = () => {
                                     Order Summary
                                 </h3>
 
+                                {/* ✅ Choose Order Type Section */}
+                                <div className="mb-5">
+                                    <h4 className="text-base font-semibold text-gray-800 mb-3">
+                                        Choose Order Type
+                                    </h4>
+
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {/* Delivery Option */}
+                                        <label
+                                            className={`cursor-pointer rounded-xl border p-3 transition-all ${orderType === "delivery"
+                                                    ? "border-[#0D7C53] bg-green-50 shadow-sm"
+                                                    : "border-gray-200 bg-white/40 hover:border-gray-300"
+                                                }`}
+                                        >
+                                            <input
+                                                type="radio"
+                                                name="orderType"
+                                                value="delivery"
+                                                checked={orderType === "delivery"}
+                                                onChange={(e) => setOrderType(e.target.value)}
+                                                className="hidden"
+                                            />
+                                            <div className="flex flex-col">
+                                                <span className="font-semibold text-gray-800 text-sm sm:text-base">
+                                                    🚚 Delivery
+                                                </span>
+                                                <span className="text-xs text-gray-500 mt-1">
+                                                    Deliver to your address
+                                                </span>
+                                            </div>
+                                        </label>
+
+                                        {/* Dine In Option */}
+                                        <label
+                                            className={`cursor-pointer rounded-xl border p-3 transition-all ${orderType === "dine_in"
+                                                    ? "border-[#0D7C53] bg-green-50 shadow-sm"
+                                                    : "border-gray-200 bg-white/40 hover:border-gray-300"
+                                                }`}
+                                        >
+                                            <input
+                                                type="radio"
+                                                name="orderType"
+                                                value="dine_in"
+                                                checked={orderType === "dine_in"}
+                                                onChange={(e) => setOrderType(e.target.value)}
+                                                className="hidden"
+                                            />
+                                            <div className="flex flex-col">
+                                                <span className="font-semibold text-gray-800 text-sm sm:text-base">
+                                                    ☕ Dine In
+                                                </span>
+                                                <span className="text-xs text-gray-500 mt-1">
+                                                    Enjoy at our cafe
+                                                </span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
                                 <div className="space-y-2 sm:space-y-3">
                                     <div className="flex justify-between text-sm sm:text-base">
                                         <span className="text-gray-500">Subtotal</span>
@@ -489,20 +612,29 @@ const CartPage = () => {
                                     </div>
                                     <div className="flex justify-between text-sm sm:text-base">
                                         <span className="text-gray-500">Delivery Fee</span>
-                                        <span className="font-medium text-gray-800">
-                                            {totalPrice > 500 ? 'FREE' : '₹50.00'}
+                                        <span className={`font-medium ${deliveryFee === 0 ? 'text-green-600' : 'text-gray-800'
+                                            }`}>
+                                            {deliveryFeeDisplay}
                                         </span>
                                     </div>
-                                    {totalPrice > 500 && (
+
+                                    {/* Delivery fee messages based on order type */}
+                                    {orderType === "delivery" && totalPrice > 500 && (
                                         <div className="flex justify-between text-[10px] sm:text-xs text-green-600 bg-green-50/50 backdrop-blur-sm px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg border border-green-200/50">
                                             <span>🎉 Free delivery on orders above ₹500</span>
                                         </div>
                                     )}
+                                    {orderType === "dine_in" && (
+                                        <div className="flex justify-between text-[10px] sm:text-xs text-green-600 bg-green-50/50 backdrop-blur-sm px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg border border-green-200/50">
+                                            <span>☕ Free delivery for dine-in orders</span>
+                                        </div>
+                                    )}
+
                                     <div className="border-t border-gray-200/50 pt-2 sm:pt-3 mt-2 sm:mt-3">
                                         <div className="flex justify-between text-base sm:text-lg font-bold">
                                             <span className="text-gray-800">Total</span>
                                             <span className="text-[#0D7C53]">
-                                                ₹{(totalPrice + (totalPrice > 500 ? 0 : 50)).toFixed(2)}
+                                                ₹{totalAmount.toFixed(2)}
                                             </span>
                                         </div>
                                     </div>
@@ -521,7 +653,7 @@ const CartPage = () => {
                                     </div>
                                 </div>
 
-                                {/* ✅ Updated Pay Now Button with proper loading states */}
+                                {/* ✅ Updated Proceed to Checkout Button */}
                                 <button
                                     onClick={handleCheckout}
                                     disabled={paymentLoading || loading || cartItems.length === 0}
@@ -545,17 +677,33 @@ const CartPage = () => {
                                     )}
                                 </button>
 
-                                {/* Display payment processing status */}
+                                {/* Payment status */}
                                 {paymentLoading && (
                                     <p className="text-xs text-gray-500 text-center mt-2">
                                         Please wait while we process your payment...
                                     </p>
                                 )}
+
+                                {/* Order type indicator */}
+                                <div className="mt-3 text-center">
+                                    <span className="text-xs text-gray-400">
+                                        {orderType === "dine_in"
+                                            ? "☕ Dine-in order"
+                                            : "🚚 Delivery order"}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* ✅ Address Modal */}
+            <AddressModal
+                isOpen={isAddressModalOpen}
+                onClose={() => setIsAddressModalOpen(false)}
+                onSaveAddress={handleSaveAddress}
+            />
 
             <style>{`
                 @keyframes pulse-slow {
@@ -574,10 +722,21 @@ const CartPage = () => {
                     0%, 100% { transform: translateY(0px) rotate(-12deg); }
                     50% { transform: translateY(20px) rotate(-15deg); }
                 }
+                @keyframes slide-up {
+                    from {
+                        opacity: 0;
+                        transform: translateY(20px) scale(0.95);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0) scale(1);
+                    }
+                }
                 .animate-pulse-slow { animation: pulse-slow 8s ease-in-out infinite; }
                 .animate-pulse-slow-delay { animation: pulse-slow-delay 10s ease-in-out infinite; }
                 .animate-float { animation: float 6s ease-in-out infinite; }
                 .animate-float-delay { animation: float-delay 7s ease-in-out infinite; }
+                .animate-slide-up { animation: slide-up 0.3s ease-out; }
             `}</style>
         </>
     );

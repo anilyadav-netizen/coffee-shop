@@ -14,6 +14,7 @@ const razorpay = new Razorpay({
 exports.createOrder = async (req, res) => {
   try {
     const userId = req.user.id;
+    //  const today = getTodayDate();
 
     const { orderType, deliveryAddress } = req.body;
 
@@ -24,6 +25,7 @@ exports.createOrder = async (req, res) => {
       });
     }
 
+    
     // Delivery address required
     if (orderType === "delivery") {
       if (
@@ -42,6 +44,8 @@ exports.createOrder = async (req, res) => {
       }
     }
 
+    console.log("========== CREATE ORDER ==========");
+console.log("UserId:", userId);
     const cart = await Cart.findOne({ user: userId }).populate("items.coffee");
 
     if (!cart || cart.items.length === 0) {
@@ -50,6 +54,7 @@ exports.createOrder = async (req, res) => {
         message: "Cart is empty",
       });
     }
+    console.log("FOUND CART =>", JSON.stringify(cart, null, 2));
 
     let totalAmount = 0;
 
