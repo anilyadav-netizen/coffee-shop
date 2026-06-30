@@ -98,12 +98,12 @@ exports.updateCoffee = async (req, res) => {
 exports.getAllCoffee = async (req, res) => {
   try {
     const coffees = await Coffee.find()
-      .populate("category", "name icon");
+      .select("name price image category") // Sirf required fields
+      .populate("category", "name icon")
+      .lean(); // Faster than normal Mongoose documents
 
-    // Response Header
     res.setHeader("Content-Type", "application/json");
 
-    // Create Readable Stream
     const stream = Readable.from([
       JSON.stringify({
         success: true,
@@ -111,7 +111,6 @@ exports.getAllCoffee = async (req, res) => {
       }),
     ]);
 
-    // Pipe stream to response
     stream.pipe(res);
 
   } catch (error) {
