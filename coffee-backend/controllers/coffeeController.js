@@ -100,20 +100,10 @@ exports.getAllCoffee = async (req, res) => {
     const coffees = await Coffee.find()
       .populate("category", "name icon");
 
-    // Response Header
-    res.setHeader("Content-Type", "application/json");
-
-    // Create Readable Stream
-    const stream = Readable.from([
-      JSON.stringify({
-        success: true,
-        data: coffees,
-      }),
-    ]);
-
-    // Pipe stream to response
-    stream.pipe(res);
-
+    res.status(200).json({
+      success: true,
+      data: coffees,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -121,6 +111,7 @@ exports.getAllCoffee = async (req, res) => {
     });
   }
 };
+
 
 exports.getCoffeeById = async (req, res) => {
   try {
