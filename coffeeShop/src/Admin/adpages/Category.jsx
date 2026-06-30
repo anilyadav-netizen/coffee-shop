@@ -61,7 +61,7 @@ const Category = () => {
             <div className="flex justify-center items-center h-64">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-[#4F46E5] dark:border-dark-primary mx-auto"></div>
-                    <p className="mt-4 text-[#64748B] dark:text-dark-text text-sm sm:text-base">Loading categories...</p>
+                    <p className="mt-4 text-[#64748B] dark:text-dark-text text-base sm:text-lg">Loading categories...</p>
                 </div>
             </div>
         );
@@ -72,7 +72,7 @@ const Category = () => {
             {/* Header - Responsive */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div>
-                    <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-[#0F172A] dark:text-dark-heading">
+                    <h1 className="text-xl sm:text-2xl md:text-2xl font-semibold text-[#0F172A] dark:text-dark-heading">
                         Categories
                     </h1>
                     <p className="text-xs sm:text-sm text-[#64748B] dark:text-dark-text">
@@ -84,7 +84,7 @@ const Category = () => {
                     to="/admin/add-category"
                     className="flex items-center justify-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-[#4F46E5] dark:bg-dark-primary text-white rounded-lg hover:bg-[#4338CA] dark:hover:bg-[#6366F1] transition text-sm sm:text-base"
                 >
-                    <FaPlus className="text-xs sm:text-sm" />
+                    <FaPlus className="text-base sm:text-xl" />
                     <span className="">Add Category</span>
                 </Link>
             </div>
@@ -93,7 +93,7 @@ const Category = () => {
             <div className="flex flex-col sm:flex-row justify-end mb-4 sm:mb-6">
                 <div className="w-full sm:w-auto">
                     <div className="relative w-full sm:w-auto">
-                        <FaSearch className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-[#64748B] dark:text-dark-text text-xs sm:text-sm" />
+                        <FaSearch className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-[#64748B] dark:text-dark-text text-sm sm:text-base" />
                         <input
                             type="text"
                             placeholder="Search Category"
@@ -110,10 +110,10 @@ const Category = () => {
                 <table className="w-full min-w-[600px] sm:min-w-full">
                     <thead>
                         <tr className="border-b border-[#E2E8F0] dark:border-dark-border bg-[#F8FAFC] dark:bg-dark-bg/50">
-                            <th className="p-2 sm:p-3 md:p-4 text-left text-[#64748B] dark:text-dark-text text-xs sm:text-sm whitespace-nowrap">Icon</th>
-                            <th className="p-2 sm:p-3 md:p-4 text-left text-[#64748B] dark:text-dark-text text-xs sm:text-sm whitespace-nowrap">Category Name</th>
-                            <th className="hidden md:table-cell p-2 sm:p-3 md:p-4 text-left text-[#64748B] dark:text-dark-text text-xs sm:text-sm whitespace-nowrap">Created At</th>
-                            <th className="p-2 sm:p-3 md:p-4 text-left text-[#64748B] dark:text-dark-text text-xs sm:text-sm whitespace-nowrap">Actions</th>
+                            <th className="p-2 sm:p-3 md:p-4 text-left text-[#64748B] dark:text-dark-text text-sm sm:text-base whitespace-nowrap">Icon</th>
+                            <th className="p-2 sm:p-3 md:p-4 text-left text-[#64748B] dark:text-dark-text text-sm sm:text-base whitespace-nowrap">Category Name</th>
+                            <th className="hidden md:table-cell p-2 sm:p-3 md:p-4 text-left text-[#64748B] dark:text-dark-text text-sm sm:text-base whitespace-nowrap">Created At</th>
+                            <th className="p-2 sm:p-3 md:p-4 text-left text-[#64748B] dark:text-dark-text text-sm sm:text-base whitespace-nowrap">Actions</th>
                         </tr>
                     </thead>
 
@@ -132,11 +132,11 @@ const Category = () => {
                                         />
                                     </td>
 
-                                    <td className="p-1.5 sm:p-2 md:p-4 font-medium text-[#0F172A] dark:text-dark-heading text-xs sm:text-sm md:text-base max-w-[100px] sm:max-w-[150px] md:max-w-none truncate">
+                                    <td className="p-1.5 sm:p-2 md:p-4 font-medium text-[#0F172A] dark:text-dark-heading text-sm sm:text-base md:text-lg max-w-[100px] sm:max-w-[150px] md:max-w-none truncate">
                                         {category.name}
                                     </td>
 
-                                    <td className="hidden md:table-cell p-1.5 sm:p-2 md:p-4 text-[#64748B] dark:text-dark-text text-xs sm:text-sm whitespace-nowrap">
+                                    <td className="hidden md:table-cell p-1.5 sm:p-2 md:p-4 text-[#64748B] dark:text-dark-text text-base sm:text-lg whitespace-nowrap">
                                         {new Date(
                                             category.createdAt
                                         ).toLocaleDateString()}
@@ -147,7 +147,7 @@ const Category = () => {
                                             {/* Edit Button */}
                                             <button
                                                 onClick={() => handleEdit(category._id)}
-                                                className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 flex items-center justify-center border border-[#E2E8F0] dark:border-dark-border rounded-md hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-colors duration-200"
+                                                className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 flex items-center justify-center border border-[#E2E8F0] dark:border-dark-border rounded-md hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-colors duration-200"
                                                 title="Edit category"
                                             >
                                                 <FaEdit className="text-[#4F46E5] dark:text-dark-primary text-[10px] sm:text-xs md:text-sm" />
@@ -157,10 +157,10 @@ const Category = () => {
                                             <button
                                                 onClick={() => handleDelete(category._id, category.name)}
                                                 disabled={deleteLoading}
-                                                className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 flex items-center justify-center border border-[#E2E8F0] dark:border-dark-border rounded-md text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                                                className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 flex items-center justify-center border border-[#E2E8F0] dark:border-dark-border rounded-md text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                                                 title="Delete category"
                                             >
-                                                <FaTrash className="text-[10px] sm:text-xs md:text-sm" />
+                                                <FaTrash className="text-[10px] sm:text-sm md:text-base" />
                                             </button>
                                         </div>
                                     </td>
