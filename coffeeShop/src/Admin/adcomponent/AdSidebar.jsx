@@ -1,6 +1,9 @@
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import {
+  FaMotorcycle,
+} from "react-icons/fa6";
+import {
   FaCoffee,
   FaShoppingBag,
   FaUsers,
@@ -41,32 +44,42 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
   }, []);
 
   const menuItems = [
-    {
-      name: "Dashboard",
-      path: "/admin",
-      icon: <MdDashboard size={20} />,
-    },
-    {
-      name: "Products",
-      path: "/admin/products",
-      icon: <FaCoffee size={18} />,
-    },
-    {
-      name: "Category",
-      path: "/admin/category",
-      icon: <FaTags size={18} />,
-    },
-    {
-      name: "Ordered Items",
-      path: "/admin/orders",
-      icon: <FaShoppingBag size={18} />,
-    },
-    {
-      name: "Users",
-      path: "/admin/users",
-      icon: <FaUsers size={18} />,
-    },
-  ];
+  {
+    name: "Dashboard",
+    path: "/admin",
+    icon: <MdDashboard size={20} />,
+  },
+  {
+    name: "Products",
+    path: "/admin/products",
+    icon: <FaCoffee size={18} />,
+  },
+  {
+    name: "Category",
+    path: "/admin/category",
+    icon: <FaTags size={18} />,
+  },
+  {
+    name: "Ordered Items",
+    path: "/admin/orders",
+    icon: <FaShoppingBag size={18} />,
+  },
+  {
+    name: "Chef",
+    path: "/admin/chef",
+    icon: <FaUser size={18} />,
+  },
+  {
+    name: "Rider",
+    path: "/admin/riders",
+    icon: <FaUserCircle size={18} />,
+  },
+  {
+    name: "Users",
+    path: "/admin/users",
+    icon: <FaUsers size={18} />,
+  },
+];
 
   const handleLogout = () => {
     localStorage.removeItem("token");
