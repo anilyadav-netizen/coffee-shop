@@ -10,8 +10,6 @@ exports.addToCart = async (req, res) => {
   try {
     const { coffeeId, quantity = 1, amount } = req.body;
 
-
-
     if (!coffeeId) {
       return res.status(400).json({
         success: false,
@@ -60,9 +58,6 @@ exports.addToCart = async (req, res) => {
           amount,
         });
       }
-
-      console.log(cart)
-
 
       await cart.save();
     }
