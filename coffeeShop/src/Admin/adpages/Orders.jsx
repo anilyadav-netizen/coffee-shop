@@ -2,17 +2,17 @@ import React, { useEffect, useState } from "react";
 import { FaEye, FaSearch, FaClipboardList } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { getMyOrders } from "../../redux/Slicer/paymentSlice";
+import { getAllOrders } from "../../redux/Slicer/adminOrder";
 
 const Orders = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { orders, loading } = useSelector((state) => state.payment);
+  const { orders, loading } = useSelector((state) => state.adminOrder);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
 
   useEffect(() => {
-    dispatch(getMyOrders());
+    dispatch(getAllOrders());
   }, [dispatch]);
 
   // Badge styles

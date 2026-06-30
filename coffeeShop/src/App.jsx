@@ -28,6 +28,7 @@ import { ToastContainer } from 'react-toastify';
 import OrderDetailsPage from "./pages/OderDetailsPage";
 import Orders from "./Admin/adpages/Orders";
 import OrderDetails from "./Admin/adpages/OrderDetails";
+import AdminProfile from "./Admin/adLayouts/AdminProfile";
 
 function App() {
 
@@ -76,6 +77,7 @@ function App() {
           <Route path="/admin/update-category/:id" element={<AddCategory />} />
           <Route path="/admin/orders" element={<Orders />} />
           <Route path="/admin/order/:id" element={<OrderDetails />} />
+          <Route path="/admin/profile" element={<AdminProfile />} />
         </Route>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />

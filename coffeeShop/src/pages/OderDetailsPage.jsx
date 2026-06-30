@@ -817,13 +817,13 @@ const OrderDetailsPage = () => {
                                                                 {/* Status Description */}
                                                                 <div className="flex justify-between">
                                                                     <span className="text-gray-500">Status Info</span>
-                                                                    <span className="text-xs text-gray-600 text-right max-w-[150px]">
+                                                                    <span className="text-sm text-gray-600 text-right max-w-[150px]">
                                                                         {statusInfo.description}
                                                                     </span>
                                                                 </div>
 
                                                                 <div className="border-t border-gray-200/50 pt-2 mt-2">
-                                                                    <div className="flex justify-between text-base font-bold">
+                                                                    <div className="flex justify-between text-lg font-bold">
                                                                         <span className="text-gray-800">Total</span>
                                                                         <span className="text-[#0D7C53]">
                                                                             {formatPrice(order.amount)}
@@ -837,7 +837,7 @@ const OrderDetailsPage = () => {
                                                                     e.stopPropagation();
                                                                     navigate('/menu');
                                                                 }}
-                                                                className="w-full mt-3 py-2 bg-gradient-to-r from-[#0D7C53] to-green-600 text-white rounded-lg font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 text-sm"
+                                                                className="w-full mt-3 py-2 bg-gradient-to-r from-[#0D7C53] to-green-600 text-white rounded-lg font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 text-lg"
                                                             >
                                                                 <Coffee size={16} />
                                                                 Order Again

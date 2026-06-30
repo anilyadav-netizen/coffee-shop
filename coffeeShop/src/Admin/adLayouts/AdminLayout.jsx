@@ -99,39 +99,6 @@ const AdminLayout = () => {
                                 <FaMoon className="text-[#4F46E5] dark:text-dark-primary text-lg sm:text-xl md:text-xl" />
                             )}
                         </button>
-
-                        {/* Profile Dropdown */}
-                        <div className="relative">
-                            <button
-                                onClick={() => setOpen(!open)}
-                                className="flex items-center gap-1 sm:gap-2 text-[#0F172A] dark:text-dark-heading"
-                            >
-                                <FaUserCircle
-                                    size={24}
-                                    className="sm:w-7 sm:h-7 md:w-8 md:h-8 text-[#4F46E5] dark:text-dark-primary"
-                                />
-                                <span className="hidden sm:inline-block text-xs sm:text-sm md:text-base text-[#0F172A] dark:text-dark-heading">
-                                    Admin
-                                </span>
-                            </button>
-
-                            {open && (
-                                <div className="absolute right-0 mt-2 w-40 sm:w-48 bg-white dark:bg-dark-card border border-[#E2E8F0] dark:border-dark-border rounded-xl shadow-lg dark:shadow-xl overflow-hidden z-50">
-                                    <button className="w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-[#64748B] dark:text-dark-text hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-colors duration-200">
-                                        My Profile
-                                    </button>
-
-                                    <button className="w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-[#64748B] dark:text-dark-text hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-colors duration-200">
-                                        Settings
-                                    </button>
-
-                                    <button className="w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2 transition-colors duration-200">
-                                        <FaSignOutAlt className="text-sm" />
-                                        Logout
-                                    </button>
-                                </div>
-                            )}
-                        </div>
                     </div>
                 </header>
 
