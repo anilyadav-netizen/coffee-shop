@@ -36,7 +36,6 @@ const paymentSchema = new mongoose.Schema(
       default: "dine_in",
     },
 
-    // Delivery Address (only for delivery orders)
     deliveryAddress: {
       type: deliveryAddressSchema,
       default: null,
