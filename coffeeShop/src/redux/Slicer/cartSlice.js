@@ -192,9 +192,9 @@ const cartSlice = createSlice({
                 const cart = action.payload;
                 console.log()
                 state.cartItems = cart.data.items || [];
-                
+
                 state.totalItems = state.cartItems.length;
-                
+
                 state.totalPrice = state.cartItems.reduce(
                     (sum, item) =>
                         sum + item.quantity * (item.coffee?.price || 0),
@@ -204,7 +204,6 @@ const cartSlice = createSlice({
                     totalItems: state.totalItems,
                     totalPrice: state.totalPrice
                 });
-                console.log(cart)
             })
             .addCase(getCart.rejected, (state, action) => {
                 state.loading = false;
