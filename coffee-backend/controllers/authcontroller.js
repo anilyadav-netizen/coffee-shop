@@ -79,7 +79,7 @@ const login = async (req, res) => {
       });
     }
 
-    const token = generateToken(user._id);
+    const token = generateToken(user._id,user.role,user.email,user.name);
 
     return res.status(200).json({
       message: "Login successful",
