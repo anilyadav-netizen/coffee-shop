@@ -2,6 +2,8 @@ const Coffee = require("../models/Coffee");
 const axios = require("axios");
 const sharp = require("sharp");
 const FormData = require("form-data");
+const { Readable } = require("stream");
+
 
 const uploadToImgBB = async (buffer, originalname) => {
   const compressedBuffer = await sharp(buffer)
@@ -98,10 +100,20 @@ exports.getAllCoffee = async (req, res) => {
     const coffees = await Coffee.find()
       .populate("category", "name icon");
 
-    res.status(200).json({
-      success: true,
-      data: coffees,
-    });
+    // Response Header
+    res.setHeader("Content-Type", "application/json");
+
+    // Create Readable Stream
+    const stream = Readable.from([
+      JSON.stringify({
+        success: true,
+        data: coffees,
+      }),
+    ]);
+
+    // Pipe stream to response
+    stream.pipe(res);
+
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -109,7 +121,6 @@ exports.getAllCoffee = async (req, res) => {
     });
   }
 };
-
 
 exports.getCoffeeById = async (req, res) => {
   try {
