@@ -18,7 +18,7 @@ exports.createOrder = async (req, res) => {
     const userId = req.user.id;
     const { orderType, deliveryAddress, amount } = req.body;
 
-    console.log(orderType,deliveryAddress, amount)
+    console.log(orderType, deliveryAddress, amount)
 
     console.log("UserId:", userId);
 
@@ -38,7 +38,7 @@ exports.createOrder = async (req, res) => {
         !deliveryAddress?.addressLine1 ||
         !deliveryAddress?.city ||
         !deliveryAddress?.state ||
-        !deliveryAddress?.pincode||
+        !deliveryAddress?.pincode ||
         !deliveryAddress?.addressLine2
       ) {
         return res.status(400).json({
@@ -49,8 +49,11 @@ exports.createOrder = async (req, res) => {
     }
 
     // ---------------- FIND CART ----------------
-    const cart = await Cart.findOne({ user: userId });
-
+    const cart = await Cart.findOne({
+      user: userId,
+      "items.0": { $exists: true },
+    }).sort({ createdAt: -1 });
+    
     console.log("CART FOUND =>", cart);
 
     if (!cart || cart.items.length === 0) {
