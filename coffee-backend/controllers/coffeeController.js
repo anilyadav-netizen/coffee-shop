@@ -41,7 +41,7 @@ exports.createCoffee = async (req, res) => {
       );
     }
 
-    console.log(req.body,"body","filer", req.file)
+    console.log(req.body, "body", "filer", req.file)
 
     const coffee = await Coffee.create({
       ...req.body,
@@ -97,22 +97,26 @@ exports.updateCoffee = async (req, res) => {
 // Get All Coffee
 exports.getAllCoffee = async (req, res) => {
   try {
-    const coffees = await Coffee.find()
-      .populate("category", "name icon");
-
-    // Response Header
     res.setHeader("Content-Type", "application/json");
 
-    // Create Readable Stream
-    const stream = Readable.from([
-      JSON.stringify({
-        success: true,
-        data: coffees,
-      }),
-    ]);
+    res.write('{"success":true,"data":[');
 
-    // Pipe stream to response
-    stream.pipe(res);
+    const cursor = Coffee.find()
+      .select("name price image category")
+      .populate("category", "name icon")
+      .lean()
+      .cursor();
+
+    let first = true;
+
+    for await (const coffee of cursor) {
+      if (!first) res.write(",");
+      res.write(JSON.stringify(coffee));
+      first = false;
+    }
+
+    res.write("]}");
+    res.end();
 
   } catch (error) {
     res.status(500).json({
