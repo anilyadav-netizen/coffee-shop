@@ -10,7 +10,8 @@ exports.addToCart = async (req, res) => {
   try {
     const { coffeeId, quantity = 1, amount } = req.body;
 
-    // Validation
+
+
     if (!coffeeId) {
       return res.status(400).json({
         success: false,
@@ -18,71 +19,73 @@ exports.addToCart = async (req, res) => {
       });
     }
 
-    if (amount === undefined || amount === null) {
+    if (!amount) {
       return res.status(400).json({
         success: false,
         message: "Amount is required",
       });
     }
 
-    // Find user's cart (ONLY ONE CART PER USER)
+    const today = getTodayDate();
+
     let cart = await Cart.findOne({
       user: req.user.id,
+      date: today,
     });
 
-    // If cart doesn't exist, create one
     if (!cart) {
       cart = await Cart.create({
         user: req.user.id,
+        date: today,
         items: [
           {
             coffee: coffeeId,
-            quantity: Number(quantity),
-            amount: Number(amount),
+            quantity,
+            amount,
           },
         ],
       });
     } else {
-      // Check if coffee already exists in cart
       const existingItem = cart.items.find(
         (item) => item.coffee.toString() === coffeeId
       );
 
       if (existingItem) {
-        // Increase quantity
         existingItem.quantity += Number(quantity);
-        existingItem.amount = Number(amount);
+        existingItem.amount = amount;
       } else {
-        // Add new coffee
         cart.items.push({
           coffee: coffeeId,
-          quantity: Number(quantity),
-          amount: Number(amount),
+          quantity,
+          amount,
         });
       }
+
+      console.log(cart)
+
 
       await cart.save();
     }
 
-    // Populate coffee details
     const updatedCart = await Cart.findById(cart._id).populate(
       "items.coffee"
     );
 
-    return res.status(200).json({
+    res.status(201).json({
       success: true,
-      message: "Item added to cart successfully",
+      message: "Item added to cart",
       data: updatedCart,
     });
   } catch (error) {
     console.error("Add To Cart Error:", error);
 
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
-      message: error.message || "Internal Server Error",
+      message: error.message,
     });
   }
 };
+
 
 // ─────────────────────────────────────────────────────────────
 // Get Cart
