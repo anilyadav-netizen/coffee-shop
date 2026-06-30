@@ -22,13 +22,12 @@ import AdminLayout from "./Admin/adLayouts/AdminLayout";
 import Dashboard from "./Admin/adpages/Dashboard";
 import Products from "./Admin/adpages/Products";
 import AddProduct from "./Admin/adpages/AddProduct";
-import OderDetailsPage from "./pages/OderDetailsPage";
 import Category from "./Admin/adpages/Category";
 import AddCategory from "./Admin/adpages/AddCategory";
 import { ToastContainer } from 'react-toastify';
 import OrderDetailsPage from "./pages/OderDetailsPage";
 import Orders from "./Admin/adpages/Orders";
-
+import OrderDetails from "./Admin/adpages/OrderDetails";
 
 function App() {
 
@@ -48,7 +47,7 @@ function App() {
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/journey" element={<Journey />} />
           <Route path="/review" element={<Review />} />
-          <Route path="/orderDetails" element={<OderDetailsPage />} />
+          <Route path="/orderDetails" element={<OrderDetailsPage />} />
           <Route
             path="/cart"
             element={
@@ -76,8 +75,7 @@ function App() {
           <Route path="/admin/update-product/:id" element={<AddProduct />} /> {/* ✅ Same component */}
           <Route path="/admin/update-category/:id" element={<AddCategory />} />
           <Route path="/admin/orders" element={<Orders />} />
-
-
+          <Route path="/admin/order/:id" element={<OrderDetails />} />
         </Route>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
