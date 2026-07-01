@@ -265,11 +265,11 @@ const WishlistPage = () => {
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-start justify-between gap-2">
                                                     <div className="min-w-0 flex-1">
-                                                        <h3 className="font-semibold text-gray-800 text-base sm:text-base truncate">
+                                                        <h3 className="font-semibold text-gray-800 text-base sm:text-lg truncate">
                                                             {coffeeData.name}
                                                         </h3>
-                                                        <p className="text-[12px] sm:text-sm text-gray-500 truncate">
-                                                            {coffeeData.category || 'Coffee'}
+                                                        <p className="text-[12px] sm:text-base text-gray-500 truncate">
+                                                            {coffeeData.description || 'Coffee'}
                                                         </p>
                                                     </div>
                                                     <button
@@ -281,7 +281,7 @@ const WishlistPage = () => {
                                                 </div>
 
                                                 {/* Price Section */}
-                                                <div className="flex flex-row items-center justify-between mt-2 sm:mt-3 gap-2">
+                                                <div className="flex flex-row items-center justify-between mt-1 sm:mt-2 gap-2">
                                                     <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
                                                         <span className="font-bold text-[#0D7C53] text-sm sm:text-base md:text-lg">
                                                             ₹{displayPrice.toFixed(2)}
