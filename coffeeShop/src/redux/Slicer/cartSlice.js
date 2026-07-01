@@ -1,4 +1,3 @@
-// src/redux/slices/cartSlice.js
 
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import API from "../../Api/Api";

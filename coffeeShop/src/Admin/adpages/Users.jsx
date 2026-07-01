@@ -209,11 +209,11 @@ const Users = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-dark-heading flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-dark-heading flex items-center gap-3">
             <FaUsers className="text-indigo-600 dark:text-indigo-400" />
             Users
           </h1>
-          <p className="text-sm text-gray-500 dark:text-dark-text mt-1">
+          <p className="text-base text-gray-500 dark:text-dark-text mt-1">
             Total {totalUsers} users registered
           </p>
         </div>
@@ -275,15 +275,15 @@ const Users = () => {
           <table className="w-full text-sm text-left">
             <thead className="bg-gray-50 dark:bg-dark-bg text-gray-600 dark:text-dark-text uppercase text-xs tracking-wider">
               <tr>
-                <th className="px-4 py-3">Profile</th>
-                <th className="px-4 py-3">Full Name</th>
-                <th className="px-4 py-3 hidden md:table-cell">Email</th>
-                <th className="px-4 py-3 hidden lg:table-cell">Phone</th>
-                <th className="px-4 py-3 hidden xl:table-cell">Orders</th>
-                <th className="px-4 py-3 hidden xl:table-cell">Spending</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3 hidden sm:table-cell">Joined</th>
-                <th className="px-4 py-3 text-center">Actions</th>
+                <th className="px-4 py-3 text-base ">Profile</th>
+                <th className="px-4 py-3 text-base">Full Name</th>
+                <th className="px-4 py-3 hidden md:table-cell text-base">Email</th>
+                <th className="px-4 py-3 hidden lg:table-cell text-base">Phone</th>
+                <th className="px-4 py-3 hidden xl:table-cell text-base">Orders</th>
+                <th className="px-4 py-3 hidden xl:table-cell text-base">Spending</th>
+                <th className="px-4 py-3 text-base">Status</th>
+                <th className="px-4 py-3 hidden sm:table-cell text-base">Joined</th>
+                <th className="px-4 py-3 text-center text-base">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-dark-border">
@@ -306,11 +306,11 @@ const Users = () => {
                         className="w-9 h-9 rounded-full object-cover border border-gray-200 dark:border-dark-border"
                       />
                     </td>
-                    <td className="px-4 py-3 font-medium text-gray-800 dark:text-dark-heading">{user.name}</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-dark-text hidden md:table-cell">{user.email}</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-dark-text hidden lg:table-cell">{user.phone}</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-dark-text hidden xl:table-cell">{user.orders}</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-dark-text hidden xl:table-cell">${user.spending.toFixed(2)}</td>
+                    <td className="px-4 py-3 font-medium text-gray-800 dark:text-dark-heading text-base">{user.name}</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-dark-text hidden md:table-cell text-base">{user.email}</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-dark-text hidden lg:table-cell text-base">{user.phone}</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-dark-text hidden xl:table-cell text-base">{user.orders}</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-dark-text hidden xl:table-cell text-base">${user.spending.toFixed(2)}</td>
                     <td className="px-4 py-3">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
                         user.status === "active" 
@@ -324,16 +324,16 @@ const Users = () => {
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-center gap-2 flex-wrap">
                         <Link to={`/admin/user/${user.id}`} className="p-1.5 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition" title="View">
-                          <FaEye />
+                          <FaEye size="18"/>
                         </Link>
                         <Link to={`/admin/update-user/${user.id}`} className="p-1.5 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition" title="Edit">
-                          <FaEdit />
+                          <FaEdit size="18" />
                         </Link>
                         <button onClick={() => handleBlockToggle(user)} className={`p-1.5 ${user.status === "active" ? "text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20" : "text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"} rounded-lg transition`} title={user.status === "active" ? "Block" : "Unblock"}>
-                          <FaBan />
+                          <FaBan size="18" />
                         </button>
                         <button onClick={() => handleDelete(user)} className="p-1.5 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition" title="Delete">
-                          <FaTrashAlt />
+                          <FaTrashAlt size="17" />
                         </button>
                       </div>
                     </td>

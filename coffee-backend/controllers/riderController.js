@@ -45,6 +45,7 @@ exports.updateOrderStatus = async (req, res) => {
     order.tracking.push({
       status: orderStatus,
       message: statusMessages[orderStatus],
+      success:true,
       time: new Date(),
     });
 

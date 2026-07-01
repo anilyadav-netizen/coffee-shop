@@ -19,6 +19,8 @@ import {
   FaSun,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
+import { GiKnifeFork } from "react-icons/gi"; // For Dine In icon
+import { FaTruck } from "react-icons/fa"; // For Delivery icon
 
 const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
   const navigate = useNavigate();
@@ -60,14 +62,14 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
     icon: <FaTags size={18} />,
   },
   {
-    name: "Ordered Items",
-    path: "/admin/orders",
-    icon: <FaShoppingBag size={18} />,
+    name: "Dine In Orders",
+    path: "/admin/orders/dine-in",
+    icon: <GiKnifeFork size={18} />,
   },
   {
-    name: "Chef",
-    path: "/admin/chef",
-    icon: <FaUser size={18} />,
+    name: "Delivery Orders",
+    path: "/admin/orders/delivery",
+    icon: <FaTruck size={18} />,
   },
   {
     name: "Rider",
@@ -138,7 +140,6 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
               }`
             }
           >
-            {/* Active indicator bar */}
             {({ isActive }) => (
               <>
                 <span className="relative z-10 flex items-center gap-3 w-full">
@@ -254,7 +255,7 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
       </div>
 
       {/* Custom CSS for animations */}
-      <style jsx>{`
+      <style>{`
         @keyframes slideUp {
           from {
             opacity: 0;
