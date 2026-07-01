@@ -38,6 +38,7 @@ const io = new Server(server, {
 app.set("io", io);
 
 // Socket Connection
+// server.js or socket.js
 io.on("connection", (socket) => {
   console.log("User Connected:", socket.id);
 
@@ -51,6 +52,65 @@ io.on("connection", (socket) => {
   socket.on("join-user", (userId) => {
     socket.join(`user-${userId}`);
     console.log(`Joined User Room: user-${userId}`);
+  });
+
+  // Handle order status update
+  socket.on("order-status-update", (data) => {
+    const { orderId, newStatus, tracking } = data;
+    // Broadcast to all users in the order room
+    io.to(orderId).emit("order-status-updated", {
+      orderId,
+      newStatus,
+      tracking,
+      timestamp: new Date()
+    });
+    console.log(`Order ${orderId} status updated to ${newStatus}`);
+  });
+
+  // Handle order cancellation
+  socket.on("cancel-order", (data) => {
+    const { orderId, reason } = data;
+    io.to(orderId).emit("order-cancelled", {
+      orderId,
+      reason,
+      timestamp: new Date()
+    });
+    console.log(`Order ${orderId} cancelled. Reason: ${reason}`);
+  });
+
+  // Handle rider assignment
+  socket.on("assign-rider", (data) => {
+    const { orderId, riderId, rider } = data;
+    io.to(orderId).emit("rider-assigned", {
+      orderId,
+      riderId,
+      rider,
+      timestamp: new Date()
+    });
+    console.log(`Rider ${riderId} assigned to order ${orderId}`);
+  });
+
+  // Handle kitchen notes update
+  socket.on("update-kitchen-notes", (data) => {
+    const { orderId, notes } = data;
+    io.to(orderId).emit("kitchen-notes-updated", {
+      orderId,
+      notes,
+      timestamp: new Date()
+    });
+    console.log(`Kitchen notes updated for order ${orderId}`);
+  });
+
+  // Handle rider messaging
+  socket.on("message-rider", (data) => {
+    const { orderId, riderId, message } = data;
+    // You can emit to specific rider's room if they have one
+    io.to(`rider-${riderId}`).emit("new-message", {
+      orderId,
+      message,
+      timestamp: new Date()
+    });
+    console.log(`Message sent to rider ${riderId}: ${message}`);
   });
 
   socket.on("disconnect", () => {

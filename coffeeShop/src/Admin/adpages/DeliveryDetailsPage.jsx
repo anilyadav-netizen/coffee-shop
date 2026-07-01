@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllOrders } from '../../redux/Slicer/adminOrder';
 import { updateOrderStatus } from '../../redux/Slicer/orderSlice';
+import io from 'socket.io-client';
 import {
   FaArrowLeft,
   FaTruck,
@@ -67,11 +68,15 @@ const DeliveryDetailsPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  // ==================== SOCKET SETUP ====================
+  const [socket, setSocket] = useState(null);
+  const socketRef = useRef(null);
+
   // ==================== A) REDUX STATE ====================
   const { orders, loading } = useSelector((state) => state.adminOrder);
   
   // ==================== B) CURRENT ORDER ====================
-  const order = orders.find(o => o._id === id);
+  const [order, setOrder] = useState(null);
   
   // ==================== CURRENT STATUS ====================
   const currentStatus = order?.orderStatus || 'pending';
@@ -84,6 +89,8 @@ const DeliveryDetailsPage = () => {
   const [showRiderDropdown, setShowRiderDropdown] = useState(false);
   const [selectedRider, setSelectedRider] = useState(null);
   const [riderSearch, setRiderSearch] = useState('');
+  const [socketConnected, setSocketConnected] = useState(false);
+  const [connectionError, setConnectionError] = useState(null);
   const notesRef = useRef(null);
 
   // Mock riders data
@@ -132,6 +139,156 @@ const DeliveryDetailsPage = () => {
     },
   ];
 
+  // ==================== SOCKET CONNECTION ====================
+  useEffect(() => {
+    const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'http://localhost:5003';
+    
+    // Connect to socket server
+    const socketInstance = io(SOCKET_URL, {
+      transports: ['websocket'],
+      withCredentials: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000
+    });
+    
+    socketRef.current = socketInstance;
+    setSocket(socketInstance);
+
+    // Socket event listeners
+    socketInstance.on('connect', () => {
+      console.log('Socket connected successfully');
+      setSocketConnected(true);
+      setConnectionError(null);
+      
+      // Join order room after connection
+      if (id) {
+        socketInstance.emit('join-order', id);
+        console.log(`Joined order room: ${id}`);
+      }
+    });
+
+    socketInstance.on('connect_error', (error) => {
+      console.error('Socket connection error:', error);
+      setConnectionError(error.message);
+      setSocketConnected(false);
+    });
+
+    socketInstance.on('disconnect', () => {
+      console.log('Socket disconnected');
+      setSocketConnected(false);
+    });
+
+    socketInstance.on('reconnect', () => {
+      console.log('Socket reconnected');
+      setSocketConnected(true);
+      if (id) {
+        socketInstance.emit('join-order', id);
+      }
+    });
+
+    // Cleanup on unmount
+    return () => {
+      if (socketInstance) {
+        socketInstance.disconnect();
+        socketInstance.off('connect');
+        socketInstance.off('connect_error');
+        socketInstance.off('disconnect');
+        socketInstance.off('reconnect');
+      }
+    };
+  }, [id]);
+
+  // ==================== SOCKET EVENT LISTENERS ====================
+  useEffect(() => {
+    if (!socketRef.current) return;
+
+    const socketInstance = socketRef.current;
+
+    // Listen for order status updates
+    socketInstance.on('order-status-updated', (data) => {
+      if (data.orderId === id) {
+        console.log('Order status updated via socket:', data);
+        // Update order in local state
+        setOrder(prev => ({
+          ...prev,
+          orderStatus: data.newStatus,
+          tracking: data.tracking || prev?.tracking
+        }));
+        // Refresh orders from Redux
+        dispatch(getAllOrders());
+      }
+    });
+
+    // Listen for order cancellation
+    socketInstance.on('order-cancelled', (data) => {
+      if (data.orderId === id) {
+        console.log('Order cancelled via socket:', data);
+        setOrder(prev => ({
+          ...prev,
+          orderStatus: 'cancelled'
+        }));
+        dispatch(getAllOrders());
+      }
+    });
+
+    // Listen for rider assignment updates
+    socketInstance.on('rider-assigned', (data) => {
+      if (data.orderId === id) {
+        console.log('Rider assigned via socket:', data);
+        setSelectedRider(data.rider);
+        // Update order with rider info
+        setOrder(prev => ({
+          ...prev,
+          assignedRider: data.rider
+        }));
+      }
+    });
+
+    // Listen for delivery updates
+    socketInstance.on('delivery-update', (data) => {
+      if (data.orderId === id) {
+        console.log('Delivery update via socket:', data);
+        setOrder(prev => ({
+          ...prev,
+          ...data
+        }));
+      }
+    });
+
+    // Listen for kitchen notes updates
+    socketInstance.on('kitchen-notes-updated', (data) => {
+      if (data.orderId === id) {
+        console.log('Kitchen notes updated via socket:', data);
+        setKitchenNotes(data.notes);
+        // Update order with new notes
+        setOrder(prev => ({
+          ...prev,
+          kitchenNotes: data.notes
+        }));
+      }
+    });
+
+    // Listen for rider messages
+    socketInstance.on('rider-response', (data) => {
+      if (data.orderId === id) {
+        console.log('Rider response:', data);
+        // You can show a notification or toast here
+        alert(`Rider responded: ${data.message}`);
+      }
+    });
+
+    // Cleanup event listeners
+    return () => {
+      socketInstance.off('order-status-updated');
+      socketInstance.off('order-cancelled');
+      socketInstance.off('rider-assigned');
+      socketInstance.off('delivery-update');
+      socketInstance.off('kitchen-notes-updated');
+      socketInstance.off('rider-response');
+    };
+  }, [id, dispatch]);
+
   // ==================== FETCH ORDERS ====================
   useEffect(() => {
     if (orders.length === 0) {
@@ -141,17 +298,168 @@ const DeliveryDetailsPage = () => {
 
   // ==================== SET ORDER DATA ====================
   useEffect(() => {
-    if (order) {
-      setKitchenNotes(order.kitchenNotes || '');
+    if (orders.length > 0) {
+      const foundOrder = orders.find(o => o._id === id);
+      setOrder(foundOrder);
+      if (foundOrder) {
+        setKitchenNotes(foundOrder.kitchenNotes || '');
+        // Set selected rider if assigned
+        if (foundOrder.assignedRider) {
+          setSelectedRider(foundOrder.assignedRider);
+        }
+      }
     }
-  }, [order]);
+  }, [orders, id]);
 
   // ==================== D) UPDATE STATUS HANDLER ====================
-  const handleUpdateStatus = (newStatus) => {
-    dispatch(updateOrderStatus({
-      orderId: id,
-      orderStatus: newStatus
-    }));
+  const handleUpdateStatus = async (newStatus) => {
+    try {
+      const result = await dispatch(updateOrderStatus({
+        orderId: id,
+        orderStatus: newStatus
+      })).unwrap();
+
+      // Emit socket event for real-time update
+      if (socketRef.current && socketConnected) {
+        socketRef.current.emit('order-status-update', {
+          orderId: id,
+          newStatus: newStatus,
+          tracking: result.tracking || [],
+          updatedBy: 'admin'
+        });
+        console.log(`Emitting status update: ${newStatus}`);
+      }
+
+      // Update local state
+      setOrder(prev => ({
+        ...prev,
+        orderStatus: newStatus,
+        tracking: result.tracking || prev?.tracking
+      }));
+
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      alert('Failed to update order status. Please try again.');
+    }
+  };
+
+  // ==================== HANDLE SAVE NOTES ====================
+  const handleSaveNotes = async () => {
+    try {
+      // Save notes via API
+      // await API.put(`/orders/${id}/notes`, { kitchenNotes });
+      
+      // Emit socket event for real-time notes update
+      if (socketRef.current && socketConnected) {
+        socketRef.current.emit('update-kitchen-notes', {
+          orderId: id,
+          notes: kitchenNotes,
+          updatedBy: 'admin'
+        });
+        console.log('Emitting kitchen notes update');
+      }
+      
+      // Update local state
+      setOrder(prev => ({
+        ...prev,
+        kitchenNotes: kitchenNotes
+      }));
+      
+      setIsEditingNotes(false);
+      dispatch(getAllOrders());
+    } catch (error) {
+      console.error('Error saving notes:', error);
+      alert('Failed to save notes. Please try again.');
+    }
+  };
+
+  // ==================== HANDLE CANCEL ORDER ====================
+  const handleCancelOrder = async () => {
+    if (!cancelReason.trim()) {
+      alert('Please provide a reason for cancellation');
+      return;
+    }
+    
+    try {
+      // await API.put(`/orders/${id}/cancel`, { reason: cancelReason });
+      
+      // Emit socket event for cancellation
+      if (socketRef.current && socketConnected) {
+        socketRef.current.emit('cancel-order', {
+          orderId: id,
+          reason: cancelReason,
+          cancelledBy: 'admin'
+        });
+        console.log('Emitting order cancellation');
+      }
+      
+      setShowCancelModal(false);
+      setCancelReason('');
+      
+      // Update status to cancelled
+      await handleUpdateStatus('cancelled');
+      
+    } catch (error) {
+      console.error('Error cancelling order:', error);
+      alert('Failed to cancel order. Please try again.');
+    }
+  };
+
+  // ==================== HANDLE RIDER ASSIGNMENT ====================
+  const handleAssignRider = async (rider) => {
+    try {
+      setSelectedRider(rider);
+      setShowRiderDropdown(false);
+      
+      // Emit socket event for rider assignment
+      if (socketRef.current && socketConnected) {
+        socketRef.current.emit('assign-rider', {
+          orderId: id,
+          riderId: rider.id,
+          rider: rider,
+          assignedBy: 'admin'
+        });
+        console.log('Emitting rider assignment');
+      }
+      
+      // await API.put(`/orders/${id}/assign-rider`, { riderId: rider.id });
+      
+      // Update order status to out_for_delivery if not already
+      if (order?.orderStatus !== 'out_for_delivery') {
+        await handleUpdateStatus('out_for_delivery');
+      }
+      
+      // Update local state
+      setOrder(prev => ({
+        ...prev,
+        assignedRider: rider
+      }));
+      
+    } catch (error) {
+      console.error('Error assigning rider:', error);
+      alert('Failed to assign rider. Please try again.');
+    }
+  };
+
+  // ==================== SEND MESSAGE TO RIDER ====================
+  const handleContactRider = () => {
+    if (selectedRider && socketRef.current && socketConnected) {
+      const message = prompt('Enter your message to the rider:');
+      if (message && message.trim()) {
+        socketRef.current.emit('message-rider', {
+          orderId: id,
+          riderId: selectedRider.id,
+          message: message.trim(),
+          sender: 'admin'
+        });
+        console.log('Sending message to rider');
+        alert('Message sent to rider successfully!');
+      }
+    } else if (!socketConnected) {
+      alert('Not connected to server. Please check your connection.');
+    } else {
+      alert('No rider assigned to this order.');
+    }
   };
 
   // ==================== STATUS CONFIGURATION ====================
@@ -289,41 +597,6 @@ const DeliveryDetailsPage = () => {
     return icons[method?.toLowerCase()] || <FaWallet />;
   };
 
-  // ==================== HANDLE SAVE NOTES ====================
-  const handleSaveNotes = async () => {
-    try {
-      // await API.put(`/orders/${id}/notes`, { kitchenNotes });
-      setIsEditingNotes(false);
-      dispatch(getAllOrders());
-    } catch (error) {
-      console.error('Error saving notes:', error);
-    }
-  };
-
-  // ==================== HANDLE CANCEL ORDER ====================
-  const handleCancelOrder = async () => {
-    if (!cancelReason.trim()) {
-      alert('Please provide a reason for cancellation');
-      return;
-    }
-    try {
-      // await API.put(`/orders/${id}/cancel`, { reason: cancelReason });
-      setShowCancelModal(false);
-      setCancelReason('');
-      handleUpdateStatus('cancelled');
-    } catch (error) {
-      console.error('Error cancelling order:', error);
-    }
-  };
-
-  // ==================== HANDLE RIDER ASSIGNMENT ====================
-  const handleAssignRider = (rider) => {
-    setSelectedRider(rider);
-    setShowRiderDropdown(false);
-    // await API.put(`/orders/${id}/assign-rider`, { riderId: rider.id });
-    handleUpdateStatus('out_for_delivery');
-  };
-
   // ==================== GET FILTERED RIDERS ====================
   const filteredRiders = availableRiders.filter(rider =>
     rider.name.toLowerCase().includes(riderSearch.toLowerCase()) ||
@@ -367,7 +640,7 @@ const DeliveryDetailsPage = () => {
   const status = order.orderStatus || 'pending';
   const statusInfo = statusConfig[status] || statusConfig.pending;
   const timeline = getTimeline();
-  const isRiderReady = status === 'ready' || status === 'out_for_delivery' || status === 'delivered';
+  const isRiderReady = status === 'preparing' || status === 'out_for_delivery' || status === 'delivered';
   const isDeliveryStage = ['out_for_delivery', 'delivered'].includes(status);
 
   // ==================== MAIN RENDER ====================
@@ -391,6 +664,17 @@ const DeliveryDetailsPage = () => {
                 {statusInfo.icon}
                 {statusInfo.label}
               </span>
+              {socketConnected ? (
+                <span className="px-2 py-0.5 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 rounded-full text-xs flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                  Live
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 rounded-full text-xs flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                  Offline
+                </span>
+              )}
             </div>
             <p className="text-[#64748B] dark:text-[#94A3B8] text-sm mt-1">
               <FaClock className="inline mr-1.5" />
@@ -634,7 +918,7 @@ const DeliveryDetailsPage = () => {
           </div>
 
           {/* RIDER ASSIGNMENT SECTION */}
-          {isRiderReady && status !== 'delivered' && status !== 'cancelled' && (
+          {(status === 'preparing' || status === 'out_for_delivery' || status === 'delivered') && status !== 'cancelled' && (
             <div className="bg-white dark:bg-[#1E293B] rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] overflow-hidden">
               <div className="p-4 border-b border-[#E2E8F0] dark:border-[#1E293B] bg-gradient-to-r from-[#F8FAFC] to-[#F1F5F9] dark:from-[#1E293B] dark:to-[#0F172A]">
                 <h3 className="font-semibold text-[#0F172A] dark:text-white flex items-center gap-2">
@@ -685,7 +969,10 @@ const DeliveryDetailsPage = () => {
                       </div>
                     </div>
                     <div className="mt-3 flex gap-2">
-                      <button className="px-3 py-1.5 bg-[#4F46E5] text-white text-sm rounded-lg hover:bg-[#4338CA] transition-colors flex items-center gap-1">
+                      <button 
+                        onClick={handleContactRider}
+                        className="px-3 py-1.5 bg-[#4F46E5] text-white text-sm rounded-lg hover:bg-[#4338CA] transition-colors flex items-center gap-1"
+                      >
                         <FaPhone /> Contact
                       </button>
                       <button
