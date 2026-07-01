@@ -98,20 +98,21 @@ exports.updateCoffee = async (req, res) => {
 exports.getAllCoffee = async (req, res) => {
   try {
     const coffees = await Coffee.find()
-      .populate("category", "name icon");
+      .select("name price image category")
+      .populate("category", "name icon")
+      .lean();
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: coffees,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
   }
 };
-
 
 exports.getCoffeeById = async (req, res) => {
   try {
