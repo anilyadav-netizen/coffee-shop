@@ -1,8 +1,6 @@
 const Order = require("../models/orderModel");
 
-// ===============================
-// Admin - Get All Orders
-// ===============================
+
 exports.getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find({})

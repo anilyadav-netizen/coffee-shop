@@ -1,8 +1,9 @@
 // pages/admin/DeliveryOrders.jsx
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { getAllOrders } from '../../redux/Slicer/adminOrder';
+import io from 'socket.io-client';
 import { 
   FaTruck, 
   FaMapMarkerAlt, 
@@ -12,10 +13,7 @@ import {
   FaRupeeSign,
   FaClock,
   FaSearch,
-  FaFilter,
   FaPrint,
-  FaDownload,
-  FaUserCircle,
   FaCheckCircle,
   FaSpinner,
   FaHourglassHalf,
@@ -23,31 +21,20 @@ import {
   FaSort,
   FaSortUp,
   FaSortDown,
-  FaShoppingBag,
-  FaWallet,
-  FaCreditCard,
-  FaMobileAlt,
-  FaCalendarAlt,
-  FaRoute,
   FaMotorcycle,
   FaHeadset,
-  FaBan
+  FaBan,
+  FaBell
 } from 'react-icons/fa';
 import { 
-  MdDeliveryDining, 
-  MdPayment, 
-  MdOutlinePending,
-  MdOutlineReceipt,
-  MdOutlineCancel,
-  MdPersonAdd,
-  MdSwapHoriz
+  MdDeliveryDining
 } from 'react-icons/md';
 import { BsThreeDotsVertical } from 'react-icons/bs';
-import { GiKnifeFork } from 'react-icons/gi';
 
 const DeliveryOrders = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const socketRef = useRef(null);
   
   const { orders, error, loading } = useSelector((state) => state.adminOrder);
   
@@ -62,6 +49,146 @@ const DeliveryOrders = () => {
   const [itemsPerPage] = useState(9);
   const [showActionMenu, setShowActionMenu] = useState(null);
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [notification, setNotification] = useState(null);
+  const [isSoundEnabled, setIsSoundEnabled] = useState(true);
+
+  // Play notification sound
+  const playNotificationSound = () => {
+    if (!isSoundEnabled) return;
+    try {
+      const audio = new Audio('/notification.mp3');
+      audio.volume = 0.3;
+      audio.play().catch(() => console.log('Sound play blocked'));
+    } catch (error) {
+      console.log('Sound error:', error);
+    }
+  };
+
+  // Socket Connection Setup
+  useEffect(() => {
+    socketRef.current = io('http://localhost:5003', {
+      transports: ['websocket'],
+      reconnection: true,
+      reconnectionAttempts: 5,
+    });
+
+    const socket = socketRef.current;
+
+    // Join admin room
+    socket.emit('admin-join');
+
+    // Listen for new orders
+    socket.on('new-order-placed', (data) => {
+      console.log('🔔 New delivery order received:', data);
+      
+      if (data.order?.orderType === 'delivery') {
+        setNotification({
+          type: 'new-order',
+          orderId: data.order._id,
+          customerName: data.order.user?.name || 'Unknown',
+          amount: data.order.amount,
+          message: `New delivery order from ${data.order.user?.name || 'Customer'}`
+        });
+
+        playNotificationSound();
+
+        setDeliveryOrders(prev => [data.order, ...prev]);
+        
+        if (!searchTerm && filterStatus === 'all' && filterPayment === 'all' && !dateRange.start && !dateRange.end) {
+          setFilteredOrders(prev => [data.order, ...prev]);
+        }
+
+        setTimeout(() => {
+          setNotification(null);
+        }, 6000);
+      }
+    });
+
+    // Listen for order status updates
+    socket.on('order-status-updated', (data) => {
+      console.log('🔄 Order status updated:', data);
+      
+      setDeliveryOrders(prev => prev.map(order => 
+        order._id === data.orderId 
+          ? { 
+              ...order, 
+              orderStatus: data.newStatus,
+              tracking: data.tracking ? [...order.tracking, data.tracking] : order.tracking
+            }
+          : order
+      ));
+
+      setNotification({
+        type: 'status-update',
+        orderId: data.orderId,
+        newStatus: data.newStatus,
+        message: `Order ${data.orderId.slice(-8)} status updated to ${data.newStatus}`
+      });
+
+      setTimeout(() => {
+        setNotification(null);
+      }, 3000);
+    });
+
+    // Listen for order cancellations
+    socket.on('order-cancelled', (data) => {
+      console.log('❌ Order cancelled:', data);
+      
+      setDeliveryOrders(prev => prev.map(order => 
+        order._id === data.orderId 
+          ? { ...order, orderStatus: 'cancelled' }
+          : order
+      ));
+
+      setNotification({
+        type: 'cancelled',
+        orderId: data.orderId,
+        message: `Order ${data.orderId.slice(-8)} has been cancelled`
+      });
+
+      setTimeout(() => {
+        setNotification(null);
+      }, 4000);
+    });
+
+    // Listen for rider assignments
+    socket.on('rider-assigned', (data) => {
+      console.log('🚚 Rider assigned:', data);
+      
+      setDeliveryOrders(prev => prev.map(order => 
+        order._id === data.orderId 
+          ? { 
+              ...order, 
+              rider: data.rider,
+              riderId: data.riderId,
+              orderStatus: 'out_for_delivery'
+            }
+          : order
+      ));
+
+      setNotification({
+        type: 'rider-assigned',
+        orderId: data.orderId,
+        riderName: data.rider?.name || 'Rider',
+        message: `Rider assigned to order ${data.orderId.slice(-8)}`
+      });
+
+      setTimeout(() => {
+        setNotification(null);
+      }, 4000);
+    });
+
+    // Listen for order count updates
+    socket.on('order-count-update', (data) => {
+      console.log('📊 Order count updated:', data);
+    });
+
+    return () => {
+      if (socket) {
+        socket.disconnect();
+      }
+    };
+  }, []);
 
   // Fetch orders
   useEffect(() => {
@@ -82,7 +209,6 @@ const DeliveryOrders = () => {
   useEffect(() => {
     let result = [...deliveryOrders];
 
-    // Search
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       result = result.filter(order => 
@@ -94,17 +220,14 @@ const DeliveryOrders = () => {
       );
     }
 
-    // Status Filter
     if (filterStatus !== 'all') {
       result = result.filter(order => order.orderStatus === filterStatus);
     }
 
-    // Payment Filter
     if (filterPayment !== 'all') {
       result = result.filter(order => order.payment?.status === filterPayment);
     }
 
-    // Date Range Filter
     if (dateRange.start) {
       result = result.filter(order => 
         new Date(order.createdAt) >= new Date(dateRange.start)
@@ -116,7 +239,6 @@ const DeliveryOrders = () => {
       );
     }
 
-    // Sorting
     if (sortConfig.key) {
       result.sort((a, b) => {
         let aVal, bVal;
@@ -147,6 +269,75 @@ const DeliveryOrders = () => {
     setFilteredOrders(result);
     setCurrentPage(1);
   }, [deliveryOrders, searchTerm, filterStatus, filterPayment, sortConfig, dateRange]);
+
+  // Update order status
+  const updateOrderStatus = async (orderId, newStatus) => {
+    try {
+      if (socketRef.current) {
+        socketRef.current.emit('order-status-update', {
+          orderId: orderId,
+          newStatus: newStatus,
+          tracking: {
+            status: newStatus,
+            message: `Order status updated to ${newStatus}`,
+            timestamp: new Date()
+          },
+          updatedBy: 'admin'
+        });
+      }
+
+      const response = await fetch(`http://localhost:5003/api/updatedelivery/update-order-status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ orderId, status: newStatus })
+      });
+
+      if (response.ok) {
+        setDeliveryOrders(prev => prev.map(order => 
+          order._id === orderId 
+            ? { ...order, orderStatus: newStatus }
+            : order
+        ));
+        setShowActionMenu(null);
+      }
+    } catch (error) {
+      console.error('Error updating order:', error);
+    }
+  };
+
+  // Cancel order
+  const cancelOrder = async (orderId) => {
+    try {
+      if (socketRef.current) {
+        socketRef.current.emit('cancel-order', {
+          orderId: orderId,
+          reason: 'Cancelled by admin',
+          cancelledBy: 'admin'
+        });
+      }
+
+      const response = await fetch(`http://localhost:5003/api/updatedelivery/cancel-order`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ orderId, reason: 'Cancelled by admin' })
+      });
+
+      if (response.ok) {
+        setDeliveryOrders(prev => prev.map(order => 
+          order._id === orderId 
+            ? { ...order, orderStatus: 'cancelled' }
+            : order
+        ));
+        setShowActionMenu(null);
+      }
+    } catch (error) {
+      console.error('Error cancelling order:', error);
+    }
+  };
 
   // Pagination
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -219,17 +410,6 @@ const DeliveryOrders = () => {
     failed: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
   };
 
-  // Update order status
-  const updateOrderStatus = async (orderId, newStatus) => {
-    try {
-      // await API.put(`/orders/${orderId}/status`, { orderStatus: newStatus });
-      dispatch(getAllOrders());
-      setShowActionMenu(null);
-    } catch (error) {
-      console.error('Error updating order:', error);
-    }
-  };
-
   // Get sort icon
   const getSortIcon = (key) => {
     if (sortConfig.key !== key) return <FaSort className="text-[#94A3B8]" />;
@@ -290,6 +470,58 @@ const DeliveryOrders = () => {
 
   return (
     <div className="p-4 md:p-6 bg-gray-50 dark:bg-[#0F172A] min-h-screen">
+      {/* Notification Popup */}
+      {notification && (
+        <div className="fixed top-6 right-6 z-50 max-w-md w-full animate-slideIn">
+          <div className={`rounded-xl shadow-2xl p-4 border-l-4 ${
+            notification.type === 'new-order' ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-[#1E293B] dark:to-[#0F172A] border-green-500' :
+            notification.type === 'status-update' ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-[#1E293B] dark:to-[#0F172A] border-blue-500' :
+            notification.type === 'cancelled' ? 'bg-gradient-to-r from-red-50 to-rose-50 dark:from-[#1E293B] dark:to-[#0F172A] border-red-500' :
+            notification.type === 'rider-assigned' ? 'bg-gradient-to-r from-orange-50 to-amber-50 dark:from-[#1E293B] dark:to-[#0F172A] border-orange-500' :
+            'bg-white dark:bg-[#1E293B] border-[#4F46E5]'
+          }`}>
+            <div className="flex items-start gap-3">
+              <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
+                notification.type === 'new-order' ? 'bg-green-100 dark:bg-green-900/30' :
+                notification.type === 'status-update' ? 'bg-blue-100 dark:bg-blue-900/30' :
+                notification.type === 'cancelled' ? 'bg-red-100 dark:bg-red-900/30' :
+                notification.type === 'rider-assigned' ? 'bg-orange-100 dark:bg-orange-900/30' :
+                'bg-[#4F46E5]/10'
+              }`}>
+                {notification.type === 'new-order' && <FaBell className="text-green-500 text-lg" />}
+                {notification.type === 'status-update' && <FaCheckCircle className="text-blue-500 text-lg" />}
+                {notification.type === 'cancelled' && <FaTimesCircle className="text-red-500 text-lg" />}
+                {notification.type === 'rider-assigned' && <FaMotorcycle className="text-orange-500 text-lg" />}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-[#0F172A] dark:text-white">
+                  {notification.type === 'new-order' && '🛒 New Delivery Order!'}
+                  {notification.type === 'status-update' && '🔄 Order Updated'}
+                  {notification.type === 'cancelled' && '❌ Order Cancelled'}
+                  {notification.type === 'rider-assigned' && '🚚 Rider Assigned'}
+                </p>
+                <p className="text-sm text-[#64748B] dark:text-[#94A3B8] truncate">
+                  {notification.message}
+                </p>
+                {notification.type === 'new-order' && (
+                  <div className="flex items-center gap-2 mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">
+                    <span>₹{notification.amount}</span>
+                    <span>•</span>
+                    <span>Order #{notification.orderId?.slice(-8)}</span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setNotification(null)}
+                className="flex-shrink-0 text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-white"
+              >
+                <FaTimesCircle className="text-lg" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Page Header */}
       <div className="mb-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -304,9 +536,20 @@ const DeliveryOrders = () => {
               <span className="px-3 py-1 bg-[#4F46E5]/10 dark:bg-[#4F46E5]/20 text-[#4F46E5] rounded-full text-sm font-medium">
                 {deliveryOrders.length} Total
               </span>
+              <button
+                onClick={() => setIsSoundEnabled(!isSoundEnabled)}
+                className={`ml-2 p-2 rounded-lg transition-colors ${
+                  isSoundEnabled 
+                    ? 'bg-[#4F46E5]/10 text-[#4F46E5] hover:bg-[#4F46E5]/20' 
+                    : 'bg-gray-100 dark:bg-[#1E293B] text-[#94A3B8] hover:bg-gray-200 dark:hover:bg-[#2D3748]'
+                }`}
+                title={isSoundEnabled ? 'Mute notifications' : 'Unmute notifications'}
+              >
+                {isSoundEnabled ? '🔊' : '🔇'}
+              </button>
             </div>
             <p className="text-[#64748B] dark:text-[#94A3B8] ml-12">
-              Manage and track all delivery orders
+              Manage and track all delivery orders {notification ? '🔔' : ''}
             </p>
           </div>
           
@@ -354,7 +597,6 @@ const DeliveryOrders = () => {
       {/* Search & Filters */}
       <div className="bg-white dark:bg-[#1E293B] rounded-xl p-4 border border-[#E2E8F0] dark:border-[#1E293B] mb-6">
         <div className="flex flex-col lg:flex-row gap-4">
-          {/* Search */}
           <div className="flex-1 relative">
             <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
             <input
@@ -366,7 +608,6 @@ const DeliveryOrders = () => {
             />
           </div>
           
-          {/* Filters */}
           <div className="flex flex-wrap items-center gap-3">
             <select
               value={filterStatus}
@@ -479,7 +720,7 @@ const DeliveryOrders = () => {
                           </button>
                           {showActionMenu === order._id && (
                             <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#1E293B] rounded-lg shadow-xl z-10 py-1">
-                              {['pending', 'confirmed', 'preparing', 'ready', 'out_for_delivery', 'delivered', 'cancelled'].map((s) => (
+                              {['pending', 'confirmed', 'preparing', 'ready', 'out_for_delivery', 'delivered'].map((s) => (
                                 <button
                                   key={s}
                                   onClick={() => updateOrderStatus(order._id, s)}
@@ -488,6 +729,13 @@ const DeliveryOrders = () => {
                                   {s.replace('_', ' ')}
                                 </button>
                               ))}
+                              <div className="border-t border-[#E2E8F0] dark:border-[#1E293B]"></div>
+                              <button
+                                onClick={() => cancelOrder(order._id)}
+                                className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors capitalize"
+                              >
+                                Cancel Order
+                              </button>
                             </div>
                           )}
                         </div>
@@ -597,7 +845,7 @@ const DeliveryOrders = () => {
                           </button>
                           {status !== 'cancelled' && status !== 'delivered' && (
                             <button
-                              onClick={() => updateOrderStatus(order._id, 'cancelled')}
+                              onClick={() => cancelOrder(order._id)}
                               className="p-2 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
                               title="Cancel Order"
                             >

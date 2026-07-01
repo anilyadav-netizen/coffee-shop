@@ -53,7 +53,7 @@ exports.createOrder = async (req, res) => {
       user: userId,
       "items.0": { $exists: true },
     }).sort({ createdAt: -1 });
-    
+
     console.log("CART FOUND =>", cart);
 
     if (!cart || cart.items.length === 0) {
@@ -163,55 +163,107 @@ exports.verifyPayment = async (req, res) => {
       });
     }
 
-    console.log(payment.user)
-
     // Check if order already exists
     const existingOrder = await Order.findOne({
       payment: payment._id,
     });
 
+    let createdOrder = null;
+
     if (!existingOrder) {
-      await Order.create({
+      // Create new order
+      createdOrder = await Order.create({
         user: payment.user,
         payment: payment._id,
-
         orderType: payment.orderType,
         deliveryAddress: payment.deliveryAddress,
-
         products: payment.products,
-
         amount: payment.amount,
-
         paymentStatus: "paid",
-
         orderStatus: "pending",
-
         tracking: [
           {
             status: "pending",
             message: "Order placed successfully",
+            timestamp: new Date()
           },
         ],
       });
-    }
 
-    // Clear Cart
-    await Cart.findOneAndUpdate(
-      { user: payment.user },
-      {
-        $set: {
-          items: [],
-        },
+      // Populate the order for socket emission
+      const populatedOrder = await Order.findById(createdOrder._id)
+        .populate({
+          path: "user",
+          select: "name email mobile profileImage",
+        })
+        .populate({
+          path: "payment",
+        })
+        .populate({
+          path: "products.coffee",
+          select: "name image price category",
+        });
+
+      // 🔥 EMIT SOCKET EVENTS - REAL-TIME UPDATE TO ADMIN
+      const io = req.app.get("io");
+
+      if (io) {
+        // 1. Emit to admin room (if admin is listening)
+        io.emit("new-order-placed", {
+          success: true,
+          order: populatedOrder,
+          message: "New order placed successfully!",
+          timestamp: new Date()
+        });
+
+        // 2. Emit to specific order room for tracking
+        io.to(createdOrder._id.toString()).emit("order-created", {
+          orderId: createdOrder._id,
+          order: populatedOrder,
+          message: "Your order has been created"
+        });
+
+        // 3. Emit to user's room for their orders
+        io.to(`user-${payment.user.toString()}`).emit("order-confirmed", {
+          orderId: createdOrder._id,
+          order: populatedOrder,
+          message: "Your payment is confirmed and order is placed"
+        });
+
+        // 4. Emit order count update to admin
+        const totalOrders = await Order.countDocuments();
+        io.emit("order-count-update", {
+          totalOrders: totalOrders,
+          newOrder: populatedOrder
+        });
+
+        console.log(`✅ Socket events emitted for new order: ${createdOrder._id}`);
       }
-    );
+
+      // Clear Cart
+      await Cart.findOneAndUpdate(
+        { user: payment.user },
+        {
+          $set: {
+            items: [],
+          },
+        }
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Payment verified and order created successfully",
+        order: populatedOrder,
+      });
+    }
 
     return res.status(200).json({
       success: true,
-      message: "Payment verified and order created successfully",
+      message: "Order already exists",
+      order: existingOrder,
     });
   } catch (error) {
     console.error("VERIFY PAYMENT ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: error.message,
