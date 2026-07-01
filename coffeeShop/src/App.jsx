@@ -29,6 +29,10 @@ import OrderDetailsPage from "./pages/OderDetailsPage";
 import Orders from "./Admin/adpages/Orders";
 import OrderDetails from "./Admin/adpages/OrderDetails";
 import AdminProfile from "./Admin/adLayouts/AdminProfile";
+import Users from "./Admin/adpages/Users";
+import UserDetails from "./Admin/adpages/UserDetails";
+import Riders from "./Admin/adpages/Riders";
+import RiderDetails from "./Admin/adpages/RiderDetails";
 
 function App() {
 
@@ -78,6 +82,11 @@ function App() {
           <Route path="/admin/orders" element={<Orders />} />
           <Route path="/admin/order/:id" element={<OrderDetails />} />
           <Route path="/admin/profile" element={<AdminProfile />} />
+          <Route path="/admin/users" element={<Users />} />
+          <Route path="/admin/user/:id" element={<UserDetails />} />
+          <Route path="/admin/update-user/:id" element={<UserDetails />} />
+          <Route path="/admin/riders" element={<Riders />} />
+          <Route path="/admin/rider/:id" element={<RiderDetails />} />
         </Route>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
