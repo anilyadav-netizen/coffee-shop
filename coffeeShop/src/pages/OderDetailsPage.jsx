@@ -51,6 +51,7 @@ const OrderDetailsPage = () => {
     const [socketConnected, setSocketConnected] = useState(false);
     const [connectionError, setConnectionError] = useState(null);
     const [reconnecting, setReconnecting] = useState(false);
+    const [notifications, setNotifications] = useState([]);
 
     // State for expanded orders
     const [expandedOrders, setExpandedOrders] = useState({});
@@ -58,15 +59,11 @@ const OrderDetailsPage = () => {
     const [filterType, setFilterType] = useState('all');
     // State for real-time order updates
     const [liveOrders, setLiveOrders] = useState([]);
-    // State for notifications
-    const [notifications, setNotifications] = useState([]);
 
     // ==================== SOCKET CONNECTION ====================
     useEffect(() => {
-        // Use the same port as your server
         const SOCKET_URL = 'http://localhost:5003';
         
-        // Connect to socket server
         const socketInstance = io(SOCKET_URL, {
             transports: ['websocket'],
             withCredentials: true,
@@ -78,14 +75,12 @@ const OrderDetailsPage = () => {
         socketRef.current = socketInstance;
         setSocket(socketInstance);
 
-        // Socket event listeners
         socketInstance.on('connect', () => {
             console.log('Socket connected successfully');
             setSocketConnected(true);
             setConnectionError(null);
             setReconnecting(false);
             
-            // Join user room for real-time updates
             const userId = localStorage.getItem('userId');
             if (userId) {
                 socketInstance.emit('join-user', userId);
@@ -117,11 +112,9 @@ const OrderDetailsPage = () => {
             if (userId) {
                 socketInstance.emit('join-user', userId);
             }
-            // Refresh orders on reconnection
             dispatch(getMyOrders());
         });
 
-        // Cleanup on unmount
         return () => {
             if (socketInstance) {
                 socketInstance.disconnect();
@@ -140,11 +133,9 @@ const OrderDetailsPage = () => {
 
         const socketInstance = socketRef.current;
 
-        // Listen for order status updates
         socketInstance.on('order-status-updated', (data) => {
             console.log('Order status updated via socket:', data);
             
-            // Update orders in real-time
             setLiveOrders(prevOrders => {
                 const updatedOrders = prevOrders.map(order => {
                     if (order._id === data.orderId) {
@@ -160,7 +151,6 @@ const OrderDetailsPage = () => {
                 return updatedOrders;
             });
 
-            // Show notification
             const order = orders.find(o => o._id === data.orderId);
             if (order) {
                 const statusLabels = {
@@ -180,11 +170,9 @@ const OrderDetailsPage = () => {
                 });
             }
 
-            // Refresh orders from Redux
             dispatch(getMyOrders());
         });
 
-        // Listen for order cancellation
         socketInstance.on('order-cancelled', (data) => {
             console.log('Order cancelled via socket:', data);
             
@@ -203,7 +191,6 @@ const OrderDetailsPage = () => {
                 return updatedOrders;
             });
 
-            // Show notification
             const order = orders.find(o => o._id === data.orderId);
             if (order) {
                 addNotification({
@@ -218,7 +205,6 @@ const OrderDetailsPage = () => {
             dispatch(getMyOrders());
         });
 
-        // Listen for rider assignment updates
         socketInstance.on('rider-assigned', (data) => {
             console.log('Rider assigned via socket:', data);
             
@@ -236,7 +222,6 @@ const OrderDetailsPage = () => {
                 return updatedOrders;
             });
 
-            // Show notification
             const order = orders.find(o => o._id === data.orderId);
             if (order) {
                 addNotification({
@@ -251,13 +236,11 @@ const OrderDetailsPage = () => {
             dispatch(getMyOrders());
         });
 
-        // Listen for kitchen notes updates
         socketInstance.on('kitchen-notes-updated', (data) => {
             console.log('Kitchen notes updated via socket:', data);
             // You can update order notes in real-time if needed
         });
 
-        // Listen for new messages from riders
         socketInstance.on('new-message', (data) => {
             console.log('New message from rider:', data);
             addNotification({
@@ -269,7 +252,6 @@ const OrderDetailsPage = () => {
             });
         });
 
-        // Cleanup event listeners
         return () => {
             socketInstance.off('order-status-updated');
             socketInstance.off('order-cancelled');
@@ -281,8 +263,7 @@ const OrderDetailsPage = () => {
 
     // ==================== ADD NOTIFICATION ====================
     const addNotification = (notification) => {
-        setNotifications(prev => [notification, ...prev].slice(0, 10)); // Keep last 10 notifications
-        // Auto-dismiss after 5 seconds
+        setNotifications(prev => [notification, ...prev].slice(0, 10));
         setTimeout(() => {
             setNotifications(prev => prev.filter(n => n.id !== notification.id));
         }, 5000);
@@ -518,7 +499,6 @@ const OrderDetailsPage = () => {
     // ==================== MANUAL REFRESH ====================
     const handleRefresh = () => {
         dispatch(getMyOrders());
-        // Emit socket event to request latest data
         if (socketRef.current && socketConnected) {
             socketRef.current.emit('request-order-update', {
                 userId: localStorage.getItem('userId')
@@ -664,7 +644,6 @@ const OrderDetailsPage = () => {
 
                     {/* Filter Toggle Buttons */}
                     <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-                        {/* All Orders Button */}
                         <button
                             onClick={() => {
                                 setFilterType('all');
@@ -687,7 +666,6 @@ const OrderDetailsPage = () => {
                             </span>
                         </button>
 
-                        {/* Delivery Button */}
                         <button
                             onClick={() => {
                                 setFilterType('delivery');
@@ -710,7 +688,6 @@ const OrderDetailsPage = () => {
                             </span>
                         </button>
 
-                        {/* Dine In Button */}
                         <button
                             onClick={() => {
                                 setFilterType('dine_in');
@@ -733,7 +710,6 @@ const OrderDetailsPage = () => {
                             </span>
                         </button>
 
-                        {/* Expand/Collapse All Button */}
                         <div className="ml-auto flex gap-2">
                             <button
                                 onClick={() => {
@@ -784,7 +760,6 @@ const OrderDetailsPage = () => {
                                 const isCancelled = order.orderStatus?.toLowerCase() === 'cancelled';
                                 const status = order.orderStatus?.toLowerCase() || 'pending';
                                 
-                                // Check if this order has a live notification
                                 const hasLiveUpdate = notifications.some(n => n.orderId === order._id);
 
                                 return (
@@ -799,12 +774,10 @@ const OrderDetailsPage = () => {
                                             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                                                        {/* Order ID */}
                                                         <span className="font-mono text-xs sm:text-sm font-semibold text-gray-700 bg-white/50 px-2 py-1 rounded-lg">
                                                             #{order._id?.slice(-8)}
                                                         </span>
                                                         
-                                                        {/* Live Indicator */}
                                                         {hasLiveUpdate && (
                                                             <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-500/20 border border-green-500/30 rounded-full text-[10px] text-green-600 animate-pulse">
                                                                 <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
@@ -812,7 +785,6 @@ const OrderDetailsPage = () => {
                                                             </span>
                                                         )}
                                                         
-                                                        {/* Order Type Badge */}
                                                         <span className={`inline-flex items-center gap-1 px-2.5 py-1 backdrop-blur-sm border-2 rounded-full text-[10px] sm:text-xs font-bold shadow-sm ${
                                                             isDeliveryOrder
                                                                 ? 'bg-blue-500/90 border-blue-600 text-white'
@@ -822,7 +794,6 @@ const OrderDetailsPage = () => {
                                                             {isDeliveryOrder ? 'Delivery' : 'Dine In'}
                                                         </span>
 
-                                                        {/* Order Status Badge */}
                                                         <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 backdrop-blur-sm border-2 rounded-full text-xs font-bold shadow-lg ${
                                                             isCancelled
                                                                 ? 'bg-red-500/90 border-red-600 text-white'
@@ -835,7 +806,6 @@ const OrderDetailsPage = () => {
                                                             {statusInfo.label}
                                                         </span>
 
-                                                        {/* Payment Status */}
                                                         <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium ${
                                                             order.paymentStatus === 'paid'
                                                                 ? 'bg-green-100 text-green-700'
@@ -845,7 +815,6 @@ const OrderDetailsPage = () => {
                                                         </span>
                                                     </div>
 
-                                                    {/* Order Info */}
                                                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs sm:text-sm text-gray-600">
                                                         <span className="flex items-center gap-1">
                                                             <Calendar size={14} className="text-gray-400" />
@@ -867,7 +836,6 @@ const OrderDetailsPage = () => {
                                                     </div>
                                                 </div>
 
-                                                {/* Toggle Button */}
                                                 <button
                                                     onClick={() => toggleOrderExpansion(order._id)}
                                                     className="flex items-center gap-2 px-4 py-2 bg-white/40 backdrop-blur-sm border border-white/50 rounded-lg hover:bg-white/60 transition-all duration-300 text-sm font-medium text-gray-700 flex-shrink-0"
@@ -908,7 +876,6 @@ const OrderDetailsPage = () => {
                                                             </span>
                                                         </h4>
                                                         
-                                                        {/* Tracking Timeline */}
                                                         <div className="relative">
                                                             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-0">
                                                                 {trackingSteps.map((step, index) => (
@@ -946,7 +913,6 @@ const OrderDetailsPage = () => {
                                                             </div>
                                                         </div>
 
-                                                        {/* Tracking Messages */}
                                                         {order.tracking && order.tracking.length > 0 && (
                                                             <div className="mt-4 pt-3 border-t border-blue-200/50">
                                                                 <div className="flex flex-col gap-1">
@@ -968,7 +934,6 @@ const OrderDetailsPage = () => {
                                                     </div>
                                                 )}
 
-                                                {/* Cancelled Order Message */}
                                                 {isCancelled && (
                                                     <div className="backdrop-blur-xl bg-red-50/40 border border-red-200/50 rounded-xl p-4 mb-4">
                                                         <div className="flex items-center gap-3">
@@ -995,7 +960,6 @@ const OrderDetailsPage = () => {
                                                 <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
                                                     {/* Left Section - Order Items & Delivery Info */}
                                                     <div className="lg:col-span-2 space-y-3 sm:space-y-4">
-                                                        {/* Delivery Address for Delivery Orders */}
                                                         {isDeliveryOrder && deliveryAddress && (
                                                             <div className="backdrop-blur-xl bg-blue-50/40 border border-blue-200/50 rounded-xl p-3 sm:p-4">
                                                                 <div className="flex items-center gap-2 mb-2 sm:mb-3">
@@ -1029,7 +993,6 @@ const OrderDetailsPage = () => {
                                                             </div>
                                                         )}
 
-                                                        {/* Dine In Info */}
                                                         {!isDeliveryOrder && (
                                                             <div className="backdrop-blur-xl bg-purple-50/40 border border-purple-200/50 rounded-xl p-3 sm:p-4">
                                                                 <div className="flex items-center gap-2">
@@ -1052,7 +1015,6 @@ const OrderDetailsPage = () => {
                                                             </div>
                                                         )}
 
-                                                        {/* Order Items */}
                                                         <div className="backdrop-blur-xl bg-white/30 border border-white/40 rounded-xl p-3 sm:p-4">
                                                             <div className="flex items-center gap-2 mb-3">
                                                                 <div className="p-1 bg-amber-100/60 rounded-lg">
@@ -1186,7 +1148,6 @@ const OrderDetailsPage = () => {
                 </div>
             </div>
 
-            {/* Animations */}
             <style>{`
                 @keyframes pulse-slow {
                     0%, 100% { transform: scale(1); opacity: 0.5; }
@@ -1205,14 +1166,8 @@ const OrderDetailsPage = () => {
                     50% { transform: translateY(20px) rotate(-15deg); }
                 }
                 @keyframes fadeIn {
-                    from {
-                        opacity: 0;
-                        transform: translateY(-10px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
+                    from { opacity: 0; transform: translateY(-10px); }
+                    to { opacity: 1; transform: translateY(0); }
                 }
                 @keyframes pulse {
                     0%, 100% { opacity: 1; }
@@ -1227,14 +1182,8 @@ const OrderDetailsPage = () => {
                     to { transform: rotate(360deg); }
                 }
                 @keyframes slideInRight {
-                    from {
-                        opacity: 0;
-                        transform: translateX(100px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateX(0);
-                    }
+                    from { opacity: 0; transform: translateX(100px); }
+                    to { opacity: 1; transform: translateX(0); }
                 }
                 .animate-pulse-slow { animation: pulse-slow 8s ease-in-out infinite; }
                 .animate-pulse-slow-delay { animation: pulse-slow-delay 10s ease-in-out infinite; }
