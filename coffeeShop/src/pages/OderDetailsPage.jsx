@@ -63,7 +63,7 @@ const OrderDetailsPage = () => {
     // ==================== SOCKET CONNECTION ====================
     useEffect(() => {
         const SOCKET_URL = 'http://localhost:5003';
-        
+
         const socketInstance = io(SOCKET_URL, {
             transports: ['websocket'],
             withCredentials: true,
@@ -71,7 +71,7 @@ const OrderDetailsPage = () => {
             reconnectionAttempts: 5,
             reconnectionDelay: 1000
         });
-        
+
         socketRef.current = socketInstance;
         setSocket(socketInstance);
 
@@ -80,7 +80,7 @@ const OrderDetailsPage = () => {
             setSocketConnected(true);
             setConnectionError(null);
             setReconnecting(false);
-            
+
             const userId = localStorage.getItem('userId');
             if (userId) {
                 socketInstance.emit('join-user', userId);
@@ -133,9 +133,14 @@ const OrderDetailsPage = () => {
 
         const socketInstance = socketRef.current;
 
-        socketInstance.on('order-status-updated', (data) => {
+        // Listen for order status updates - FIXED to handle both order room and broadcast
+        const handleOrderStatusUpdate = (data) => {
             console.log('Order status updated via socket:', data);
-            
+
+            // Check if this update is for our orders
+            const orderExists = liveOrders.some(o => o._id === data.orderId);
+            if (!orderExists) return;
+
             setLiveOrders(prevOrders => {
                 const updatedOrders = prevOrders.map(order => {
                     if (order._id === data.orderId) {
@@ -171,11 +176,15 @@ const OrderDetailsPage = () => {
             }
 
             dispatch(getMyOrders());
-        });
+        };
 
-        socketInstance.on('order-cancelled', (data) => {
+        // Listen for order cancellation - FIXED
+        const handleOrderCancelled = (data) => {
             console.log('Order cancelled via socket:', data);
-            
+
+            const orderExists = liveOrders.some(o => o._id === data.orderId);
+            if (!orderExists) return;
+
             setLiveOrders(prevOrders => {
                 const updatedOrders = prevOrders.map(order => {
                     if (order._id === data.orderId) {
@@ -203,11 +212,15 @@ const OrderDetailsPage = () => {
             }
 
             dispatch(getMyOrders());
-        });
+        };
 
-        socketInstance.on('rider-assigned', (data) => {
+        // Listen for rider assignment - FIXED
+        const handleRiderAssigned = (data) => {
             console.log('Rider assigned via socket:', data);
-            
+
+            const orderExists = liveOrders.some(o => o._id === data.orderId);
+            if (!orderExists) return;
+
             setLiveOrders(prevOrders => {
                 const updatedOrders = prevOrders.map(order => {
                     if (order._id === data.orderId) {
@@ -234,32 +247,92 @@ const OrderDetailsPage = () => {
             }
 
             dispatch(getMyOrders());
-        });
+        };
 
-        socketInstance.on('kitchen-notes-updated', (data) => {
+        // Listen for kitchen notes updates - FIXED
+        const handleKitchenNotesUpdated = (data) => {
             console.log('Kitchen notes updated via socket:', data);
-            // You can update order notes in real-time if needed
-        });
 
-        socketInstance.on('new-message', (data) => {
-            console.log('New message from rider:', data);
+            const orderExists = liveOrders.some(o => o._id === data.orderId);
+            if (!orderExists) return;
+
+            setLiveOrders(prevOrders => {
+                const updatedOrders = prevOrders.map(order => {
+                    if (order._id === data.orderId) {
+                        return {
+                            ...order,
+                            kitchenNotes: data.notes,
+                            updatedAt: data.timestamp || new Date().toISOString()
+                        };
+                    }
+                    return order;
+                });
+                return updatedOrders;
+            });
+        };
+
+        // Listen for new messages - FIXED
+        const handleNewMessage = (data) => {
+            console.log('New message:', data);
             addNotification({
                 id: Date.now(),
                 orderId: data.orderId,
-                message: `Rider: ${data.message}`,
+                message: `${data.sender || 'Rider'}: ${data.message}`,
                 type: 'rider_message',
                 timestamp: new Date().toISOString()
             });
-        });
-
-        return () => {
-            socketInstance.off('order-status-updated');
-            socketInstance.off('order-cancelled');
-            socketInstance.off('rider-assigned');
-            socketInstance.off('kitchen-notes-updated');
-            socketInstance.off('new-message');
         };
-    }, [orders, dispatch]);
+
+        // Listen for broadcast updates (for users who might not be in the order room)
+        const handleOrderUpdateBroadcast = (data) => {
+            console.log('Order update broadcast received:', data);
+            // Process the update similar to handleOrderStatusUpdate
+            handleOrderStatusUpdate(data);
+        };
+
+        const handleOrderCancelledBroadcast = (data) => {
+            console.log('Order cancellation broadcast received:', data);
+            handleOrderCancelled(data);
+        };
+
+        const handleRiderAssignedBroadcast = (data) => {
+            console.log('Rider assignment broadcast received:', data);
+            handleRiderAssigned(data);
+        };
+
+        const handleKitchenNotesUpdatedBroadcast = (data) => {
+            console.log('Kitchen notes broadcast received:', data);
+            handleKitchenNotesUpdated(data);
+        };
+
+        // Register all event listeners
+        socketInstance.on('order-status-updated', handleOrderStatusUpdate);
+        socketInstance.on('order-cancelled', handleOrderCancelled);
+        socketInstance.on('rider-assigned', handleRiderAssigned);
+        socketInstance.on('kitchen-notes-updated', handleKitchenNotesUpdated);
+        socketInstance.on('new-message', handleNewMessage);
+        socketInstance.on('rider-message', handleNewMessage);
+
+        // Register broadcast listeners
+        socketInstance.on('order-update-broadcast', handleOrderUpdateBroadcast);
+        socketInstance.on('order-cancelled-broadcast', handleOrderCancelledBroadcast);
+        socketInstance.on('rider-assigned-broadcast', handleRiderAssignedBroadcast);
+        socketInstance.on('kitchen-notes-updated-broadcast', handleKitchenNotesUpdatedBroadcast);
+
+        // Cleanup
+        return () => {
+            socketInstance.off('order-status-updated', handleOrderStatusUpdate);
+            socketInstance.off('order-cancelled', handleOrderCancelled);
+            socketInstance.off('rider-assigned', handleRiderAssigned);
+            socketInstance.off('kitchen-notes-updated', handleKitchenNotesUpdated);
+            socketInstance.off('new-message', handleNewMessage);
+            socketInstance.off('rider-message', handleNewMessage);
+            socketInstance.off('order-update-broadcast', handleOrderUpdateBroadcast);
+            socketInstance.off('order-cancelled-broadcast', handleOrderCancelledBroadcast);
+            socketInstance.off('rider-assigned-broadcast', handleRiderAssignedBroadcast);
+            socketInstance.off('kitchen-notes-updated-broadcast', handleKitchenNotesUpdatedBroadcast);
+        };
+    }, [orders, liveOrders, dispatch]);
 
     // ==================== ADD NOTIFICATION ====================
     const addNotification = (notification) => {
@@ -291,7 +364,7 @@ const OrderDetailsPage = () => {
     useEffect(() => {
         if (liveOrders && liveOrders.length > 0) {
             const orderFromState = location.state?.order;
-            
+
             if (orderFromState) {
                 setExpandedOrders({ [orderFromState._id]: true });
             } else {
@@ -402,7 +475,7 @@ const OrderDetailsPage = () => {
     const getTrackingSteps = (order) => {
         const status = order.orderStatus?.toLowerCase() || 'pending';
         const isDelivery = order.orderType?.toLowerCase() === 'delivery';
-        
+
         const deliverySteps = [
             { id: 'pending', label: 'Order Placed', icon: Clock, color: 'text-yellow-500' },
             { id: 'confirmed', label: 'Confirmed', icon: CircleCheck, color: 'text-green-500' },
@@ -420,7 +493,7 @@ const OrderDetailsPage = () => {
 
         const steps = isDelivery ? deliverySteps : dineInSteps;
         const currentStepIndex = steps.findIndex(s => s.id === status);
-        
+
         if (status === 'cancelled') {
             return steps.map((step, index) => ({
                 ...step,
@@ -449,7 +522,7 @@ const OrderDetailsPage = () => {
     // ==================== GET ORDER ITEMS ====================
     const getOrderItems = (order) => {
         if (!order || !products || products.length === 0) return [];
-        
+
         return order.products.map((item) => {
             const productDetails = item.coffee || {};
             return {
@@ -649,19 +722,17 @@ const OrderDetailsPage = () => {
                                 setFilterType('all');
                                 collapseAll();
                             }}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 ${
-                                filterType === 'all'
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 ${filterType === 'all'
                                     ? 'bg-gradient-to-r from-[#0D7C53] to-green-600 text-white shadow-lg shadow-[#0D7C53]/30'
                                     : 'bg-white/30 backdrop-blur-sm border border-white/40 text-gray-700 hover:bg-white/50'
-                            }`}
+                                }`}
                         >
                             <Filter size={16} />
                             All Orders
-                            <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
-                                filterType === 'all'
+                            <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${filterType === 'all'
                                     ? 'bg-white/20 text-white'
                                     : 'bg-gray-200/50 text-gray-600'
-                            }`}>
+                                }`}>
                                 {liveOrders.length}
                             </span>
                         </button>
@@ -671,19 +742,17 @@ const OrderDetailsPage = () => {
                                 setFilterType('delivery');
                                 expandAllByType('delivery');
                             }}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 ${
-                                filterType === 'delivery'
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 ${filterType === 'delivery'
                                     ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30'
                                     : 'bg-white/30 backdrop-blur-sm border border-white/40 text-gray-700 hover:bg-white/50'
-                            }`}
+                                }`}
                         >
                             <Truck size={16} />
                             Delivery
-                            <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
-                                filterType === 'delivery'
+                            <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${filterType === 'delivery'
                                     ? 'bg-white/20 text-white'
                                     : 'bg-gray-200/50 text-gray-600'
-                            }`}>
+                                }`}>
                                 {deliveryCount}
                             </span>
                         </button>
@@ -693,19 +762,17 @@ const OrderDetailsPage = () => {
                                 setFilterType('dine_in');
                                 expandAllByType('dine_in');
                             }}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 ${
-                                filterType === 'dine_in'
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 ${filterType === 'dine_in'
                                     ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30'
                                     : 'bg-white/30 backdrop-blur-sm border border-white/40 text-gray-700 hover:bg-white/50'
-                            }`}
+                                }`}
                         >
                             <Store size={16} />
                             Dine In
-                            <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
-                                filterType === 'dine_in'
+                            <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${filterType === 'dine_in'
                                     ? 'bg-white/20 text-white'
                                     : 'bg-gray-200/50 text-gray-600'
-                            }`}>
+                                }`}>
                                 {dineInCount}
                             </span>
                         </button>
@@ -759,15 +826,14 @@ const OrderDetailsPage = () => {
                                 const trackingSteps = getTrackingSteps(order);
                                 const isCancelled = order.orderStatus?.toLowerCase() === 'cancelled';
                                 const status = order.orderStatus?.toLowerCase() || 'pending';
-                                
+
                                 const hasLiveUpdate = notifications.some(n => n.orderId === order._id);
 
                                 return (
-                                    <div 
+                                    <div
                                         key={order._id}
-                                        className={`backdrop-blur-xl bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 ${
-                                            isCancelled ? 'opacity-75' : ''
-                                        } ${hasLiveUpdate ? 'ring-2 ring-[#0D7C53] ring-opacity-50' : ''}`}
+                                        className={`backdrop-blur-xl bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 ${isCancelled ? 'opacity-75' : ''
+                                            } ${hasLiveUpdate ? 'ring-2 ring-[#0D7C53] ring-opacity-50' : ''}`}
                                     >
                                         {/* Order Header - Always Visible */}
                                         <div className="p-4 sm:p-6">
@@ -777,40 +843,37 @@ const OrderDetailsPage = () => {
                                                         <span className="font-mono text-xs sm:text-sm font-semibold text-gray-700 bg-white/50 px-2 py-1 rounded-lg">
                                                             #{order._id?.slice(-8)}
                                                         </span>
-                                                        
+
                                                         {hasLiveUpdate && (
                                                             <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-500/20 border border-green-500/30 rounded-full text-[10px] text-green-600 animate-pulse">
                                                                 <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
                                                                 Live
                                                             </span>
                                                         )}
-                                                        
-                                                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 backdrop-blur-sm border-2 rounded-full text-[10px] sm:text-xs font-bold shadow-sm ${
-                                                            isDeliveryOrder
+
+                                                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 backdrop-blur-sm border-2 rounded-full text-[10px] sm:text-xs font-bold shadow-sm ${isDeliveryOrder
                                                                 ? 'bg-blue-500/90 border-blue-600 text-white'
                                                                 : 'bg-purple-500/90 border-purple-600 text-white'
-                                                        }`}>
+                                                            }`}>
                                                             {isDeliveryOrder ? <Truck size={12} /> : <Store size={12} />}
                                                             {isDeliveryOrder ? 'Delivery' : 'Dine In'}
                                                         </span>
 
-                                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 backdrop-blur-sm border-2 rounded-full text-xs font-bold shadow-lg ${
-                                                            isCancelled
+                                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 backdrop-blur-sm border-2 rounded-full text-xs font-bold shadow-lg ${isCancelled
                                                                 ? 'bg-red-500/90 border-red-600 text-white'
                                                                 : statusInfo.bg + ' ' + statusInfo.border + ' ' + statusInfo.color
-                                                        }`}>
+                                                            }`}>
                                                             <StatusIcon size={14} className={
-                                                                status === 'preparing' ? 'animate-spin' : 
-                                                                status === 'out_for_delivery' ? 'animate-bounce-slow' : ''
+                                                                status === 'preparing' ? 'animate-spin' :
+                                                                    status === 'out_for_delivery' ? 'animate-bounce-slow' : ''
                                                             } />
                                                             {statusInfo.label}
                                                         </span>
 
-                                                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium ${
-                                                            order.paymentStatus === 'paid'
+                                                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium ${order.paymentStatus === 'paid'
                                                                 ? 'bg-green-100 text-green-700'
                                                                 : 'bg-yellow-100 text-yellow-700'
-                                                        }`}>
+                                                            }`}>
                                                             {order.paymentStatus === 'paid' ? '💳 Paid' : '💳 Pending'}
                                                         </span>
                                                     </div>
@@ -863,11 +926,10 @@ const OrderDetailsPage = () => {
                                             <div className="border-t border-white/30 p-4 sm:p-6 bg-white/10 animate-fadeIn">
                                                 {/* Order Status Timeline */}
                                                 {!isCancelled && (
-                                                    <div className={`backdrop-blur-xl border rounded-xl p-4 mb-4 ${
-                                                        isDeliveryOrder 
+                                                    <div className={`backdrop-blur-xl border rounded-xl p-4 mb-4 ${isDeliveryOrder
                                                             ? 'bg-blue-50/40 border-blue-200/50'
                                                             : 'bg-purple-50/40 border-purple-200/50'
-                                                    }`}>
+                                                        }`}>
                                                         <h4 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
                                                             {isDeliveryOrder ? <TruckIcon size={18} className="text-blue-600" /> : <Utensils size={18} className="text-purple-600" />}
                                                             {isDeliveryOrder ? 'Delivery Tracking' : 'Order Progress'}
@@ -875,37 +937,34 @@ const OrderDetailsPage = () => {
                                                                 Updated: {formatDate(order.updatedAt)}
                                                             </span>
                                                         </h4>
-                                                        
+
                                                         <div className="relative">
                                                             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-0">
                                                                 {trackingSteps.map((step, index) => (
                                                                     <React.Fragment key={step.id}>
                                                                         <div className="flex items-center gap-2 sm:gap-3">
                                                                             <div className="flex flex-col items-center">
-                                                                                <div className={`w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
-                                                                                    step.isCompleted
+                                                                                <div className={`w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${step.isCompleted
                                                                                         ? 'bg-green-500 border-green-600 text-white shadow-lg shadow-green-500/30'
                                                                                         : step.isCurrent
-                                                                                        ? 'bg-blue-500 border-blue-600 text-white shadow-lg shadow-blue-500/30 animate-pulse'
-                                                                                        : 'bg-gray-200 border-gray-300 text-gray-400'
-                                                                                }`}>
+                                                                                            ? 'bg-blue-500 border-blue-600 text-white shadow-lg shadow-blue-500/30 animate-pulse'
+                                                                                            : 'bg-gray-200 border-gray-300 text-gray-400'
+                                                                                    }`}>
                                                                                     <step.icon size={16} className={
                                                                                         step.isCurrent && step.id === 'preparing' ? 'animate-spin' :
-                                                                                        step.isCurrent && step.id === 'out_for_delivery' ? 'animate-bounce-slow' : ''
+                                                                                            step.isCurrent && step.id === 'out_for_delivery' ? 'animate-bounce-slow' : ''
                                                                                     } />
                                                                                 </div>
-                                                                                <span className={`text-[10px] font-medium mt-1 text-center ${
-                                                                                    step.isCompleted ? 'text-green-600' : step.isCurrent ? 'text-blue-600' : 'text-gray-400'
-                                                                                }`}>
+                                                                                <span className={`text-[10px] font-medium mt-1 text-center ${step.isCompleted ? 'text-green-600' : step.isCurrent ? 'text-blue-600' : 'text-gray-400'
+                                                                                    }`}>
                                                                                     {step.label}
                                                                                 </span>
                                                                             </div>
                                                                         </div>
                                                                         {index < trackingSteps.length - 1 && (
                                                                             <div className="flex-1 min-w-[20px] sm:min-w-[40px] h-0.5 mx-2">
-                                                                                <div className={`h-full transition-all duration-500 ${
-                                                                                    step.isCompleted ? 'bg-green-500' : 'bg-gray-300'
-                                                                                }`}></div>
+                                                                                <div className={`h-full transition-all duration-500 ${step.isCompleted ? 'bg-green-500' : 'bg-gray-300'
+                                                                                    }`}></div>
                                                                             </div>
                                                                         )}
                                                                     </React.Fragment>
@@ -1086,7 +1145,7 @@ const OrderDetailsPage = () => {
                                                                     <span className={`font-semibold flex items-center gap-1.5 ${isCancelled ? 'text-red-600' : statusInfo.color}`}>
                                                                         <StatusIcon size={14} className={
                                                                             status === 'preparing' ? 'animate-spin' :
-                                                                            status === 'out_for_delivery' ? 'animate-bounce-slow' : ''
+                                                                                status === 'out_for_delivery' ? 'animate-bounce-slow' : ''
                                                                         } />
                                                                         {statusInfo.label}
                                                                     </span>
