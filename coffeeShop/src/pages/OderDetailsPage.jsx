@@ -59,6 +59,155 @@ const OrderDetailsPage = () => {
     const [filterType, setFilterType] = useState('all');
     // State for real-time order updates
     const [liveOrders, setLiveOrders] = useState([]);
+    // Sound enabled state
+    const [soundEnabled, setSoundEnabled] = useState(true);
+
+    // ==================== SOUND NOTIFICATION SYSTEM ====================
+    const audioContextRef = useRef(null);
+
+    // Initialize Audio Context
+    const getAudioContext = () => {
+        if (!audioContextRef.current) {
+            audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        return audioContextRef.current;
+    };
+
+    // Play notification sound for different statuses
+    const playNotificationSound = (status, orderId) => {
+        if (!soundEnabled) return;
+
+        try {
+            const audioCtx = getAudioContext();
+            
+            // Resume context if suspended (needed for Chrome autoplay policy)
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            // Create oscillator and gain node
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            // Different sounds for different statuses
+            switch (status) {
+                case 'confirmed':
+                    // Pleasant two-tone chime - Order confirmed
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    oscillator.start(audioCtx.currentTime);
+                    oscillator.stop(audioCtx.currentTime + 0.2);
+                    
+                    // Second note after a short delay
+                    setTimeout(() => {
+                        const osc2 = audioCtx.createOscillator();
+                        const gain2 = audioCtx.createGain();
+                        osc2.connect(gain2);
+                        gain2.connect(audioCtx.destination);
+                        osc2.type = 'sine';
+                        osc2.frequency.setValueAtTime(659.25, audioCtx.currentTime); // E5
+                        gain2.gain.setValueAtTime(0.25, audioCtx.currentTime);
+                        osc2.start(audioCtx.currentTime);
+                        osc2.stop(audioCtx.currentTime + 0.25);
+                    }, 150);
+                    break;
+
+                case 'preparing':
+                    // Short upbeat sound - Preparing
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(698.46, audioCtx.currentTime); // F5
+                    gainNode.gain.setValueAtTime(0.25, audioCtx.currentTime);
+                    oscillator.start(audioCtx.currentTime);
+                    oscillator.stop(audioCtx.currentTime + 0.15);
+                    
+                    // Quick second note
+                    setTimeout(() => {
+                        const osc2 = audioCtx.createOscillator();
+                        const gain2 = audioCtx.createGain();
+                        osc2.connect(gain2);
+                        gain2.connect(audioCtx.destination);
+                        osc2.type = 'sine';
+                        osc2.frequency.setValueAtTime(880, audioCtx.currentTime); // A5
+                        gain2.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                        osc2.start(audioCtx.currentTime);
+                        osc2.stop(audioCtx.currentTime + 0.15);
+                    }, 100);
+                    break;
+
+                case 'out_for_delivery':
+                    // Ascending happy sound - Out for delivery
+                    const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
+                    notes.forEach((freq, index) => {
+                        setTimeout(() => {
+                            const osc = audioCtx.createOscillator();
+                            const gain = audioCtx.createGain();
+                            osc.connect(gain);
+                            gain.connect(audioCtx.destination);
+                            osc.type = 'sine';
+                            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                            osc.start(audioCtx.currentTime);
+                            osc.stop(audioCtx.currentTime + 0.15);
+                            // Fade out
+                            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                        }, index * 150);
+                    });
+                    break;
+
+                case 'delivered':
+                    // Happy jingle - Delivered
+                    const deliveredNotes = [523.25, 659.25, 783.99, 1046.5];
+                    deliveredNotes.forEach((freq, index) => {
+                        setTimeout(() => {
+                            const osc = audioCtx.createOscillator();
+                            const gain = audioCtx.createGain();
+                            osc.connect(gain);
+                            gain.connect(audioCtx.destination);
+                            osc.type = 'sine';
+                            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                            gain.gain.setValueAtTime(0.25 - (index * 0.03), audioCtx.currentTime);
+                            osc.start(audioCtx.currentTime);
+                            osc.stop(audioCtx.currentTime + 0.2);
+                        }, index * 120);
+                    });
+                    break;
+
+                case 'cancelled':
+                    // Descending sad sound - Cancelled
+                    const cancelNotes = [523.25, 493.88, 440, 392];
+                    cancelNotes.forEach((freq, index) => {
+                        setTimeout(() => {
+                            const osc = audioCtx.createOscillator();
+                            const gain = audioCtx.createGain();
+                            osc.connect(gain);
+                            gain.connect(audioCtx.destination);
+                            osc.type = 'sine';
+                            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                            gain.gain.setValueAtTime(0.2 - (index * 0.03), audioCtx.currentTime);
+                            osc.start(audioCtx.currentTime);
+                            osc.stop(audioCtx.currentTime + 0.2);
+                        }, index * 150);
+                    });
+                    break;
+
+                default:
+                    // Default single beep
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
+                    gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    oscillator.start(audioCtx.currentTime);
+                    oscillator.stop(audioCtx.currentTime + 0.15);
+                    break;
+            }
+
+        } catch (error) {
+            console.error('Error playing notification sound:', error);
+        }
+    };
 
     // ==================== SOCKET CONNECTION ====================
     useEffect(() => {
@@ -137,6 +286,11 @@ const OrderDetailsPage = () => {
         const handleOrderStatusUpdate = (data) => {
             console.log('Order status updated via socket:', data);
 
+            // Play sound notification for status update
+            if (data.newStatus) {
+                playNotificationSound(data.newStatus, data.orderId);
+            }
+
             // Check if this update is for our orders
             const orderExists = liveOrders.some(o => o._id === data.orderId);
             if (!orderExists) return;
@@ -182,6 +336,9 @@ const OrderDetailsPage = () => {
         const handleOrderCancelled = (data) => {
             console.log('Order cancelled via socket:', data);
 
+            // Play sound for cancellation
+            playNotificationSound('cancelled', data.orderId);
+
             const orderExists = liveOrders.some(o => o._id === data.orderId);
             if (!orderExists) return;
 
@@ -217,6 +374,9 @@ const OrderDetailsPage = () => {
         // Listen for rider assignment - FIXED
         const handleRiderAssigned = (data) => {
             console.log('Rider assigned via socket:', data);
+
+            // Play sound for rider assigned (out for delivery)
+            playNotificationSound('out_for_delivery', data.orderId);
 
             const orderExists = liveOrders.some(o => o._id === data.orderId);
             if (!orderExists) return;
@@ -274,6 +434,9 @@ const OrderDetailsPage = () => {
         // Listen for new messages - FIXED
         const handleNewMessage = (data) => {
             console.log('New message:', data);
+            // Play a simple notification sound for messages
+            playNotificationSound('message', data.orderId);
+            
             addNotification({
                 id: Date.now(),
                 orderId: data.orderId,
@@ -579,6 +742,11 @@ const OrderDetailsPage = () => {
         }
     };
 
+    // ==================== TOGGLE SOUND ====================
+    const toggleSound = () => {
+        setSoundEnabled(prev => !prev);
+    };
+
     // ==================== LOADING STATE ====================
     if (loading) {
         return (
@@ -685,8 +853,21 @@ const OrderDetailsPage = () => {
                             </div>
                         </div>
 
-                        {/* Connection Status & Refresh */}
+                        {/* Connection Status & Refresh & Sound Toggle */}
                         <div className="flex items-center gap-2">
+                            {/* Sound Toggle Button */}
+                            <button
+                                onClick={toggleSound}
+                                className={`p-2 rounded-lg backdrop-blur-sm border transition-all ${
+                                    soundEnabled 
+                                        ? 'bg-green-500/20 border-green-500/30 text-green-600' 
+                                        : 'bg-gray-500/20 border-gray-500/30 text-gray-500'
+                                }`}
+                                title={soundEnabled ? 'Sound On' : 'Sound Off'}
+                            >
+                                {soundEnabled ? '🔊' : '🔇'}
+                            </button>
+
                             <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/40 backdrop-blur-sm border border-white/40 rounded-lg">
                                 {reconnecting ? (
                                     <>
