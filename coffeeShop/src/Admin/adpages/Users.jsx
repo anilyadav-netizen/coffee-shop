@@ -15,96 +15,11 @@ import {
   FaSpinner
 } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
+import 
 
-// Mock Data
-const mockUsers = [
-  {
-    id: 1,
-    name: "John Doe",
-    email: "john@example.com",
-    phone: "+1 234 567 8900",
-    avatar: "https://ui-avatars.com/api/?name=John+Doe&background=6366f1&color=fff&size=40",
-    orders: 24,
-    spending: 1247.50,
-    status: "active",
-    joined: "2024-01-15",
-    isNew: false
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    email: "jane@example.com",
-    phone: "+1 234 567 8901",
-    avatar: "https://ui-avatars.com/api/?name=Jane+Smith&background=6366f1&color=fff&size=40",
-    orders: 18,
-    spending: 876.25,
-    status: "active",
-    joined: "2024-02-20",
-    isNew: true
-  },
-  {
-    id: 3,
-    name: "Mike Johnson",
-    email: "mike@example.com",
-    phone: "+1 234 567 8902",
-    avatar: "https://ui-avatars.com/api/?name=Mike+Johnson&background=6366f1&color=fff&size=40",
-    orders: 5,
-    spending: 234.80,
-    status: "blocked",
-    joined: "2024-03-10",
-    isNew: false
-  },
-  {
-    id: 4,
-    name: "Sarah Wilson",
-    email: "sarah@example.com",
-    phone: "+1 234 567 8903",
-    avatar: "https://ui-avatars.com/api/?name=Sarah+Wilson&background=6366f1&color=fff&size=40",
-    orders: 32,
-    spending: 2156.90,
-    status: "active",
-    joined: "2023-11-05",
-    isNew: false
-  },
-  {
-    id: 5,
-    name: "Robert Brown",
-    email: "robert@example.com",
-    phone: "+1 234 567 8904",
-    avatar: "https://ui-avatars.com/api/?name=Robert+Brown&background=6366f1&color=fff&size=40",
-    orders: 0,
-    spending: 0,
-    status: "blocked",
-    joined: "2024-04-01",
-    isNew: true
-  },
-  {
-    id: 6,
-    name: "Emily Davis",
-    email: "emily@example.com",
-    phone: "+1 234 567 8905",
-    avatar: "https://ui-avatars.com/api/?name=Emily+Davis&background=6366f1&color=fff&size=40",
-    orders: 15,
-    spending: 654.30,
-    status: "active",
-    joined: "2024-02-28",
-    isNew: false
-  },
-  {
-    id: 7,
-    name: "David Miller",
-    email: "david@example.com",
-    phone: "+1 234 567 8906",
-    avatar: "https://ui-avatars.com/api/?name=David+Miller&background=6366f1&color=fff&size=40",
-    orders: 9,
-    spending: 423.75,
-    status: "active",
-    joined: "2024-03-15",
-    isNew: true
-  }
-];
 
-// Stat Card Component
+
 const StatCard = ({ icon, label, value, color }) => {
   return (
     <div className="bg-white dark:bg-dark-card rounded-xl shadow-sm p-5 flex items-center gap-4 transition-all hover:shadow-md border border-gray-100 dark:border-dark-border">
@@ -137,6 +52,17 @@ const FilterChip = ({ label, active, onClick }) => {
 
 // Main Users Component
 const Users = () => {
+
+  const dispatch = useDispatch()
+  const {} = useSelector(
+    (state)=>state.getUser
+  )
+
+
+  useEffect(()=>{
+    dispatch()
+  })
+
   const [users, setUsers] = useState(mockUsers);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");

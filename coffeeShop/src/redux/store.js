@@ -7,6 +7,7 @@ import paymentReducer from './Slicer/paymentSlice'
 import categoryReducer from './Slicer/categorySlice'
 import adminReducer from './Slicer/adminOrder'
 import orderReducer from './Slicer/orderSlice'
+import userReducer from './Slicer/userSlice'
 export const store = configureStore({
     reducer: {
         auth: authReducer,
@@ -16,6 +17,7 @@ export const store = configureStore({
         payment: paymentReducer,
         category: categoryReducer,
         adminOrder: adminReducer,
-        orderStatus : orderReducer,
+        orderStatus: orderReducer,
+        getUser: userReducer
     }
 })

@@ -16,15 +16,14 @@ import {
 } from 'react-icons/fa';
 
 // Assume these actions exist in your redux slice
-import { getUsers, deleteUser, blockUser } from '../features/users/userSlice';
-
+import { getAllUsers } from '../../redux/Slicer/userSlice';
 const User = () => {
   const dispatch = useDispatch();
-  const { users, isLoading } = useSelector((state) => state.users);
+  const { users, isLoading } = useSelector((state) => state.getUser);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    dispatch(getUsers());
+    dispatch(getAllUsers);
   }, [dispatch]);
 
   // Filter users based on search term

@@ -23,72 +23,10 @@ import {
   FaSpinner
 } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { getAllUsers } from "../../redux/Slicer/userSlice";
 
 // Mock user data (in real app, fetch from API)
-const mockUserData = {
-  1: {
-    id: 1,
-    name: "John Doe",
-    email: "john@example.com",
-    phone: "+1 234 567 8900",
-    avatar: "https://ui-avatars.com/api/?name=John+Doe&background=6366f1&color=fff&size=120",
-    status: "active",
-    emailVerified: true,
-    joined: "2024-01-15",
-    lastLogin: "2024-03-15 14:30",
-    address: {
-      line1: "123 Main Street",
-      city: "New York",
-      state: "NY",
-      pincode: "10001"
-    },
-    orderStats: {
-      total: 24,
-      pending: 3,
-      preparing: 5,
-      delivered: 14,
-      cancelled: 2,
-      totalSpending: 1247.50
-    },
-    recentOrders: [
-      { id: "ORD-001", date: "2024-03-15", amount: 45.50, paymentStatus: "paid", orderStatus: "delivered" },
-      { id: "ORD-002", date: "2024-03-14", amount: 32.75, paymentStatus: "paid", orderStatus: "preparing" },
-      { id: "ORD-003", date: "2024-03-13", amount: 67.20, paymentStatus: "pending", orderStatus: "pending" },
-      { id: "ORD-004", date: "2024-03-12", amount: 23.50, paymentStatus: "paid", orderStatus: "delivered" },
-      { id: "ORD-005", date: "2024-03-11", amount: 54.80, paymentStatus: "failed", orderStatus: "cancelled" }
-    ]
-  },
-  2: {
-    id: 2,
-    name: "Jane Smith",
-    email: "jane@example.com",
-    phone: "+1 234 567 8901",
-    avatar: "https://ui-avatars.com/api/?name=Jane+Smith&background=6366f1&color=fff&size=120",
-    status: "active",
-    emailVerified: false,
-    joined: "2024-02-20",
-    lastLogin: "2024-03-14 09:15",
-    address: {
-      line1: "456 Oak Avenue",
-      city: "Los Angeles",
-      state: "CA",
-      pincode: "90001"
-    },
-    orderStats: {
-      total: 18,
-      pending: 2,
-      preparing: 3,
-      delivered: 11,
-      cancelled: 2,
-      totalSpending: 876.25
-    },
-    recentOrders: [
-      { id: "ORD-006", date: "2024-03-14", amount: 28.90, paymentStatus: "paid", orderStatus: "delivered" },
-      { id: "ORD-007", date: "2024-03-13", amount: 42.30, paymentStatus: "paid", orderStatus: "preparing" },
-      { id: "ORD-008", date: "2024-03-12", amount: 19.50, paymentStatus: "pending", orderStatus: "pending" }
-    ]
-  }
-};
+
 
 // Stat Card Component
 const StatCard = ({ icon, label, value, color }) => {

@@ -3,6 +3,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { getAllOrders } from '../../redux/Slicer/adminOrder';
+import Beep from '../../assets/Sounds/beep.wav'
 import io from 'socket.io-client';
 import { 
   FaTruck, 
@@ -64,6 +65,12 @@ const DeliveryOrders = () => {
     }
   };
 
+  const playNotification = () => {
+  const audio = new Audio(Beep);
+  audio.volume = 1;
+  audio.play().catch((err) => console.log(err));
+};
+
   // Socket Connection Setup
   useEffect(() => {
     socketRef.current = io('http://localhost:5003', {
@@ -79,6 +86,7 @@ const DeliveryOrders = () => {
 
     // Listen for new orders
     socket.on('new-order-placed', (data) => {
+        playNotification(); 
       console.log('🔔 New delivery order received:', data);
       
       if (data.order?.orderType === 'delivery') {
