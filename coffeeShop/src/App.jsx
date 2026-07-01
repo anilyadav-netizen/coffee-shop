@@ -27,7 +27,6 @@ import { ToastContainer } from 'react-toastify';
 import OrderDetailsPage from "./pages/OderDetailsPage";
 import Orders from "./Admin/adpages/Orders";
 import AdminProfile from "./Admin/adLayouts/AdminProfile";
-<<<<<<< Updated upstream
 import Users from "./Admin/adpages/Users";
 import UserDetails from "./Admin/adpages/UserDetails";
 import Riders from "./Admin/adpages/Riders";
@@ -36,9 +35,6 @@ import DineInOrders from "./Admin/adpages/DineInOrders";
 import DeliveryOrders from "./Admin/adpages/DeliveryOrders";
 import DineInDetails from "./Admin/adpages/DineInDetails";
 import DeliveryDetailsPage from "./Admin/adpages/DeliveryDetailsPage";
-=======
-import Users from "./Admin/adpages/User";
->>>>>>> Stashed changes
 
 function App() {
 
@@ -87,7 +83,6 @@ function App() {
           <Route path="/admin/update-category/:id" element={<AddCategory />} />
           <Route path="/admin/orders" element={<Orders />} />
           <Route path="/admin/profile" element={<AdminProfile />} />
-<<<<<<< Updated upstream
           <Route path="/admin/users" element={<Users />} />
           <Route path="/admin/user/:id" element={<UserDetails />} />
           <Route path="/admin/update-user/:id" element={<UserDetails />} />
@@ -96,9 +91,7 @@ function App() {
           <Route path="/admin/orders/dine-in/:id" element={<DineInDetails />} />
           <Route path="/admin/orders/delivery" element={<DeliveryOrders />} />
           <Route path="/admin/orders/delivery/:id" element={<DeliveryDetailsPage />} />
-=======
           <Route path="admin/users" element={<Users />} />
->>>>>>> Stashed changes
         </Route>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
