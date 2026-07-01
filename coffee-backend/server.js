@@ -2,8 +2,12 @@ require("dotenv").config()
 const express = require("express")
 const dns = require("dns")
 const cors = require("cors")
+const status = require("express-status-monitor")
 const app = express()
+
 dns.setServers(["1.1.1.1","8.8.8.8"])
+
+app.use(status())
 
 const Port= process.env.PORT || 5000
 
