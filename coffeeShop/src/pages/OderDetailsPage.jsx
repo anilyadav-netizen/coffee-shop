@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import io from 'socket.io-client';
 import {
     ArrowLeft,
     Package,
@@ -26,7 +27,10 @@ import {
     Loader2,
     AlertCircle,
     Utensils,
-    ChefHat
+    ChefHat,
+    Wifi,
+    WifiOff,
+    RefreshCw
 } from "lucide-react";
 import { getMyOrders } from "../redux/Slicer/paymentSlice";
 import { getProducts } from "../redux/Slicer/adminProductSlice";
@@ -41,35 +45,283 @@ const OrderDetailsPage = () => {
     // Get products from Redux
     const { products } = useSelector((state) => state.adminProducts);
 
+    // ==================== SOCKET SETUP ====================
+    const [socket, setSocket] = useState(null);
+    const socketRef = useRef(null);
+    const [socketConnected, setSocketConnected] = useState(false);
+    const [connectionError, setConnectionError] = useState(null);
+    const [reconnecting, setReconnecting] = useState(false);
+
     // State for expanded orders
     const [expandedOrders, setExpandedOrders] = useState({});
     // State for filter
-    const [filterType, setFilterType] = useState('all'); // 'all', 'delivery', 'dine_in'
+    const [filterType, setFilterType] = useState('all');
+    // State for real-time order updates
+    const [liveOrders, setLiveOrders] = useState([]);
+    // State for notifications
+    const [notifications, setNotifications] = useState([]);
 
+    // ==================== SOCKET CONNECTION ====================
+    useEffect(() => {
+        // Use the same port as your server
+        const SOCKET_URL = 'http://localhost:5003';
+        
+        // Connect to socket server
+        const socketInstance = io(SOCKET_URL, {
+            transports: ['websocket'],
+            withCredentials: true,
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000
+        });
+        
+        socketRef.current = socketInstance;
+        setSocket(socketInstance);
+
+        // Socket event listeners
+        socketInstance.on('connect', () => {
+            console.log('Socket connected successfully');
+            setSocketConnected(true);
+            setConnectionError(null);
+            setReconnecting(false);
+            
+            // Join user room for real-time updates
+            const userId = localStorage.getItem('userId');
+            if (userId) {
+                socketInstance.emit('join-user', userId);
+                console.log(`Joined user room: ${userId}`);
+            }
+        });
+
+        socketInstance.on('connect_error', (error) => {
+            console.error('Socket connection error:', error);
+            setConnectionError(error.message);
+            setSocketConnected(false);
+        });
+
+        socketInstance.on('disconnect', () => {
+            console.log('Socket disconnected');
+            setSocketConnected(false);
+        });
+
+        socketInstance.on('reconnecting', (attemptNumber) => {
+            console.log(`Reconnecting attempt ${attemptNumber}`);
+            setReconnecting(true);
+        });
+
+        socketInstance.on('reconnect', () => {
+            console.log('Socket reconnected');
+            setSocketConnected(true);
+            setReconnecting(false);
+            const userId = localStorage.getItem('userId');
+            if (userId) {
+                socketInstance.emit('join-user', userId);
+            }
+            // Refresh orders on reconnection
+            dispatch(getMyOrders());
+        });
+
+        // Cleanup on unmount
+        return () => {
+            if (socketInstance) {
+                socketInstance.disconnect();
+                socketInstance.off('connect');
+                socketInstance.off('connect_error');
+                socketInstance.off('disconnect');
+                socketInstance.off('reconnecting');
+                socketInstance.off('reconnect');
+            }
+        };
+    }, [dispatch]);
+
+    // ==================== SOCKET EVENT LISTENERS ====================
+    useEffect(() => {
+        if (!socketRef.current) return;
+
+        const socketInstance = socketRef.current;
+
+        // Listen for order status updates
+        socketInstance.on('order-status-updated', (data) => {
+            console.log('Order status updated via socket:', data);
+            
+            // Update orders in real-time
+            setLiveOrders(prevOrders => {
+                const updatedOrders = prevOrders.map(order => {
+                    if (order._id === data.orderId) {
+                        return {
+                            ...order,
+                            orderStatus: data.newStatus,
+                            tracking: data.tracking || order.tracking,
+                            updatedAt: data.timestamp || new Date().toISOString()
+                        };
+                    }
+                    return order;
+                });
+                return updatedOrders;
+            });
+
+            // Show notification
+            const order = orders.find(o => o._id === data.orderId);
+            if (order) {
+                const statusLabels = {
+                    'pending': 'Pending',
+                    'confirmed': 'Confirmed',
+                    'preparing': 'Preparing',
+                    'out_for_delivery': 'Out for Delivery',
+                    'delivered': 'Delivered',
+                    'cancelled': 'Cancelled'
+                };
+                addNotification({
+                    id: Date.now(),
+                    orderId: data.orderId,
+                    message: `Order #${order._id.slice(-8)} status updated to ${statusLabels[data.newStatus] || data.newStatus}`,
+                    type: 'status_update',
+                    timestamp: new Date().toISOString()
+                });
+            }
+
+            // Refresh orders from Redux
+            dispatch(getMyOrders());
+        });
+
+        // Listen for order cancellation
+        socketInstance.on('order-cancelled', (data) => {
+            console.log('Order cancelled via socket:', data);
+            
+            setLiveOrders(prevOrders => {
+                const updatedOrders = prevOrders.map(order => {
+                    if (order._id === data.orderId) {
+                        return {
+                            ...order,
+                            orderStatus: 'cancelled',
+                            cancelledAt: data.timestamp || new Date().toISOString(),
+                            cancelReason: data.reason
+                        };
+                    }
+                    return order;
+                });
+                return updatedOrders;
+            });
+
+            // Show notification
+            const order = orders.find(o => o._id === data.orderId);
+            if (order) {
+                addNotification({
+                    id: Date.now(),
+                    orderId: data.orderId,
+                    message: `Order #${order._id.slice(-8)} has been cancelled`,
+                    type: 'cancellation',
+                    timestamp: new Date().toISOString()
+                });
+            }
+
+            dispatch(getMyOrders());
+        });
+
+        // Listen for rider assignment updates
+        socketInstance.on('rider-assigned', (data) => {
+            console.log('Rider assigned via socket:', data);
+            
+            setLiveOrders(prevOrders => {
+                const updatedOrders = prevOrders.map(order => {
+                    if (order._id === data.orderId) {
+                        return {
+                            ...order,
+                            assignedRider: data.rider,
+                            orderStatus: 'out_for_delivery'
+                        };
+                    }
+                    return order;
+                });
+                return updatedOrders;
+            });
+
+            // Show notification
+            const order = orders.find(o => o._id === data.orderId);
+            if (order) {
+                addNotification({
+                    id: Date.now(),
+                    orderId: data.orderId,
+                    message: `Order #${order._id.slice(-8)} is out for delivery with ${data.rider?.name || 'a rider'}`,
+                    type: 'rider_assigned',
+                    timestamp: new Date().toISOString()
+                });
+            }
+
+            dispatch(getMyOrders());
+        });
+
+        // Listen for kitchen notes updates
+        socketInstance.on('kitchen-notes-updated', (data) => {
+            console.log('Kitchen notes updated via socket:', data);
+            // You can update order notes in real-time if needed
+        });
+
+        // Listen for new messages from riders
+        socketInstance.on('new-message', (data) => {
+            console.log('New message from rider:', data);
+            addNotification({
+                id: Date.now(),
+                orderId: data.orderId,
+                message: `Rider: ${data.message}`,
+                type: 'rider_message',
+                timestamp: new Date().toISOString()
+            });
+        });
+
+        // Cleanup event listeners
+        return () => {
+            socketInstance.off('order-status-updated');
+            socketInstance.off('order-cancelled');
+            socketInstance.off('rider-assigned');
+            socketInstance.off('kitchen-notes-updated');
+            socketInstance.off('new-message');
+        };
+    }, [orders, dispatch]);
+
+    // ==================== ADD NOTIFICATION ====================
+    const addNotification = (notification) => {
+        setNotifications(prev => [notification, ...prev].slice(0, 10)); // Keep last 10 notifications
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            setNotifications(prev => prev.filter(n => n.id !== notification.id));
+        }, 5000);
+    };
+
+    // ==================== DISMISS NOTIFICATION ====================
+    const dismissNotification = (id) => {
+        setNotifications(prev => prev.filter(n => n.id !== id));
+    };
+
+    // ==================== INITIAL DATA LOAD ====================
     useEffect(() => {
         dispatch(getMyOrders());
         dispatch(getProducts());
     }, [dispatch]);
 
-    // Process orders when they arrive
+    // ==================== SYNC ORDERS FROM REDUX ====================
     useEffect(() => {
-        if (orders && orders.length > 0 && products && products.length > 0) {
-            // Check if we have a specific order from navigation state
+        if (orders && orders.length > 0) {
+            setLiveOrders(orders);
+        }
+    }, [orders]);
+
+    // ==================== EXPAND ORDERS ON NAVIGATION ====================
+    useEffect(() => {
+        if (liveOrders && liveOrders.length > 0) {
             const orderFromState = location.state?.order;
             
             if (orderFromState) {
-                // Expand only the specific order
                 setExpandedOrders({ [orderFromState._id]: true });
             } else {
-                // Expand the first order by default
-                if (orders.length > 0) {
-                    setExpandedOrders({ [orders[0]._id]: true });
+                if (liveOrders.length > 0) {
+                    setExpandedOrders({ [liveOrders[0]._id]: true });
                 }
             }
         }
-    }, [orders, products, location.state]);
+    }, [liveOrders, location.state]);
 
-    // NAVBAR DARK
+    // ==================== NAVBAR DARK ====================
     useEffect(() => {
         const navbar = document.querySelector('nav');
         if (navbar) {
@@ -86,7 +338,7 @@ const OrderDetailsPage = () => {
         };
     }, []);
 
-    // Format date
+    // ==================== FORMAT FUNCTIONS ====================
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
         const date = new Date(dateString);
@@ -99,12 +351,11 @@ const OrderDetailsPage = () => {
         });
     };
 
-    // Format price
     const formatPrice = (price) => {
         return `₹${price?.toLocaleString('en-IN') || 0}`;
     };
 
-    // Get order status display with icon based on orderStatus field
+    // ==================== ORDER STATUS DISPLAY ====================
     const getOrderStatusDisplay = (order) => {
         const status = order.orderStatus?.toLowerCase() || 'pending';
         const statusMap = {
@@ -166,12 +417,11 @@ const OrderDetailsPage = () => {
         return statusMap[status] || statusMap['pending'];
     };
 
-    // Get tracking steps based on order status
+    // ==================== GET TRACKING STEPS ====================
     const getTrackingSteps = (order) => {
         const status = order.orderStatus?.toLowerCase() || 'pending';
         const isDelivery = order.orderType?.toLowerCase() === 'delivery';
         
-        // Different steps for delivery and dine-in
         const deliverySteps = [
             { id: 'pending', label: 'Order Placed', icon: Clock, color: 'text-yellow-500' },
             { id: 'confirmed', label: 'Confirmed', icon: CircleCheck, color: 'text-green-500' },
@@ -188,11 +438,8 @@ const OrderDetailsPage = () => {
         ];
 
         const steps = isDelivery ? deliverySteps : dineInSteps;
-
-        // Find the current step index
         const currentStepIndex = steps.findIndex(s => s.id === status);
         
-        // If order is cancelled, show cancelled status
         if (status === 'cancelled') {
             return steps.map((step, index) => ({
                 ...step,
@@ -210,7 +457,7 @@ const OrderDetailsPage = () => {
         }));
     };
 
-    // Toggle order expansion
+    // ==================== TOGGLE ORDER EXPANSION ====================
     const toggleOrderExpansion = (orderId) => {
         setExpandedOrders(prev => ({
             ...prev,
@@ -218,13 +465,12 @@ const OrderDetailsPage = () => {
         }));
     };
 
-    // Get matched items for an order
+    // ==================== GET ORDER ITEMS ====================
     const getOrderItems = (order) => {
         if (!order || !products || products.length === 0) return [];
         
         return order.products.map((item) => {
             const productDetails = item.coffee || {};
-            
             return {
                 ...item,
                 name: productDetails?.name || item.name || 'Unknown Item',
@@ -237,21 +483,21 @@ const OrderDetailsPage = () => {
         });
     };
 
-    // Filter orders based on type
-    const filteredOrders = orders.filter(order => {
+    // ==================== FILTER ORDERS ====================
+    const filteredOrders = liveOrders.filter(order => {
         if (filterType === 'all') return true;
         if (filterType === 'delivery') return order.orderType?.toLowerCase() === 'delivery';
         if (filterType === 'dine_in') return order.orderType?.toLowerCase() === 'dine_in';
         return true;
     });
 
-    // Get counts for each type
-    const deliveryCount = orders.filter(o => o.orderType?.toLowerCase() === 'delivery').length;
-    const dineInCount = orders.filter(o => o.orderType?.toLowerCase() === 'dine_in').length;
+    // ==================== GET COUNTS ====================
+    const deliveryCount = liveOrders.filter(o => o.orderType?.toLowerCase() === 'delivery').length;
+    const dineInCount = liveOrders.filter(o => o.orderType?.toLowerCase() === 'dine_in').length;
 
-    // Expand all orders of a specific type
+    // ==================== EXPAND/COLLAPSE ALL ====================
     const expandAllByType = (type) => {
-        const ordersToExpand = orders.filter(order => {
+        const ordersToExpand = liveOrders.filter(order => {
             if (type === 'all') return true;
             if (type === 'delivery') return order.orderType?.toLowerCase() === 'delivery';
             if (type === 'dine_in') return order.orderType?.toLowerCase() === 'dine_in';
@@ -265,12 +511,22 @@ const OrderDetailsPage = () => {
         setExpandedOrders(newState);
     };
 
-    // Collapse all orders
     const collapseAll = () => {
         setExpandedOrders({});
     };
 
-    // Loading state
+    // ==================== MANUAL REFRESH ====================
+    const handleRefresh = () => {
+        dispatch(getMyOrders());
+        // Emit socket event to request latest data
+        if (socketRef.current && socketConnected) {
+            socketRef.current.emit('request-order-update', {
+                userId: localStorage.getItem('userId')
+            });
+        }
+    };
+
+    // ==================== LOADING STATE ====================
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -279,8 +535,8 @@ const OrderDetailsPage = () => {
         );
     }
 
-    // No orders state
-    if (!orders || orders.length === 0) {
+    // ==================== NO ORDERS STATE ====================
+    if (!liveOrders || liveOrders.length === 0) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3] pt-20 sm:pt-24 px-3 sm:px-4 overflow-x-hidden">
                 <div className="max-w-7xl mx-auto">
@@ -309,8 +565,38 @@ const OrderDetailsPage = () => {
         );
     }
 
+    // ==================== MAIN RENDER ====================
     return (
         <>
+            {/* ==================== NOTIFICATIONS ==================== */}
+            {notifications.length > 0 && (
+                <div className="fixed top-20 right-4 z-50 space-y-2 max-w-sm w-full">
+                    {notifications.map((notification) => (
+                        <div
+                            key={notification.id}
+                            className={`backdrop-blur-xl bg-white/95 border border-white/60 rounded-xl shadow-2xl p-3 sm:p-4 animate-slideInRight`}
+                        >
+                            <div className="flex items-start gap-3">
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-xs sm:text-sm font-medium text-gray-800">
+                                        {notification.message}
+                                    </p>
+                                    <p className="text-[10px] text-gray-400 mt-0.5">
+                                        {formatDate(notification.timestamp)}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => dismissNotification(notification.id)}
+                                    className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
+                                >
+                                    <ArrowLeft size={14} className="rotate-45" />
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
             <div className="min-h-screen bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3] pt-20 sm:pt-24 px-3 sm:px-4 pb-10 overflow-hidden">
 
                 {/* Glass Background */}
@@ -340,8 +626,39 @@ const OrderDetailsPage = () => {
                                 <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 truncate">
                                     My <span className="text-[#0D7C53]">Orders</span>
                                 </h1>
-                                <p className="text-sm text-gray-500">{orders.length} order{orders.length > 1 ? 's' : ''} found</p>
+                                <p className="text-sm text-gray-500">
+                                    {liveOrders.length} order{liveOrders.length > 1 ? 's' : ''} found
+                                </p>
                             </div>
+                        </div>
+
+                        {/* Connection Status & Refresh */}
+                        <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/40 backdrop-blur-sm border border-white/40 rounded-lg">
+                                {reconnecting ? (
+                                    <>
+                                        <Loader2 size={14} className="text-yellow-500 animate-spin" />
+                                        <span className="text-xs text-gray-600">Reconnecting...</span>
+                                    </>
+                                ) : socketConnected ? (
+                                    <>
+                                        <Wifi size={14} className="text-green-500" />
+                                        <span className="text-xs text-gray-600">Live</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <WifiOff size={14} className="text-red-500" />
+                                        <span className="text-xs text-gray-600">Offline</span>
+                                    </>
+                                )}
+                            </div>
+                            <button
+                                onClick={handleRefresh}
+                                className="p-2 rounded-lg bg-white/40 backdrop-blur-sm border border-white/40 hover:bg-white/60 transition-all"
+                                disabled={loading}
+                            >
+                                <RefreshCw size={18} className={`text-gray-600 ${loading ? 'animate-spin' : ''}`} />
+                            </button>
                         </div>
                     </div>
 
@@ -366,7 +683,7 @@ const OrderDetailsPage = () => {
                                     ? 'bg-white/20 text-white'
                                     : 'bg-gray-200/50 text-gray-600'
                             }`}>
-                                {orders.length}
+                                {liveOrders.length}
                             </span>
                         </button>
 
@@ -466,13 +783,16 @@ const OrderDetailsPage = () => {
                                 const trackingSteps = getTrackingSteps(order);
                                 const isCancelled = order.orderStatus?.toLowerCase() === 'cancelled';
                                 const status = order.orderStatus?.toLowerCase() || 'pending';
+                                
+                                // Check if this order has a live notification
+                                const hasLiveUpdate = notifications.some(n => n.orderId === order._id);
 
                                 return (
                                     <div 
                                         key={order._id}
                                         className={`backdrop-blur-xl bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 ${
                                             isCancelled ? 'opacity-75' : ''
-                                        }`}
+                                        } ${hasLiveUpdate ? 'ring-2 ring-[#0D7C53] ring-opacity-50' : ''}`}
                                     >
                                         {/* Order Header - Always Visible */}
                                         <div className="p-4 sm:p-6">
@@ -484,6 +804,14 @@ const OrderDetailsPage = () => {
                                                             #{order._id?.slice(-8)}
                                                         </span>
                                                         
+                                                        {/* Live Indicator */}
+                                                        {hasLiveUpdate && (
+                                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-500/20 border border-green-500/30 rounded-full text-[10px] text-green-600 animate-pulse">
+                                                                <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                                                                Live
+                                                            </span>
+                                                        )}
+                                                        
                                                         {/* Order Type Badge */}
                                                         <span className={`inline-flex items-center gap-1 px-2.5 py-1 backdrop-blur-sm border-2 rounded-full text-[10px] sm:text-xs font-bold shadow-sm ${
                                                             isDeliveryOrder
@@ -494,7 +822,7 @@ const OrderDetailsPage = () => {
                                                             {isDeliveryOrder ? 'Delivery' : 'Dine In'}
                                                         </span>
 
-                                                        {/* Order Status Badge - Using orderStatus */}
+                                                        {/* Order Status Badge */}
                                                         <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 backdrop-blur-sm border-2 rounded-full text-xs font-bold shadow-lg ${
                                                             isCancelled
                                                                 ? 'bg-red-500/90 border-red-600 text-white'
@@ -515,13 +843,6 @@ const OrderDetailsPage = () => {
                                                         }`}>
                                                             {order.paymentStatus === 'paid' ? '💳 Paid' : '💳 Pending'}
                                                         </span>
-
-                                                        {/* Status Description - New */}
-                                                        {statusInfo.description && (
-                                                            <span className="hidden sm:inline-block text-[10px] text-gray-500 bg-white/50 px-2 py-0.5 rounded-full">
-                                                                {statusInfo.description}
-                                                            </span>
-                                                        )}
                                                     </div>
 
                                                     {/* Order Info */}
@@ -537,6 +858,12 @@ const OrderDetailsPage = () => {
                                                         <span className="font-semibold text-[#0D7C53]">
                                                             {formatPrice(order.amount)}
                                                         </span>
+                                                        {order.updatedAt && (
+                                                            <span className="text-[10px] text-gray-400 flex items-center gap-1">
+                                                                <Clock size={12} />
+                                                                Updated: {formatDate(order.updatedAt)}
+                                                            </span>
+                                                        )}
                                                     </div>
                                                 </div>
 
@@ -566,7 +893,7 @@ const OrderDetailsPage = () => {
                                         {/* Order Details - Expandable */}
                                         {isExpanded && (
                                             <div className="border-t border-white/30 p-4 sm:p-6 bg-white/10 animate-fadeIn">
-                                                {/* Order Status Timeline - Using tracking data */}
+                                                {/* Order Status Timeline */}
                                                 {!isCancelled && (
                                                     <div className={`backdrop-blur-xl border rounded-xl p-4 mb-4 ${
                                                         isDeliveryOrder 
@@ -655,6 +982,11 @@ const OrderDetailsPage = () => {
                                                                 <p className="text-xs text-red-600">
                                                                     This order has been cancelled and will not be processed.
                                                                 </p>
+                                                                {order.cancelReason && (
+                                                                    <p className="text-xs text-red-500 mt-1">
+                                                                        Reason: {order.cancelReason}
+                                                                    </p>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     </div>
@@ -814,7 +1146,6 @@ const OrderDetailsPage = () => {
                                                                     </div>
                                                                 )}
 
-                                                                {/* Status Description */}
                                                                 <div className="flex justify-between">
                                                                     <span className="text-gray-500">Status Info</span>
                                                                     <span className="text-sm text-gray-600 text-right max-w-[150px]">
@@ -895,6 +1226,16 @@ const OrderDetailsPage = () => {
                     from { transform: rotate(0deg); }
                     to { transform: rotate(360deg); }
                 }
+                @keyframes slideInRight {
+                    from {
+                        opacity: 0;
+                        transform: translateX(100px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                }
                 .animate-pulse-slow { animation: pulse-slow 8s ease-in-out infinite; }
                 .animate-pulse-slow-delay { animation: pulse-slow-delay 10s ease-in-out infinite; }
                 .animate-float { animation: float 6s ease-in-out infinite; }
@@ -903,6 +1244,7 @@ const OrderDetailsPage = () => {
                 .animate-pulse { animation: pulse 2s ease-in-out infinite; }
                 .animate-bounce-slow { animation: bounce-slow 2s ease-in-out infinite; }
                 .animate-spin { animation: spin 2s linear infinite; }
+                .animate-slideInRight { animation: slideInRight 0.5s ease-out; }
             `}</style>
         </>
     );
