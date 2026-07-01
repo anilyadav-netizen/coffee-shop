@@ -30,7 +30,6 @@ exports.updateOrderStatus = async (req, res) => {
       });
     }
 
-    // Status Messages
     const statusMessages = {
       pending: "Order placed successfully.",
       confirmed: "Order confirmed.",
@@ -50,11 +49,30 @@ exports.updateOrderStatus = async (req, res) => {
 
     await order.save();
 
+    // 🔥 Emit socket event
+    const io = req.app.get("io");
+
+    io.to(orderId).emit("order-status-updated", {
+      success: true,
+      orderId: order._id,
+      orderStatus: order.orderStatus,
+      tracking: order.tracking,
+      updatedAt: new Date(),
+    });
+
+    // Agar user room use kar rahe ho to ye bhi kar sakte ho:
+    // io.to(`user-${order.user}`).emit("order-status-updated", {
+    //   orderId: order._id,
+    //   orderStatus: order.orderStatus,
+    //   tracking: order.tracking,
+    // });
+
     return res.status(200).json({
       success: true,
       message: "Order status updated successfully",
       order,
     });
+
   } catch (error) {
     console.log(error);
 
