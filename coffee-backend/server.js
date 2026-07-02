@@ -22,6 +22,7 @@ const paymentRoutes = require("./routes/paymentRoutes");
 const wishlistRoute = require("./routes/wishlistRoute");
 const categoryRoute = require("./routes/category.routes");
 const updatedeliveryRoute = require("./routes/orderRoutes");
+const tableRoutes = require("./routes/tableRoutes");
 
 // Create HTTP Server
 const server = http.createServer(app);
@@ -198,7 +199,7 @@ app.use("/api/payment", paymentRoutes);
 app.use("/api/wishlist", wishlistRoute);
 app.use("/api/category", categoryRoute);
 app.use("/api/updatedelivery", updatedeliveryRoute);
-
+app.use("/api/tables", tableRoutes);
 // DB
 connectDB();
 
