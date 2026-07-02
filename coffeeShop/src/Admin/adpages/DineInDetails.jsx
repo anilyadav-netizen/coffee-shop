@@ -431,155 +431,12 @@ const DineInDetails = () => {
                         </div>
                     </div>
 
-                    {/* Kitchen Operations */}
-                    <div className="bg-white dark:bg-[#1E293B] rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] overflow-hidden">
-                        <div className="p-4 border-b border-[#E2E8F0] dark:border-[#1E293B] bg-gradient-to-r from-[#F8FAFC] to-[#F1F5F9] dark:from-[#1E293B] dark:to-[#0F172A]">
-                            <h3 className="font-semibold text-[#0F172A] dark:text-white flex items-center gap-2">
-                                {/* <FaKitchenSet className="text-[#4F46E5]" /> */}
-                                Kitchen Operations
-                            </h3>
-                        </div>
-                        <div className="p-4">
-                            {/* Status Progress */}
-                            <div className="flex items-center justify-between mb-6">
-                                {['pending', 'confirmed', 'preparing', 'ready', 'served', 'completed'].map((s, index) => {
-                                    const isActive = status === s;
-                                    const isCompleted = order.tracking?.some(t => t.status === s) ||
-                                        ['completed', 'served', 'ready', 'preparing', 'confirmed'].includes(s) &&
-                                        ['pending', 'confirmed', 'preparing', 'ready', 'served', 'completed'].indexOf(s) <=
-                                        ['pending', 'confirmed', 'preparing', 'ready', 'served', 'completed'].indexOf(status);
-                                    const config = statusConfig[s];
-
-                                    return (
-                                        <React.Fragment key={s}>
-                                            <div className="flex flex-col items-center gap-1.5">
-                                                <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isActive
-                                                    ? config.bgColor + ' ring-2 ring-[#4F46E5] ring-offset-2 dark:ring-offset-[#0F172A]'
-                                                    : isCompleted
-                                                        ? 'bg-green-100 dark:bg-green-900/20 text-green-500'
-                                                        : 'bg-[#F1F5F9] dark:bg-[#0F172A] text-[#94A3B8]'
-                                                    }`}>
-                                                    {isCompleted && s !== status ? <FaCheckCircle /> : config.icon}
-                                                </div>
-                                                <span className={`text-[10px] font-medium ${isActive
-                                                    ? 'text-[#0F172A] dark:text-white'
-                                                    : 'text-[#64748B] dark:text-[#94A3B8]'
-                                                    }`}>
-                                                    {config.label.split(' ')[0]}
-                                                </span>
-                                            </div>
-                                            {index < 5 && (
-                                                <div className={`flex-1 h-0.5 ${['pending', 'confirmed', 'preparing', 'ready', 'served'].indexOf(s) <=
-                                                    ['pending', 'confirmed', 'preparing', 'ready', 'served'].indexOf(status)
-                                                    ? 'bg-[#4F46E5]'
-                                                    : 'bg-[#E2E8F0] dark:bg-[#1E293B]'
-                                                    }`} />
-                                            )}
-                                        </React.Fragment>
-                                    );
-                                })}
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="flex flex-wrap gap-3">
-                                {getActionButtons()?.map((action, index) => (
-                                    <button
-                                        key={index}
-                                        onClick={action.action}
-                                        className={`px-6 py-2.5 text-white rounded-lg font-medium flex items-center gap-2 transition-all hover:scale-105 hover:shadow-lg ${action.color}`}
-                                    >
-                                        {action.icon}
-                                        {action.label}
-                                    </button>
-                                ))}
-                                {statusInfo.canCancel && (
-                                    <button
-                                        onClick={() => setShowCancelModal(true)}
-                                        className="px-6 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium flex items-center gap-2 transition-all hover:scale-105 hover:shadow-lg"
-                                    >
-                                        <FaBan />
-                                        Cancel Order
-                                    </button>
-                                )}
-                                {!getActionButtons() && status !== 'cancelled' && (
-                                    <div className="text-[#64748B] dark:text-[#94A3B8] text-sm flex items-center gap-2">
-                                        <FaCheckCircle className="text-green-500" />
-                                        Order is completed
-                                    </div>
-                                )}
-                                {status === 'cancelled' && (
-                                    <div className="text-red-500 text-sm flex items-center gap-2">
-                                        <FaTimesCircle />
-                                        Order has been cancelled
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Kitchen Notes */}
-                    <div className="bg-white dark:bg-[#1E293B] rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] overflow-hidden">
-                        <div className="p-4 border-b border-[#E2E8F0] dark:border-[#1E293B] bg-gradient-to-r from-[#F8FAFC] to-[#F1F5F9] dark:from-[#1E293B] dark:to-[#0F172A]">
-                            <div className="flex items-center justify-between">
-                                <h3 className="font-semibold text-[#0F172A] dark:text-white flex items-center gap-2">
-                                    <MdNotes className="text-[#4F46E5]" />
-                                    Kitchen Notes
-                                </h3>
-                                {isEditingNotes ? ( 
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => setIsEditingNotes(false)}
-                                            className="px-3 py-1 text-sm text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#0F172A] rounded-lg transition-colors"
-                                        >
-                                            <FaTimes />
-                                        </button>
-                                        <button
-                                            onClick={handleSaveNotes}
-                                            className="px-3 py-1 bg-[#4F46E5] text-white text-sm rounded-lg hover:bg-[#4338CA] transition-colors flex items-center gap-1.5"
-                                        >
-                                            <FaSave />
-                                            Save
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <button
-                                        onClick={() => setIsEditingNotes(true)}
-                                        className="px-3 py-1 text-sm text-[#4F46E5] hover:bg-[#4F46E5]/10 rounded-lg transition-colors flex items-center gap-1.5"
-                                    >
-                                        <FaEdit />
-                                        Edit
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                        <div className="p-4">
-                            {isEditingNotes ? (
-                                <textarea
-                                    ref={notesRef}
-                                    value={kitchenNotes}
-                                    onChange={(e) => setKitchenNotes(e.target.value)}
-                                    placeholder="Add internal notes for kitchen staff..."
-                                    className="w-full p-3 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E2E8F0] dark:border-[#1E293B] rounded-lg text-[#0F172A] dark:text-white placeholder-[#94A3B8] focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent outline-none transition-all min-h-[100px]"
-                                />
-                            ) : (
-                                <div className="p-3 bg-[#F8FAFC] dark:bg-[#0F172A] rounded-lg min-h-[60px]">
-                                    {kitchenNotes ? (
-                                        <p className="text-[#0F172A] dark:text-white text-sm whitespace-pre-wrap">
-                                            {kitchenNotes}
-                                        </p>
-                                    ) : (
-                                        <p className="text-[#94A3B8] text-sm italic">No kitchen notes added</p>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    </div>
                 </div>
 
                 {/* Right Column - Sidebar */}
                 <div className="space-y-6">
                     {/* Order Summary */}
-                    <div className="bg-white dark:bg-[#1E293B] rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] overflow-hidden sticky top-6">
+                    <div className="bg-white dark:bg-[#1E293B] rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] overflow-hidden">
                         <div className="p-4 border-b border-[#E2E8F0] dark:border-[#1E293B] bg-gradient-to-r from-[#F8FAFC] to-[#F1F5F9] dark:from-[#1E293B] dark:to-[#0F172A]">
                             <h3 className="font-semibold text-[#0F172A] dark:text-white flex items-center gap-2">
                                 <FaReceipt className="text-[#4F46E5]" />
@@ -650,42 +507,6 @@ const DineInDetails = () => {
                         </div>
                     </div>
 
-                    {/* Order Timeline */}
-                    <div className="bg-white dark:bg-[#1E293B] rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] overflow-hidden">
-                        <div className="p-4 border-b border-[#E2E8F0] dark:border-[#1E293B] bg-gradient-to-r from-[#F8FAFC] to-[#F1F5F9] dark:from-[#1E293B] dark:to-[#0F172A]">
-                            <h3 className="font-semibold text-[#0F172A] dark:text-white flex items-center gap-2">
-                                <FaHistory className="text-[#4F46E5]" />
-                                Order Timeline
-                            </h3>
-                        </div>
-                        <div className="p-4 max-h-[400px] overflow-y-auto">
-                            <div className="space-y-4">
-                                {timeline.map((item, index) => (
-                                    <div key={index} className="flex gap-3">
-                                        <div className="flex flex-col items-center">
-                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${item.color} bg-opacity-10`}>
-                                                {item.icon}
-                                            </div>
-                                            {index < timeline.length - 1 && (
-                                                <div className="w-0.5 flex-1 bg-[#E2E8F0] dark:bg-[#1E293B] mt-1" />
-                                            )}
-                                        </div>
-                                        <div className="flex-1 pt-0.5">
-                                            <p className="text-sm font-medium text-[#0F172A] dark:text-white">
-                                                {item.status}
-                                            </p>
-                                            {item.message && (
-                                                <p className="text-xs text-[#64748B] dark:text-[#94A3B8]">{item.message}</p>
-                                            )}
-                                            <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-0.5">
-                                                {new Date(item.time).toLocaleString()}
-                                            </p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
 
