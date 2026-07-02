@@ -36,6 +36,8 @@ import DeliveryOrders from "./Admin/adpages/DeliveryOrders";
 import DineInDetails from "./Admin/adpages/DineInDetails";
 import DeliveryDetailsPage from "./Admin/adpages/DeliveryDetailsPage";
 import TablePage from "./Admin/adpages/TablePage";
+import Profile from "./pages/Profile";
+import UpdateAddress from "./pages/UpdateAddress";
 
 function App() {
 
@@ -56,6 +58,8 @@ function App() {
           <Route path="/journey" element={<Journey />} />
           <Route path="/review" element={<Review />} />
           <Route path="/orderDetails" element={<OrderDetailsPage />} />
+          <Route path="/profile" element={<Profile/>} />
+          <Route path="/update-address/:addressId" element={<UpdateAddress/>} />
           <Route
             path="/cart"
             element={

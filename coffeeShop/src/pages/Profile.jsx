@@ -1,0 +1,772 @@
+import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import {
+    User,
+    Mail,
+    Phone,
+    Calendar,
+    MapPin,
+    ShoppingBag,
+    Heart,
+    Settings,
+    LogOut,
+    Key,
+    ChevronRight,
+    Award,
+    Home,
+    Briefcase,
+    Building,
+    Edit,
+    Loader2,
+    Package,
+    Coffee,
+    ShoppingCart,
+    Trash2,
+    Store,
+    Truck,
+    ArrowRight
+} from 'lucide-react';
+import { logout } from '../redux/Slicer/authSlice';
+import { getMyOrders } from '../redux/Slicer/paymentSlice';
+import { getWishlist, removeFromWishlist } from '../redux/Slicer/wishlistSlice';
+import { addToCart, getCart } from '../redux/Slicer/cartSlice';
+
+// --- Reusable Components ---
+
+const GlassCard = ({ children, className = '' }) => (
+    <div className={`bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 dark:border-gray-700/30 p-6 transition-all duration-300 hover:shadow-xl ${className}`}>
+        {children}
+    </div>
+);
+
+const SkeletonLoader = () => (
+    <div className="animate-pulse space-y-4">
+        <div className="flex items-center space-x-4">
+            <div className="w-20 h-20 rounded-full bg-gray-300 dark:bg-gray-700"></div>
+            <div className="flex-1 space-y-2">
+                <div className="h-4 w-3/4 bg-gray-300 dark:bg-gray-700 rounded"></div>
+                <div className="h-3 w-1/2 bg-gray-300 dark:bg-gray-700 rounded"></div>
+            </div>
+        </div>
+        <div className="space-y-2">
+            <div className="h-3 w-full bg-gray-300 dark:bg-gray-700 rounded"></div>
+            <div className="h-3 w-5/6 bg-gray-300 dark:bg-gray-700 rounded"></div>
+            <div className="h-3 w-2/3 bg-gray-300 dark:bg-gray-700 rounded"></div>
+        </div>
+    </div>
+);
+
+const getAddressIcon = (type) => {
+    switch (type?.toLowerCase()) {
+        case 'home': return <Home className="w-4 h-4" />;
+        case 'office': return <Briefcase className="w-4 h-4" />;
+        case 'hostel': return <Building className="w-4 h-4" />;
+        default: return <MapPin className="w-4 h-4" />;
+    }
+};
+
+// --- Main Profile Component ---
+
+const Profile = () => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const { user, isLoading } = useSelector((state) => state.auth);
+    const { orders, loading: ordersLoading } = useSelector((state) => state.payment);
+    const { items: wishlistItems, loading: wishlistLoading } = useSelector((state) => state.wishlist);
+    const { isAuthenticated } = useSelector((state) => state.auth);
+    
+    const [isEditing, setIsEditing] = useState(false);
+    const [addedItems, setAddedItems] = useState({});
+
+    // Fetch orders and wishlist when component mounts
+    useEffect(() => {
+        dispatch(getMyOrders());
+        dispatch(getWishlist());
+    }, [dispatch]);
+
+    // If user data is loading, show skeletons
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-green-50/50 to-white dark:from-gray-900 dark:to-gray-800 p-4 md:p-8">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="lg:col-span-1">
+                            <GlassCard><SkeletonLoader /></GlassCard>
+                        </div>
+                        <div className="lg:col-span-2 space-y-6">
+                            <GlassCard><SkeletonLoader /></GlassCard>
+                            <GlassCard><SkeletonLoader /></GlassCard>
+                            <GlassCard><SkeletonLoader /></GlassCard>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // If no user data, show a message
+    if (!user) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50/50 to-white dark:from-gray-900 dark:to-gray-800">
+                <GlassCard className="text-center max-w-md">
+                    <User className="w-16 h-16 mx-auto text-gray-400 dark:text-gray-600 mb-4" />
+                    <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">No User Data</h2>
+                    <p className="text-gray-600 dark:text-gray-400 mt-2">Please log in to view your profile.</p>
+                </GlassCard>
+            </div>
+        );
+    }
+
+    // Extract user data
+    const {
+        name = 'Coffee Lover',
+        email = 'user@coffeehub.com',
+        role = 'customer',
+        mobile = '+1 234 567 890',
+        joinDate = '2024-01-15',
+        avatar = null,
+        addresses = [],
+    } = user;
+
+    const getInitials = (name) => {
+        return name
+            .split(' ')
+            .map(word => word[0])
+            .join('')
+            .toUpperCase()
+            .slice(0, 2);
+    };
+
+    const getRoleBadgeColor = (role) => {
+        switch (role?.toLowerCase()) {
+            case 'admin': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
+            case 'manager': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
+            default: return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
+        }
+    };
+
+    const handleLogout = () => {
+        dispatch(logout());
+    };
+
+    const handleUpdateAddress = (addressId) => {
+        navigate(`/update-address/${addressId}`);
+    };
+
+    // Format order date
+    const formatDate = (date) => {
+        if (!date) return 'N/A';
+        return new Date(date).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    };
+
+    // Get order status color
+    const getOrderStatusColor = (status) => {
+        switch (status?.toLowerCase()) {
+            case 'delivered': 
+                return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
+            case 'processing': 
+                return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
+            case 'shipped': 
+                return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
+            case 'cancelled': 
+                return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
+            case 'pending': 
+                return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400';
+            default: 
+                return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400';
+        }
+    };
+
+    // Get order status icon
+    const getOrderStatusIcon = (status) => {
+        switch (status?.toLowerCase()) {
+            case 'delivered': return '✅';
+            case 'processing': return '🔄';
+            case 'shipped': return '📦';
+            case 'cancelled': return '❌';
+            case 'pending': return '⏳';
+            default: return '📋';
+        }
+    };
+
+    // Get product image from products array
+    const getProductImage = (product) => {
+        if (product?.coffee?.image) {
+            return product.coffee.image;
+        }
+        if (product?.coffee?.images && product.coffee.images.length > 0) {
+            return product.coffee.images[0];
+        }
+        if (product?.image) {
+            return product.image;
+        }
+        if (product?.images && product.images.length > 0) {
+            return product.images[0];
+        }
+        return 'https://placehold.co/100x100/e2e8f0/64748b?text=☕';
+    };
+
+    // Get product name
+    const getProductName = (product) => {
+        if (product?.coffee?.name) return product.coffee.name;
+        if (product?.name) return product.name;
+        return 'Coffee Item';
+    };
+
+    // Get product price
+    const getProductPrice = (product) => {
+        if (product?.price) return product.price;
+        if (product?.coffee?.price) return product.coffee.price;
+        return 0;
+    };
+
+    // ============ WISHLIST FUNCTIONS ============
+    
+    // Handle add to cart from wishlist
+    const handleAddToCart = async (item) => {
+        if (!isAuthenticated) {
+            navigate('/login');
+            return;
+        }
+
+        const coffeeData = item.coffee || item;
+        const coffeeId = coffeeData._id || item._id || item.id;
+        const amount = coffeeData.discountPrice || coffeeData.price;
+
+        try {
+            const result = await dispatch(addToCart({
+                coffeeId: coffeeId,
+                quantity: 1,
+                amount: amount
+            }));
+
+            if (addToCart.fulfilled.match(result)) {
+                await dispatch(getCart());
+                setAddedItems(prev => ({ ...prev, [item._id || item.id]: true }));
+                setTimeout(() => {
+                    setAddedItems(prev => ({ ...prev, [item._id || item.id]: false }));
+                }, 1500);
+            }
+        } catch (error) {
+            console.error("Add to cart error:", error);
+        }
+    };
+
+    // Handle remove from wishlist
+    const handleRemoveFromWishlist = (itemId) => {
+        dispatch(removeFromWishlist(itemId))
+            .unwrap()
+            .then(() => {
+                // Success - automatically removed from state
+            })
+            .catch((error) => {
+                console.error("Failed to remove:", error);
+            });
+    };
+
+    // Get wishlist item display data
+    const getWishlistItemData = (item) => {
+        const coffeeData = item.coffee || item;
+        return {
+            id: item._id,
+            coffeeId: coffeeData._id || item._id,
+            name: coffeeData.name || 'Coffee Item',
+            image: coffeeData.image || 'https://placehold.co/100x100/e2e8f0/64748b?text=☕',
+            price: coffeeData.discountPrice || coffeeData.price || 0,
+            originalPrice: coffeeData.price,
+            description: coffeeData.description || ''
+        };
+    };
+
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-green-50/30 to-white dark:from-gray-900 dark:to-gray-800 p-4 md:p-8 transition-colors duration-300 mt-20">
+            <div className="max-w-7xl mx-auto">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                    {/* --- Left Sidebar Profile Card --- */}
+                    <div className="lg:col-span-1">
+                        <GlassCard className="text-center sticky top-8">
+                            {/* Avatar */}
+                            <div className="relative mx-auto w-28 h-28 rounded-full bg-gradient-to-br from-green-600 to-green-400 flex items-center justify-center text-white text-4xl font-bold shadow-lg ring-4 ring-white/50 dark:ring-gray-700/50 transition-transform duration-300 hover:scale-105">
+                                {avatar ? (
+                                    <img src={avatar} alt={name} className="w-full h-full rounded-full object-cover" />
+                                ) : (
+                                    getInitials(name)
+                                )}
+                            </div>
+
+                            {/* User Info */}
+                            <h2 className="mt-4 text-2xl font-bold text-gray-800 dark:text-white">{name}</h2>
+                            <p className="text-gray-600 dark:text-gray-400">{email}</p>
+
+                            {/* Role Badge */}
+                            <span className={`inline-block mt-3 px-4 py-1.5 rounded-full text-sm font-medium ${getRoleBadgeColor(role)}`}>
+                                {role?.charAt(0).toUpperCase() + role?.slice(1) || 'Customer'}
+                            </span>
+
+                            {/* Join Date */}
+                            <div className="mt-4 flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">
+                                <Calendar className="w-4 h-4 mr-2" />
+                                Joined {new Date(joinDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                            </div>
+
+                            {/* Edit Profile Button */}
+                            <button
+                                onClick={() => setIsEditing(!isEditing)}
+                                className="mt-6 w-full py-2.5 px-4 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all duration-200 hover:shadow-lg flex items-center justify-center gap-2"
+                            >
+                                <Edit className="w-4 h-4" />
+                                {isEditing ? 'Cancel' : 'Edit Profile'}
+                            </button>
+                        </GlassCard>
+                    </div>
+
+                    {/* --- Right Content Area --- */}
+                    <div className="lg:col-span-2 space-y-6">
+
+                        {/* 1. Personal Information Card */}
+                        <GlassCard>
+                            <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2 mb-4">
+                                <User className="w-5 h-5 text-green-600 dark:text-green-400" />
+                                Personal Information
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-sm text-gray-500 dark:text-gray-400">Full Name</label>
+                                    <p className="text-gray-800 dark:text-white font-medium">{name}</p>
+                                </div>
+                                <div>
+                                    <label className="text-sm text-gray-500 dark:text-gray-400">Email Address</label>
+                                    <p className="text-gray-800 dark:text-white font-medium flex items-center gap-2">
+                                        <Mail className="w-4 h-4 text-gray-400" />
+                                        {email}
+                                    </p>
+                                </div>
+                                <div>
+                                    <label className="text-sm text-gray-500 dark:text-gray-400">Mobile Number</label>
+                                    <p className="text-gray-800 dark:text-white font-medium flex items-center gap-2">
+                                        <Phone className="w-4 h-4 text-gray-400" />
+                                        {mobile}
+                                    </p>
+                                </div>
+                                <div>
+                                    <label className="text-sm text-gray-500 dark:text-gray-400">Account Role</label>
+                                    <p className="text-gray-800 dark:text-white font-medium flex items-center gap-2">
+                                        <Award className="w-4 h-4 text-gray-400" />
+                                        {role?.charAt(0).toUpperCase() + role?.slice(1) || 'Customer'}
+                                    </p>
+                                </div>
+                            </div>
+                        </GlassCard>
+
+                        {/* 2. Saved Addresses */}
+                        <GlassCard>
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+                                    <MapPin className="w-5 h-5 text-green-600 dark:text-green-400" />
+                                    Saved Addresses
+                                </h3>
+                                <span className="text-sm text-gray-500 dark:text-gray-400">
+                                    {addresses?.length || 0} address{addresses?.length !== 1 ? 'es' : ''}
+                                </span>
+                            </div>
+
+                            {addresses && addresses.length > 0 ? (
+                                <div className="space-y-4">
+                                    {addresses.map((address) => (
+                                        <div
+                                            key={address._id || address.id}
+                                            className={`bg-gray-50 dark:bg-gray-700/30 rounded-xl p-4 border transition-all hover:shadow-md ${address.isDefault
+                                                    ? 'border-green-300 dark:border-green-700 bg-green-50/50 dark:bg-green-900/20'
+                                                    : 'border-gray-200 dark:border-gray-700'
+                                                }`}
+                                        >
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex-1 space-y-2">
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <span className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                            {getAddressIcon(address.type)}
+                                                            {address.type || 'Home'}
+                                                        </span>
+                                                        {address.isDefault && (
+                                                            <span className="inline-block bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                                                                Default
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-sm">
+                                                        <div>
+                                                            <span className="text-gray-500 dark:text-gray-400">Name:</span>
+                                                            <span className="ml-1 text-gray-800 dark:text-white font-medium">{address.name}</span>
+                                                        </div>
+                                                        <div>
+                                                            <span className="text-gray-500 dark:text-gray-400">Phone:</span>
+                                                            <span className="ml-1 text-gray-800 dark:text-white">{address.phone}</span>
+                                                        </div>
+                                                        <div>
+                                                            <span className="text-gray-500 dark:text-gray-400">Email:</span>
+                                                            <span className="ml-1 text-gray-800 dark:text-white">{address.email}</span>
+                                                        </div>
+                                                        <div className="sm:col-span-2">
+                                                            <span className="text-gray-500 dark:text-gray-400">Address:</span>
+                                                            <span className="ml-1 text-gray-800 dark:text-white">
+                                                                {address.address}, {address.city}, {address.state} - {address.pincode}
+                                                            </span>
+                                                            {address.landmark && (
+                                                                <span className="ml-1 text-gray-500 dark:text-gray-400">
+                                                                    (Landmark: {address.landmark})
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <button
+                                                    onClick={() => handleUpdateAddress(address._id || address.id)}
+                                                    className="ml-4 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all hover:shadow-lg flex items-center gap-2 flex-shrink-0 text-sm"
+                                                >
+                                                    <Edit className="w-4 h-4" />
+                                                    Update Address
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-8">
+                                    <MapPin className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-600 mb-3" />
+                                    <p className="text-gray-500 dark:text-gray-400">No addresses saved yet.</p>
+                                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Add your first address to get started.</p>
+                                </div>
+                            )}
+                        </GlassCard>
+
+                        {/* 3. Recent Orders */}
+                        <GlassCard>
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+                                    <ShoppingBag className="w-5 h-5 text-green-600 dark:text-green-400" />
+                                    Recent Orders
+                                </h3>
+                                <button
+                                    onClick={() => navigate('/orders')}
+                                    className="text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium flex items-center gap-1 transition-colors"
+                                >
+                                    View All Orders
+                                    <ChevronRight className="w-4 h-4" />
+                                </button>
+                            </div>
+
+                            {ordersLoading ? (
+                                <div className="space-y-3">
+                                    {[1, 2, 3].map((i) => (
+                                        <div key={i} className="animate-pulse flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl">
+                                            <div className="space-y-2">
+                                                <div className="h-4 w-24 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                                                <div className="h-3 w-20 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                                            </div>
+                                            <div className="text-right space-y-2">
+                                                <div className="h-4 w-16 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                                                <div className="h-3 w-12 bg-gray-300 dark:bg-gray-600 rounded ml-auto"></div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : orders && orders.length > 0 ? (
+                                <div className="space-y-4">
+                                    {orders.slice(0, 2).map((order) => {
+                                        const isDineIn = order.orderType === 'dine_in';
+                                        const tableNumber = order.table?.tableNumber;
+                                        
+                                        return (
+                                        <div
+                                            key={order._id}
+                                            className="bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-gray-200 dark:border-gray-700/50 hover:border-green-300 dark:hover:border-green-700 transition-all overflow-hidden"
+                                        >
+                                            {/* Order Header */}
+                                            <div 
+                                                className="p-3 cursor-pointer hover:bg-gray-100/50 dark:hover:bg-gray-600/20 transition-colors"
+                                                onClick={() => navigate(`/orders/${order._id}`)}
+                                            >
+                                                <div className="flex flex-wrap items-center justify-between gap-2">
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-lg">{getOrderStatusIcon(order.orderStatus)}</span>
+                                                        <div>
+                                                            <p className="font-medium text-gray-800 dark:text-white text-sm">
+                                                                Order #{order._id?.slice(-6)}
+                                                            </p>
+                                                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                                {formatDate(order.createdAt)}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className={`text-xs px-2 py-0.5 rounded-full flex items-center gap-1 ${
+                                                            isDineIn 
+                                                                ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' 
+                                                                : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                                                        }`}>
+                                                            {isDineIn ? '🍽️ Dine In' : '🚚 Delivery'}
+                                                            {isDineIn && tableNumber && (
+                                                                <span className="font-bold">(Table {tableNumber})</span>
+                                                            )}
+                                                        </span>
+                                                        <div className="text-right">
+                                                            <p className="font-bold text-green-600 dark:text-green-400 text-sm">
+                                                                ₹{order.amount.toFixed(2)}
+                                                            </p>
+                                                            <span className={`text-xs px-2 py-0.5 rounded-full ${getOrderStatusColor(order.orderStatus)}`}>
+                                                                {order.orderStatus || 'Pending'}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Order Items */}
+                                            <div className="border-t border-gray-200/50 dark:border-gray-700/50 p-3">
+                                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-1">
+                                                    <Coffee size={12} />
+                                                    {order.products?.length || 0} item{order.products?.length !== 1 ? 's' : ''}
+                                                </p>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                    {order.products?.slice(0, 4).map((product, index) => {
+                                                        const imageUrl = getProductImage(product);
+                                                        const productName = getProductName(product);
+                                                        const productPrice = getProductPrice(product);
+                                                        const quantity = product.quantity || 1;
+                                                        const totalPrice = productPrice * quantity;
+                                                        
+                                                        return (
+                                                        <div 
+                                                            key={product._id || index}
+                                                            className="flex items-center gap-2 bg-white/50 dark:bg-gray-800/30 rounded-lg p-2 hover:bg-white/80 dark:hover:bg-gray-800/50 transition-colors"
+                                                        >
+                                                            <img
+                                                                src={imageUrl}
+                                                                alt={productName}
+                                                                className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
+                                                                onError={(e) => {
+                                                                    e.target.src = 'https://placehold.co/100x100/e2e8f0/64748b?text=☕';
+                                                                }}
+                                                            />
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className="text-xs font-medium text-gray-800 dark:text-white truncate">
+                                                                    {productName}
+                                                                </p>
+                                                                <div className="flex items-center justify-between">
+                                                                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                                                                        Qty: {quantity}
+                                                                    </span>
+                                                                    <span className="text-xs font-semibold text-green-600 dark:text-green-400">
+                                                                        ₹{totalPrice.toFixed(2)}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )})}
+                                                    {order.products?.length > 4 && (
+                                                        <div className="flex items-center justify-center bg-white/50 dark:bg-gray-800/30 rounded-lg p-2">
+                                                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                                                                +{order.products.length - 4} more items
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )})}
+                                </div>
+                            ) : (
+                                <div className="text-center py-8">
+                                    <Package className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-600 mb-3" />
+                                    <p className="text-gray-500 dark:text-gray-400">No orders yet.</p>
+                                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Start shopping to see your orders here.</p>
+                                    <button
+                                        onClick={() => navigate('/menu')}
+                                        className="mt-4 px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all hover:shadow-lg"
+                                    >
+                                        Start Shopping
+                                    </button>
+                                </div>
+                            )}
+                        </GlassCard>
+
+                        {/* 4. Wishlist Section - Same as Wishlist Page Style */}
+                        <GlassCard>
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+                                    <Heart className="w-5 h-5 text-green-600 dark:text-green-400" />
+                                    My Wishlist
+                                </h3>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                                        {wishlistItems?.length || 0} items
+                                    </span>
+                                    <button
+                                        onClick={() => navigate('/wishlist')}
+                                        className="text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium flex items-center gap-1 transition-colors"
+                                    >
+                                        View All
+                                        <ChevronRight className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {wishlistLoading ? (
+                                <div className="space-y-3">
+                                    {[1, 2].map((i) => (
+                                        <div key={i} className="animate-pulse flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl">
+                                            <div className="w-16 h-16 bg-gray-300 dark:bg-gray-600 rounded-lg"></div>
+                                            <div className="flex-1 space-y-2">
+                                                <div className="h-4 w-32 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                                                <div className="h-3 w-20 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : wishlistItems && wishlistItems.length > 0 ? (
+                                <div className="space-y-3">
+                                    {wishlistItems.slice(0, 3).map((item) => {
+                                        const itemData = getWishlistItemData(item);
+                                        
+                                        return (
+                                            <div
+                                                key={itemData.id}
+                                                className="group bg-white/30 dark:bg-gray-800/30 border border-white/40 dark:border-gray-700/50 rounded-xl p-3 shadow-md shadow-black/5 hover:shadow-lg transition-all duration-300"
+                                            >
+                                                <div className="flex gap-3">
+                                                    {/* Image */}
+                                                    <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100/50 border border-white/20">
+                                                        <img
+                                                            src={itemData.image}
+                                                            alt={itemData.name}
+                                                            className="w-full h-full object-cover"
+                                                            onError={(e) => {
+                                                                e.target.src = 'https://placehold.co/100x100/e2e8f0/64748b?text=☕';
+                                                            }}
+                                                        />
+                                                    </div>
+
+                                                    {/* Details */}
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-start justify-between gap-2">
+                                                            <div className="min-w-0 flex-1">
+                                                                <h3 className="font-semibold text-gray-800 dark:text-white text-sm truncate">
+                                                                    {itemData.name}
+                                                                </h3>
+                                                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                                                    {itemData.description || 'Coffee'}
+                                                                </p>
+                                                            </div>
+                                                            <button
+                                                                onClick={() => handleRemoveFromWishlist(itemData.id)}
+                                                                className="p-1 rounded-full bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 transition-all flex-shrink-0"
+                                                            >
+                                                                <Trash2 className="w-4 h-4 text-red-500 dark:text-red-400" />
+                                                            </button>
+                                                        </div>
+
+                                                        {/* Price Section */}
+                                                        <div className="flex flex-row items-center justify-between mt-1 gap-2">
+                                                            <div className="flex items-center gap-1 flex-wrap">
+                                                                <span className="font-bold text-[#0D7C53] text-sm">
+                                                                    ₹{itemData.price.toFixed(2)}
+                                                                </span>
+                                                                {itemData.originalPrice && itemData.originalPrice > itemData.price && (
+                                                                    <span className="text-xs text-gray-400 line-through">
+                                                                        ₹{itemData.originalPrice.toFixed(2)}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+
+                                                            {/* Add to Cart Button */}
+                                                            <button
+                                                                onClick={() => handleAddToCart(item)}
+                                                                className={`px-3 py-1.5 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-1.5 text-sm ${
+                                                                    addedItems[itemData.id]
+                                                                        ? 'bg-green-500 text-white'
+                                                                        : 'bg-gradient-to-r from-[#0D7C53] to-green-600 text-white hover:shadow-lg hover:scale-[1.02]'
+                                                                }`}
+                                                            >
+                                                                {addedItems[itemData.id] ? (
+                                                                    <>
+                                                                        <span>Added ✓</span>
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <ShoppingCart className="w-4 h-4" />
+                                                                        Add
+                                                                    </>
+                                                                )}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                    {wishlistItems.length > 3 && (
+                                        <button
+                                            onClick={() => navigate('/wishlist')}
+                                            className="w-full text-center text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium py-2 transition-colors border-t border-gray-200/50 dark:border-gray-700/50 mt-2 pt-3"
+                                        >
+                                            + {wishlistItems.length - 3} more items in wishlist
+                                        </button>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="text-center py-8">
+                                    <Heart className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-600 mb-3" />
+                                    <p className="text-gray-500 dark:text-gray-400">Your wishlist is empty</p>
+                                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Start adding your favourite coffee items</p>
+                                    <button
+                                        onClick={() => navigate('/menu')}
+                                        className="mt-4 px-6 py-2 bg-gradient-to-r from-[#0D7C53] to-green-600 text-white rounded-full font-medium hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center gap-2 text-sm mx-auto"
+                                    >
+                                        <Coffee size={16} />
+                                        Browse Menu
+                                        <ArrowRight size={14} />
+                                    </button>
+                                </div>
+                            )}
+                        </GlassCard>
+
+                        {/* 5. Account Settings */}
+                        <GlassCard>
+                            <h4 className="font-semibold text-gray-800 dark:text-white flex items-center gap-2 mb-3">
+                                <Settings className="w-5 h-5 text-green-600 dark:text-green-400" />
+                                Account Settings
+                            </h4>
+                            <div className="space-y-2">
+                                <button
+                                    onClick={() => navigate('/change-password')}
+                                    className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg text-gray-700 dark:text-gray-300 font-medium transition-all"
+                                >
+                                    <Key className="w-4 h-4" />
+                                    Change Password
+                                </button>
+                                <button
+                                    onClick={handleLogout}
+                                    className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg font-medium transition-all"
+                                >
+                                    <LogOut className="w-4 h-4" />
+                                    Logout
+                                </button>
+                            </div>
+                        </GlassCard>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default Profile;

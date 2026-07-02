@@ -1,11 +1,15 @@
 // src/components/ProfileDropdown.jsx
 
 import { useState, useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { User, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
+import { User, ShoppingBag, Heart, LogOut } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../redux/Slicer/authSlice";
 
 const ProfileDropdown = () => {
+
+    const dispatch = useDispatch();
     const [open, setOpen] = useState(false);
 
     const { user, isAuthenticated } = useSelector(
@@ -42,6 +46,7 @@ const ProfileDropdown = () => {
         // Agar Redux logout action hai to yahan dispatch karo
         // dispatch(logout())
 
+        dispatch(logout());
         setOpen(false);
         navigate("/");
         window.location.reload();
@@ -129,6 +134,19 @@ const ProfileDropdown = () => {
                                     </div>
                                 </div>
                             </div>
+                            <Link
+                                to="/profile"
+                                onClick={() => setOpen(false)}
+                                className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:text-[#0D7C53] hover:bg-[#0D7C53]/10 transition-all duration-300 group"
+                            >
+                                <span className="w-9 h-9 rounded-full bg-[#0D7C53]/10 flex items-center justify-center group-hover:bg-[#0D7C53]/20 transition-all">
+                                    <User className="w-5 h-5 text-[#0D7C53]" />
+                                </span>
+
+                                <span className="font-medium text-base">
+                                    My Profile
+                                </span>
+                            </Link>
 
                             {/* Menu Items */}
                             <div className="p-1">
