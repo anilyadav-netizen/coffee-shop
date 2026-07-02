@@ -1106,7 +1106,7 @@ const DeliveryDetailsPage = () => {
         {/* RIGHT COLUMN - SIDEBAR */}
         <div className="space-y-6">
           {/* ORDER SUMMARY */}
-          <div className="bg-white dark:bg-[#1E293B] rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] overflow-hidden sticky top-6">
+          <div className="bg-white dark:bg-[#1E293B] rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] overflow-hidden">
             <div className="p-4 border-b border-[#E2E8F0] dark:border-[#1E293B] bg-gradient-to-r from-[#F8FAFC] to-[#F1F5F9] dark:from-[#1E293B] dark:to-[#0F172A]">
               <h3 className="font-semibold text-[#0F172A] dark:text-white flex items-center gap-2">
                 <FaReceipt className="text-[#4F46E5]" />

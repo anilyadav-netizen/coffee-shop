@@ -48,7 +48,6 @@ const DineInOrders = () => {
   const [dineInOrders, setDineInOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
   const [sortConfig, setSortConfig] = useState({ key: 'createdAt', direction: 'desc' });
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(9);
@@ -86,11 +85,6 @@ const DineInOrders = () => {
       );
     }
 
-    // Status Filter
-    if (filterStatus !== 'all') {
-      result = result.filter(order => order.orderStatus === filterStatus);
-    }
-
     // Sorting
     if (sortConfig.key) {
       result.sort((a, b) => {
@@ -121,64 +115,13 @@ const DineInOrders = () => {
 
     setFilteredOrders(result);
     setCurrentPage(1);
-  }, [dineInOrders, searchTerm, filterStatus, sortConfig]);
+  }, [dineInOrders, searchTerm, sortConfig]);
 
   // Pagination
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentOrders = filteredOrders.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
-
-  // Status counts
-  const statusCounts = useMemo(() => ({
-    all: dineInOrders.length,
-    pending: dineInOrders.filter(o => o.orderStatus === 'pending').length,
-    confirmed: dineInOrders.filter(o => o.orderStatus === 'confirmed').length,
-    preparing: dineInOrders.filter(o => o.orderStatus === 'preparing').length,
-    ready: dineInOrders.filter(o => o.orderStatus === 'ready').length,
-    served: dineInOrders.filter(o => o.orderStatus === 'served').length,
-    completed: dineInOrders.filter(o => o.orderStatus === 'completed').length,
-    cancelled: dineInOrders.filter(o => o.orderStatus === 'cancelled').length,
-  }), [dineInOrders]);
-
-  // Status configurations
-  const statusConfig = {
-    pending: { 
-      icon: <FaHourglassHalf />,
-      color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
-      dotColor: 'bg-yellow-500'
-    },
-    confirmed: { 
-      icon: <FaCheckCircle />,
-      color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-      dotColor: 'bg-blue-500'
-    },
-    preparing: { 
-      icon: <FaSpinner className="animate-spin" />,
-      color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400',
-      dotColor: 'bg-indigo-500'
-    },
-    ready: { 
-      icon: <FaCheckCircle />,
-      color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-      dotColor: 'bg-green-500'
-    },
-    served: { 
-      icon: <FaCheckCircle />,
-      color: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400',
-      dotColor: 'bg-teal-500'
-    },
-    completed: { 
-      icon: <FaCheckCircle />,
-      color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
-      dotColor: 'bg-purple-500'
-    },
-    cancelled: { 
-      icon: <FaTimesCircle />,
-      color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-      dotColor: 'bg-red-500'
-    }
-  };
 
   // Payment method icons
   const getPaymentIcon = (method) => {
@@ -207,28 +150,12 @@ const DineInOrders = () => {
       : <FaSortDown className="text-[#4F46E5]" />;
   };
 
-  // Update order status
-  const updateOrderStatus = async (orderId, newStatus) => {
-    try {
-      // await API.put(`/orders/${orderId}/status`, { orderStatus: newStatus });
-      dispatch(getAllOrders());
-      setShowActionMenu(null);
-    } catch (error) {
-      console.error('Error updating order:', error);
-    }
-  };
-
   // Loading Skeleton
   if (loading) {
     return (
       <div className="p-6 bg-gray-50 dark:bg-[#0F172A] min-h-screen">
         <div className="animate-pulse">
           <div className="h-8 w-48 bg-gray-200 dark:bg-[#1E293B] rounded-lg mb-6"></div>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-6">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="h-20 bg-gray-200 dark:bg-[#1E293B] rounded-xl"></div>
-            ))}
-          </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="h-64 bg-gray-200 dark:bg-[#1E293B] rounded-xl"></div>
@@ -294,71 +221,17 @@ const DineInOrders = () => {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
-        {[
-          { key: 'all', label: 'All', count: statusCounts.all, color: 'text-[#4F46E5]' },
-          { key: 'pending', label: 'Pending', count: statusCounts.pending, color: 'text-yellow-500' },
-          { key: 'confirmed', label: 'Confirmed', count: statusCounts.confirmed, color: 'text-blue-500' },
-          { key: 'preparing', label: 'Preparing', count: statusCounts.preparing, color: 'text-indigo-500' },
-          { key: 'ready', label: 'Ready', count: statusCounts.ready, color: 'text-green-500' },
-          { key: 'served', label: 'Served', count: statusCounts.served, color: 'text-teal-500' },
-          { key: 'completed', label: 'Done', count: statusCounts.completed, color: 'text-purple-500' },
-          { key: 'cancelled', label: 'Cancelled', count: statusCounts.cancelled, color: 'text-red-500' },
-        ].map((stat) => (
-          <div
-            key={stat.key}
-            onClick={() => setFilterStatus(stat.key)}
-            className={`bg-white dark:bg-[#1E293B] rounded-xl p-3 border transition-all cursor-pointer hover:shadow-md ${
-              filterStatus === stat.key
-                ? 'border-[#4F46E5] ring-2 ring-[#4F46E5]/20 dark:ring-[#4F46E5]/10'
-                : 'border-[#E2E8F0] dark:border-[#1E293B] hover:border-[#4F46E5]/30'
-            }`}
-          >
-            <p className="text-[10px] font-medium text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">
-              {stat.label}
-            </p>
-            <p className={`text-xl font-bold ${stat.color}`}>{stat.count}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Search & Filters */}
+      {/* Search */}
       <div className="bg-white dark:bg-[#1E293B] rounded-xl p-4 border border-[#E2E8F0] dark:border-[#1E293B] mb-6">
-        <div className="flex flex-col sm:flex-row gap-4">
-          {/* Search */}
-          <div className="flex-1 relative">
-            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
-            <input
-              type="text"
-              placeholder="Search by Order ID, Customer, or Table..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E2E8F0] dark:border-[#1E293B] rounded-lg text-[#0F172A] dark:text-white placeholder-[#94A3B8] focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent outline-none transition-all"
-            />
-          </div>
-          
-          {/* Filter Dropdown */}
-          <div className="flex items-center gap-3">
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="px-4 py-2.5 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E2E8F0] dark:border-[#1E293B] rounded-lg text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent outline-none"
-            >
-              <option value="all">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="preparing">Preparing</option>
-              <option value="ready">Ready</option>
-              <option value="served">Served</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-            
-            <button className="p-2.5 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E2E8F0] dark:border-[#1E293B] rounded-lg text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#2D3748] transition-colors">
-              <FaFilter />
-            </button>
-          </div>
+        <div className="relative">
+          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
+          <input
+            type="text"
+            placeholder="Search by Order ID, Customer, or Table..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E2E8F0] dark:border-[#1E293B] rounded-lg text-[#0F172A] dark:text-white placeholder-[#94A3B8] focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent outline-none transition-all"
+          />
         </div>
       </div>
 
@@ -370,16 +243,16 @@ const DineInOrders = () => {
           </div>
           <h3 className="text-lg font-semibold text-[#0F172A] dark:text-white mb-2">No Dine-In Orders</h3>
           <p className="text-[#64748B] dark:text-[#94A3B8] text-sm">
-            {searchTerm || filterStatus !== 'all' 
+            {searchTerm 
               ? 'No orders match your search criteria' 
               : 'New dine-in orders will appear here'}
           </p>
-          {(searchTerm || filterStatus !== 'all') && (
+          {searchTerm && (
             <button
-              onClick={() => { setSearchTerm(''); setFilterStatus('all'); }}
+              onClick={() => setSearchTerm('')}
               className="mt-4 px-4 py-2 text-[#4F46E5] hover:bg-[#4F46E5]/10 rounded-lg text-sm font-medium transition-colors"
             >
-              Clear Filters
+              Clear Search
             </button>
           )}
         </div>
@@ -387,9 +260,6 @@ const DineInOrders = () => {
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {currentOrders.map((order) => {
-              const status = order.orderStatus || 'pending';
-              const statusInfo = statusConfig[status] || statusConfig.pending;
-              
               return (
                 <div
                   key={order._id}
@@ -408,33 +278,6 @@ const DineInOrders = () => {
                         <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-0.5">
                           #{order._id?.slice(-8)}
                         </p>
-                      </div>
-                      <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-semibold flex items-center gap-1 ${statusInfo.color}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${statusInfo.dotColor}`}></span>
-                          {status.charAt(0).toUpperCase() + status.slice(1)}
-                        </span>
-                        <div className="relative">
-                          <button
-                            onClick={() => setShowActionMenu(showActionMenu === order._id ? null : order._id)}
-                            className="p-1.5 hover:bg-[#E2E8F0] dark:hover:bg-[#0F172A] rounded-lg transition-colors"
-                          >
-                            <HiOutlineDotsVertical className="text-[#64748B] dark:text-[#94A3B8]" />
-                          </button>
-                          {showActionMenu === order._id && (
-                            <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#1E293B] rounded-lg shadow-xl z-10 py-1">
-                              {['pending', 'confirmed', 'preparing', 'ready', 'served', 'completed', 'cancelled'].map((s) => (
-                                <button
-                                  key={s}
-                                  onClick={() => updateOrderStatus(order._id, s)}
-                                  className="w-full px-4 py-2 text-left text-sm hover:bg-[#F1F5F9] dark:hover:bg-[#0F172A] text-[#0F172A] dark:text-white transition-colors capitalize"
-                                >
-                                  {s}
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -512,27 +355,18 @@ const DineInOrders = () => {
                         
                         <div className="flex items-center gap-1.5">
                           <button
-  onClick={() => navigate(`/admin/orders/dine-in/${order._id}`)}
-  className="p-2 bg-[#4F46E5] text-white rounded-lg hover:bg-[#4338CA] transition-all hover:scale-105"
-  title="View Details"
->
-  <FaEye className="text-sm" />
-</button>
+                            onClick={() => navigate(`/admin/orders/dine-in/${order._id}`)}
+                            className="p-2 bg-[#4F46E5] text-white rounded-lg hover:bg-[#4338CA] transition-all hover:scale-105"
+                            title="View Details"
+                          >
+                            <FaEye className="text-sm" />
+                          </button>
                           <button
                             className="p-2 bg-[#F1F5F9] dark:bg-[#0F172A] text-[#64748B] dark:text-[#94A3B8] rounded-lg hover:bg-[#E2E8F0] dark:hover:bg-[#1E293B] transition-colors"
                             title="Print Bill"
                           >
                             <FaPrint className="text-sm" />
                           </button>
-                          {status !== 'cancelled' && status !== 'completed' && (
-                            <button
-                              onClick={() => updateOrderStatus(order._id, 'cancelled')}
-                              className="p-2 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
-                              title="Cancel Order"
-                            >
-                              <FaBan className="text-sm" />
-                            </button>
-                          )}
                         </div>
                       </div>
                     </div>

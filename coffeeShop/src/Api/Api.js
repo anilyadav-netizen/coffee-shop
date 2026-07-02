@@ -1,26 +1,21 @@
-// src/Api/Api.js
-
 import axios from "axios";
 
 const API = axios.create({
     baseURL: "http://localhost:5003/api",
 });
 
-API.interceptors.request.use((req) => {
+API.interceptors.request.use((config) => {
     const token = localStorage.getItem("token");
 
     if (token) {
-        req.headers.Authorization = `Bearer ${token}`;
+        config.headers.Authorization = `Bearer ${token}`;
     }
 
-    API.interceptors.request.use((config) => {
-  console.log("URL:", config.url);
-  console.log("TOKEN:", config.headers.Authorization);
-  console.log("DATA:", config.data);
-  return config;
-});
+    console.log("Full URL:", config.baseURL + config.url);
+    console.log("Token:", config.headers.Authorization);
+    console.log("Data:", config.data);
 
-    return req;
+    return config;
 });
 
 export default API;
