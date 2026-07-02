@@ -330,7 +330,12 @@ exports.getMyOrders = async (req, res) => {
     const orders = await Payment.find({
       user: req.user._id,
       status: "paid",
-    }).sort({ createdAt: -1 });
+    })
+      .populate({
+        path: "table",
+        select: "tableNumber seats status",
+      })
+      .sort({ createdAt: -1 });
 
     return res.status(200).json({
       success: true,
@@ -354,8 +359,12 @@ exports.getUserOrders = async (req, res) => {
       user: req.user._id,
     })
       .select(
-        "orderType amount paymentStatus orderStatus deliveryAddress products tracking createdAt updatedAt payment"
+        "orderType table amount paymentStatus orderStatus deliveryAddress products tracking createdAt updatedAt payment"
       )
+      .populate({
+        path: "table",
+        select: "tableNumber seats status",
+      })
       .populate({
         path: "products.coffee",
         select: "name image description category price discountPrice stock",
@@ -374,6 +383,7 @@ exports.getUserOrders = async (req, res) => {
     });
   } catch (error) {
     console.error("GET USER ORDERS ERROR:", error);
+
     return res.status(500).json({
       success: false,
       message: error.message,
