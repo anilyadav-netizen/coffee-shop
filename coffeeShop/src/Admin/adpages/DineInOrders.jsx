@@ -3,10 +3,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { getAllOrders } from '../../redux/Slicer/adminOrder';
-import { 
-  FaEye, 
-  FaUtensils, 
-  FaUser, 
+import {
+  FaEye,
+  FaUtensils,
+  FaUser,
   FaRupeeSign,
   FaCheckCircle,
   FaSpinner,
@@ -28,9 +28,9 @@ import {
   FaCreditCard,
   FaMobileAlt
 } from 'react-icons/fa';
-import { 
-  MdTableRestaurant, 
-  MdPayment, 
+import {
+  MdTableRestaurant,
+  MdPayment,
   MdOutlinePending,
   MdOutlineReceipt,
   MdOutlineCancel
@@ -41,9 +41,9 @@ import { HiOutlineDotsVertical } from 'react-icons/hi';
 const DineInOrders = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
+
   const { orders, loading, error } = useSelector((state) => state.adminOrder);
-  
+
   // State Management
   const [dineInOrders, setDineInOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
@@ -77,19 +77,23 @@ const DineInOrders = () => {
     // Search
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      result = result.filter(order => 
-        order._id?.toLowerCase().includes(term) ||
-        order.user?.name?.toLowerCase().includes(term) ||
-        order.user?.email?.toLowerCase().includes(term) ||
-        order.tableNumber?.toString().includes(term)
-      );
+      result = result.filter(order => {
+        // Get table number from the table object
+        const tableNumber = order.table?.tableNumber || 'N/A';
+        return (
+          order._id?.toLowerCase().includes(term) ||
+          order.user?.name?.toLowerCase().includes(term) ||
+          order.user?.email?.toLowerCase().includes(term) ||
+          String(tableNumber).includes(term)
+        );
+      });
     }
 
     // Sorting
     if (sortConfig.key) {
       result.sort((a, b) => {
         let aVal, bVal;
-        
+
         if (sortConfig.key === 'user') {
           aVal = a.user?.name || '';
           bVal = b.user?.name || '';
@@ -99,13 +103,16 @@ const DineInOrders = () => {
         } else if (sortConfig.key === 'createdAt') {
           aVal = new Date(a.createdAt).getTime();
           bVal = new Date(b.createdAt).getTime();
+        } else if (sortConfig.key === 'tableNumber') {
+          aVal = a.table?.tableNumber || 0;
+          bVal = b.table?.tableNumber || 0;
         } else {
           aVal = a[sortConfig.key] || '';
           bVal = b[sortConfig.key] || '';
         }
 
         if (typeof aVal === 'string') {
-          return sortConfig.direction === 'asc' 
+          return sortConfig.direction === 'asc'
             ? aVal.localeCompare(bVal)
             : bVal.localeCompare(aVal);
         }
@@ -145,9 +152,20 @@ const DineInOrders = () => {
   // Get sort icon
   const getSortIcon = (key) => {
     if (sortConfig.key !== key) return <FaSort className="text-[#94A3B8]" />;
-    return sortConfig.direction === 'asc' 
+    return sortConfig.direction === 'asc'
       ? <FaSortUp className="text-[#4F46E5]" />
       : <FaSortDown className="text-[#4F46E5]" />;
+  };
+
+  // Get table status color
+  const getTableStatusColor = (status) => {
+    const colors = {
+      occupied: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+      available: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+      reserved: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+      cleaning: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+    };
+    return colors[status?.toLowerCase()] || 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400';
   };
 
   // Loading Skeleton
@@ -176,7 +194,7 @@ const DineInOrders = () => {
           </div>
           <h3 className="text-lg font-semibold text-[#0F172A] dark:text-white mb-2">Failed to Load Orders</h3>
           <p className="text-[#64748B] dark:text-[#94A3B8] text-sm mb-4">{error}</p>
-          <button 
+          <button
             onClick={() => dispatch(getAllOrders())}
             className="px-6 py-2 bg-[#4F46E5] text-white rounded-lg hover:bg-[#4338CA] transition-colors"
           >
@@ -208,7 +226,7 @@ const DineInOrders = () => {
               Manage and track all dine-in orders
             </p>
           </div>
-          
+
           <div className="flex items-center gap-3 ml-12 md:ml-0">
             <button className="px-4 py-2 bg-white dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#1E293B] rounded-lg text-sm text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#2D3748] transition-colors flex items-center gap-2">
               <FaPrint />
@@ -243,8 +261,8 @@ const DineInOrders = () => {
           </div>
           <h3 className="text-lg font-semibold text-[#0F172A] dark:text-white mb-2">No Dine-In Orders</h3>
           <p className="text-[#64748B] dark:text-[#94A3B8] text-sm">
-            {searchTerm 
-              ? 'No orders match your search criteria' 
+            {searchTerm
+              ? 'No orders match your search criteria'
               : 'New dine-in orders will appear here'}
           </p>
           {searchTerm && (
@@ -260,6 +278,11 @@ const DineInOrders = () => {
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {currentOrders.map((order) => {
+              // Get table details safely
+              const tableNumber = order.table?.tableNumber || 'N/A';
+              const tableStatus = order.table?.status || 'N/A';
+              const tableSeats = order.table?.seats || 'N/A';
+
               return (
                 <div
                   key={order._id}
@@ -272,13 +295,26 @@ const DineInOrders = () => {
                         <div className="flex items-center gap-2">
                           <MdTableRestaurant className="text-[#4F46E5] text-lg flex-shrink-0" />
                           <h3 className="font-bold text-[#0F172A] dark:text-white truncate">
-                            Table #{order.tableNumber || 'N/A'}
+                            Table #{tableNumber}
                           </h3>
+                          {/* Table status badge */}
+                          <span className={`px-2 py-0.5 text-[10px] font-medium rounded-full ${getTableStatusColor(tableStatus)}`}>
+                            {tableStatus}
+                          </span>
                         </div>
-                        <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-0.5">
-                          #{order._id?.slice(-8)}
-                        </p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <p className="text-xs text-[#64748B] dark:text-[#94A3B8]">
+                            #{order._id?.slice(-8)}
+                          </p>
+                          {tableSeats !== 'N/A' && (
+                            <span className="text-xs text-[#64748B] dark:text-[#94A3B8]">
+                              • {tableSeats} seats
+                            </span>
+                          )}
+                        </div>
                       </div>
+                      {/* Order status badge */}
+                      
                     </div>
                   </div>
 
@@ -290,10 +326,9 @@ const DineInOrders = () => {
                       <span className="font-medium text-[#0F172A] dark:text-white truncate">
                         {order.user?.name || 'Guest'}
                       </span>
-                      {order.numberOfGuests && (
-                        <span className="ml-auto flex items-center gap-1 text-xs text-[#64748B] dark:text-[#94A3B8] bg-white dark:bg-[#1E293B] px-2 py-0.5 rounded-full">
-                          <FaUsers className="text-[10px]" />
-                          {order.numberOfGuests}
+                      {order.user?.email && (
+                        <span className="text-xs text-[#64748B] dark:text-[#94A3B8] truncate max-w-[120px]">
+                          {order.user.email}
                         </span>
                       )}
                     </div>
@@ -349,10 +384,12 @@ const DineInOrders = () => {
                               {order.payment?.method || 'N/A'}
                             </span>
                             <span className="w-1 h-1 rounded-full bg-[#E2E8F0] dark:bg-[#1E293B]"></span>
-                            <span>{order.payment?.status || 'Pending'}</span>
+                            <span className={order.payment?.status === 'paid' ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'}>
+                              {order.payment?.status || 'Pending'}
+                            </span>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center gap-1.5">
                           <button
                             onClick={() => navigate(`/admin/orders/dine-in/${order._id}`)}
@@ -394,11 +431,10 @@ const DineInOrders = () => {
                   <button
                     key={i}
                     onClick={() => setCurrentPage(i + 1)}
-                    className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
-                      currentPage === i + 1
+                    className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${currentPage === i + 1
                         ? 'bg-[#4F46E5] text-white'
                         : 'bg-white dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#1E293B] text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#2D3748]'
-                    }`}
+                      }`}
                   >
                     {i + 1}
                   </button>

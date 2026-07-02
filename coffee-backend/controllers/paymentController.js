@@ -21,11 +21,12 @@ exports.createOrder = async (req, res) => {
     const {
       orderType,
       deliveryAddress,
-      table,
       amount,
     } = req.body;
 
     console.log(req.body);
+
+    const table = req.body.tableId
 
     // ---------------- VALIDATE ORDER TYPE ----------------
     if (!["delivery", "dine_in"].includes(orderType)) {
@@ -179,10 +180,11 @@ exports.verifyPayment = async (req, res) => {
 
     // Verify Razorpay Signature
     const generatedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-      .digest("hex");
-
+    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+    .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+    .digest("hex");
+    
+    console.log("Payment Table:", payment.table);
     if (generatedSignature !== razorpay_signature) {
       return res.status(400).json({
         success: false,
@@ -390,3 +392,5 @@ exports.getUserOrders = async (req, res) => {
     });
   }
 };
+
+

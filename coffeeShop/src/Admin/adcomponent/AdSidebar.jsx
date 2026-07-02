@@ -1,5 +1,6 @@
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
+import { FaChair } from "react-icons/fa";
 import {
   FaMotorcycle,
 } from "react-icons/fa6";
@@ -46,42 +47,47 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
   }, []);
 
   const menuItems = [
-  {
-    name: "Dashboard",
-    path: "/admin",
-    icon: <MdDashboard size={20} />,
-  },
-  {
-    name: "Products",
-    path: "/admin/products",
-    icon: <FaCoffee size={18} />,
-  },
-  {
-    name: "Category",
-    path: "/admin/category",
-    icon: <FaTags size={18} />,
-  },
-  {
-    name: "Dine In Orders",
-    path: "/admin/orders/dine-in",
-    icon: <GiKnifeFork size={18} />,
-  },
-  {
-    name: "Delivery Orders",
-    path: "/admin/orders/delivery",
-    icon: <FaTruck size={18} />,
-  },
-  {
-    name: "Rider",
-    path: "/admin/riders",
-    icon: <FaUserCircle size={18} />,
-  },
-  {
-    name: "Users",
-    path: "/admin/users",
-    icon: <FaUsers size={18} />,
-  },
-];
+    {
+      name: "Dashboard",
+      path: "/admin",
+      icon: <MdDashboard size={20} />,
+    },
+    {
+      name: "Products",
+      path: "/admin/products",
+      icon: <FaCoffee size={18} />,
+    },
+    {
+      name: "Category",
+      path: "/admin/category",
+      icon: <FaTags size={18} />,
+    },
+    {
+      name: "Tables",
+      path: "/admin/tables",
+      icon: <FaChair size={18} />,
+    },
+    {
+      name: "Dine In Orders",
+      path: "/admin/orders/dine-in",
+      icon: <GiKnifeFork size={18} />,
+    },
+    {
+      name: "Delivery Orders",
+      path: "/admin/orders/delivery",
+      icon: <FaTruck size={18} />,
+    },
+    {
+      name: "Rider",
+      path: "/admin/riders",
+      icon: <FaUserCircle size={18} />,
+    },
+    {
+      name: "Users",
+      path: "/admin/users",
+      icon: <FaUsers size={18} />,
+    },
+  ];
 
   const handleLogout = () => {
     localStorage.removeItem("token");

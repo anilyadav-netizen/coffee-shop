@@ -79,7 +79,7 @@ const OrderDetailsPage = () => {
 
         try {
             const audioCtx = getAudioContext();
-            
+
             // Resume context if suspended (needed for Chrome autoplay policy)
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
@@ -88,7 +88,7 @@ const OrderDetailsPage = () => {
             // Create oscillator and gain node
             const oscillator = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
-            
+
             oscillator.connect(gainNode);
             gainNode.connect(audioCtx.destination);
 
@@ -101,7 +101,7 @@ const OrderDetailsPage = () => {
                     gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
                     oscillator.start(audioCtx.currentTime);
                     oscillator.stop(audioCtx.currentTime + 0.2);
-                    
+
                     // Second note after a short delay
                     setTimeout(() => {
                         const osc2 = audioCtx.createOscillator();
@@ -123,7 +123,7 @@ const OrderDetailsPage = () => {
                     gainNode.gain.setValueAtTime(0.25, audioCtx.currentTime);
                     oscillator.start(audioCtx.currentTime);
                     oscillator.stop(audioCtx.currentTime + 0.15);
-                    
+
                     // Quick second note
                     setTimeout(() => {
                         const osc2 = audioCtx.createOscillator();
@@ -436,7 +436,7 @@ const OrderDetailsPage = () => {
             console.log('New message:', data);
             // Play a simple notification sound for messages
             playNotificationSound('message', data.orderId);
-            
+
             addNotification({
                 id: Date.now(),
                 orderId: data.orderId,
@@ -515,6 +515,7 @@ const OrderDetailsPage = () => {
         dispatch(getMyOrders());
         dispatch(getProducts());
     }, [dispatch]);
+    console.log(orders)
 
     // ==================== SYNC ORDERS FROM REDUX ====================
     useEffect(() => {
@@ -575,6 +576,21 @@ const OrderDetailsPage = () => {
     // ==================== ORDER STATUS DISPLAY ====================
     const getOrderStatusDisplay = (order) => {
         const status = order.orderStatus?.toLowerCase() || 'pending';
+        const isDelivery = order.orderType?.toLowerCase() === 'delivery';
+
+        // For dine-in orders, always show as pending or a custom status
+        if (!isDelivery) {
+            return {
+                label: 'Dine In 🍽️',
+                icon: Store,
+                color: 'text-purple-600',
+                bg: 'bg-purple-100/80',
+                border: 'border-purple-200',
+                step: 0,
+                description: 'Dine-in order placed at the cafe'
+            };
+        }
+
         const statusMap = {
             'pending': {
                 label: 'Pending ⏳',
@@ -639,6 +655,11 @@ const OrderDetailsPage = () => {
         const status = order.orderStatus?.toLowerCase() || 'pending';
         const isDelivery = order.orderType?.toLowerCase() === 'delivery';
 
+        // Return null for dine-in orders
+        if (!isDelivery) {
+            return null;
+        }
+
         const deliverySteps = [
             { id: 'pending', label: 'Order Placed', icon: Clock, color: 'text-yellow-500' },
             { id: 'confirmed', label: 'Confirmed', icon: CircleCheck, color: 'text-green-500' },
@@ -647,18 +668,10 @@ const OrderDetailsPage = () => {
             { id: 'delivered', label: 'Delivered', icon: PackageCheck, color: 'text-green-600' }
         ];
 
-        const dineInSteps = [
-            { id: 'pending', label: 'Order Placed', icon: Clock, color: 'text-yellow-500' },
-            { id: 'confirmed', label: 'Confirmed', icon: CircleCheck, color: 'text-green-500' },
-            { id: 'preparing', label: 'Preparing', icon: ChefHat, color: 'text-orange-500' },
-            { id: 'delivered', label: 'Ready for Pickup', icon: Utensils, color: 'text-green-600' }
-        ];
-
-        const steps = isDelivery ? deliverySteps : dineInSteps;
-        const currentStepIndex = steps.findIndex(s => s.id === status);
+        const currentStepIndex = deliverySteps.findIndex(s => s.id === status);
 
         if (status === 'cancelled') {
-            return steps.map((step, index) => ({
+            return deliverySteps.map((step, index) => ({
                 ...step,
                 isCompleted: false,
                 isCurrent: index === 0,
@@ -666,7 +679,7 @@ const OrderDetailsPage = () => {
             }));
         }
 
-        return steps.map((step, index) => ({
+        return deliverySteps.map((step, index) => ({
             ...step,
             isCompleted: index <= currentStepIndex,
             isCurrent: index === currentStepIndex,
@@ -755,6 +768,7 @@ const OrderDetailsPage = () => {
             </div>
         );
     }
+    console.log(orders)
 
     // ==================== NO ORDERS STATE ====================
     if (!liveOrders || liveOrders.length === 0) {
@@ -858,11 +872,10 @@ const OrderDetailsPage = () => {
                             {/* Sound Toggle Button */}
                             <button
                                 onClick={toggleSound}
-                                className={`p-2 rounded-lg backdrop-blur-sm border transition-all ${
-                                    soundEnabled 
-                                        ? 'bg-green-500/20 border-green-500/30 text-green-600' 
-                                        : 'bg-gray-500/20 border-gray-500/30 text-gray-500'
-                                }`}
+                                className={`p-2 rounded-lg backdrop-blur-sm border transition-all ${soundEnabled
+                                    ? 'bg-green-500/20 border-green-500/30 text-green-600'
+                                    : 'bg-gray-500/20 border-gray-500/30 text-gray-500'
+                                    }`}
                                 title={soundEnabled ? 'Sound On' : 'Sound Off'}
                             >
                                 {soundEnabled ? '🔊' : '🔇'}
@@ -904,15 +917,15 @@ const OrderDetailsPage = () => {
                                 collapseAll();
                             }}
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 ${filterType === 'all'
-                                    ? 'bg-gradient-to-r from-[#0D7C53] to-green-600 text-white shadow-lg shadow-[#0D7C53]/30'
-                                    : 'bg-white/30 backdrop-blur-sm border border-white/40 text-gray-700 hover:bg-white/50'
+                                ? 'bg-gradient-to-r from-[#0D7C53] to-green-600 text-white shadow-lg shadow-[#0D7C53]/30'
+                                : 'bg-white/30 backdrop-blur-sm border border-white/40 text-gray-700 hover:bg-white/50'
                                 }`}
                         >
                             <Filter size={16} />
                             All Orders
                             <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${filterType === 'all'
-                                    ? 'bg-white/20 text-white'
-                                    : 'bg-gray-200/50 text-gray-600'
+                                ? 'bg-white/20 text-white'
+                                : 'bg-gray-200/50 text-gray-600'
                                 }`}>
                                 {liveOrders.length}
                             </span>
@@ -924,15 +937,15 @@ const OrderDetailsPage = () => {
                                 expandAllByType('delivery');
                             }}
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 ${filterType === 'delivery'
-                                    ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30'
-                                    : 'bg-white/30 backdrop-blur-sm border border-white/40 text-gray-700 hover:bg-white/50'
+                                ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30'
+                                : 'bg-white/30 backdrop-blur-sm border border-white/40 text-gray-700 hover:bg-white/50'
                                 }`}
                         >
                             <Truck size={16} />
                             Delivery
                             <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${filterType === 'delivery'
-                                    ? 'bg-white/20 text-white'
-                                    : 'bg-gray-200/50 text-gray-600'
+                                ? 'bg-white/20 text-white'
+                                : 'bg-gray-200/50 text-gray-600'
                                 }`}>
                                 {deliveryCount}
                             </span>
@@ -944,15 +957,15 @@ const OrderDetailsPage = () => {
                                 expandAllByType('dine_in');
                             }}
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 ${filterType === 'dine_in'
-                                    ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30'
-                                    : 'bg-white/30 backdrop-blur-sm border border-white/40 text-gray-700 hover:bg-white/50'
+                                ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30'
+                                : 'bg-white/30 backdrop-blur-sm border border-white/40 text-gray-700 hover:bg-white/50'
                                 }`}
                         >
                             <Store size={16} />
                             Dine In
                             <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${filterType === 'dine_in'
-                                    ? 'bg-white/20 text-white'
-                                    : 'bg-gray-200/50 text-gray-600'
+                                ? 'bg-white/20 text-white'
+                                : 'bg-gray-200/50 text-gray-600'
                                 }`}>
                                 {dineInCount}
                             </span>
@@ -1032,17 +1045,17 @@ const OrderDetailsPage = () => {
                                                             </span>
                                                         )}
 
-                                                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 backdrop-blur-sm border-2 rounded-full text-[10px] sm:text-xs font-bold shadow-sm ${isDeliveryOrder
-                                                                ? 'bg-blue-500/90 border-blue-600 text-white'
-                                                                : 'bg-purple-500/90 border-purple-600 text-white'
-                                                            }`}>
-                                                            {isDeliveryOrder ? <Truck size={12} /> : <Store size={12} />}
-                                                            {isDeliveryOrder ? 'Delivery' : 'Dine In'}
-                                                        </span>
+                                                        {/* ============ TABLE NUMBER DISPLAY - HEADER ============ */}
+                                                        {order.table && order.table.tableNumber && (
+                                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 backdrop-blur-sm border-2 rounded-full text-xs font-bold shadow-lg bg-indigo-500/90 border-indigo-600 text-white`}>
+                                                                <Store size={14} />
+                                                                Table {order.table.tableNumber}
+                                                            </span>
+                                                        )}
 
                                                         <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 backdrop-blur-sm border-2 rounded-full text-xs font-bold shadow-lg ${isCancelled
-                                                                ? 'bg-red-500/90 border-red-600 text-white'
-                                                                : statusInfo.bg + ' ' + statusInfo.border + ' ' + statusInfo.color
+                                                            ? 'bg-red-500/90 border-red-600 text-white'
+                                                            : statusInfo.bg + ' ' + statusInfo.border + ' ' + statusInfo.color
                                                             }`}>
                                                             <StatusIcon size={14} className={
                                                                 status === 'preparing' ? 'animate-spin' :
@@ -1052,8 +1065,8 @@ const OrderDetailsPage = () => {
                                                         </span>
 
                                                         <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium ${order.paymentStatus === 'paid'
-                                                                ? 'bg-green-100 text-green-700'
-                                                                : 'bg-yellow-100 text-yellow-700'
+                                                            ? 'bg-green-100 text-green-700'
+                                                            : 'bg-yellow-100 text-yellow-700'
                                                             }`}>
                                                             {order.paymentStatus === 'paid' ? '💳 Paid' : '💳 Pending'}
                                                         </span>
@@ -1106,14 +1119,11 @@ const OrderDetailsPage = () => {
                                         {isExpanded && (
                                             <div className="border-t border-white/30 p-4 sm:p-6 bg-white/10 animate-fadeIn">
                                                 {/* Order Status Timeline */}
-                                                {!isCancelled && (
-                                                    <div className={`backdrop-blur-xl border rounded-xl p-4 mb-4 ${isDeliveryOrder
-                                                            ? 'bg-blue-50/40 border-blue-200/50'
-                                                            : 'bg-purple-50/40 border-purple-200/50'
-                                                        }`}>
+                                                {isDeliveryOrder && !isCancelled && (
+                                                    <div className={`backdrop-blur-xl border rounded-xl p-4 mb-4 bg-blue-50/40 border-blue-200/50`}>
                                                         <h4 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                                                            {isDeliveryOrder ? <TruckIcon size={18} className="text-blue-600" /> : <Utensils size={18} className="text-purple-600" />}
-                                                            {isDeliveryOrder ? 'Delivery Tracking' : 'Order Progress'}
+                                                            <TruckIcon size={18} className="text-blue-600" />
+                                                            Delivery Tracking
                                                             <span className="ml-auto text-xs font-normal text-gray-500">
                                                                 Updated: {formatDate(order.updatedAt)}
                                                             </span>
@@ -1126,10 +1136,10 @@ const OrderDetailsPage = () => {
                                                                         <div className="flex items-center gap-2 sm:gap-3">
                                                                             <div className="flex flex-col items-center">
                                                                                 <div className={`w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${step.isCompleted
-                                                                                        ? 'bg-green-500 border-green-600 text-white shadow-lg shadow-green-500/30'
-                                                                                        : step.isCurrent
-                                                                                            ? 'bg-blue-500 border-blue-600 text-white shadow-lg shadow-blue-500/30 animate-pulse'
-                                                                                            : 'bg-gray-200 border-gray-300 text-gray-400'
+                                                                                    ? 'bg-green-500 border-green-600 text-white shadow-lg shadow-green-500/30'
+                                                                                    : step.isCurrent
+                                                                                        ? 'bg-blue-500 border-blue-600 text-white shadow-lg shadow-blue-500/30 animate-pulse'
+                                                                                        : 'bg-gray-200 border-gray-300 text-gray-400'
                                                                                     }`}>
                                                                                     <step.icon size={16} className={
                                                                                         step.isCurrent && step.id === 'preparing' ? 'animate-spin' :
@@ -1233,6 +1243,7 @@ const OrderDetailsPage = () => {
                                                             </div>
                                                         )}
 
+                                                        {/* ============ DINE IN INFO CARD WITH TABLE NUMBER ============ */}
                                                         {!isDeliveryOrder && (
                                                             <div className="backdrop-blur-xl bg-purple-50/40 border border-purple-200/50 rounded-xl p-3 sm:p-4">
                                                                 <div className="flex items-center gap-2">
@@ -1246,6 +1257,13 @@ const OrderDetailsPage = () => {
                                                                 <p className="text-xs sm:text-sm text-gray-600 mt-1 ml-7">
                                                                     This order is for dine-in at our cafe.
                                                                 </p>
+                                                                {/* Table Number in Dine In Card */}
+                                                                {order.table && order.table.tableNumber && (
+                                                                    <p className="text-xs sm:text-sm font-semibold text-indigo-600 mt-1 ml-7 flex items-center gap-1">
+                                                                        <Store size={14} />
+                                                                        Table Number: {order.table.tableNumber}
+                                                                    </p>
+                                                                )}
                                                                 {status === 'delivered' && (
                                                                     <p className="text-xs text-green-600 mt-1 ml-7 flex items-center gap-1">
                                                                         <CircleCheck size={14} />
@@ -1316,20 +1334,20 @@ const OrderDetailsPage = () => {
                                                                     </span>
                                                                 </div>
 
+                                                                {/* ============ TABLE NUMBER IN ORDER SUMMARY ============ */}
+                                                                {!isDeliveryOrder && order.table && order.table.tableNumber && (
+                                                                    <div className="flex justify-between">
+                                                                        <span className="text-gray-500">Table Number</span>
+                                                                        <span className="font-semibold text-indigo-600 flex items-center gap-1">
+                                                                            <Store size={14} />
+                                                                            Table {order.table.tableNumber}
+                                                                        </span>
+                                                                    </div>
+                                                                )}
+
                                                                 <div className="flex justify-between">
                                                                     <span className="text-gray-500">Total Items</span>
                                                                     <span className="font-medium text-gray-800">{totalItems}</span>
-                                                                </div>
-
-                                                                <div className="flex justify-between items-center">
-                                                                    <span className="text-gray-500">Order Status</span>
-                                                                    <span className={`font-semibold flex items-center gap-1.5 ${isCancelled ? 'text-red-600' : statusInfo.color}`}>
-                                                                        <StatusIcon size={14} className={
-                                                                            status === 'preparing' ? 'animate-spin' :
-                                                                                status === 'out_for_delivery' ? 'animate-bounce-slow' : ''
-                                                                        } />
-                                                                        {statusInfo.label}
-                                                                    </span>
                                                                 </div>
 
                                                                 <div className="flex justify-between">

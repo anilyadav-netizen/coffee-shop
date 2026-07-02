@@ -8,7 +8,6 @@ exports.createTable = async (req, res) => {
     const table = await Table.create({
       tableNumber,
       seats,
-      adminId: req.user.id, // JWT middleware se aayega
     });
 
     res.status(201).json({
@@ -27,7 +26,6 @@ exports.createTable = async (req, res) => {
 exports.getTables = async (req, res) => {
   try {
     const tables = await Table.find({
-      adminId: req.user.id,
     });
 
     res.json({

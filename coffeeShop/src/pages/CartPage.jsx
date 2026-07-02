@@ -21,8 +21,14 @@ import {
     ArrowRight,
     Coffee,
     ShoppingBag,
+    X,
+    CheckCircle,
+    Loader2
 } from "lucide-react";
 
+import { getTables } from '../redux/Slicer/tableSlice';
+
+// ✅ IMPORT ADDRESS MODAL
 import AddressModal from '../Admin/adcomponent/AddressModel';
 
 const CartPage = () => {
@@ -36,6 +42,18 @@ const CartPage = () => {
     // ✅ Order type state - Default to "delivery"
     const [orderType, setOrderType] = useState("delivery");
 
+    // ✅ Table selection state (Integrated in CartPage)
+    const [isTableModalOpen, setIsTableModalOpen] = useState(false);
+    const [selectedTable, setSelectedTable] = useState(null); // { tableId, tableNumber, seats }
+    const [selectedTableId, setSelectedTableId] = useState(null);
+    const [tablesLoading, setTablesLoading] = useState(false);
+    
+    // ✅ Table filter state
+    const [tableFilter, setTableFilter] = useState('all');
+    
+    // ✅ Track if payment is already being processed to prevent double calls
+    const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
     // ✅ Address modal state
     const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
     const [deliveryAddress, setDeliveryAddress] = useState(null);
@@ -45,6 +63,28 @@ const CartPage = () => {
 
     // Get payment state from Redux store
     const { order, paymentStatus, paymentError, loading: paymentProcessing } = useSelector((state) => state.payment);
+
+    // Get tables from Redux store
+    const { tables, loading: tablesReduxLoading, error: tablesError } = useSelector(
+        (state) => state.table
+    );
+    console.log(tables)
+
+    const tableList = tables?.tables || [];
+
+    // ✅ Filtered tables based on status
+    const filteredTables = tableList.filter(table => {
+        if (tableFilter === 'all') return true;
+        return table.status === tableFilter;
+    });
+
+    // ✅ Fetch tables when modal opens
+    useEffect(() => {
+        if (isTableModalOpen) {
+            console.log("Dispatching getTables...");
+            dispatch(getTables());
+        }
+    }, [isTableModalOpen, dispatch]);
 
     useEffect(() => {
         dispatch(getCart());
@@ -67,13 +107,29 @@ const CartPage = () => {
         };
     }, []);
 
+    // ✅ Reset table selection when switching order type
+    useEffect(() => {
+        if (orderType !== 'dine_in') {
+            setSelectedTable(null);
+            setSelectedTableId(null);
+        }
+    }, [orderType]);
+
     // ✅ Handle display of backend errors from Redux state
     useEffect(() => {
         if (paymentError) {
             setError(paymentError);
             setPaymentLoading(false);
+            setIsProcessingPayment(false);
         }
     }, [paymentError]);
+
+    // ✅ Reset selection when modal closes
+    useEffect(() => {
+        if (!isTableModalOpen) {
+            setSelectedTableId(null);
+        }
+    }, [isTableModalOpen]);
 
     // ✅ Increase quantity
     const handleIncrease = async (coffeeId) => {
@@ -187,6 +243,7 @@ const CartPage = () => {
         navigate("/menu");
     };
 
+    // ✅ Handle Address Save (Delivery)
     const handleSaveAddress = (address) => {
         console.log("📦 Address saved:", address);
         setDeliveryAddress(address);
@@ -195,15 +252,57 @@ const CartPage = () => {
         processPayment(address);
     };
 
-    // ✅ FIXED: Process Payment with correct amount field
+    // ✅ Handle table selection
+    const handleTableSelect = (tableId) => {
+        setSelectedTableId(tableId);
+        console.log('✅ Table selected:', tableId);
+    };
+
+    // ✅ Handle confirm table selection - FIXED: Only set table and close modal, don't process payment here
+    const handleConfirmTable = () => {
+        if (selectedTableId) {
+            const selectedTableData = tableList.find(
+                (table) => table._id === selectedTableId
+            );
+            if (selectedTableData) {
+                console.log('✅ Confirming table:', selectedTableData);
+                setSelectedTable({
+                    tableId: selectedTableData._id,
+                    tableNumber: selectedTableData.tableNumber,
+                    seats: selectedTableData.seats,
+                });
+                setIsTableModalOpen(false);
+                setError(null);
+                // ✅ Don't process payment here - let the checkout button handle it
+                // This prevents double processing
+            }
+        }
+    };
+
+    // ✅ Process Payment with table selection
     const processPayment = async (address) => {
+        // ✅ Prevent multiple payment processing calls
+        if (isProcessingPayment) {
+            console.log("⚠️ Payment already processing, skipping...");
+            return;
+        }
+
         console.log("========== PROCESS PAYMENT ==========");
         console.log("Address:", address);
         console.log("Order Type:", orderType);
+        console.log("Selected Table:", selectedTable);
         console.log("Cart Items:", cartItems);
         console.log("Total Price:", totalPrice);
 
+        // ✅ Validate table selection for dine-in
+        if (orderType === "dine_in" && !selectedTable) {
+            setError("Please select a table before proceeding.");
+            setIsTableModalOpen(true);
+            return;
+        }
+
         try {
+            setIsProcessingPayment(true);
             setPaymentLoading(true);
             setError(null);
 
@@ -216,9 +315,9 @@ const CartPage = () => {
             console.log("💰 Total Amount to charge:", totalAmount);
             console.log("📦 Delivery Fee:", deliveryFee);
 
-            // ✅ FIXED: Use 'amount' instead of 'totalAmount' - matches backend expectation
+            // ✅ Build order payload
             const orderPayload = {
-                amount: totalAmount,  // ✅ This matches the backend field name
+                amount: totalAmount,
                 orderType: orderType
             };
 
@@ -227,9 +326,15 @@ const CartPage = () => {
                 orderPayload.deliveryAddress = address;
             }
 
+            // ✅ Add table details for dine-in
+            if (orderType === "dine_in" && selectedTable) {
+                orderPayload.tableId = selectedTable.tableId;
+                orderPayload.tableNumber = selectedTable.tableNumber;
+            }
+
             console.log("📦 Order Payload being sent:", JSON.stringify(orderPayload, null, 2));
 
-            // ✅ Create order with updated payload
+            // ✅ Create order
             const result = await dispatch(createOrder(orderPayload)).unwrap();
             console.log("✅ Order creation result:", result);
 
@@ -247,7 +352,7 @@ const CartPage = () => {
                 name: "Coffee Shop",
                 description:
                     orderType === "dine_in"
-                        ? `Dine-in order for ${totalItems} item(s)`
+                        ? `Dine-in at Table ${selectedTable?.tableNumber || 'N/A'}`
                         : `Delivery order for ${totalItems} item(s)`,
                 image: "https://example.com/logo.png",
                 prefill: {
@@ -257,7 +362,9 @@ const CartPage = () => {
                 },
                 notes: {
                     orderType: orderType,
-                    deliveryAddress: address ? JSON.stringify(address) : 'N/A'
+                    deliveryAddress: address ? JSON.stringify(address) : 'N/A',
+                    tableNumber: selectedTable?.tableNumber || 'N/A',
+                    tableId: selectedTable?.tableId || 'N/A'
                 },
                 theme: {
                     color: "#0D7C53"
@@ -282,12 +389,14 @@ const CartPage = () => {
                         console.error("❌ Payment verification failed:", error);
                         setError(error?.message || "Payment verification failed. Please contact support.");
                         setPaymentLoading(false);
+                        setIsProcessingPayment(false);
                     }
                 },
                 modal: {
                     ondismiss: function () {
                         console.log("❌ Razorpay modal closed by user");
                         setPaymentLoading(false);
+                        setIsProcessingPayment(false);
                     }
                 }
             };
@@ -297,6 +406,7 @@ const CartPage = () => {
                 console.error("❌ Razorpay SDK not loaded!");
                 setError("Payment gateway not loaded. Please refresh and try again.");
                 setPaymentLoading(false);
+                setIsProcessingPayment(false);
                 return;
             }
 
@@ -306,6 +416,7 @@ const CartPage = () => {
                 console.error("❌ Payment failed:", response.error);
                 setError(response.error?.description || "Payment failed. Please try again.");
                 setPaymentLoading(false);
+                setIsProcessingPayment(false);
             });
 
             razorpay.open();
@@ -315,12 +426,13 @@ const CartPage = () => {
             console.error("Error details:", error.response?.data || error.message);
             setError(error?.response?.data?.message || error?.message || "Failed to process payment. Please try again.");
             setPaymentLoading(false);
+            setIsProcessingPayment(false);
         }
     };
 
-    // ✅ Handle Checkout - Opens address modal for delivery, proceeds directly for dine-in
+    // ✅ Handle Checkout - FIXED: Only open modal if no table selected
     const handleCheckout = async () => {
-        console.log("========== CHECKOUT START ==========");
+        console.log("Checkout button clicked");
         console.log("Order Type:", orderType);
         console.log("Cart Items:", cartItems);
         console.log("Total Items:", totalItems);
@@ -332,18 +444,24 @@ const CartPage = () => {
             return;
         }
 
-        // ✅ Check order type
-        if (orderType === "delivery") {
-            console.log("📦 Delivery order - Opening Address Modal");
-            // Open Address Modal
-            setIsAddressModalOpen(true);
+        // ✅ DINE IN - Check if table is selected
+        if (orderType === "dine_in") {
+            if (selectedTable) {
+                console.log("☕ Table already selected:", selectedTable);
+                // ✅ Table is already selected, proceed directly to payment
+                await processPayment(null);
+            } else {
+                console.log("☕ No table selected - Opening Table Selection Modal");
+                setIsTableModalOpen(true);
+            }
             return;
         }
 
-        // ✅ For dine_in, continue with payment flow
-        if (orderType === "dine_in") {
-            console.log("☕ Dine-in order - Proceeding to payment");
-            await processPayment(null); // No address needed for dine-in
+        // ✅ DELIVERY - Show Address Modal
+        if (orderType === "delivery") {
+            console.log("📦 Delivery order - Opening Address Modal");
+            setIsAddressModalOpen(true);
+            return;
         }
     };
 
@@ -352,9 +470,8 @@ const CartPage = () => {
      */
     const calculateDeliveryFee = (subtotal, type) => {
         if (type === "dine_in") {
-            return 0; // Free delivery for dine-in
+            return 0; // Free for dine-in
         }
-        // For delivery
         return subtotal > 500 ? 0 : 50; // Free if subtotal > 500, else ₹50
     };
 
@@ -375,6 +492,39 @@ const CartPage = () => {
     const calculateTotal = (subtotal, type) => {
         return subtotal + calculateDeliveryFee(subtotal, type);
     };
+
+    // ✅ Get status color
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 'available':
+                return 'bg-green-500';
+            case 'occupied':
+                return 'bg-red-500';
+            case 'reserved':
+                return 'bg-yellow-500';
+            default:
+                return 'bg-gray-500';
+        }
+    };
+
+    // ✅ Get status text
+    const getStatusText = (status) => {
+        switch (status) {
+            case 'available':
+                return 'Available';
+            case 'occupied':
+                return 'Occupied';
+            case 'reserved':
+                return 'Reserved';
+            default:
+                return status;
+        }
+    };
+
+    // ✅ Get available tables only
+    const availableTables = tableList.filter(
+        (table) => table.status === 'available'
+    );
 
     // ✅ Loading state
     if (loading && cartItems.length === 0) {
@@ -617,6 +767,42 @@ const CartPage = () => {
                                             </div>
                                         </label>
                                     </div>
+
+                                    {/* ✅ Show selected table for dine-in */}
+                                    {orderType === "dine_in" && selectedTable && (
+                                        <div className="mt-3 p-3 bg-green-50/70 border border-green-200 rounded-lg">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <Coffee className="w-4 h-4 text-[#0D7C53]" />
+                                                    <span className="text-sm font-semibold text-gray-700">
+                                                        Table {selectedTable.tableNumber}
+                                                    </span>
+                                                </div>
+                                                <span className="text-xs text-green-600 bg-green-200/50 px-2 py-0.5 rounded-full">
+                                                    {selectedTable.seats} seats
+                                                </span>
+                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedTable(null);
+                                                    setSelectedTableId(null);
+                                                    setIsTableModalOpen(true);
+                                                }}
+                                                className="mt-2 text-xs text-[#0D7C53] hover:text-green-700 font-medium underline-offset-2 hover:underline"
+                                            >
+                                                Change Table
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {/* ✅ Show table selection prompt for dine-in */}
+                                    {orderType === "dine_in" && !selectedTable && (
+                                        <div className="mt-3 p-3 bg-yellow-50/70 border border-yellow-200 rounded-lg">
+                                            <p className="text-sm text-yellow-700">
+                                                ⚠️ Please select a table
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="space-y-2 sm:space-y-3">
@@ -665,13 +851,18 @@ const CartPage = () => {
                                     </div>
                                 </div>
 
-                                {/* ✅ Updated Proceed to Checkout Button */}
+                                {/* ✅ Proceed to Checkout Button */}
                                 <button
                                     onClick={handleCheckout}
-                                    disabled={paymentLoading || loading || cartItems.length === 0}
+                                    disabled={
+                                        paymentLoading ||
+                                        loading ||
+                                        cartItems.length === 0 ||
+                                        isProcessingPayment
+                                    }
                                     className="w-full mt-4 sm:mt-6 py-2.5 sm:py-3.5 bg-gradient-to-r from-[#0D7C53] to-green-600 text-white rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed text-base sm:text-lg"
                                 >
-                                    {paymentLoading ? (
+                                    {paymentLoading || isProcessingPayment ? (
                                         <>
                                             <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                                             Processing...
@@ -680,6 +871,11 @@ const CartPage = () => {
                                         <>
                                             <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                                             Loading Cart...
+                                        </>
+                                    ) : orderType === "dine_in" && !selectedTable ? (
+                                        <>
+                                            <span>Select Table</span>
+                                            <Coffee />
                                         </>
                                     ) : (
                                         <>
@@ -700,7 +896,7 @@ const CartPage = () => {
                                 <div className="mt-3 text-center">
                                     <span className="text-xs text-gray-400">
                                         {orderType === "dine_in"
-                                            ? "☕ Dine-in order"
+                                            ? `☕ Dine-in order ${selectedTable ? `- Table ${selectedTable.tableNumber}` : ''}`
                                             : "🚚 Delivery order"}
                                     </span>
                                 </div>
@@ -710,7 +906,248 @@ const CartPage = () => {
                 </div>
             </div>
 
-            {/* ✅ Address Modal */}
+            {/* ✅ Table Selection Modal - Integrated in CartPage */}
+            {isTableModalOpen && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-dark-card rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+                        {/* Header */}
+                        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-100 dark:border-dark-border">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-[#0D7C53]/10 rounded-lg">
+                                    <Coffee className="w-5 h-5 sm:w-6 sm:h-6 text-[#0D7C53]" />
+                                </div>
+                                <div>
+                                    <h2 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-dark-heading">
+                                        Select a Table
+                                    </h2>
+                                    <p className="text-xs sm:text-sm text-gray-500 dark:text-dark-text">
+                                        Choose your table for dine-in
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setIsTableModalOpen(false)}
+                                className="p-1.5 sm:p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                            >
+                                <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" />
+                            </button>
+                        </div>
+
+                        {/* Status Filter Tabs */}
+                        <div className="px-4 sm:px-6 pt-4 pb-2 border-b border-gray-100 dark:border-dark-border">
+                            <div className="flex flex-wrap gap-2">
+                                {['all', 'available', 'occupied', 'reserved'].map((status) => {
+                                    const count = status === 'all'
+                                        ? tableList.length
+                                        : tableList.filter(t => t.status === status).length;
+
+                                    const statusColors = {
+                                        all: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+                                        available: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
+                                        occupied: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
+                                        reserved: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
+                                    };
+
+                                    const activeColors = {
+                                        all: 'bg-gray-800 text-white dark:bg-gray-600 dark:text-white',
+                                        available: 'bg-green-600 text-white dark:bg-green-700',
+                                        occupied: 'bg-red-600 text-white dark:bg-red-700',
+                                        reserved: 'bg-yellow-600 text-white dark:bg-yellow-700'
+                                    };
+
+                                    return (
+                                        <button
+                                            key={status}
+                                            onClick={() => setTableFilter(status)}
+                                            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 flex items-center gap-1.5
+                                    ${tableFilter === status
+                                                    ? activeColors[status]
+                                                    : statusColors[status]
+                                                }`}
+                                        >
+                                            <span className="capitalize">{status === 'all' ? 'All' : status}</span>
+                                            <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${tableFilter === status
+                                                    ? 'bg-white/20 text-white'
+                                                    : 'bg-gray-200/50 text-gray-600 dark:bg-gray-600/50 dark:text-gray-400'
+                                                }`}>
+                                                {count}
+                                            </span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Body */}
+                        <div className="p-4 sm:p-6 overflow-y-auto max-h-[60vh]">
+                            {/* ✅ FORCE RENDER CHECK */}
+                            <div className="text-center text-xs text-gray-400 dark:text-gray-500 mb-2">
+                                Total Tables: {filteredTables.length} | Selected: {selectedTableId || 'None'}
+                            </div>
+
+                            {tablesReduxLoading ? (
+                                <div className="flex flex-col items-center justify-center py-12">
+                                    <Loader2 className="w-10 h-10 text-[#0D7C53] animate-spin" />
+                                    <p className="mt-3 text-gray-500 dark:text-dark-text text-sm">Loading tables...</p>
+                                </div>
+                            ) : tablesError ? (
+                                <div className="text-center py-8">
+                                    <p className="text-red-500 text-sm">Failed to load tables.</p>
+                                    <button
+                                        onClick={() => dispatch(getTables())}
+                                        className="mt-3 px-4 py-2 bg-[#0D7C53] text-white rounded-lg text-sm"
+                                    >
+                                        Retry
+                                    </button>
+                                </div>
+                            ) : filteredTables.length === 0 ? (
+                                <div className="text-center py-12">
+                                    <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <Coffee className="w-8 h-8 text-gray-400 dark:text-gray-500" />
+                                    </div>
+                                    <h3 className="text-lg font-semibold text-gray-700 dark:text-dark-heading mb-2">
+                                        {tableFilter === 'all' ? 'No Tables Available' : `No ${tableFilter} Tables`}
+                                    </h3>
+                                    <p className="text-sm text-gray-500 dark:text-dark-text">
+                                        {tableFilter === 'all'
+                                            ? 'All tables are currently occupied.'
+                                            : `There are no ${tableFilter} tables at the moment.`}
+                                    </p>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+                                        {filteredTables.map((table) => {
+                                            // Get status colors
+                                            const statusColors = {
+                                                available: {
+                                                    bg: 'border-green-200 hover:border-green-500 dark:border-green-900/30',
+                                                    selected: 'border-green-600 bg-green-50 dark:bg-green-900/20',
+                                                    badge: 'bg-green-500',
+                                                    text: 'text-green-700 dark:text-green-400'
+                                                },
+                                                occupied: {
+                                                    bg: 'border-red-200 hover:border-red-500 dark:border-red-900/30',
+                                                    selected: 'border-red-600 bg-red-50 dark:bg-red-900/20',
+                                                    badge: 'bg-red-500',
+                                                    text: 'text-red-700 dark:text-red-400'
+                                                },
+                                                reserved: {
+                                                    bg: 'border-yellow-200 hover:border-yellow-500 dark:border-yellow-900/30',
+                                                    selected: 'border-yellow-600 bg-yellow-50 dark:bg-yellow-900/20',
+                                                    badge: 'bg-yellow-500',
+                                                    text: 'text-yellow-700 dark:text-yellow-400'
+                                                }
+                                            };
+
+                                            const colors = statusColors[table.status] || statusColors.available;
+                                            const isSelected = selectedTableId === table._id;
+
+                                            return (
+                                                <button
+                                                    key={table._id}
+                                                    onClick={() => {
+                                                        console.log("🔥 Table clicked:", table._id);
+                                                        handleTableSelect(table._id);
+                                                    }}
+                                                    className={`relative p-4 rounded-xl border-2 transition-all duration-300 group hover:shadow-lg
+                                            ${isSelected
+                                                            ? colors.selected
+                                                            : `${colors.bg} hover:bg-gray-50 dark:hover:bg-gray-800`
+                                                        }
+                                        `}
+                                                >
+                                                    {/* Status Badge - Top Right */}
+                                                    <div className="absolute top-2 right-2">
+                                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium text-white ${colors.badge}`}>
+                                                            {table.status.charAt(0).toUpperCase() + table.status.slice(1)}
+                                                        </span>
+                                                    </div>
+
+                                                    {/* Table Number */}
+                                                    <div className="text-center">
+                                                        <div className={`text-2xl sm:text-3xl font-bold transition-colors 
+                                                ${isSelected
+                                                                ? `text-[#0D7C53] dark:text-green-400`
+                                                                : `text-gray-700 dark:text-dark-heading group-hover:text-[#0D7C53] dark:group-hover:text-green-400`
+                                                            }`}
+                                                        >
+                                                            Table {table.tableNumber}
+                                                        </div>
+                                                        <div className="mt-1 flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-dark-text">
+                                                            <span>🪑 {table.seats} seats</span>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Selection Indicator */}
+                                                    {isSelected && (
+                                                        <div className="absolute -top-1 -right-1">
+                                                            <div className="w-6 h-6 bg-[#0D7C53] rounded-full flex items-center justify-center shadow-lg">
+                                                                <CheckCircle className="w-4 h-4 text-white" />
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+
+                                    {/* Table Legend */}
+                                    <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs text-gray-500 dark:text-dark-text">
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+                                            <span>Available</span>
+                                        </div>
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="w-3 h-3 bg-red-500 rounded-full"></span>
+                                            <span>Occupied</span>
+                                        </div>
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="w-3 h-3 bg-yellow-500 rounded-full"></span>
+                                            <span>Reserved</span>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+
+                        {/* Footer */}
+                        <div className="p-4 sm:p-6 border-t border-gray-100 dark:border-dark-border bg-gray-50/50 dark:bg-gray-800/30">
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <button
+                                    onClick={() => setIsTableModalOpen(false)}
+                                    className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition font-medium text-sm"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleConfirmTable}
+                                    disabled={!selectedTableId || tablesReduxLoading}
+                                    className={`flex-1 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-300 
+                            ${selectedTableId && !tablesReduxLoading
+                                            ? 'bg-gradient-to-r from-[#0D7C53] to-green-600 text-white hover:shadow-lg hover:scale-[1.02]'
+                                            : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                                        }`}
+                                >
+                                    {tablesReduxLoading ? (
+                                        <span className="flex items-center justify-center gap-2">
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                            Loading...
+                                        </span>
+                                    ) : (
+                                        <span className="flex items-center justify-center gap-2">
+                                            <CheckCircle className="w-4 h-4" />
+                                            Confirm Table
+                                        </span>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ✅ Address Modal - For Delivery */}
             <AddressModal
                 isOpen={isAddressModalOpen}
                 onClose={() => setIsAddressModalOpen(false)}
@@ -734,6 +1171,10 @@ const CartPage = () => {
                     0%, 100% { transform: translateY(0px) rotate(-12deg); }
                     50% { transform: translateY(20px) rotate(-15deg); }
                 }
+                @keyframes fade-in {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
                 @keyframes slide-up {
                     from {
                         opacity: 0;
@@ -748,6 +1189,7 @@ const CartPage = () => {
                 .animate-pulse-slow-delay { animation: pulse-slow-delay 10s ease-in-out infinite; }
                 .animate-float { animation: float 6s ease-in-out infinite; }
                 .animate-float-delay { animation: float-delay 7s ease-in-out infinite; }
+                .animate-fade-in { animation: fade-in 0.2s ease-out; }
                 .animate-slide-up { animation: slide-up 0.3s ease-out; }
             `}</style>
         </>

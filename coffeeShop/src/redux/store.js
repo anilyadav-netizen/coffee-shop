@@ -8,6 +8,7 @@ import categoryReducer from './Slicer/categorySlice'
 import adminReducer from './Slicer/adminOrder'
 import orderReducer from './Slicer/orderSlice'
 import userReducer from './Slicer/userSlice'
+import tableReducer from './Slicer/tableSlice'
 export const store = configureStore({
     reducer: {
         auth: authReducer,
@@ -18,6 +19,7 @@ export const store = configureStore({
         category: categoryReducer,
         adminOrder: adminReducer,
         orderStatus: orderReducer,
-        getUser: userReducer
+        getUser: userReducer,
+        table: tableReducer
     }
 })

@@ -35,6 +35,7 @@ import DineInOrders from "./Admin/adpages/DineInOrders";
 import DeliveryOrders from "./Admin/adpages/DeliveryOrders";
 import DineInDetails from "./Admin/adpages/DineInDetails";
 import DeliveryDetailsPage from "./Admin/adpages/DeliveryDetailsPage";
+import TablePage from "./Admin/adpages/TablePage";
 
 function App() {
 
@@ -92,6 +93,7 @@ function App() {
           <Route path="/admin/orders/delivery" element={<DeliveryOrders />} />
           <Route path="/admin/orders/delivery/:id" element={<DeliveryDetailsPage />} />
           <Route path="admin/users" element={<Users />} />
+          <Route path="/admin/tables" element={<TablePage />} />
         </Route>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />

@@ -18,11 +18,7 @@ const tableSchema = new mongoose.Schema(
       default: "available",
     },
 
-    adminId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Admin",
-      required: true,
-    },
+
   },
   {
     timestamps: true,

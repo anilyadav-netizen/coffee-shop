@@ -28,7 +28,9 @@ import {
   FaInfoCircle,
   FaCheckCircle,
   FaCoffee,
-  FaTools // ✅ FaKitchenSet ki jagah FaTools use karo
+  FaTools,
+  FaChair,
+  FaTable
 } from 'react-icons/fa';
 
 import {
@@ -37,7 +39,8 @@ import {
   MdNotes,
   MdCheckCircleOutline,
   MdOutlineCheckCircle,
-  MdOutlineReceipt
+  MdOutlineReceipt,
+  MdRestaurant
 } from 'react-icons/md';
 
 import { GiKnifeFork } from 'react-icons/gi';
@@ -129,6 +132,15 @@ const DineInDetails = () => {
             nextActions: [],
             canCancel: false
         },
+        delivered: {
+            icon: <FaCheckCircle className="text-emerald-500" />,
+            color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400',
+            borderColor: 'border-emerald-500',
+            bgColor: 'bg-emerald-50 dark:bg-emerald-950/20',
+            label: 'Delivered',
+            nextActions: [],
+            canCancel: false
+        },
         cancelled: {
             icon: <FaTimesCircle className="text-red-500" />,
             color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
@@ -149,6 +161,17 @@ const DineInDetails = () => {
             online: <FaCreditCard />
         };
         return icons[method?.toLowerCase()] || <FaWallet />;
+    };
+
+    // Get table status color
+    const getTableStatusColor = (status) => {
+        const colors = {
+            occupied: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+            available: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+            reserved: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+            cleaning: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+        };
+        return colors[status?.toLowerCase()] || 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400';
     };
 
     // Update order status
@@ -204,7 +227,7 @@ const DineInDetails = () => {
             },
             prepare: {
                 label: 'Start Preparing',
-                // icon: <FaKitchenSet />,
+                icon: <FaTools />,
                 color: 'bg-indigo-500 hover:bg-indigo-600',
                 action: () => updateOrderStatus('preparing')
             },
@@ -233,35 +256,45 @@ const DineInDetails = () => {
 
     // Get timeline data
     const getTimeline = () => {
-        const statuses = ['pending', 'confirmed', 'preparing', 'ready', 'served', 'completed'];
         const timeline = [];
 
         // Add order creation
         timeline.push({
             status: 'Order Placed',
             time: order?.createdAt,
-            icon: <FaClock />,
-            color: 'text-blue-500'
+            icon: <FaClock className="text-blue-500" />,
+            color: 'text-blue-500',
+            message: 'Order placed successfully'
         });
 
         // Add tracking statuses
         if (order?.tracking) {
-            order.tracking.forEach((track, index) => {
+            order.tracking.forEach((track) => {
                 const status = track.status;
                 const config = statusConfig[status];
                 if (config) {
                     timeline.push({
-                        status: config.label,
+                        status: config.label || status,
                         time: track.time,
-                        icon: config.icon,
-                        color: config.color.split(' ')[0].replace('bg-', 'text-'),
+                        icon: config.icon || <FaClock />,
+                        color: config.color?.split(' ')[0]?.replace('bg-', 'text-') || 'text-gray-500',
+                        message: track.message
+                    });
+                } else {
+                    // Handle unknown statuses
+                    timeline.push({
+                        status: status,
+                        time: track.time,
+                        icon: <FaClock className="text-gray-500" />,
+                        color: 'text-gray-500',
                         message: track.message
                     });
                 }
             });
         }
 
-        return timeline;
+        // Sort by time
+        return timeline.sort((a, b) => new Date(a.time) - new Date(b.time));
     };
 
     if (loading) {
@@ -298,6 +331,11 @@ const DineInDetails = () => {
     const status = order.orderStatus || 'pending';
     const statusInfo = statusConfig[status] || statusConfig.pending;
     const timeline = getTimeline();
+    
+    // ✅ FIX: Get table details safely from nested object
+    const tableNumber = order.table?.tableNumber || 'N/A';
+    const tableStatus = order.table?.status || 'N/A';
+    const tableSeats = order.table?.seats || 'N/A';
 
     return (
         <div className="p-4 md:p-6 bg-gray-50 dark:bg-[#0F172A] min-h-screen">
@@ -311,7 +349,7 @@ const DineInDetails = () => {
                         <FaArrowLeft className="text-[#64748B] dark:text-[#94A3B8]" />
                     </button>
                     <div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 flex-wrap">
                             <h1 className="text-2xl md:text-3xl font-bold text-[#0F172A] dark:text-white">
                                 Order #{order._id?.slice(-8)}
                             </h1>
@@ -319,6 +357,13 @@ const DineInDetails = () => {
                                 {statusInfo.icon}
                                 {statusInfo.label}
                             </span>
+                            {/* ✅ Table badge with status */}
+                            {order.orderType === 'dine_in' && tableNumber !== 'N/A' && (
+                                <span className="px-3 py-1 bg-[#4F46E5]/10 dark:bg-[#4F46E5]/20 text-[#4F46E5] rounded-full text-xs font-semibold flex items-center gap-1.5">
+                                    <MdTableRestaurant />
+                                    Table #{tableNumber}
+                                </span>
+                            )}
                         </div>
                         <p className="text-[#64748B] dark:text-[#94A3B8] text-sm mt-1">
                             <FaClock className="inline mr-1.5" />
@@ -326,7 +371,7 @@ const DineInDetails = () => {
                         </p>
                     </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
                     <button className="px-4 py-2 bg-white dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#1E293B] rounded-lg text-sm text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#2D3748] transition-colors flex items-center gap-2">
                         <FaPrint />
                         Print
@@ -341,14 +386,30 @@ const DineInDetails = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Left Column - Main Content */}
                 <div className="lg:col-span-2 space-y-6">
-                    {/* Order Info Cards */}
+                    {/* Order Info Cards - Updated with table details */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="bg-white dark:bg-[#1E293B] rounded-xl p-4 border border-[#E2E8F0] dark:border-[#1E293B]">
-                            <p className="text-xs text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">Table</p>
-                            <p className="text-lg font-bold text-[#0F172A] dark:text-white mt-1">
-                                <MdTableRestaurant className="inline mr-1.5 text-[#4F46E5]" />
-                                {order.tableNumber || 'N/A'}
+                        {/* ✅ Table Card with full details */}
+                        <div className="bg-white dark:bg-[#1E293B] rounded-xl p-4 border border-[#E2E8F0] dark:border-[#1E293B] col-span-2 md:col-span-1">
+                            <p className="text-xs text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider flex items-center gap-1">
+                                <MdTableRestaurant className="text-[#4F46E5]" />
+                                Table
                             </p>
+                            <div className="mt-1">
+                                <p className="text-lg font-bold text-[#0F172A] dark:text-white">
+                                    #{tableNumber}
+                                </p>
+                                {tableStatus !== 'N/A' && (
+                                    <span className={`text-xs px-2 py-0.5 rounded-full inline-block mt-1 ${getTableStatusColor(tableStatus)}`}>
+                                        {tableStatus}
+                                    </span>
+                                )}
+                                {tableSeats !== 'N/A' && (
+                                    <span className="text-xs text-[#64748B] dark:text-[#94A3B8] ml-2">
+                                        <FaChair className="inline mr-0.5" />
+                                        {tableSeats} seats
+                                    </span>
+                                )}
+                            </div>
                         </div>
                         <div className="bg-white dark:bg-[#1E293B] rounded-xl p-4 border border-[#E2E8F0] dark:border-[#1E293B]">
                             <p className="text-xs text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">Customer</p>
@@ -356,22 +417,79 @@ const DineInDetails = () => {
                                 <FaUser className="inline mr-1.5 text-[#4F46E5]" />
                                 {order.user?.name || 'Guest'}
                             </p>
-                        </div>
-                        <div className="bg-white dark:bg-[#1E293B] rounded-xl p-4 border border-[#E2E8F0] dark:border-[#1E293B]">
-                            <p className="text-xs text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">Guests</p>
-                            <p className="text-lg font-bold text-[#0F172A] dark:text-white mt-1">
-                                <FaUsers className="inline mr-1.5 text-[#4F46E5]" />
-                                {order.numberOfGuests || '1'}
+                            <p className="text-xs text-[#64748B] dark:text-[#94A3B8] truncate mt-0.5">
+                                {order.user?.email || ''}
                             </p>
                         </div>
                         <div className="bg-white dark:bg-[#1E293B] rounded-xl p-4 border border-[#E2E8F0] dark:border-[#1E293B]">
-                            <p className="text-xs text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">Type</p>
+                            <p className="text-xs text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">Order Type</p>
                             <p className="text-lg font-bold text-[#0F172A] dark:text-white mt-1">
-                                <GiKnifeFork className="inline mr-1.5 text-[#4F46E5]" />
-                                Dine In
+                                {order.orderType === 'dine_in' ? (
+                                    <>
+                                        <MdRestaurant className="inline mr-1.5 text-[#4F46E5]" />
+                                        Dine In
+                                    </>
+                                ) : (
+                                    <>
+                                        <FaUtensils className="inline mr-1.5 text-[#4F46E5]" />
+                                        Delivery
+                                    </>
+                                )}
+                            </p>
+                        </div>
+                        <div className="bg-white dark:bg-[#1E293B] rounded-xl p-4 border border-[#E2E8F0] dark:border-[#1E293B]">
+                            <p className="text-xs text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">Total Amount</p>
+                            <p className="text-lg font-bold text-[#4F46E5] mt-1 flex items-center gap-0.5">
+                                <FaRupeeSign className="text-sm" />
+                                {order.amount || 0}
                             </p>
                         </div>
                     </div>
+
+                    {/* ✅ Table Section - Detailed Table Info */}
+                    {order.orderType === 'dine_in' && tableNumber !== 'N/A' && (
+                        <div className="bg-white dark:bg-[#1E293B] rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] overflow-hidden">
+                            <div className="p-4 border-b border-[#E2E8F0] dark:border-[#1E293B] bg-gradient-to-r from-[#F8FAFC] to-[#F1F5F9] dark:from-[#1E293B] dark:to-[#0F172A]">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="font-semibold text-[#0F172A] dark:text-white flex items-center gap-2">
+                                        <FaTable className="text-[#4F46E5]" />
+                                        Table Details
+                                    </h3>
+                                    <span className={`text-xs px-2 py-0.5 rounded-full ${getTableStatusColor(tableStatus)}`}>
+                                        {tableStatus}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="p-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div>
+                                    <p className="text-xs text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">Table Number</p>
+                                    <p className="text-lg font-bold text-[#0F172A] dark:text-white mt-0.5">#{tableNumber}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">Seats</p>
+                                    <p className="text-lg font-bold text-[#0F172A] dark:text-white mt-0.5 flex items-center gap-1">
+                                        <FaChair className="text-[#4F46E5] text-sm" />
+                                        {tableSeats}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">Status</p>
+                                    <p className={`text-sm font-semibold mt-0.5 capitalize ${tableStatus === 'occupied' ? 'text-green-600 dark:text-green-400' : 
+                                        tableStatus === 'available' ? 'text-blue-600 dark:text-blue-400' :
+                                        tableStatus === 'reserved' ? 'text-yellow-600 dark:text-yellow-400' :
+                                        'text-gray-600 dark:text-gray-400'}`}>
+                                        {tableStatus}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">Table ID</p>
+                                    <p className="text-xs font-mono text-[#64748B] dark:text-[#94A3B8] mt-0.5 truncate">
+                                        {order.table?._id?.slice(-8) || 'N/A'}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Ordered Items */}
                     <div className="bg-white dark:bg-[#1E293B] rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] overflow-hidden">
@@ -409,10 +527,16 @@ const DineInDetails = () => {
                                                     <h4 className="font-semibold text-[#0F172A] dark:text-white">
                                                         {item.coffee?.name || 'Product'}
                                                     </h4>
-                                                    <div className="flex items-center gap-3 mt-1 text-sm text-[#64748B] dark:text-[#94A3B8]">
+                                                    <div className="flex items-center gap-3 mt-1 text-sm text-[#64748B] dark:text-[#94A3B8] flex-wrap">
                                                         <span>Qty: {item.quantity || 1}</span>
                                                         <span className="w-1 h-1 rounded-full bg-[#E2E8F0] dark:bg-[#1E293B]"></span>
                                                         <span>₹{item.price || 0} each</span>
+                                                        {item.coffee?.category && (
+                                                            <>
+                                                                <span className="w-1 h-1 rounded-full bg-[#E2E8F0] dark:bg-[#1E293B]"></span>
+                                                                <span className="text-xs">{item.coffee.category}</span>
+                                                            </>
+                                                        )}
                                                     </div>
                                                     {item.specialInstructions && (
                                                         <p className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-1 italic">
@@ -431,10 +555,84 @@ const DineInDetails = () => {
                         </div>
                     </div>
 
+                    {/* Order Timeline */}
+                    {timeline.length > 0 && (
+                        <div className="bg-white dark:bg-[#1E293B] rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] overflow-hidden">
+                            <div className="p-4 border-b border-[#E2E8F0] dark:border-[#1E293B] bg-gradient-to-r from-[#F8FAFC] to-[#F1F5F9] dark:from-[#1E293B] dark:to-[#0F172A]">
+                                <h3 className="font-semibold text-[#0F172A] dark:text-white flex items-center gap-2">
+                                    <FaHistory className="text-[#4F46E5]" />
+                                    Order Timeline
+                                </h3>
+                            </div>
+                            <div className="p-4">
+                                <div className="relative">
+                                    {/* Vertical line */}
+                                    <div className="absolute left-5 top-0 bottom-0 w-0.5 bg-[#E2E8F0] dark:bg-[#1E293B]"></div>
+                                    {timeline.map((event, index) => (
+                                        <div key={index} className="relative flex gap-4 pb-6 last:pb-0">
+                                            <div className="relative z-10 flex-shrink-0 w-10 h-10 rounded-full bg-white dark:bg-[#1E293B] border-2 border-[#E2E8F0] dark:border-[#1E293B] flex items-center justify-center">
+                                                <div className="w-8 h-8 rounded-full bg-[#F1F5F9] dark:bg-[#0F172A] flex items-center justify-center">
+                                                    {event.icon}
+                                                </div>
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center justify-between gap-2 flex-wrap">
+                                                    <p className="font-medium text-[#0F172A] dark:text-white">
+                                                        {event.status}
+                                                    </p>
+                                                    <p className="text-xs text-[#64748B] dark:text-[#94A3B8]">
+                                                        {event.time ? new Date(event.time).toLocaleString() : 'N/A'}
+                                                    </p>
+                                                </div>
+                                                {event.message && (
+                                                    <p className="text-sm text-[#64748B] dark:text-[#94A3B8] mt-0.5">
+                                                        {event.message}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Right Column - Sidebar */}
                 <div className="space-y-6">
+                    {/* Action Buttons */}
+                    {getActionButtons() && getActionButtons().length > 0 && (
+                        <div className="bg-white dark:bg-[#1E293B] rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] overflow-hidden">
+                            <div className="p-4 border-b border-[#E2E8F0] dark:border-[#1E293B] bg-gradient-to-r from-[#F8FAFC] to-[#F1F5F9] dark:from-[#1E293B] dark:to-[#0F172A]">
+                                <h3 className="font-semibold text-[#0F172A] dark:text-white flex items-center gap-2">
+                                    <FaTools className="text-[#4F46E5]" />
+                                    Actions
+                                </h3>
+                            </div>
+                            <div className="p-4 space-y-2">
+                                {getActionButtons().map((action, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={action.action}
+                                        className={`w-full px-4 py-2.5 text-white rounded-lg font-medium flex items-center justify-center gap-2 transition-all ${action.color} hover:shadow-lg hover:scale-[1.02]`}
+                                    >
+                                        {action.icon}
+                                        {action.label}
+                                    </button>
+                                ))}
+                                {statusInfo.canCancel && (
+                                    <button
+                                        onClick={() => setShowCancelModal(true)}
+                                        className="w-full px-4 py-2.5 border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all hover:scale-[1.02]"
+                                    >
+                                        <FaBan />
+                                        Cancel Order
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Order Summary */}
                     <div className="bg-white dark:bg-[#1E293B] rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] overflow-hidden">
                         <div className="p-4 border-b border-[#E2E8F0] dark:border-[#1E293B] bg-gradient-to-r from-[#F8FAFC] to-[#F1F5F9] dark:from-[#1E293B] dark:to-[#0F172A]">
@@ -496,17 +694,33 @@ const DineInDetails = () => {
                                     {order.payment?.status || 'Pending'}
                                 </span>
                             </div>
-                            {order.payment?.transactionId && (
+                            {order.payment?.razorpayOrderId && (
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-[#64748B] dark:text-[#94A3B8]">Transaction ID</span>
-                                    <span className="text-sm text-[#0F172A] dark:text-white font-mono">
-                                        {order.payment.transactionId}
+                                    <span className="text-sm text-[#64748B] dark:text-[#94A3B8]">Razorpay Order ID</span>
+                                    <span className="text-xs text-[#0F172A] dark:text-white font-mono truncate max-w-[150px]">
+                                        {order.payment.razorpayOrderId}
                                     </span>
                                 </div>
                             )}
+                            {order.payment?.razorpayPaymentId && (
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-[#64748B] dark:text-[#94A3B8]">Razorpay Payment ID</span>
+                                    <span className="text-xs text-[#0F172A] dark:text-white font-mono truncate max-w-[150px]">
+                                        {order.payment.razorpayPaymentId}
+                                    </span>
+                                </div>
+                            )}
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm text-[#64748B] dark:text-[#94A3B8]">Paid Amount</span>
+                                <span className="text-sm text-[#0F172A] dark:text-white font-bold flex items-center gap-0.5">
+                                    <FaRupeeSign className="text-xs" />
+                                    {order.payment?.amount || order.amount || 0}
+                                </span>
+                            </div>
                         </div>
                     </div>
 
+                  
                 </div>
             </div>
 
