@@ -88,11 +88,20 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
 
+    // ✅ Table for Dine-In
+    table: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Table",
+      default: null,
+    },
+
+    // Delivery Address
     deliveryAddress: {
       type: deliveryAddressSchema,
       default: null,
     },
 
+    // Products
     products: [orderProductSchema],
 
     amount: {

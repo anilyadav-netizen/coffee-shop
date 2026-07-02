@@ -28,14 +28,20 @@ const paymentSchema = new mongoose.Schema(
       required: true,
     },
 
-    // Order Type
     orderType: {
       type: String,
       enum: ["dine_in", "delivery"],
       required: true,
-      default: "dine_in",
     },
 
+    // Dine In
+    table: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Table",
+      default: null,
+    },
+
+    // Delivery
     deliveryAddress: {
       type: deliveryAddressSchema,
       default: null,
