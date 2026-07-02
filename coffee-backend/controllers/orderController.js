@@ -1,6 +1,5 @@
 const Order = require("../models/orderModel");
 
-
 exports.getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find({})
@@ -10,6 +9,10 @@ exports.getAllOrders = async (req, res) => {
       })
       .populate({
         path: "payment",
+      })
+      .populate({
+        path: "table",          // ✅ Populate table
+        select: "tableNumber seats status",
       })
       .populate({
         path: "products.coffee",
