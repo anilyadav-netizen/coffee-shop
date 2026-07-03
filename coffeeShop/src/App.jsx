@@ -58,8 +58,9 @@ function App() {
           <Route path="/journey" element={<Journey />} />
           <Route path="/review" element={<Review />} />
           <Route path="/orderDetails" element={<OrderDetailsPage />} />
-          <Route path="/profile" element={<Profile/>} />
-          <Route path="/update-address/:addressId" element={<UpdateAddress/>} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/address/new" element={<UpdateAddress />} />
+          <Route path="/address/:addressId" element={<UpdateAddress />} />
           <Route
             path="/cart"
             element={
