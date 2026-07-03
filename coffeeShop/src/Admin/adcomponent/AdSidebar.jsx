@@ -1,5 +1,5 @@
 import { NavLink, Link, useNavigate } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { FaChair } from "react-icons/fa";
 import {
   FaMotorcycle,
@@ -20,8 +20,8 @@ import {
   FaSun,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
-import { GiKnifeFork } from "react-icons/gi"; // For Dine In icon
-import { FaTruck } from "react-icons/fa"; // For Delivery icon
+import { GiKnifeFork } from "react-icons/gi";
+import { FaTruck } from "react-icons/fa";
 
 const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
   const navigate = useNavigate();
@@ -30,12 +30,116 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
   const profileRef = useRef(null);
   const buttonRef = useRef(null);
 
+  // Get user from localStorage with error handling
+  const user = useMemo(() => {
+    try {
+      const userData = localStorage.getItem("user");
+      return userData ? JSON.parse(userData) : null;
+    } catch (error) {
+      console.error("Error parsing user data:", error);
+      return null;
+    }
+  }, []);
+
+  // Role-based menu configuration
+  const menuItems = useMemo(() => {
+    const allMenus = [
+      {
+        name: "Dashboard",
+        path: "/admin",
+        icon: <MdDashboard size={20} />,
+        roles: ["admin", "rider", "user"]
+      },
+      {
+        name: "Products",
+        path: "/admin/products",
+        icon: <FaCoffee size={18} />,
+        roles: ["admin"]
+      },
+      {
+        name: "Category",
+        path: "/admin/category",
+        icon: <FaTags size={18} />,
+        roles: ["admin"]
+      },
+      {
+        name: "Tables",
+        path: "/admin/tables",
+        icon: <FaChair size={18} />,
+        roles: ["admin"]
+      },
+      {
+        name: "Dine In Orders",
+        path: "/admin/orders/dine-in",
+        icon: <GiKnifeFork size={18} />,
+        roles: ["admin", "rider"]
+      },
+      {
+        name: "Delivery Orders",
+        path: "/admin/orders/delivery",
+        icon: <FaTruck size={18} />,
+        roles: ["admin", "rider"]
+      },
+      {
+        name: "Rider",
+        path: "/admin/riders",
+        icon: <FaUserCircle size={18} />,
+        roles: ["admin"]
+      },
+      {
+        name: "Users",
+        path: "/admin/users",
+        icon: <FaUsers size={18} />,
+        roles: ["admin"]
+      },
+    ];
+
+    // Filter menus based on user role
+    if (!user || !user.role) {
+      return allMenus.filter(item => item.roles.includes("user"));
+    }
+
+    return allMenus.filter(item => item.roles.includes(user.role));
+  }, [user]);
+
+  // Profile dropdown items with role-based access
+  const profileItems = useMemo(() => {
+    const items = [
+      {
+        name: "My Profile",
+        path: "/admin/profile",
+        icon: <FaUser className="text-[#64748B] dark:text-[#94A3B8] group-hover:text-[#4F46E5] dark:group-hover:text-[#818CF8]" />,
+        roles: ["admin", "rider", "user"]
+      },
+      {
+        name: "Settings",
+        path: "/admin/settings",
+        icon: <FaCog className="text-[#64748B] dark:text-[#94A3B8] group-hover:text-[#4F46E5] dark:group-hover:text-[#818CF8]" />,
+        roles: ["admin", "rider", "user"]
+      },
+      {
+        name: "Notifications",
+        path: "/admin/notifications",
+        icon: <FaBell className="text-[#64748B] dark:text-[#94A3B8] group-hover:text-[#4F46E5] dark:group-hover:text-[#818CF8]" />,
+        roles: ["admin", "rider", "user"],
+        badge: 3
+      },
+    ];
+
+    if (!user || !user.role) {
+      return items.filter(item => item.roles.includes("user"));
+    }
+
+    return items.filter(item => item.roles.includes(user.role));
+  }, [user]);
+
   // Close profile dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
         profileRef.current &&
         !profileRef.current.contains(event.target) &&
+        buttonRef.current &&
         !buttonRef.current.contains(event.target)
       ) {
         setProfileOpen(false);
@@ -46,53 +150,16 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const menuItems = [
-    {
-      name: "Dashboard",
-      path: "/admin",
-      icon: <MdDashboard size={20} />,
-    },
-    {
-      name: "Products",
-      path: "/admin/products",
-      icon: <FaCoffee size={18} />,
-    },
-    {
-      name: "Category",
-      path: "/admin/category",
-      icon: <FaTags size={18} />,
-    },
-    {
-      name: "Tables",
-      path: "/admin/tables",
-      icon: <FaChair size={18} />,
-    },
-    {
-      name: "Dine In Orders",
-      path: "/admin/orders/dine-in",
-      icon: <GiKnifeFork size={18} />,
-    },
-    {
-      name: "Delivery Orders",
-      path: "/admin/orders/delivery",
-      icon: <FaTruck size={18} />,
-    },
-    {
-      name: "Rider",
-      path: "/admin/riders",
-      icon: <FaUserCircle size={18} />,
-    },
-    {
-      name: "Users",
-      path: "/admin/users",
-      icon: <FaUsers size={18} />,
-    },
-  ];
-
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     navigate("/login");
   };
+
+  // Get user display info with fallbacks
+  const userDisplayName = user?.name || "Guest User";
+  const userEmail = user?.email || "guest@coffee.com";
+  const userRole = user?.role || "user";
 
   return (
     <aside className="w-72 h-screen flex flex-col border-r shadow-2xl bg-white dark:bg-[#0F172A] border-[#E2E8F0] dark:border-[#1E293B] relative transition-colors duration-300">
@@ -140,31 +207,44 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
             onMouseEnter={() => setHoveredItem(index)}
             onMouseLeave={() => setHoveredItem(null)}
             className={({ isActive }) =>
-              `relative flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group ${isActive
-                ? "font-semibold bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] text-white shadow-lg shadow-[#4F46E5]/25 dark:shadow-[#4F46E5]/30"
-                : "text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] hover:text-[#0F172A] dark:hover:text-white"
+              `relative flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group ${
+                isActive
+                  ? "font-semibold bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] text-white shadow-lg shadow-[#4F46E5]/25 dark:shadow-[#4F46E5]/30"
+                  : "text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] hover:text-[#0F172A] dark:hover:text-white"
               }`
             }
           >
             {({ isActive }) => (
               <>
                 <span className="relative z-10 flex items-center gap-3 w-full">
-                  <span className={isActive ? "text-white" : "text-[#64748B] dark:text-[#94A3B8] group-hover:text-[#0F172A] dark:group-hover:text-white transition-colors"}>
+                  <span
+                    className={
+                      isActive
+                        ? "text-white"
+                        : "text-[#64748B] dark:text-[#94A3B8] group-hover:text-[#0F172A] dark:group-hover:text-white transition-colors"
+                    }
+                  >
                     {item.icon}
                   </span>
                   <span className="flex-1 text-xl">{item.name}</span>
                   {item.badge && (
-                    <span className={`px-2.5 py-0.5 text-xs font-bold rounded-full ${isActive
-                      ? "bg-white/20 text-white"
-                      : "bg-[#4F46E5]/10 dark:bg-[#4F46E5]/20 text-[#4F46E5] dark:text-[#818CF8]"
-                      }`}>
+                    <span
+                      className={`px-2.5 py-0.5 text-xs font-bold rounded-full ${
+                        isActive
+                          ? "bg-white/20 text-white"
+                          : "bg-[#4F46E5]/10 dark:bg-[#4F46E5]/20 text-[#4F46E5] dark:text-[#818CF8]"
+                      }`}
+                    >
                       {item.badge}
                     </span>
                   )}
                 </span>
                 {/* Hover background effect */}
-                <span className={`absolute inset-0 rounded-2xl transition-all duration-300 ${isActive ? "opacity-100" : "opacity-0"
-                  }`} />
+                <span
+                  className={`absolute inset-0 rounded-2xl transition-all duration-300 ${
+                    isActive ? "opacity-100" : "opacity-0"
+                  }`}
+                />
               </>
             )}
           </NavLink>
@@ -188,18 +268,19 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
 
               <div className="text-left">
                 <h3 className="font-semibold text-[#0F172A] dark:text-white text-xl">
-                  Admin User
+                  {userDisplayName}
                 </h3>
 
                 <p className="text-sm text-[#64748B] dark:text-[#94A3B8]">
-                  admin@coffee.com
+                  {userEmail}
                 </p>
               </div>
             </div>
 
             <FaChevronUp
-              className={`text-[#64748B] dark:text-[#94A3B8] transition-all duration-300 ${profileOpen ? "rotate-180" : ""
-                } group-hover:text-[#0F172A] dark:group-hover:text-white`}
+              className={`text-[#64748B] dark:text-[#94A3B8] transition-all duration-300 ${
+                profileOpen ? "rotate-180" : ""
+              } group-hover:text-[#0F172A] dark:group-hover:text-white`}
             />
           </button>
 
@@ -209,41 +290,24 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
               className="absolute bottom-full left-0 right-0 mb-2 rounded-2xl shadow-2xl border border-[#E2E8F0] dark:border-[#1E293B] bg-white dark:bg-[#0F172A] overflow-hidden animate-slideUp"
             >
               <div className="p-2 space-y-1">
-                <button
-                  onClick={() => {
-                    navigate("/admin/profile");
-                    setProfileOpen(false);
-                  }}
-                  className="flex items-center gap-3 w-full px-4 py-3 rounded-xl hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] transition-all duration-200 text-[#0F172A] dark:text-white group"
-                >
-                  <FaUser className="text-[#64748B] dark:text-[#94A3B8] group-hover:text-[#4F46E5] dark:group-hover:text-[#818CF8]" />
-                  <span className="text-base font-medium">My Profile</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    navigate("/admin/settings");
-                    setProfileOpen(false);
-                  }}
-                  className="flex items-center gap-3 w-full px-4 py-3 rounded-xl hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] transition-all duration-200 text-[#0F172A] dark:text-white group"
-                >
-                  <FaCog className="text-[#64748B] dark:text-[#94A3B8] group-hover:text-[#4F46E5] dark:group-hover:text-[#818CF8]" />
-                  <span className="text-base font-medium">Settings</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    navigate("/admin/notifications");
-                    setProfileOpen(false);
-                  }}
-                  className="flex items-center gap-3 w-full px-4 py-3 rounded-xl hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] transition-all duration-200 text-[#0F172A] dark:text-white group"
-                >
-                  <FaBell className="text-[#64748B] dark:text-[#94A3B8] group-hover:text-[#4F46E5] dark:group-hover:text-[#818CF8]" />
-                  <span className="text-base font-medium">Notifications</span>
-                  <span className="ml-auto px-2 py-0.5 text-xs font-bold bg-red-500 text-white rounded-full">
-                    3
-                  </span>
-                </button>
+                {profileItems.map((item) => (
+                  <button
+                    key={item.path}
+                    onClick={() => {
+                      navigate(item.path);
+                      setProfileOpen(false);
+                    }}
+                    className="flex items-center gap-3 w-full px-4 py-3 rounded-xl hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] transition-all duration-200 text-[#0F172A] dark:text-white group"
+                  >
+                    {item.icon}
+                    <span className="text-base font-medium">{item.name}</span>
+                    {item.badge && (
+                      <span className="ml-auto px-2 py-0.5 text-xs font-bold bg-red-500 text-white rounded-full">
+                        {item.badge}
+                      </span>
+                    )}
+                  </button>
+                ))}
 
                 <div className="border-t border-[#E2E8F0] dark:border-[#1E293B] my-1" />
 

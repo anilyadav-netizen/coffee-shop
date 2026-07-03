@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -14,11 +13,11 @@ import {
     Mail,
     Phone,
     CheckCircle,
-    X
+    X,
+    Plus
 } from 'lucide-react';
 import { updateAddress, clearAddressState } from '../redux/Slicer/addressSlice';
-import { getAllUsers } from '../redux/Slicer/userSlice';
-
+import { getProfile } from '../redux/Slicer/authSlice';
 
 const GlassCard = ({ children, className = '' }) => (
     <div className={`bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 dark:border-gray-700/30 p-6 md:p-8 transition-all duration-300 hover:shadow-xl ${className}`}>
@@ -88,9 +87,32 @@ const SelectField = ({ label, name, value, onChange, options, required = false, 
 const UpdateAddress = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+
     const { addressId } = useParams();
-    const { user, isLoading: authLoading } = useSelector((state) => state.auth);
+    const isNew = addressId === "new";
+
+    const { user, isLoading: authLoading, isAuthenticated } = useSelector((state) => state.auth);
     const { loading: addressLoading, success, error } = useSelector((state) => state.address);
+
+    // ✅ Navbar ko black karne ke liye useEffect
+    useEffect(() => {
+        const navbar = document.querySelector('nav');
+        if (navbar) {
+            navbar.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+            navbar.style.backdropFilter = 'blur(20px)';
+            navbar.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
+        }
+        return () => {
+            if (navbar) {
+                navbar.style.backgroundColor = '';
+                navbar.style.backdropFilter = '';
+                navbar.style.boxShadow = '';
+            }
+        };
+    }, []);
+
+    // CRITICAL: Check if it's a new address
+    const isNewAddress = addressId === "new";
 
     const [formData, setFormData] = useState({
         type: 'Home',
@@ -109,15 +131,35 @@ const UpdateAddress = () => {
     const [formErrors, setFormErrors] = useState({});
     const [toastMessage, setToastMessage] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isLoadingAddress, setIsLoadingAddress] = useState(true);
 
-    // Find the address to edit
-    const addressToEdit = user?.addresses?.find(
-        addr => (addr._id || addr.id) === addressId
-    );
-
-    // Pre-fill form when address is found
+    // Fetch the latest profile data when component mounts
     useEffect(() => {
-        if (addressToEdit) {
+        if (isAuthenticated) {
+            dispatch(getProfile())
+                .unwrap()
+                .then(() => {
+                    setIsLoadingAddress(false);
+                })
+                .catch(() => {
+                    setIsLoadingAddress(false);
+                });
+        } else {
+            setIsLoadingAddress(false);
+        }
+    }, [dispatch, isAuthenticated]);
+
+    // CRITICAL: Only find address if NOT a new address
+    const addressToEdit = !isNewAddress
+        ? user?.addresses?.find(
+            addr => (addr._id || addr.id) === addressId
+        )
+        : null;
+
+    // Pre-fill form ONLY when editing existing address
+    useEffect(() => {
+        // Only prefill if we have an address to edit and it's NOT a new address
+        if (addressToEdit && !isNewAddress) {
             setFormData({
                 type: addressToEdit.type || 'Home',
                 name: addressToEdit.name || '',
@@ -132,12 +174,16 @@ const UpdateAddress = () => {
                 isDefault: addressToEdit.isDefault || false
             });
         }
-    }, [addressToEdit]);
+        // For new address, keep the form empty (initial state)
+    }, [addressToEdit, isNewAddress]);
 
     // Show toast notification
     useEffect(() => {
         if (success) {
-            setToastMessage({ type: 'success', text: 'Address updated successfully!' });
+            setToastMessage({
+                type: 'success',
+                text: isNewAddress ? 'Address added successfully!' : 'Address updated successfully!'
+            });
             setIsSubmitting(false);
 
             // Navigate back to profile after a brief delay
@@ -149,13 +195,13 @@ const UpdateAddress = () => {
             return () => clearTimeout(timer);
         }
         if (error) {
-            setToastMessage({ type: 'error', text: error });
+            setToastMessage({ type: 'error', text: typeof error === 'string' ? error : 'Failed to save address' });
             setIsSubmitting(false);
             setTimeout(() => {
                 dispatch(clearAddressState());
             }, 4000);
         }
-    }, [success, error, dispatch, navigate]);
+    }, [success, error, dispatch, navigate, isNewAddress]);
 
     // Auto-close toast
     useEffect(() => {
@@ -206,6 +252,11 @@ const UpdateAddress = () => {
         const errors = validateForm();
         if (Object.keys(errors).length > 0) {
             setFormErrors(errors);
+            // Scroll to first error
+            const firstError = document.querySelector('.text-red-500');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
             return;
         }
 
@@ -227,18 +278,28 @@ const UpdateAddress = () => {
                 isDefault: formData.isDefault
             };
 
-            // Dispatch updateAddress thunk
-            await dispatch(updateAddress({
-                addressId: addressId,
-                addressData
-            })).unwrap();
+            if (isNew) {
+                // NEW ADDRESS → backend updateAddress use karega WITHOUT id
+                await dispatch(updateAddress({
+                    addressId: "new",
+                    addressData
+                })).unwrap();
+            } else {
+                // UPDATE ADDRESS
+                await dispatch(updateAddress({
+                    addressId,
+                    addressData
+                })).unwrap();
+            }
 
             // Refresh profile to get updated data
             await dispatch(getProfile()).unwrap();
 
+            // Success is handled by the success useEffect above
+
         } catch (error) {
             // Error is handled by the reducer
-            console.error('Failed to update address:', error);
+            console.error('Failed to save address:', error);
             setIsSubmitting(false);
         }
     };
@@ -248,39 +309,27 @@ const UpdateAddress = () => {
         navigate('/profile');
     };
 
+    // Combined loading state
+    const isLoading = authLoading || isLoadingAddress;
+
     // Loading state
-    if (authLoading) {
+    if (isLoading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-green-50/50 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
+            // ✅ Added pt-20 sm:pt-24 for top padding
+            <div className="min-h-screen bg-gradient-to-br from-green-50/50 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4 pt-20 sm:pt-24">
                 <GlassCard className="max-w-md w-full text-center">
                     <Loader2 className="w-12 h-12 mx-auto text-green-600 dark:text-green-400 animate-spin mb-4" />
-                    <p className="text-gray-600 dark:text-gray-400">Loading address details...</p>
-                </GlassCard>
-            </div>
-        );
-    }
-
-    // If address not found
-    if (!addressToEdit) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-green-50/50 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
-                <GlassCard className="max-w-md w-full text-center">
-                    <MapPin className="w-16 h-16 mx-auto text-red-400 dark:text-red-500 mb-4" />
-                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Address Not Found</h2>
-                    <p className="text-gray-600 dark:text-gray-400 mb-6">The address you're looking for doesn't exist.</p>
-                    <button
-                        onClick={handleBack}
-                        className="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all hover:shadow-lg"
-                    >
-                        Return to Profile
-                    </button>
+                    <p className="text-gray-600 dark:text-gray-400">
+                        {isNewAddress ? 'Loading...' : 'Loading address details...'}
+                    </p>
                 </GlassCard>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-green-50/30 to-white dark:from-gray-900 dark:to-gray-800 p-4 md:p-8 transition-colors duration-300">
+        // ✅ Added pt-20 sm:pt-24 for top padding to accommodate fixed navbar
+        <div className="mt-20 min-h-screen bg-gradient-to-br from-green-50/30 to-white dark:from-gray-900 dark:to-gray-800 p-4 md:p-8 transition-colors duration-300 pt-20 sm:pt-24">
             {/* Toast Notification */}
             {toastMessage && (
                 <div className={`fixed top-4 right-4 z-50 animate-in slide-in-from-top-2 duration-300 ${toastMessage.type === 'success'
@@ -307,8 +356,14 @@ const UpdateAddress = () => {
                         <ArrowLeft className="w-6 h-6 text-gray-700 dark:text-gray-300" />
                     </button>
                     <div>
-                        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white">Update Address</h1>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Edit your address details below</p>
+                        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white">
+                            {isNewAddress ? 'Add Address' : 'Update Address'}
+                        </h1>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                            {isNewAddress
+                                ? 'Add a new address to your profile'
+                                : 'Edit your address details below'}
+                        </p>
                     </div>
                 </div>
 
@@ -325,7 +380,7 @@ const UpdateAddress = () => {
                                 options={[
                                     { value: 'Home', label: '🏠 Home' },
                                     { value: 'Office', label: '💼 Office' },
-                                    { value: 'Hostel', label: '🏢 Hostel' }
+                                    { value: 'Other', label: '📍 Other' }
                                 ]}
                                 required
                                 icon={Home}
@@ -341,7 +396,7 @@ const UpdateAddress = () => {
                                 required
                                 placeholder="John Doe"
                                 icon={User}
-                                className={formErrors.name ? 'md:col-span-2' : 'md:col-span-2'}
+                                className="md:col-span-2"
                             />
                             {formErrors.name && (
                                 <p className="text-red-500 text-sm -mt-3 md:col-span-2">{formErrors.name}</p>
@@ -492,12 +547,21 @@ const UpdateAddress = () => {
                                 {isSubmitting ? (
                                     <>
                                         <Loader2 className="w-5 h-5 animate-spin" />
-                                        Saving...
+                                        {isNewAddress ? 'Saving...' : 'Updating...'}
                                     </>
                                 ) : (
                                     <>
-                                        <Save className="w-5 h-5" />
-                                        Save Changes
+                                        {isNewAddress ? (
+                                            <>
+                                                <Plus className="w-5 h-5" />
+                                                Save Address
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Save className="w-5 h-5" />
+                                                Update Address
+                                            </>
+                                        )}
                                     </>
                                 )}
                             </button>

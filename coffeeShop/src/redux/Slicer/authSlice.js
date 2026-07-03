@@ -49,6 +49,21 @@ export const logoutUser = createAsyncThunk(
     }
 );
 
+/* ---------------- GET PROFILE ---------------- */
+export const getProfile = createAsyncThunk(
+    "auth/getProfile",
+    async (_, thunkAPI) => {
+        try {
+            const { data } = await API.get("/auth/profile");
+            return data.user;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(
+                error.response?.data?.message || "Failed to fetch profile"
+            );
+        }
+    }
+);
+
 // ✅ ADD THIS - Alias for logout
 export const logout = logoutUser;
 
@@ -107,7 +122,26 @@ const authSlice = createSlice({
                 state.isAuthenticated = false;
                 state.loading = false;
                 state.error = null;
-            });
+            })
+            /* ===== GET PROFILE ===== */
+            .addCase(getProfile.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+
+            .addCase(getProfile.fulfilled, (state, action) => {
+                state.loading = false;
+                state.user = action.payload;
+                state.isAuthenticated = true;
+
+                // LocalStorage bhi update kar do
+                localStorage.setItem("user", JSON.stringify(action.payload));
+            })
+
+            .addCase(getProfile.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
     },
 });
 

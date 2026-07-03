@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { Plus } from "lucide-react";
 import {
     User,
     Mail,
@@ -23,14 +23,13 @@ import {
     Coffee,
     ShoppingCart,
     Trash2,
-    Store,
-    Truck,
     ArrowRight
 } from 'lucide-react';
-import { logout } from '../redux/Slicer/authSlice';
+import { logout, getProfile } from '../redux/Slicer/authSlice';
 import { getMyOrders } from '../redux/Slicer/paymentSlice';
 import { getWishlist, removeFromWishlist } from '../redux/Slicer/wishlistSlice';
 import { addToCart, getCart } from '../redux/Slicer/cartSlice';
+import { useNavigate } from 'react-router-dom';
 
 // --- Reusable Components ---
 
@@ -70,25 +69,49 @@ const getAddressIcon = (type) => {
 
 const Profile = () => {
     const dispatch = useDispatch();
-    const navigate = useNavigate();
-    const { user, isLoading } = useSelector((state) => state.auth);
+    const { user, isLoading, isAuthenticated } = useSelector((state) => state.auth);
     const { orders, loading: ordersLoading } = useSelector((state) => state.payment);
     const { items: wishlistItems, loading: wishlistLoading } = useSelector((state) => state.wishlist);
-    const { isAuthenticated } = useSelector((state) => state.auth);
-    
+
     const [isEditing, setIsEditing] = useState(false);
     const [addedItems, setAddedItems] = useState({});
 
-    // Fetch orders and wishlist when component mounts
+    // ✅ Navbar ko black karne ke liye useEffect
     useEffect(() => {
-        dispatch(getMyOrders());
-        dispatch(getWishlist());
-    }, [dispatch]);
+        const navbar = document.querySelector('nav');
+        if (navbar) {
+            navbar.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+            navbar.style.backdropFilter = 'blur(20px)';
+            navbar.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
+        }
+        return () => {
+            if (navbar) {
+                navbar.style.backgroundColor = '';
+                navbar.style.backdropFilter = '';
+                navbar.style.boxShadow = '';
+            }
+        };
+    }, []);
+
+    // Fetch profile, orders, and wishlist when component mounts
+    useEffect(() => {
+        if (isAuthenticated) {
+            // First get the latest profile with addresses
+            dispatch(getProfile());
+            dispatch(getMyOrders());
+            dispatch(getWishlist());
+        }
+    }, [dispatch, isAuthenticated]);
+
+    const navigate = useNavigate()
+    const handleAddAddress = () => {
+        navigate("/address/new");
+    };
 
     // If user data is loading, show skeletons
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-green-50/50 to-white dark:from-gray-900 dark:to-gray-800 p-4 md:p-8">
+            <div className="min-h-screen bg-gradient-to-br from-green-50/50 to-white dark:from-gray-900 dark:to-gray-800 p-4 md:p-8 pt-20 sm:pt-24">
                 <div className="max-w-7xl mx-auto">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div className="lg:col-span-1">
@@ -108,25 +131,31 @@ const Profile = () => {
     // If no user data, show a message
     if (!user) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50/50 to-white dark:from-gray-900 dark:to-gray-800">
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50/50 to-white dark:from-gray-900 dark:to-gray-800 pt-20 sm:pt-24">
                 <GlassCard className="text-center max-w-md">
                     <User className="w-16 h-16 mx-auto text-gray-400 dark:text-gray-600 mb-4" />
                     <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">No User Data</h2>
                     <p className="text-gray-600 dark:text-gray-400 mt-2">Please log in to view your profile.</p>
+                    <button
+                        onClick={() => navigate('/login')}
+                        className="mt-4 px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all hover:shadow-lg"
+                    >
+                        Login
+                    </button>
                 </GlassCard>
             </div>
         );
     }
 
-    // Extract user data
+    // Extract user data with fallbacks
     const {
         name = 'Coffee Lover',
         email = 'user@coffeehub.com',
         role = 'customer',
         mobile = '+1 234 567 890',
-        joinDate = '2024-01-15',
+        createdAt = '2024-01-15',
         avatar = null,
-        addresses = [],
+        addresses = [], // This comes from the latest getProfile() call
     } = user;
 
     const getInitials = (name) => {
@@ -148,10 +177,11 @@ const Profile = () => {
 
     const handleLogout = () => {
         dispatch(logout());
+        navigate('/login');
     };
 
     const handleUpdateAddress = (addressId) => {
-        navigate(`/update-address/${addressId}`);
+        navigate(`/address/${addressId}`);
     };
 
     // Format order date
@@ -167,17 +197,17 @@ const Profile = () => {
     // Get order status color
     const getOrderStatusColor = (status) => {
         switch (status?.toLowerCase()) {
-            case 'delivered': 
+            case 'delivered':
                 return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
-            case 'processing': 
+            case 'processing':
                 return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
-            case 'shipped': 
+            case 'shipped':
                 return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
-            case 'cancelled': 
+            case 'cancelled':
                 return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
-            case 'pending': 
+            case 'pending':
                 return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400';
-            default: 
+            default:
                 return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400';
         }
     };
@@ -226,7 +256,7 @@ const Profile = () => {
     };
 
     // ============ WISHLIST FUNCTIONS ============
-    
+
     // Handle add to cart from wishlist
     const handleAddToCart = async (item) => {
         if (!isAuthenticated) {
@@ -284,7 +314,9 @@ const Profile = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-green-50/30 to-white dark:from-gray-900 dark:to-gray-800 p-4 md:p-8 transition-colors duration-300 mt-20">
+        // ✅ Added pt-20 sm:pt-24 for top padding to accommodate fixed navbar
+        <div className="mt-28 min-h-screen bg-gradient-to-br from-green-50/30 to-white dark:from-gray-900 dark:to-gray-800 p-4 md:p-8 transition-colors duration-300">
+
             <div className="max-w-7xl mx-auto">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
@@ -312,7 +344,7 @@ const Profile = () => {
                             {/* Join Date */}
                             <div className="mt-4 flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">
                                 <Calendar className="w-4 h-4 mr-2" />
-                                Joined {new Date(joinDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                                Joined {new Date(createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                             </div>
 
                             {/* Edit Profile Button */}
@@ -364,16 +396,27 @@ const Profile = () => {
                             </div>
                         </GlassCard>
 
-                        {/* 2. Saved Addresses */}
+                        {/* 2. Saved Addresses - Using user.addresses from auth slice */}
                         <GlassCard>
                             <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
-                                    <MapPin className="w-5 h-5 text-green-600 dark:text-green-400" />
-                                    Saved Addresses
-                                </h3>
-                                <span className="text-sm text-gray-500 dark:text-gray-400">
-                                    {addresses?.length || 0} address{addresses?.length !== 1 ? 'es' : ''}
-                                </span>
+                                <div>
+                                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+                                        <MapPin className="w-5 h-5 text-green-600 dark:text-green-400" />
+                                        Saved Addresses
+                                    </h3>
+
+                                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                                        {addresses?.length || 0} address{addresses?.length !== 1 ? "es" : ""}
+                                    </span>
+                                </div>
+
+                                <button
+                                    onClick={handleAddAddress}
+                                    className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all hover:shadow-lg"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                    Add Address
+                                </button>
                             </div>
 
                             {addresses && addresses.length > 0 ? (
@@ -382,8 +425,8 @@ const Profile = () => {
                                         <div
                                             key={address._id || address.id}
                                             className={`bg-gray-50 dark:bg-gray-700/30 rounded-xl p-4 border transition-all hover:shadow-md ${address.isDefault
-                                                    ? 'border-green-300 dark:border-green-700 bg-green-50/50 dark:bg-green-900/20'
-                                                    : 'border-gray-200 dark:border-gray-700'
+                                                ? "border-green-300 dark:border-green-700 bg-green-50/50 dark:bg-green-900/20"
+                                                : "border-gray-200 dark:border-gray-700"
                                                 }`}
                                         >
                                             <div className="flex items-start justify-between">
@@ -391,8 +434,9 @@ const Profile = () => {
                                                     <div className="flex items-center gap-2 flex-wrap">
                                                         <span className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-300">
                                                             {getAddressIcon(address.type)}
-                                                            {address.type || 'Home'}
+                                                            {address.type || "Home"}
                                                         </span>
+
                                                         {address.isDefault && (
                                                             <span className="inline-block bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300 text-xs font-medium px-2.5 py-0.5 rounded-full">
                                                                 Default
@@ -402,22 +446,41 @@ const Profile = () => {
 
                                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-sm">
                                                         <div>
-                                                            <span className="text-gray-500 dark:text-gray-400">Name:</span>
-                                                            <span className="ml-1 text-gray-800 dark:text-white font-medium">{address.name}</span>
+                                                            <span className="text-gray-500 dark:text-gray-400">
+                                                                Name:
+                                                            </span>
+                                                            <span className="ml-1 text-gray-800 dark:text-white font-medium">
+                                                                {address.name}
+                                                            </span>
                                                         </div>
+
                                                         <div>
-                                                            <span className="text-gray-500 dark:text-gray-400">Phone:</span>
-                                                            <span className="ml-1 text-gray-800 dark:text-white">{address.phone}</span>
+                                                            <span className="text-gray-500 dark:text-gray-400">
+                                                                Phone:
+                                                            </span>
+                                                            <span className="ml-1 text-gray-800 dark:text-white">
+                                                                {address.phone}
+                                                            </span>
                                                         </div>
+
                                                         <div>
-                                                            <span className="text-gray-500 dark:text-gray-400">Email:</span>
-                                                            <span className="ml-1 text-gray-800 dark:text-white">{address.email}</span>
+                                                            <span className="text-gray-500 dark:text-gray-400">
+                                                                Email:
+                                                            </span>
+                                                            <span className="ml-1 text-gray-800 dark:text-white">
+                                                                {address.email}
+                                                            </span>
                                                         </div>
+
                                                         <div className="sm:col-span-2">
-                                                            <span className="text-gray-500 dark:text-gray-400">Address:</span>
+                                                            <span className="text-gray-500 dark:text-gray-400">
+                                                                Address:
+                                                            </span>
+
                                                             <span className="ml-1 text-gray-800 dark:text-white">
                                                                 {address.address}, {address.city}, {address.state} - {address.pincode}
                                                             </span>
+
                                                             {address.landmark && (
                                                                 <span className="ml-1 text-gray-500 dark:text-gray-400">
                                                                     (Landmark: {address.landmark})
@@ -428,21 +491,37 @@ const Profile = () => {
                                                 </div>
 
                                                 <button
-                                                    onClick={() => handleUpdateAddress(address._id || address.id)}
+                                                    onClick={() =>
+                                                        handleUpdateAddress(address._id || address.id)
+                                                    }
                                                     className="ml-4 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all hover:shadow-lg flex items-center gap-2 flex-shrink-0 text-sm"
                                                 >
                                                     <Edit className="w-4 h-4" />
-                                                    Update Address
+                                                    Update
                                                 </button>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
                             ) : (
-                                <div className="text-center py-8">
-                                    <MapPin className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-600 mb-3" />
-                                    <p className="text-gray-500 dark:text-gray-400">No addresses saved yet.</p>
-                                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Add your first address to get started.</p>
+                                <div className="text-center py-10">
+                                    <MapPin className="w-14 h-14 mx-auto text-gray-400 dark:text-gray-600 mb-4" />
+
+                                    <p className="text-gray-500 dark:text-gray-400">
+                                        No addresses saved yet.
+                                    </p>
+
+                                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-1 mb-5">
+                                        Add your first address to get started.
+                                    </p>
+
+                                    <button
+                                        onClick={handleAddAddress}
+                                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all"
+                                    >
+                                        <Plus className="w-4 h-4" />
+                                        Add Address
+                                    </button>
                                 </div>
                             )}
                         </GlassCard>
@@ -455,7 +534,7 @@ const Profile = () => {
                                     Recent Orders
                                 </h3>
                                 <button
-                                    onClick={() => navigate('/orders')}
+                                    onClick={() => navigate('/orderDetails')}
                                     className="text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium flex items-center gap-1 transition-colors"
                                 >
                                     View All Orders
@@ -483,105 +562,105 @@ const Profile = () => {
                                     {orders.slice(0, 2).map((order) => {
                                         const isDineIn = order.orderType === 'dine_in';
                                         const tableNumber = order.table?.tableNumber;
-                                        
-                                        return (
-                                        <div
-                                            key={order._id}
-                                            className="bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-gray-200 dark:border-gray-700/50 hover:border-green-300 dark:hover:border-green-700 transition-all overflow-hidden"
-                                        >
-                                            {/* Order Header */}
-                                            <div 
-                                                className="p-3 cursor-pointer hover:bg-gray-100/50 dark:hover:bg-gray-600/20 transition-colors"
-                                                onClick={() => navigate(`/orders/${order._id}`)}
-                                            >
-                                                <div className="flex flex-wrap items-center justify-between gap-2">
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="text-lg">{getOrderStatusIcon(order.orderStatus)}</span>
-                                                        <div>
-                                                            <p className="font-medium text-gray-800 dark:text-white text-sm">
-                                                                Order #{order._id?.slice(-6)}
-                                                            </p>
-                                                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                                {formatDate(order.createdAt)}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className={`text-xs px-2 py-0.5 rounded-full flex items-center gap-1 ${
-                                                            isDineIn 
-                                                                ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' 
-                                                                : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                                                        }`}>
-                                                            {isDineIn ? '🍽️ Dine In' : '🚚 Delivery'}
-                                                            {isDineIn && tableNumber && (
-                                                                <span className="font-bold">(Table {tableNumber})</span>
-                                                            )}
-                                                        </span>
-                                                        <div className="text-right">
-                                                            <p className="font-bold text-green-600 dark:text-green-400 text-sm">
-                                                                ₹{order.amount.toFixed(2)}
-                                                            </p>
-                                                            <span className={`text-xs px-2 py-0.5 rounded-full ${getOrderStatusColor(order.orderStatus)}`}>
-                                                                {order.orderStatus || 'Pending'}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
 
-                                            {/* Order Items */}
-                                            <div className="border-t border-gray-200/50 dark:border-gray-700/50 p-3">
-                                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-1">
-                                                    <Coffee size={12} />
-                                                    {order.products?.length || 0} item{order.products?.length !== 1 ? 's' : ''}
-                                                </p>
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                    {order.products?.slice(0, 4).map((product, index) => {
-                                                        const imageUrl = getProductImage(product);
-                                                        const productName = getProductName(product);
-                                                        const productPrice = getProductPrice(product);
-                                                        const quantity = product.quantity || 1;
-                                                        const totalPrice = productPrice * quantity;
-                                                        
-                                                        return (
-                                                        <div 
-                                                            key={product._id || index}
-                                                            className="flex items-center gap-2 bg-white/50 dark:bg-gray-800/30 rounded-lg p-2 hover:bg-white/80 dark:hover:bg-gray-800/50 transition-colors"
-                                                        >
-                                                            <img
-                                                                src={imageUrl}
-                                                                alt={productName}
-                                                                className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
-                                                                onError={(e) => {
-                                                                    e.target.src = 'https://placehold.co/100x100/e2e8f0/64748b?text=☕';
-                                                                }}
-                                                            />
-                                                            <div className="flex-1 min-w-0">
-                                                                <p className="text-xs font-medium text-gray-800 dark:text-white truncate">
-                                                                    {productName}
+                                        return (
+                                            <div
+                                                key={order._id}
+                                                className="bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-gray-200 dark:border-gray-700/50 hover:border-green-300 dark:hover:border-green-700 transition-all overflow-hidden"
+                                            >
+                                                {/* Order Header */}
+                                                <div
+                                                    className="p-3 cursor-pointer hover:bg-gray-100/50 dark:hover:bg-gray-600/20 transition-colors"
+                                                >
+                                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                                        <div className="flex items-center gap-3">
+                                                            <span className="text-lg">{getOrderStatusIcon(order.orderStatus)}</span>
+                                                            <div>
+                                                                <p className="font-medium text-gray-800 dark:text-white text-sm">
+                                                                    Order #{order._id?.slice(-6)}
                                                                 </p>
-                                                                <div className="flex items-center justify-between">
-                                                                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                                                                        Qty: {quantity}
-                                                                    </span>
-                                                                    <span className="text-xs font-semibold text-green-600 dark:text-green-400">
-                                                                        ₹{totalPrice.toFixed(2)}
-                                                                    </span>
-                                                                </div>
+                                                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                                    {formatDate(order.createdAt)}
+                                                                </p>
                                                             </div>
                                                         </div>
-                                                    )})}
-                                                    {order.products?.length > 4 && (
-                                                        <div className="flex items-center justify-center bg-white/50 dark:bg-gray-800/30 rounded-lg p-2">
-                                                            <span className="text-xs text-gray-500 dark:text-gray-400">
-                                                                +{order.products.length - 4} more items
+                                                        <div className="flex items-center gap-2">
+                                                            <span className={`text-xs px-2 py-0.5 rounded-full flex items-center gap-1 ${isDineIn
+                                                                ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+                                                                : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                                                                }`}>
+                                                                {isDineIn ? '🍽️ Dine In' : '🚚 Delivery'}
+                                                                {isDineIn && tableNumber && (
+                                                                    <span className="font-bold">(Table {tableNumber})</span>
+                                                                )}
                                                             </span>
+                                                            <div className="text-right">
+                                                                <p className="font-bold text-green-600 dark:text-green-400 text-sm">
+                                                                    ₹{order.amount?.toFixed(2) || '0.00'}
+                                                                </p>
+                                                                <span className={`text-xs px-2 py-0.5 rounded-full ${getOrderStatusColor(order.orderStatus)}`}>
+                                                                    {order.orderStatus || 'Pending'}
+                                                                </span>
+                                                            </div>
                                                         </div>
-                                                    )}
+                                                    </div>
+                                                </div>
+
+                                                {/* Order Items */}
+                                                <div className="border-t border-gray-200/50 dark:border-gray-700/50 p-3">
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-1">
+                                                        <Coffee size={12} />
+                                                        {order.products?.length || 0} item{order.products?.length !== 1 ? 's' : ''}
+                                                    </p>
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                        {order.products?.slice(0, 4).map((product, index) => {
+                                                            const imageUrl = getProductImage(product);
+                                                            const productName = getProductName(product);
+                                                            const productPrice = getProductPrice(product);
+                                                            const quantity = product.quantity || 1;
+                                                            const totalPrice = productPrice * quantity;
+
+                                                            return (
+                                                                <div
+                                                                    key={product._id || index}
+                                                                    className="flex items-center gap-2 bg-white/50 dark:bg-gray-800/30 rounded-lg p-2 hover:bg-white/80 dark:hover:bg-gray-800/50 transition-colors"
+                                                                >
+                                                                    <img
+                                                                        src={imageUrl}
+                                                                        alt={productName}
+                                                                        className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
+                                                                        onError={(e) => {
+                                                                            e.target.src = 'https://placehold.co/100x100/e2e8f0/64748b?text=☕';
+                                                                        }}
+                                                                    />
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <p className="text-xs font-medium text-gray-800 dark:text-white truncate">
+                                                                            {productName}
+                                                                        </p>
+                                                                        <div className="flex items-center justify-between">
+                                                                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                                                                                Qty: {quantity}
+                                                                            </span>
+                                                                            <span className="text-xs font-semibold text-green-600 dark:text-green-400">
+                                                                                ₹{totalPrice.toFixed(2)}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            )
+                                                        })}
+                                                        {order.products?.length > 4 && (
+                                                            <div className="flex items-center justify-center bg-white/50 dark:bg-gray-800/30 rounded-lg p-2">
+                                                                <span className="text-xs text-gray-500 dark:text-gray-400">
+                                                                    +{order.products.length - 4} more items
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    )})}
+                                        )
+                                    })}
                                 </div>
                             ) : (
                                 <div className="text-center py-8">
@@ -635,7 +714,7 @@ const Profile = () => {
                                 <div className="space-y-3">
                                     {wishlistItems.slice(0, 3).map((item) => {
                                         const itemData = getWishlistItemData(item);
-                                        
+
                                         return (
                                             <div
                                                 key={itemData.id}
@@ -689,11 +768,10 @@ const Profile = () => {
                                                             {/* Add to Cart Button */}
                                                             <button
                                                                 onClick={() => handleAddToCart(item)}
-                                                                className={`px-3 py-1.5 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-1.5 text-sm ${
-                                                                    addedItems[itemData.id]
-                                                                        ? 'bg-green-500 text-white'
-                                                                        : 'bg-gradient-to-r from-[#0D7C53] to-green-600 text-white hover:shadow-lg hover:scale-[1.02]'
-                                                                }`}
+                                                                className={`px-3 py-1.5 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-1.5 text-sm ${addedItems[itemData.id]
+                                                                    ? 'bg-green-500 text-white'
+                                                                    : 'bg-gradient-to-r from-[#0D7C53] to-green-600 text-white hover:shadow-lg hover:scale-[1.02]'
+                                                                    }`}
                                                             >
                                                                 {addedItems[itemData.id] ? (
                                                                     <>
