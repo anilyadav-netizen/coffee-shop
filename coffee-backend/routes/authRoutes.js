@@ -8,7 +8,9 @@ const {
   getProfile,
   updateAddress,
   getAllUsers,
-  deleteUser
+  deleteUser,
+  createAddress,
+  deleteAddress
 } = require("../controllers/authController");
 const { protect } = require("../middleware/authMiddleware");
 
@@ -21,7 +23,11 @@ router.post("/login", login);
 router.post("/logout", protect, logout);
 router.get("/profile", protect, getProfile);
 
+router.post("/address", protect, createAddress);
+
 router.put("/address/:addressId", protect, updateAddress);
+router.delete("/address/:addressId", protect, deleteAddress);
+
 router.get("/all", protect, getAllUsers);
 router.delete("/delete/:id", protect, deleteUser);
 

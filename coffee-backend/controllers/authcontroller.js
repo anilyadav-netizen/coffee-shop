@@ -79,7 +79,7 @@ const login = async (req, res) => {
       });
     }
 
-    const token = generateToken(user._id,user.role,user.email,user.name);
+    const token = generateToken(user._id, user.role, user.email, user.name);
 
     return res.status(200).json({
       message: "Login successful",
@@ -130,6 +130,133 @@ const getProfile = async (req, res) => {
   } catch (err) {
     return res.status(500).json({
       message: err.message,
+    });
+  }
+};
+
+const createAddress = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const {
+      type,
+      fullName,
+      email,
+      phone,
+      secondPhone,
+      address,
+      city,
+      state,
+      pincode,
+      landmark,
+      isDefault,
+    } = req.body;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // If this is the first address, make it default automatically
+    let defaultStatus = isDefault || false;
+
+    if (user.addresses.length === 0) {
+      defaultStatus = true;
+    }
+
+    // If new address is default, remove default from others
+    if (defaultStatus) {
+      user.addresses.forEach((addr) => {
+        addr.isDefault = false;
+      });
+    }
+
+    const newAddress = {
+      type,
+      fullName,
+      email,
+      phone,
+      secondPhone,
+      address,
+      city,
+      state,
+      pincode,
+      landmark,
+      isDefault: defaultStatus,
+    };
+
+    user.addresses.push(newAddress);
+
+    await user.save();
+
+    const createdAddress = user.addresses[user.addresses.length - 1];
+
+    res.status(201).json({
+      success: true,
+      message: "Address created successfully",
+      address: createdAddress,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+      error: error.message,
+    });
+  }
+};
+
+const deleteAddress = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { addressId } = req.params;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const address = user.addresses.id(addressId);
+
+    if (!address) {
+      return res.status(404).json({
+        success: false,
+        message: "Address not found",
+      });
+    }
+
+    const wasDefault = address.isDefault;
+
+    // Delete address
+    address.deleteOne();
+
+    // If deleted address was default, make first remaining address default
+    if (wasDefault && user.addresses.length > 0) {
+      user.addresses[0].isDefault = true;
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Address deleted successfully",
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+      error: error.message,
     });
   }
 };
@@ -227,7 +354,7 @@ const getAllUsers = async (req, res) => {
 };
 
 const deleteUser = async (req, res) => {
-  try{
+  try {
     const userId = req.params.id;
 
     const user = await User.findByIdAndDelete(userId);
@@ -261,5 +388,7 @@ module.exports = {
   getProfile,
   updateAddress,
   getAllUsers,
-  deleteUser
+  deleteUser,
+  createAddress,
+  deleteAddress
 };
