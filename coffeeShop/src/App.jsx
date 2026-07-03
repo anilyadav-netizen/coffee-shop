@@ -38,6 +38,7 @@ import DeliveryDetailsPage from "./Admin/adpages/DeliveryDetailsPage";
 import TablePage from "./Admin/adpages/TablePage";
 import Profile from "./pages/Profile";
 import UpdateAddress from "./pages/UpdateAddress";
+import RoleRoute from "./component/RoleRoute";
 
 function App() {
 

@@ -29,6 +29,7 @@ import { logout, getProfile } from '../redux/Slicer/authSlice';
 import { getMyOrders } from '../redux/Slicer/paymentSlice';
 import { getWishlist, removeFromWishlist } from '../redux/Slicer/wishlistSlice';
 import { addToCart, getCart } from '../redux/Slicer/cartSlice';
+import { deleteAddress } from '../redux/Slicer/addressSlice';
 import { useNavigate } from 'react-router-dom';
 
 // --- Reusable Components ---
@@ -72,9 +73,11 @@ const Profile = () => {
     const { user, isLoading, isAuthenticated } = useSelector((state) => state.auth);
     const { orders, loading: ordersLoading } = useSelector((state) => state.payment);
     const { items: wishlistItems, loading: wishlistLoading } = useSelector((state) => state.wishlist);
+    const { loading: addressDeleting } = useSelector((state) => state.address);
 
     const [isEditing, setIsEditing] = useState(false);
     const [addedItems, setAddedItems] = useState({});
+    const [deletingAddressId, setDeletingAddressId] = useState(null);
 
     // ✅ Navbar ko black karne ke liye useEffect
     useEffect(() => {
@@ -182,6 +185,22 @@ const Profile = () => {
 
     const handleUpdateAddress = (addressId) => {
         navigate(`/address/${addressId}`);
+    };
+
+    // Handle delete address
+    const handleDeleteAddress = async (addressId) => {
+        if (window.confirm('Are you sure you want to delete this address?')) {
+            setDeletingAddressId(addressId);
+            try {
+                await dispatch(deleteAddress(addressId)).unwrap();
+                // Refresh profile to get updated addresses
+                await dispatch(getProfile()).unwrap();
+            } catch (error) {
+                console.error('Failed to delete address:', error);
+            } finally {
+                setDeletingAddressId(null);
+            }
+        }
     };
 
     // Format order date
@@ -450,7 +469,7 @@ const Profile = () => {
                                                                 Name:
                                                             </span>
                                                             <span className="ml-1 text-gray-800 dark:text-white font-medium">
-                                                                {address.name}
+                                                                {address.fullName}
                                                             </span>
                                                         </div>
 
@@ -490,15 +509,31 @@ const Profile = () => {
                                                     </div>
                                                 </div>
 
-                                                <button
-                                                    onClick={() =>
-                                                        handleUpdateAddress(address._id || address.id)
-                                                    }
-                                                    className="ml-4 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all hover:shadow-lg flex items-center gap-2 flex-shrink-0 text-sm"
-                                                >
-                                                    <Edit className="w-4 h-4" />
-                                                    Update
-                                                </button>
+                                                <div className="flex gap-2 ml-4 flex-shrink-0">
+                                                    <button
+                                                        onClick={() =>
+                                                            handleUpdateAddress(address._id || address.id)
+                                                        }
+                                                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all hover:shadow-lg flex items-center gap-2 text-sm"
+                                                    >
+                                                        <Edit className="w-4 h-4" />
+                                                        Update
+                                                    </button>
+                                                    <button
+                                                        onClick={() =>
+                                                            handleDeleteAddress(address._id || address.id)
+                                                        }
+                                                        disabled={deletingAddressId === (address._id || address.id)}
+                                                        className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-all hover:shadow-lg flex items-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        {deletingAddressId === (address._id || address.id) ? (
+                                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                                        ) : (
+                                                            <Trash2 className="w-4 h-4" />
+                                                        )}
+                                                        Delete
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     ))}
@@ -725,7 +760,7 @@ const Profile = () => {
                                                     <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100/50 border border-white/20">
                                                         <img
                                                             src={itemData.image}
-                                                            alt={itemData.name}
+                                                            alt={itemData.fullName}
                                                             className="w-full h-full object-cover"
                                                             onError={(e) => {
                                                                 e.target.src = 'https://placehold.co/100x100/e2e8f0/64748b?text=☕';
@@ -738,7 +773,7 @@ const Profile = () => {
                                                         <div className="flex items-start justify-between gap-2">
                                                             <div className="min-w-0 flex-1">
                                                                 <h3 className="font-semibold text-gray-800 dark:text-white text-sm truncate">
-                                                                    {itemData.name}
+                                                                    {itemData.fullName}
                                                                 </h3>
                                                                 <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                                                                     {itemData.description || 'Coffee'}

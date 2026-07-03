@@ -23,13 +23,20 @@ import {
     ShoppingBag,
     X,
     CheckCircle,
-    Loader2
+    Loader2,
+    MapPin,
+    Home,
+    Building2,
+    Plus as PlusIcon
 } from "lucide-react";
 
 import { getTables } from '../redux/Slicer/tableSlice';
+import { getProfile } from '../redux/Slicer/authSlice';
+import { createAddress } from '../redux/Slicer/addressSlice';
 
 // ✅ IMPORT ADDRESS MODAL
 import AddressModal from '../Admin/adcomponent/AddressModel';
+
 
 const CartPage = () => {
 
@@ -42,37 +49,40 @@ const CartPage = () => {
     // ✅ Order type state - Default to "delivery"
     const [orderType, setOrderType] = useState("delivery");
 
-    // ✅ Table selection state (Integrated in CartPage)
+    // ✅ Table selection state
     const [isTableModalOpen, setIsTableModalOpen] = useState(false);
-    const [selectedTable, setSelectedTable] = useState(null); // { tableId, tableNumber, seats }
+    const [selectedTable, setSelectedTable] = useState(null);
     const [selectedTableId, setSelectedTableId] = useState(null);
     const [tablesLoading, setTablesLoading] = useState(false);
-    
-    // ✅ Table filter state
     const [tableFilter, setTableFilter] = useState('all');
-    
-    // ✅ Track if payment is already being processed to prevent double calls
+
+    // ✅ Track if payment is already being processed
     const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
-    // ✅ Address modal state
+    // ✅ Address state
     const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
-    const [deliveryAddress, setDeliveryAddress] = useState(null);
+    const [selectedAddress, setSelectedAddress] = useState(null);
+    const [addressLoading, setAddressLoading] = useState(false);
+    const [showAddressPopup, setShowAddressPopup] = useState(false);
 
-    // Get cart data from Redux store
+    // ✅ Get auth data
+    const { user } = useSelector((state) => state.auth);
+    const addresses = user?.addresses || [];
+
+    // Get cart data
     const { cartItems, totalItems, totalPrice, loading } = useSelector((state) => state.cart);
 
-    // Get payment state from Redux store
+    // Get payment state
     const { order, paymentStatus, paymentError, loading: paymentProcessing } = useSelector((state) => state.payment);
 
-    // Get tables from Redux store
+    // Get tables
     const { tables, loading: tablesReduxLoading, error: tablesError } = useSelector(
         (state) => state.table
     );
-    console.log(tables)
 
     const tableList = tables?.tables || [];
 
-    // ✅ Filtered tables based on status
+    // ✅ Filtered tables
     const filteredTables = tableList.filter(table => {
         if (tableFilter === 'all') return true;
         return table.status === tableFilter;
@@ -81,7 +91,6 @@ const CartPage = () => {
     // ✅ Fetch tables when modal opens
     useEffect(() => {
         if (isTableModalOpen) {
-            console.log("Dispatching getTables...");
             dispatch(getTables());
         }
     }, [isTableModalOpen, dispatch]);
@@ -115,7 +124,7 @@ const CartPage = () => {
         }
     }, [orderType]);
 
-    // ✅ Handle display of backend errors from Redux state
+    // ✅ Handle display of backend errors
     useEffect(() => {
         if (paymentError) {
             setError(paymentError);
@@ -131,6 +140,15 @@ const CartPage = () => {
         }
     }, [isTableModalOpen]);
 
+    // ✅ Auto-select default address when delivery is selected
+    useEffect(() => {
+        if (orderType === 'delivery' && addresses.length > 0 && !selectedAddress) {
+            const defaultAddress = addresses.find(addr => addr.isDefault) || addresses[0];
+            console.log("📦 Auto-selected default address:", defaultAddress);
+            setSelectedAddress(defaultAddress);
+        }
+    }, [orderType, addresses, selectedAddress]);
+
     // ✅ Increase quantity
     const handleIncrease = async (coffeeId) => {
         if (!coffeeId) {
@@ -140,22 +158,17 @@ const CartPage = () => {
         }
 
         setError(null);
-        console.log("🔼 Increasing quantity for coffeeId:", coffeeId);
 
         try {
             const result = await dispatch(increaseQuantity(coffeeId)).unwrap();
-            console.log("✅ Increase successful:", result);
-
             if (result.error) {
                 setError(result.error);
             }
         } catch (error) {
             console.error("❌ Failed to increase:", error);
             setError(error || "Failed to increase quantity. Please try again.");
-
             try {
                 await dispatch(getCart()).unwrap();
-                console.log("✅ Cart refetched after error");
             } catch (refetchError) {
                 console.error("❌ Failed to refetch cart:", refetchError);
             }
@@ -171,22 +184,17 @@ const CartPage = () => {
         }
 
         setError(null);
-        console.log("🔽 Decreasing quantity for coffeeId:", coffeeId);
 
         try {
             const result = await dispatch(decreaseQuantity(coffeeId)).unwrap();
-            console.log("✅ Decrease successful:", result);
-
             if (result.error) {
                 setError(result.error);
             }
         } catch (error) {
             console.error("❌ Failed to decrease:", error);
             setError(error || "Failed to decrease quantity. Please try again.");
-
             try {
                 await dispatch(getCart()).unwrap();
-                console.log("✅ Cart refetched after error");
             } catch (refetchError) {
                 console.error("❌ Failed to refetch cart:", refetchError);
             }
@@ -202,15 +210,12 @@ const CartPage = () => {
         }
 
         setError(null);
-        console.log("🗑️ Removing item with coffeeId:", coffeeId);
 
         try {
             await dispatch(removeCartItem(coffeeId)).unwrap();
-            console.log("✅ Remove successful");
         } catch (error) {
             console.error("❌ Failed to remove:", error);
             setError(error || "Failed to remove item. Please try again.");
-
             try {
                 await dispatch(getCart()).unwrap();
             } catch (refetchError) {
@@ -230,7 +235,6 @@ const CartPage = () => {
                         await dispatch(removeCartItem(coffeeId)).unwrap();
                     }
                 }
-                console.log("✅ Cart cleared successfully");
                 await dispatch(getCart()).unwrap();
             } catch (error) {
                 console.error("❌ Failed to clear cart:", error);
@@ -243,29 +247,83 @@ const CartPage = () => {
         navigate("/menu");
     };
 
-    // ✅ Handle Address Save (Delivery)
-    const handleSaveAddress = (address) => {
-        console.log("📦 Address saved:", address);
-        setDeliveryAddress(address);
-        setIsAddressModalOpen(false);
-        // After saving address, proceed with payment
-        processPayment(address);
+    // ✅ Handle Address Selection from Popup
+    const handleAddressSelect = (address) => {
+        console.log("📦 Address selected from popup:", address);
+        setSelectedAddress(address);
+        setShowAddressPopup(false);
+        setError(null);
+    };
+
+    // ✅ Handle Address Selection from Radio Button
+    const handleAddressRadioSelect = (address) => {
+        console.log("📦 Address selected from radio:", address);
+        setSelectedAddress(address);
+        setError(null);
+    };
+
+    // ✅ Handle Address Save
+    const handleSaveAddress = async (addressData) => {
+        console.log("📦 Saving address - Raw data:", addressData);
+        setAddressLoading(true);
+        setError(null);
+
+        try {
+            const formattedAddress = {
+                addressType: addressData.addressType || 'Home',
+                fullName: addressData.fullName || addressData.name || '',
+                phone: addressData.phone || addressData.mobile || '',
+                email: addressData.email || user?.email || '',
+                address: addressData.addressLine || addressData.address || '',
+                addressLine: addressData.addressLine || addressData.address || '',
+                city: addressData.city || '',
+                state: addressData.state || '',
+                pincode: addressData.pincode || addressData.zipCode || '',
+                isDefault: addressData.isDefault || false
+            };
+
+            console.log("📦 Formatted address for backend:", formattedAddress);
+
+            const result = await dispatch(createAddress(formattedAddress)).unwrap();
+            console.log("✅ Address created:", result);
+
+            await dispatch(getProfile()).unwrap();
+            console.log("✅ Profile refreshed");
+
+            setIsAddressModalOpen(false);
+            setAddressLoading(false);
+            setShowAddressPopup(false);
+
+            // Get the updated user from Redux
+            const updatedUser = useSelector((state) => state.auth.user);
+            const newAddress = updatedUser?.addresses?.find(
+                (addr) => addr._id === result.address?._id
+            );
+            if (newAddress) {
+                console.log("📦 Auto-selecting new address:", newAddress);
+                setSelectedAddress(newAddress);
+            }
+
+        } catch (error) {
+            console.error("❌ Failed to save address:", error);
+            console.error("Error details:", error.response?.data);
+            setError(error?.response?.data?.message || error?.message || "Failed to save address. Please try again.");
+            setAddressLoading(false);
+        }
     };
 
     // ✅ Handle table selection
     const handleTableSelect = (tableId) => {
         setSelectedTableId(tableId);
-        console.log('✅ Table selected:', tableId);
     };
 
-    // ✅ Handle confirm table selection - FIXED: Only set table and close modal, don't process payment here
+    // ✅ Handle confirm table selection
     const handleConfirmTable = () => {
         if (selectedTableId) {
             const selectedTableData = tableList.find(
                 (table) => table._id === selectedTableId
             );
             if (selectedTableData) {
-                console.log('✅ Confirming table:', selectedTableData);
                 setSelectedTable({
                     tableId: selectedTableData._id,
                     tableNumber: selectedTableData.tableNumber,
@@ -273,28 +331,74 @@ const CartPage = () => {
                 });
                 setIsTableModalOpen(false);
                 setError(null);
-                // ✅ Don't process payment here - let the checkout button handle it
-                // This prevents double processing
             }
         }
     };
 
-    // ✅ Process Payment with table selection
+    // ✅ Format address for backend - matches backend schema
+    const formatAddressForBackend = (address) => {
+        if (!address) return null;
+
+        return {
+            // Backend expects these exact field names
+            fullName: address.fullName || '',
+            phone: address.phone || '',
+            email: address.email || user?.email || '',
+            addressLine1: address.address || address.addressLine || '',
+            addressLine2: address.landmark || address.addressLine2 || '',
+            city: address.city || '',
+            state: address.state || '',
+            pincode: address.pincode || '',
+            country: address.country || 'India',
+            addressType: address.addressType || 'Home',
+            isDefault: address.isDefault || false
+        };
+    };
+
+    // ✅ Process Payment with address
     const processPayment = async (address) => {
-        // ✅ Prevent multiple payment processing calls
         if (isProcessingPayment) {
             console.log("⚠️ Payment already processing, skipping...");
             return;
         }
 
         console.log("========== PROCESS PAYMENT ==========");
-        console.log("Address:", address);
+        console.log("Address received in processPayment:", address);
+        console.log("Address type:", typeof address);
+        console.log("Address keys:", address ? Object.keys(address) : 'null');
         console.log("Order Type:", orderType);
         console.log("Selected Table:", selectedTable);
-        console.log("Cart Items:", cartItems);
-        console.log("Total Price:", totalPrice);
 
-        // ✅ Validate table selection for dine-in
+        // ✅ Validate address for delivery
+        if (orderType === "delivery") {
+            if (!address) {
+                console.error("❌ No address provided to processPayment!");
+                setError("Please select a delivery address.");
+                setShowAddressPopup(true);
+                return;
+            }
+
+            // Validate required fields
+            if (!address.fullName) {
+                console.error("❌ Address missing fullName");
+                setError("Address is incomplete. Please select a valid address.");
+                return;
+            }
+
+            if (!address.phone) {
+                console.error("❌ Address missing phone");
+                setError("Address is incomplete. Please select a valid address.");
+                return;
+            }
+
+            if (!address.address && !address.addressLine) {
+                console.error("❌ Address missing address field");
+                setError("Address is incomplete. Please select a valid address.");
+                return;
+            }
+        }
+
+        // ✅ Validate table for dine-in
         if (orderType === "dine_in" && !selectedTable) {
             setError("Please select a table before proceeding.");
             setIsTableModalOpen(true);
@@ -306,14 +410,9 @@ const CartPage = () => {
             setPaymentLoading(true);
             setError(null);
 
-            console.log("🔄 Creating payment order...");
-
-            // ✅ Calculate delivery fee based on order type
+            // ✅ Calculate delivery fee
             const deliveryFee = calculateDeliveryFee(totalPrice, orderType);
             const totalAmount = totalPrice + deliveryFee;
-
-            console.log("💰 Total Amount to charge:", totalAmount);
-            console.log("📦 Delivery Fee:", deliveryFee);
 
             // ✅ Build order payload
             const orderPayload = {
@@ -321,9 +420,14 @@ const CartPage = () => {
                 orderType: orderType
             };
 
-            // ✅ Add deliveryAddress only if it's a delivery order
+            // ✅ Add deliveryAddress for delivery orders - properly formatted
             if (orderType === "delivery" && address) {
-                orderPayload.deliveryAddress = address;
+                const formattedAddress = formatAddressForBackend(address);
+                console.log("📦 Formatted address for order payload:", formattedAddress);
+                
+                // Send both formats to ensure backend compatibility
+                orderPayload.deliveryAddress = formattedAddress;
+                orderPayload.deliveryAddressId = address._id;
             }
 
             // ✅ Add table details for dine-in
@@ -332,37 +436,34 @@ const CartPage = () => {
                 orderPayload.tableNumber = selectedTable.tableNumber;
             }
 
-            console.log("📦 Order Payload being sent:", JSON.stringify(orderPayload, null, 2));
+            console.log("📦 Final Order Payload:", JSON.stringify(orderPayload, null, 2));
 
             // ✅ Create order
             const result = await dispatch(createOrder(orderPayload)).unwrap();
-            console.log("✅ Order creation result:", result);
+            console.log("✅ Order created:", result);
 
             const orderData = result.order;
-            console.log("✅ Order created successfully:", orderData);
-
             const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_Rn6mAmy8ydPszM";
 
-            // ✅ Initialize Razorpay options
+            // ✅ Initialize Razorpay
             const options = {
                 key: razorpayKey,
                 amount: orderData.amount,
                 currency: orderData.currency || "INR",
                 order_id: orderData.id,
                 name: "Coffee Shop",
-                description:
-                    orderType === "dine_in"
-                        ? `Dine-in at Table ${selectedTable?.tableNumber || 'N/A'}`
-                        : `Delivery order for ${totalItems} item(s)`,
+                description: orderType === "dine_in"
+                    ? `Dine-in at Table ${selectedTable?.tableNumber || 'N/A'}`
+                    : `Delivery to ${address?.fullName || 'Customer'}`,
                 image: "https://example.com/logo.png",
                 prefill: {
-                    name: "Customer",
-                    email: "customer@example.com",
-                    contact: "9999999999"
+                    name: address?.fullName || "Customer",
+                    email: address?.email || user?.email || "customer@example.com",
+                    contact: address?.phone || "9999999999"
                 },
                 notes: {
                     orderType: orderType,
-                    deliveryAddress: address ? JSON.stringify(address) : 'N/A',
+                    deliveryAddressId: address?._id || 'N/A',
                     tableNumber: selectedTable?.tableNumber || 'N/A',
                     tableId: selectedTable?.tableId || 'N/A'
                 },
@@ -371,7 +472,6 @@ const CartPage = () => {
                 },
                 handler: async function (response) {
                     console.log("✅ Payment successful:", response);
-
                     try {
                         const verificationData = {
                             razorpay_order_id: response.razorpay_order_id,
@@ -380,7 +480,6 @@ const CartPage = () => {
                         };
 
                         await dispatch(verifyPayment(verificationData)).unwrap();
-                        console.log("✅ Payment verified successfully");
                         alert("🎉 Payment successful! Your order has been placed.");
                         await dispatch(getCart()).unwrap();
                         navigate("/orderDetails");
@@ -401,7 +500,6 @@ const CartPage = () => {
                 }
             };
 
-            // ✅ Check if Razorpay is loaded
             if (typeof window.Razorpay === 'undefined') {
                 console.error("❌ Razorpay SDK not loaded!");
                 setError("Payment gateway not loaded. Please refresh and try again.");
@@ -424,55 +522,72 @@ const CartPage = () => {
         } catch (error) {
             console.error("❌ Payment processing failed:", error);
             console.error("Error details:", error.response?.data || error.message);
-            setError(error?.response?.data?.message || error?.message || "Failed to process payment. Please try again.");
+
+            if (error.response?.data?.message?.includes('address')) {
+                setError("Please select a valid delivery address.");
+                setShowAddressPopup(true);
+            } else {
+                setError(error?.response?.data?.message || error?.message || "Failed to process payment. Please try again.");
+            }
+
             setPaymentLoading(false);
             setIsProcessingPayment(false);
         }
     };
 
-    // ✅ Handle Checkout - FIXED: Only open modal if no table selected
+    // ✅ Handle Checkout - FIXED
     const handleCheckout = async () => {
-        console.log("Checkout button clicked");
+        console.log("========== CHECKOUT CLICKED ==========");
+        console.log("Selected Address:", selectedAddress);
         console.log("Order Type:", orderType);
-        console.log("Cart Items:", cartItems);
-        console.log("Total Items:", totalItems);
-        console.log("Total Price:", totalPrice);
+        console.log("Cart Items:", cartItems.length);
 
-        // ✅ Check if cart is empty
         if (cartItems.length === 0) {
             setError("Your cart is empty. Please add items before checking out.");
             return;
         }
 
-        // ✅ DINE IN - Check if table is selected
-        if (orderType === "dine_in") {
-            if (selectedTable) {
-                console.log("☕ Table already selected:", selectedTable);
-                // ✅ Table is already selected, proceed directly to payment
-                await processPayment(null);
-            } else {
-                console.log("☕ No table selected - Opening Table Selection Modal");
-                setIsTableModalOpen(true);
+        if (orderType === "delivery") {
+            // ✅ Check if address is selected
+            if (!selectedAddress) {
+                console.error("❌ No address selected!");
+                setError("Please select a delivery address.");
+                setShowAddressPopup(true);
+                return;
             }
+
+            // ✅ Validate address has required fields
+            if (!selectedAddress.fullName || !selectedAddress.phone || 
+                (!selectedAddress.address && !selectedAddress.addressLine)) {
+                console.error("❌ Address is incomplete:", selectedAddress);
+                setError("Selected address is incomplete. Please select a valid address.");
+                setShowAddressPopup(true);
+                return;
+            }
+
+            console.log("✅ Address validated. Proceeding to payment.");
+            await processPayment(selectedAddress);
             return;
         }
 
-        // ✅ DELIVERY - Show Address Modal
-        if (orderType === "delivery") {
-            console.log("📦 Delivery order - Opening Address Modal");
-            setIsAddressModalOpen(true);
+        if (orderType === "dine_in") {
+            if (selectedTable) {
+                await processPayment(null);
+            } else {
+                setIsTableModalOpen(true);
+            }
             return;
         }
     };
 
     /**
-     * ✅ Calculate delivery fee based on order type and subtotal
+     * ✅ Calculate delivery fee
      */
     const calculateDeliveryFee = (subtotal, type) => {
         if (type === "dine_in") {
-            return 0; // Free for dine-in
+            return 0;
         }
-        return subtotal > 500 ? 0 : 50; // Free if subtotal > 500, else ₹50
+        return subtotal > 500 ? 0 : 50;
     };
 
     /**
@@ -492,39 +607,6 @@ const CartPage = () => {
     const calculateTotal = (subtotal, type) => {
         return subtotal + calculateDeliveryFee(subtotal, type);
     };
-
-    // ✅ Get status color
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 'available':
-                return 'bg-green-500';
-            case 'occupied':
-                return 'bg-red-500';
-            case 'reserved':
-                return 'bg-yellow-500';
-            default:
-                return 'bg-gray-500';
-        }
-    };
-
-    // ✅ Get status text
-    const getStatusText = (status) => {
-        switch (status) {
-            case 'available':
-                return 'Available';
-            case 'occupied':
-                return 'Occupied';
-            case 'reserved':
-                return 'Reserved';
-            default:
-                return status;
-        }
-    };
-
-    // ✅ Get available tables only
-    const availableTables = tableList.filter(
-        (table) => table.status === 'available'
-    );
 
     // ✅ Loading state
     if (loading && cartItems.length === 0) {
@@ -567,7 +649,7 @@ const CartPage = () => {
         );
     }
 
-    // ✅ Calculate dynamic values based on order type
+    // ✅ Calculate dynamic values
     const deliveryFee = calculateDeliveryFee(totalPrice, orderType);
     const totalAmount = calculateTotal(totalPrice, orderType);
     const deliveryFeeDisplay = getDeliveryFeeDisplay(totalPrice, orderType);
@@ -628,7 +710,6 @@ const CartPage = () => {
                             {cartItems.map((item) => {
                                 const coffeeId = item.coffee?._id;
                                 if (!coffeeId) {
-                                    console.warn("⚠️ Item missing coffee._id:", item);
                                     return null;
                                 }
 
@@ -768,7 +849,59 @@ const CartPage = () => {
                                         </label>
                                     </div>
 
-                                    {/* ✅ Show selected table for dine-in */}
+                                    {/* Show selected address for delivery */}
+                                    {orderType === "delivery" && selectedAddress && (
+                                        <div className="mt-3 p-3 bg-green-50/70 border border-green-200 rounded-lg">
+                                            <div className="flex items-start gap-2">
+                                                <MapPin className="w-4 h-4 text-[#0D7C53] mt-0.5" />
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <span className="text-sm font-semibold text-gray-700">
+                                                            {selectedAddress.addressType || 'Home'}
+                                                        </span>
+                                                        {selectedAddress.isDefault && (
+                                                            <span className="text-[10px] bg-[#0D7C53] text-white px-2 py-0.5 rounded-full">
+                                                                Default
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <p className="text-xs text-gray-600 mt-0.5">
+                                                        {selectedAddress.fullName}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500">
+                                                        {selectedAddress.address || selectedAddress.addressLine}, {selectedAddress.city}, {selectedAddress.state} - {selectedAddress.pincode}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedAddress(null);
+                                                    setShowAddressPopup(true);
+                                                }}
+                                                className="mt-2 text-xs text-[#0D7C53] hover:text-green-700 font-medium underline-offset-2 hover:underline"
+                                            >
+                                                Change Address
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {/* Show address selection prompt for delivery */}
+                                    {orderType === "delivery" && !selectedAddress && (
+                                        <div className="mt-3 p-3 bg-yellow-50/70 border border-yellow-200 rounded-lg">
+                                            <p className="text-sm text-yellow-700 flex items-center gap-2">
+                                                <MapPin className="w-4 h-4" />
+                                                ⚠️ Please select a delivery address
+                                            </p>
+                                            <button
+                                                onClick={() => setShowAddressPopup(true)}
+                                                className="mt-2 text-xs text-[#0D7C53] hover:text-green-700 font-medium"
+                                            >
+                                                Select Address
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {/* Show selected table for dine-in */}
                                     {orderType === "dine_in" && selectedTable && (
                                         <div className="mt-3 p-3 bg-green-50/70 border border-green-200 rounded-lg">
                                             <div className="flex items-center justify-between">
@@ -795,7 +928,7 @@ const CartPage = () => {
                                         </div>
                                     )}
 
-                                    {/* ✅ Show table selection prompt for dine-in */}
+                                    {/* Show table selection prompt for dine-in */}
                                     {orderType === "dine_in" && !selectedTable && (
                                         <div className="mt-3 p-3 bg-yellow-50/70 border border-yellow-200 rounded-lg">
                                             <p className="text-sm text-yellow-700">
@@ -805,6 +938,100 @@ const CartPage = () => {
                                     )}
                                 </div>
 
+                                {/* ✅ Delivery Address Section */}
+                                {orderType === "delivery" && (
+                                    <div className="mb-5">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <h4 className="text-base font-semibold text-gray-800">
+                                                Delivery Address
+                                            </h4>
+                                            {addresses.length > 0 && (
+                                                <button
+                                                    onClick={() => setIsAddressModalOpen(true)}
+                                                    className="text-xs sm:text-sm text-[#0D7C53] hover:text-green-700 font-medium flex items-center gap-1"
+                                                >
+                                                    <PlusIcon className="w-3.5 h-3.5" />
+                                                    Add New
+                                                </button>
+                                            )}
+                                        </div>
+
+                                        {addresses.length === 0 ? (
+                                            <div className="p-4 bg-yellow-50/70 border border-yellow-200 rounded-lg text-center">
+                                                <MapPin className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
+                                                <p className="text-sm text-gray-700 font-medium">
+                                                    No delivery address found.
+                                                </p>
+                                                <p className="text-xs text-gray-500 mt-1">
+                                                    Please add a new address.
+                                                </p>
+                                                <button
+                                                    onClick={() => setIsAddressModalOpen(true)}
+                                                    className="mt-3 px-4 py-2 bg-[#0D7C53] text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
+                                                >
+                                                    + Add Address
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-3">
+                                                {addresses.map((address, index) => {
+                                                    const isSelected = selectedAddress?._id === address._id;
+                                                    return (
+                                                        <label
+                                                            key={address._id || index}
+                                                            className={`block cursor-pointer rounded-xl border p-3 transition-all ${isSelected
+                                                                ? "border-[#0D7C53] bg-green-50 shadow-sm"
+                                                                : "border-gray-200 bg-white/40 hover:border-gray-300"
+                                                                }`}
+                                                            onClick={() => {
+                                                                console.log("📦 Address clicked:", address);
+                                                                handleAddressRadioSelect(address);
+                                                            }}
+                                                        >
+                                                            <div className="flex items-start gap-3">
+                                                                <input
+                                                                    type="radio"
+                                                                    name="deliveryAddress"
+                                                                    checked={isSelected}
+                                                                    onChange={() => {
+                                                                        console.log("📦 Address selected via radio:", address);
+                                                                        handleAddressRadioSelect(address);
+                                                                    }}
+                                                                    className="mt-1 flex-shrink-0"
+                                                                />
+                                                                <div className="flex-1 min-w-0">
+                                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                                        <span className="font-semibold text-gray-800 text-sm">
+                                                                            {address.addressType || 'Home'}
+                                                                        </span>
+                                                                        {address.isDefault && (
+                                                                            <span className="text-[10px] bg-[#0D7C53] text-white px-2 py-0.5 rounded-full">
+                                                                                Default
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                    <p className="text-sm text-gray-700 font-medium mt-0.5">
+                                                                        {address.fullName || 'N/A'}
+                                                                    </p>
+                                                                    <p className="text-xs text-gray-500 mt-0.5">
+                                                                        {address.phone || 'N/A'}
+                                                                    </p>
+                                                                    <p className="text-xs text-gray-600 mt-0.5 line-clamp-2">
+                                                                        {address.address || address.addressLine || 'N/A'}
+                                                                    </p>
+                                                                    <p className="text-xs text-gray-500 mt-0.5">
+                                                                        {address.city || 'N/A'}, {address.state || 'N/A'} - {address.pincode || 'N/A'}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </label>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
                                 <div className="space-y-2 sm:space-y-3">
                                     <div className="flex justify-between text-sm sm:text-base">
                                         <span className="text-gray-500">Subtotal</span>
@@ -812,8 +1039,7 @@ const CartPage = () => {
                                     </div>
                                     <div className="flex justify-between text-sm sm:text-base">
                                         <span className="text-gray-500">Delivery Fee</span>
-                                        <span className={`font-medium ${deliveryFee === 0 ? 'text-green-600' : 'text-gray-800'
-                                            }`}>
+                                        <span className={`font-medium ${deliveryFee === 0 ? 'text-green-600' : 'text-gray-800'}`}>
                                             {deliveryFeeDisplay}
                                         </span>
                                     </div>
@@ -858,7 +1084,8 @@ const CartPage = () => {
                                         paymentLoading ||
                                         loading ||
                                         cartItems.length === 0 ||
-                                        isProcessingPayment
+                                        isProcessingPayment ||
+                                        (orderType === "delivery" && !selectedAddress)
                                     }
                                     className="w-full mt-4 sm:mt-6 py-2.5 sm:py-3.5 bg-gradient-to-r from-[#0D7C53] to-green-600 text-white rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed text-base sm:text-lg"
                                 >
@@ -871,6 +1098,11 @@ const CartPage = () => {
                                         <>
                                             <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                                             Loading Cart...
+                                        </>
+                                    ) : orderType === "delivery" && !selectedAddress ? (
+                                        <>
+                                            <span>Select Address</span>
+                                            <MapPin />
                                         </>
                                     ) : orderType === "dine_in" && !selectedTable ? (
                                         <>
@@ -906,7 +1138,172 @@ const CartPage = () => {
                 </div>
             </div>
 
-            {/* ✅ Table Selection Modal - Integrated in CartPage */}
+            {/* ✅ Address Selection Popup */}
+            {showAddressPopup && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-hidden animate-slide-up">
+                        {/* Header */}
+                        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-100">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-[#0D7C53]/10 rounded-lg">
+                                    <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-[#0D7C53]" />
+                                </div>
+                                <div>
+                                    <h2 className="text-lg sm:text-xl font-bold text-gray-800">
+                                        Select Delivery Address
+                                    </h2>
+                                    <p className="text-xs sm:text-sm text-gray-500">
+                                        Choose where to deliver your order
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setShowAddressPopup(false);
+                                    // If no address is selected and we have addresses, select default
+                                    if (!selectedAddress && addresses.length > 0) {
+                                        const defaultAddr = addresses.find(addr => addr.isDefault) || addresses[0];
+                                        setSelectedAddress(defaultAddr);
+                                    }
+                                }}
+                                className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                            >
+                                <X className="w-5 h-5 text-gray-500 hover:text-gray-700" />
+                            </button>
+                        </div>
+
+                        {/* Body */}
+                        <div className="p-4 sm:p-6 overflow-y-auto max-h-[60vh]">
+                            {addresses.length === 0 ? (
+                                <div className="text-center py-8">
+                                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <MapPin className="w-8 h-8 text-gray-400" />
+                                    </div>
+                                    <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                                        No Address Found
+                                    </h3>
+                                    <p className="text-sm text-gray-500 mb-4">
+                                        You haven't added any delivery address yet.
+                                    </p>
+                                    <button
+                                        onClick={() => {
+                                            setShowAddressPopup(false);
+                                            setIsAddressModalOpen(true);
+                                        }}
+                                        className="px-4 py-2 bg-[#0D7C53] text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors flex items-center gap-2 mx-auto"
+                                    >
+                                        <PlusIcon className="w-4 h-4" />
+                                        Add New Address
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {addresses.map((address, index) => {
+                                        const isSelected = selectedAddress?._id === address._id;
+                                        return (
+                                            <div
+                                                key={address._id || index}
+                                                onClick={() => {
+                                                    console.log("📦 Address selected from popup:", address);
+                                                    handleAddressSelect(address);
+                                                }}
+                                                className={`cursor-pointer rounded-xl border-2 p-4 transition-all ${isSelected
+                                                    ? "border-[#0D7C53] bg-green-50 shadow-sm"
+                                                    : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                                                    }`}
+                                            >
+                                                <div className="flex items-start gap-3">
+                                                    <div className="mt-1">
+                                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected
+                                                            ? "border-[#0D7C53] bg-[#0D7C53]"
+                                                            : "border-gray-300"
+                                                            }`}>
+                                                            {isSelected && (
+                                                                <CheckCircle className="w-3 h-3 text-white" />
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                            <span className="font-semibold text-gray-800">
+                                                                {address.addressType || 'Home'}
+                                                            </span>
+                                                            {address.isDefault && (
+                                                                <span className="text-[10px] bg-[#0D7C53] text-white px-2 py-0.5 rounded-full">
+                                                                    Default
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <p className="text-sm text-gray-700 font-medium mt-0.5">
+                                                            {address.fullName || 'N/A'}
+                                                        </p>
+                                                        <p className="text-xs text-gray-500">
+                                                            {address.phone || 'N/A'}
+                                                        </p>
+                                                        <p className="text-xs text-gray-600 mt-0.5">
+                                                            {address.address || address.addressLine || 'N/A'}
+                                                        </p>
+                                                        <p className="text-xs text-gray-500">
+                                                            {address.city || 'N/A'}, {address.state || 'N/A'} - {address.pincode || 'N/A'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Footer */}
+                        <div className="p-4 sm:p-6 border-t border-gray-100 bg-gray-50/50">
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                {addresses.length > 0 && (
+                                    <button
+                                        onClick={() => {
+                                            setShowAddressPopup(false);
+                                            setIsAddressModalOpen(true);
+                                        }}
+                                        className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition font-medium text-sm flex items-center justify-center gap-2"
+                                    >
+                                        <PlusIcon className="w-4 h-4" />
+                                        Add New Address
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => {
+                                        if (selectedAddress) {
+                                            console.log("✅ Confirming address:", selectedAddress);
+                                            setShowAddressPopup(false);
+                                            setError(null);
+                                        } else {
+                                            setError("Please select a delivery address.");
+                                        }
+                                    }}
+                                    disabled={!selectedAddress}
+                                    className={`flex-1 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-300 
+                                        ${selectedAddress
+                                            ? 'bg-gradient-to-r from-[#0D7C53] to-green-600 text-white hover:shadow-lg hover:scale-[1.02]'
+                                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                        }`}
+                                >
+                                    <span className="flex items-center justify-center gap-2">
+                                        <CheckCircle className="w-4 h-4" />
+                                        Confirm Address
+                                    </span>
+                                </button>
+                            </div>
+                            {!selectedAddress && addresses.length > 0 && (
+                                <p className="text-xs text-red-500 text-center mt-2">
+                                    Please select an address to continue
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ✅ Table Selection Modal */}
             {isTableModalOpen && (
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
                     <div className="bg-white dark:bg-dark-card rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
@@ -967,8 +1364,8 @@ const CartPage = () => {
                                         >
                                             <span className="capitalize">{status === 'all' ? 'All' : status}</span>
                                             <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${tableFilter === status
-                                                    ? 'bg-white/20 text-white'
-                                                    : 'bg-gray-200/50 text-gray-600 dark:bg-gray-600/50 dark:text-gray-400'
+                                                ? 'bg-white/20 text-white'
+                                                : 'bg-gray-200/50 text-gray-600 dark:bg-gray-600/50 dark:text-gray-400'
                                                 }`}>
                                                 {count}
                                             </span>
@@ -980,11 +1377,6 @@ const CartPage = () => {
 
                         {/* Body */}
                         <div className="p-4 sm:p-6 overflow-y-auto max-h-[60vh]">
-                            {/* ✅ FORCE RENDER CHECK */}
-                            <div className="text-center text-xs text-gray-400 dark:text-gray-500 mb-2">
-                                Total Tables: {filteredTables.length} | Selected: {selectedTableId || 'None'}
-                            </div>
-
                             {tablesReduxLoading ? (
                                 <div className="flex flex-col items-center justify-center py-12">
                                     <Loader2 className="w-10 h-10 text-[#0D7C53] animate-spin" />
@@ -1018,7 +1410,6 @@ const CartPage = () => {
                                 <>
                                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
                                         {filteredTables.map((table) => {
-                                            // Get status colors
                                             const statusColors = {
                                                 available: {
                                                     bg: 'border-green-200 hover:border-green-500 dark:border-green-900/30',
@@ -1046,10 +1437,7 @@ const CartPage = () => {
                                             return (
                                                 <button
                                                     key={table._id}
-                                                    onClick={() => {
-                                                        console.log("🔥 Table clicked:", table._id);
-                                                        handleTableSelect(table._id);
-                                                    }}
+                                                    onClick={() => handleTableSelect(table._id)}
                                                     className={`relative p-4 rounded-xl border-2 transition-all duration-300 group hover:shadow-lg
                                             ${isSelected
                                                             ? colors.selected
@@ -1057,14 +1445,12 @@ const CartPage = () => {
                                                         }
                                         `}
                                                 >
-                                                    {/* Status Badge - Top Right */}
                                                     <div className="absolute top-2 right-2">
                                                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium text-white ${colors.badge}`}>
                                                             {table.status.charAt(0).toUpperCase() + table.status.slice(1)}
                                                         </span>
                                                     </div>
 
-                                                    {/* Table Number */}
                                                     <div className="text-center">
                                                         <div className={`text-2xl sm:text-3xl font-bold transition-colors 
                                                 ${isSelected
@@ -1079,7 +1465,6 @@ const CartPage = () => {
                                                         </div>
                                                     </div>
 
-                                                    {/* Selection Indicator */}
                                                     {isSelected && (
                                                         <div className="absolute -top-1 -right-1">
                                                             <div className="w-6 h-6 bg-[#0D7C53] rounded-full flex items-center justify-center shadow-lg">
@@ -1092,7 +1477,6 @@ const CartPage = () => {
                                         })}
                                     </div>
 
-                                    {/* Table Legend */}
                                     <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs text-gray-500 dark:text-dark-text">
                                         <div className="flex items-center gap-1.5">
                                             <span className="w-3 h-3 bg-green-500 rounded-full"></span>
@@ -1147,11 +1531,14 @@ const CartPage = () => {
                 </div>
             )}
 
-            {/* ✅ Address Modal - For Delivery */}
+            {/* ✅ Address Modal - For Adding New Address */}
             <AddressModal
                 isOpen={isAddressModalOpen}
-                onClose={() => setIsAddressModalOpen(false)}
+                onClose={() => {
+                    setIsAddressModalOpen(false);
+                }}
                 onSaveAddress={handleSaveAddress}
+                isLoading={addressLoading}
             />
 
             <style>{`

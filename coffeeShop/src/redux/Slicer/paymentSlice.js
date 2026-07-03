@@ -6,6 +6,8 @@ export const createOrder = createAsyncThunk(
     "payment/createOrder",
     async (orderData, { rejectWithValue }) => {
         try {
+            console.log("========== PAYMENT SLICE ==========");
+            console.log(JSON.stringify(orderData, null, 2));
             console.log("📦 Sending order payload:", orderData);
             const { data } = await API.post("/payment/create-order", orderData);
             console.log("✅ Create Order Response:", data);

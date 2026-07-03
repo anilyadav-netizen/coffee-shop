@@ -16,7 +16,7 @@ import {
     X,
     Plus
 } from 'lucide-react';
-import { updateAddress, clearAddressState } from '../redux/Slicer/addressSlice';
+import { updateAddress, clearAddressState, createAddress } from '../redux/Slicer/addressSlice';
 import { getProfile } from '../redux/Slicer/authSlice';
 
 const GlassCard = ({ children, className = '' }) => (
@@ -89,7 +89,8 @@ const UpdateAddress = () => {
     const navigate = useNavigate();
 
     const { addressId } = useParams();
-    const isNew = addressId === "new";
+
+    const isNew = window.location.pathname === "/address/new";
 
     const { user, isLoading: authLoading, isAuthenticated } = useSelector((state) => state.auth);
     const { loading: addressLoading, success, error } = useSelector((state) => state.address);
@@ -115,7 +116,7 @@ const UpdateAddress = () => {
     const isNewAddress = addressId === "new";
 
     const [formData, setFormData] = useState({
-        type: 'Home',
+        type: 'home',
         name: '',
         email: '',
         phone: '',
@@ -161,8 +162,8 @@ const UpdateAddress = () => {
         // Only prefill if we have an address to edit and it's NOT a new address
         if (addressToEdit && !isNewAddress) {
             setFormData({
-                type: addressToEdit.type || 'Home',
-                name: addressToEdit.name || '',
+                type: addressToEdit.type || 'home',
+                name: addressToEdit.fullName || '',
                 email: addressToEdit.email || '',
                 phone: addressToEdit.phone || '',
                 secondPhone: addressToEdit.secondPhone || '',
@@ -182,7 +183,7 @@ const UpdateAddress = () => {
         if (success) {
             setToastMessage({
                 type: 'success',
-                text: isNewAddress ? 'Address added successfully!' : 'Address updated successfully!'
+                text: isNewAddress ? 'Address Updated successfully!' : 'Address Added successfully!'
             });
             setIsSubmitting(false);
 
@@ -266,26 +267,23 @@ const UpdateAddress = () => {
             // Prepare address data for API
             const addressData = {
                 type: formData.type,
-                name: formData.name,
+                fullName: formData.name,
                 email: formData.email,
                 phone: formData.phone,
-                secondPhone: formData.secondPhone || undefined,
+                secondPhone: formData.secondPhone,
                 address: formData.address,
                 city: formData.city,
                 state: formData.state,
                 pincode: formData.pincode,
-                landmark: formData.landmark || undefined,
-                isDefault: formData.isDefault
+                landmark: formData.landmark,
+                isDefault: formData.isDefault,
             };
 
             if (isNew) {
-                // NEW ADDRESS → backend updateAddress use karega WITHOUT id
-                await dispatch(updateAddress({
-                    addressId: "new",
-                    addressData
-                })).unwrap();
+                // NEW ADDRESS → Use createAddress API
+                await dispatch(createAddress(addressData)).unwrap();
             } else {
-                // UPDATE ADDRESS
+                // UPDATE ADDRESS → Use updateAddress API with addressId
                 await dispatch(updateAddress({
                     addressId,
                     addressData
@@ -378,9 +376,9 @@ const UpdateAddress = () => {
                                 value={formData.type}
                                 onChange={handleChange}
                                 options={[
-                                    { value: 'Home', label: '🏠 Home' },
-                                    { value: 'Office', label: '💼 Office' },
-                                    { value: 'Other', label: '📍 Other' }
+                                    { value: 'home', label: '🏠 home' },
+                                    { value: 'office', label: '💼 office' },
+                                    { value: 'other', label: '📍 other' }
                                 ]}
                                 required
                                 icon={Home}
@@ -559,7 +557,7 @@ const UpdateAddress = () => {
                                         ) : (
                                             <>
                                                 <Save className="w-5 h-5" />
-                                                Update Address
+                                                Add Address
                                             </>
                                         )}
                                     </>
