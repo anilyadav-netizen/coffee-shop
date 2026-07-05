@@ -1,6 +1,7 @@
 // src/pages/Login.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { getProfile } from '../redux/Slicer/authSlice';
 import {
     Mail,
     Lock,
@@ -24,7 +25,7 @@ const Login = () => {
     const navigate = useNavigate();
 
     // ✅ Redux state se loading aur error le rahe hain
-    const { loading, Error, isAuthenticated } = useSelector(
+    const { loading, error, isAuthenticated } = useSelector(
         (state) => state.auth
     );
 
@@ -41,11 +42,11 @@ const Login = () => {
     });
 
     // ✅ Check if already logged in
-   useEffect(() => {
-  if (isAuthenticated) {
-    navigate(from, { replace: true });
-  }
-}, [isAuthenticated, navigate, from]);
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigate(from, { replace: true });
+        }
+    }, [isAuthenticated, navigate, from]);
 
     const validateField = (name, value) => {
         let error = '';
@@ -76,29 +77,38 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const emailError = validateField('email', email);
-        const passwordError = validateField('password', password);
+        const emailError = validateField("email", email);
+        const passwordError = validateField("password", password);
 
         if (emailError || passwordError) {
             setErrors({
                 email: emailError,
-                password: passwordError
+                password: passwordError,
             });
             return;
         }
 
-        setLocalError('');
+        setLocalError("");
 
-        // ✅ Redux dispatch with user data
+        // Login API
         const result = await dispatch(loginUser({ email, password }));
 
-        // ✅ Check if login was successful
+        console.log("LOGIN RESULT", result);
+
         if (loginUser.fulfilled.match(result)) {
-            // Success - redirect handled by useEffect
-            navigate('/');
-        } else if (loginUser.rejected.match(result)) {
-            // Error from Redux
-            setLocalError(result.payload || 'Login failed. Please try again.');
+
+            console.log("Login Success");
+
+            const profileResult = await dispatch(getProfile());
+
+            console.log("Profile Result", profileResult);
+
+            navigate("/");
+
+        } else {
+
+            console.log("Login Failed");
+
         }
     };
 

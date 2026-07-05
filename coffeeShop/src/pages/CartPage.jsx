@@ -265,49 +265,50 @@ const CartPage = () => {
     // ✅ Handle Address Save
     const handleSaveAddress = async (addressData) => {
         console.log("📦 Saving address - Raw data:", addressData);
+
         setAddressLoading(true);
         setError(null);
 
         try {
+            // Backend schema ke according payload
             const formattedAddress = {
-                addressType: addressData.addressType || 'Home',
-                fullName: addressData.fullName || addressData.name || '',
-                phone: addressData.phone || addressData.mobile || '',
-                email: addressData.email || user?.email || '',
-                address: addressData.addressLine || addressData.address || '',
-                addressLine: addressData.addressLine || addressData.address || '',
-                city: addressData.city || '',
-                state: addressData.state || '',
-                pincode: addressData.pincode || addressData.zipCode || '',
-                isDefault: addressData.isDefault || false
+                type: addressData.type || "home",
+                fullName: addressData.fullName?.trim() || "",
+                email: addressData.email?.trim() || user?.email || "",
+                phone: addressData.phone?.trim() || "",
+                secondPhone: addressData.secondPhone?.trim() || "",
+                address: addressData.address?.trim() || "",
+                city: addressData.city?.trim() || "",
+                state: addressData.state?.trim() || "",
+                pincode: addressData.pincode?.trim() || "",
+                landmark: addressData.landmark?.trim() || "",
+                isDefault: addressData.isDefault || false,
             };
 
             console.log("📦 Formatted address for backend:", formattedAddress);
 
+            // Address Create
             const result = await dispatch(createAddress(formattedAddress)).unwrap();
+
             console.log("✅ Address created:", result);
 
+            // Refresh Profile
             await dispatch(getProfile()).unwrap();
+
             console.log("✅ Profile refreshed");
 
             setIsAddressModalOpen(false);
-            setAddressLoading(false);
             setShowAddressPopup(false);
-
-            // Get the updated user from Redux
-            const updatedUser = useSelector((state) => state.auth.user);
-            const newAddress = updatedUser?.addresses?.find(
-                (addr) => addr._id === result.address?._id
-            );
-            if (newAddress) {
-                console.log("📦 Auto-selecting new address:", newAddress);
-                setSelectedAddress(newAddress);
-            }
-
+            setAddressLoading(false);
         } catch (error) {
             console.error("❌ Failed to save address:", error);
-            console.error("Error details:", error.response?.data);
-            setError(error?.response?.data?.message || error?.message || "Failed to save address. Please try again.");
+
+            setError(
+                error?.response?.data?.message ||
+                error?.message ||
+                "Failed to save address. Please try again."
+            );
+
             setAddressLoading(false);
         }
     };
@@ -345,7 +346,10 @@ const CartPage = () => {
             phone: address.phone || '',
             email: address.email || user?.email || '',
             addressLine1: address.address || address.addressLine || '',
-            addressLine2: address.landmark || address.addressLine2 || '',
+            addressLine2:
+                address.landmark?.trim() ||
+                address.addressLine2?.trim() ||
+                "N/A",
             city: address.city || '',
             state: address.state || '',
             pincode: address.pincode || '',
@@ -424,7 +428,7 @@ const CartPage = () => {
             if (orderType === "delivery" && address) {
                 const formattedAddress = formatAddressForBackend(address);
                 console.log("📦 Formatted address for order payload:", formattedAddress);
-                
+
                 // Send both formats to ensure backend compatibility
                 orderPayload.deliveryAddress = formattedAddress;
                 orderPayload.deliveryAddressId = address._id;
@@ -557,7 +561,7 @@ const CartPage = () => {
             }
 
             // ✅ Validate address has required fields
-            if (!selectedAddress.fullName || !selectedAddress.phone || 
+            if (!selectedAddress.fullName || !selectedAddress.phone ||
                 (!selectedAddress.address && !selectedAddress.addressLine)) {
                 console.error("❌ Address is incomplete:", selectedAddress);
                 setError("Selected address is incomplete. Please select a valid address.");

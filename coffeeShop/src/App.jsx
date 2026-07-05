@@ -39,8 +39,19 @@ import TablePage from "./Admin/adpages/TablePage";
 import Profile from "./pages/Profile";
 import UpdateAddress from "./pages/UpdateAddress";
 import RoleRoute from "./component/RoleRoute";
-
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getProfile } from "./redux/Slicer/authSlice";
 function App() {
+
+  const dispatch = useDispatch();
+  const { token } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (token) {
+      dispatch(getProfile());
+    }
+  }, [dispatch, token]);
 
   return (
     <BrowserRouter>

@@ -184,7 +184,7 @@ exports.verifyPayment = async (req, res) => {
     .update(`${razorpay_order_id}|${razorpay_payment_id}`)
     .digest("hex");
     
-    console.log("Payment Table:", payment.table);
+    // console.log("Payment Table:", payment.table);
     if (generatedSignature !== razorpay_signature) {
       return res.status(400).json({
         success: false,

@@ -4,22 +4,26 @@ import { X } from 'lucide-react';
 
 const AddressModal = ({ isOpen, onClose, onSaveAddress }) => {
     const [addressData, setAddressData] = useState({
+        type: 'home',
         fullName: '',
+        email: '',
         phone: '',
-        addressLine1: '',
+        secondPhone: '',
+        address: '',
         city: '',
         state: '',
         pincode: '',
-        addressLine2: '' // Optional
+        landmark: '',
+        isDefault: false
     });
     const [errors, setErrors] = useState({});
 
     // Handle input changes
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
+        const { name, value, type, checked } = e.target;
         setAddressData(prev => ({
             ...prev,
-            [name]: value
+            [name]: type === 'checkbox' ? checked : value
         }));
         // Clear error for this field when user types
         if (errors[name]) {
@@ -38,14 +42,24 @@ const AddressModal = ({ isOpen, onClose, onSaveAddress }) => {
             newErrors.fullName = 'Full name is required';
         }
         
+        if (!addressData.email.trim()) {
+            newErrors.email = 'Email is required';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(addressData.email.trim())) {
+            newErrors.email = 'Please enter a valid email address';
+        }
+        
         if (!addressData.phone.trim()) {
             newErrors.phone = 'Phone number is required';
         } else if (!/^[0-9]{10}$/.test(addressData.phone.trim())) {
             newErrors.phone = 'Please enter a valid 10-digit phone number';
         }
         
-        if (!addressData.addressLine1.trim()) {
-            newErrors.addressLine1 = 'Address line 1 is required';
+        if (addressData.secondPhone.trim() && !/^[0-9]{10}$/.test(addressData.secondPhone.trim())) {
+            newErrors.secondPhone = 'Please enter a valid 10-digit phone number';
+        }
+        
+        if (!addressData.address.trim()) {
+            newErrors.address = 'Address is required';
         }
         
         if (!addressData.city.trim()) {
@@ -72,13 +86,17 @@ const AddressModal = ({ isOpen, onClose, onSaveAddress }) => {
         if (validateForm()) {
             // Format address object according to backend requirements
             const deliveryAddress = {
+                type: addressData.type,
                 fullName: addressData.fullName.trim(),
+                email: addressData.email.trim(),
                 phone: addressData.phone.trim(),
-                addressLine1: addressData.addressLine1.trim(),
+                secondPhone: addressData.secondPhone.trim(),
+                address: addressData.address.trim(),
                 city: addressData.city.trim(),
                 state: addressData.state.trim(),
                 pincode: addressData.pincode.trim(),
-                addressLine2: addressData.addressLine2?.trim() || '' // Optional
+                landmark: addressData.landmark.trim(),
+                isDefault: addressData.isDefault
             };
             
             console.log("📦 Delivery Address:", deliveryAddress);
@@ -86,13 +104,17 @@ const AddressModal = ({ isOpen, onClose, onSaveAddress }) => {
             
             // Reset form after successful submission
             setAddressData({
+                type: 'home',
                 fullName: '',
+                email: '',
                 phone: '',
-                addressLine1: '',
+                secondPhone: '',
+                address: '',
                 city: '',
                 state: '',
                 pincode: '',
-                addressLine2: ''
+                landmark: '',
+                isDefault: false
             });
         }
     };
@@ -100,13 +122,17 @@ const AddressModal = ({ isOpen, onClose, onSaveAddress }) => {
     // Close modal
     const handleClose = () => {
         setAddressData({
+            type: 'home',
             fullName: '',
+            email: '',
             phone: '',
-            addressLine1: '',
+            secondPhone: '',
+            address: '',
             city: '',
             state: '',
             pincode: '',
-            addressLine2: ''
+            landmark: '',
+            isDefault: false
         });
         setErrors({});
         onClose();
@@ -139,6 +165,23 @@ const AddressModal = ({ isOpen, onClose, onSaveAddress }) => {
 
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Address Type */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Address Type *
+                        </label>
+                        <select
+                            name="type"
+                            value={addressData.type}
+                            onChange={handleInputChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D7C53] transition-all"
+                        >
+                            <option value="home">Home</option>
+                            <option value="office">Office</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
                     {/* Full Name */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -156,6 +199,26 @@ const AddressModal = ({ isOpen, onClose, onSaveAddress }) => {
                         />
                         {errors.fullName && (
                             <p className="text-xs text-red-500 mt-1">{errors.fullName}</p>
+                        )}
+                    </div>
+
+                    {/* Email */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Email *
+                        </label>
+                        <input
+                            type="email"
+                            name="email"
+                            value={addressData.email}
+                            onChange={handleInputChange}
+                            placeholder="Enter your email address"
+                            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D7C53] transition-all ${
+                                errors.email ? 'border-red-500' : 'border-gray-300'
+                            }`}
+                        />
+                        {errors.email && (
+                            <p className="text-xs text-red-500 mt-1">{errors.email}</p>
                         )}
                     </div>
 
@@ -180,35 +243,56 @@ const AddressModal = ({ isOpen, onClose, onSaveAddress }) => {
                         )}
                     </div>
 
-                    {/* Address Line 1 */}
+                    {/* Second Phone (Optional) */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Address Line 1 *
+                            Second Phone (Optional)
                         </label>
                         <input
-                            type="text"
-                            name="addressLine1"
-                            value={addressData.addressLine1}
+                            type="tel"
+                            name="secondPhone"
+                            value={addressData.secondPhone}
                             onChange={handleInputChange}
-                            placeholder="Enter street address"
+                            placeholder="Enter 10-digit phone number"
+                            maxLength="10"
                             className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D7C53] transition-all ${
-                                errors.addressLine1 ? 'border-red-500' : 'border-gray-300'
+                                errors.secondPhone ? 'border-red-500' : 'border-gray-300'
                             }`}
                         />
-                        {errors.addressLine1 && (
-                            <p className="text-xs text-red-500 mt-1">{errors.addressLine1}</p>
+                        {errors.secondPhone && (
+                            <p className="text-xs text-red-500 mt-1">{errors.secondPhone}</p>
                         )}
                     </div>
 
-                    {/* Address Line 2 (Optional) */}
+                    {/* Address */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Address Line 2 (Optional)
+                            Address *
                         </label>
                         <input
                             type="text"
-                            name="addressLine2"
-                            value={addressData.addressLine2}
+                            name="address"
+                            value={addressData.address}
+                            onChange={handleInputChange}
+                            placeholder="Enter street address"
+                            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D7C53] transition-all ${
+                                errors.address ? 'border-red-500' : 'border-gray-300'
+                            }`}
+                        />
+                        {errors.address && (
+                            <p className="text-xs text-red-500 mt-1">{errors.address}</p>
+                        )}
+                    </div>
+
+                    {/* Landmark (Optional) */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Landmark (Optional)
+                        </label>
+                        <input
+                            type="text"
+                            name="landmark"
+                            value={addressData.landmark}
                             onChange={handleInputChange}
                             placeholder="Apartment, suite, floor, etc."
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D7C53] transition-all"
@@ -274,6 +358,20 @@ const AddressModal = ({ isOpen, onClose, onSaveAddress }) => {
                         {errors.pincode && (
                             <p className="text-xs text-red-500 mt-1">{errors.pincode}</p>
                         )}
+                    </div>
+
+                    {/* Make Default Address */}
+                    <div className="flex items-center">
+                        <input
+                            type="checkbox"
+                            name="isDefault"
+                            checked={addressData.isDefault}
+                            onChange={handleInputChange}
+                            className="w-4 h-4 text-[#0D7C53] border-gray-300 rounded focus:ring-[#0D7C53]"
+                        />
+                        <label className="ml-2 text-sm font-medium text-gray-700">
+                            Make Default Address
+                        </label>
                     </div>
 
                     {/* Buttons */}
