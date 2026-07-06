@@ -41,17 +41,13 @@ const ProfileDropdown = () => {
     }, []);
 
     const handleLogout = () => {
-        localStorage.removeItem("token");
-
-        // Agar Redux logout action hai to yahan dispatch karo
-        // dispatch(logout())
-
         dispatch(logout());
-        setOpen(false);
-        navigate("/");
-        window.location.reload();
-    };
 
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+        navigate("/", { replace: true });
+    };
     return (
 
         <div className="relative hidden md:block" ref={dropdownRef}>

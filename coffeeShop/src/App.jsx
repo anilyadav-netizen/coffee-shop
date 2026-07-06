@@ -1,5 +1,21 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { ToastContainer } from "react-toastify";
+
+import { getProfile } from "./redux/Slicer/authSlice";
+
+// Layouts
+import UserLayouts from "./Layouts/UserLayouts";
+import AdminLayout from "./Admin/adLayouts/AdminLayout";
+
+// Components
+import ScrollToTop from "./component/ScrollToTop";
+import PrivateRoute from "./component/PrivateRoute";
+import RoleRoute from "./component/RoleRoute";
+
+// User Pages
 import Home from "./pages/Home";
 import MenuPage from "./pages/MenuPage";
 import About from "./pages/About";
@@ -11,20 +27,16 @@ import CartPage from "./pages/CartPage";
 import WishlistPage from "./pages/WishlistPage";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
+import Profile from "./pages/Profile";
+import UpdateAddress from "./pages/UpdateAddress";
+import OrderDetailsPage from "./pages/OderDetailsPage";
 
-import ScrollToTop from "./component/ScrollToTop";
-import PrivateRoute from "./component/PrivateRoute";
-
-// Layout
-import UserLayouts from "./Layouts/UserLayouts";
-import AdminLayout from "./Admin/adLayouts/AdminLayout";
+// Admin Pages
 import Dashboard from "./Admin/adpages/Dashboard";
 import Products from "./Admin/adpages/Products";
 import AddProduct from "./Admin/adpages/AddProduct";
 import Category from "./Admin/adpages/Category";
 import AddCategory from "./Admin/adpages/AddCategory";
-import { ToastContainer } from 'react-toastify';
-import OrderDetailsPage from "./pages/OderDetailsPage";
 import Orders from "./Admin/adpages/Orders";
 import AdminProfile from "./Admin/adLayouts/AdminProfile";
 import Users from "./Admin/adpages/Users";
@@ -32,57 +44,58 @@ import UserDetails from "./Admin/adpages/UserDetails";
 import Riders from "./Admin/adpages/Riders";
 import RiderDetails from "./Admin/adpages/RiderDetails";
 import DineInOrders from "./Admin/adpages/DineInOrders";
-import DeliveryOrders from "./Admin/adpages/DeliveryOrders";
 import DineInDetails from "./Admin/adpages/DineInDetails";
+import DeliveryOrders from "./Admin/adpages/DeliveryOrders";
 import DeliveryDetailsPage from "./Admin/adpages/DeliveryDetailsPage";
 import TablePage from "./Admin/adpages/TablePage";
-import Profile from "./pages/Profile";
-import UpdateAddress from "./pages/UpdateAddress";
-import RoleRoute from "./component/RoleRoute";
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { getProfile } from "./redux/Slicer/authSlice";
-function App() {
+import { useSelector } from "react-redux";
 
+function App() {
   const dispatch = useDispatch();
-  const { token } = useSelector((state) => state.auth);
+  const auth = useSelector(state => state.auth);
+
+  console.log("APP AUTH =", auth);
 
   useEffect(() => {
-    if (token) {
-      dispatch(getProfile());
-    }
-  }, [dispatch, token]);
+    console.log("App Mounted");
+    dispatch(getProfile());
+
+  }, [dispatch]);
 
   return (
     <BrowserRouter>
       <ScrollToTop />
-
       <ToastContainer />
+
       <Routes>
-        {/* User Layout */}
+
+        {/* ================= USER ================= */}
         <Route element={<UserLayouts />}>
+          <Route index element={<Home />} />
           <Route path="/" element={<Home />} />
-          <Route path="/menu" element={<MenuPage />} />
-          <Route path="/menu/:categoryId" element={<MenuPage />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/gallery" element={<Gallery />} />
-          <Route path="/journey" element={<Journey />} />
-          <Route path="/review" element={<Review />} />
-          <Route path="/orderDetails" element={<OrderDetailsPage />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/address/new" element={<UpdateAddress />} />
-          <Route path="/address/:addressId" element={<UpdateAddress />} />
+          <Route path="menu" element={<MenuPage />} />
+          <Route path="menu/:categoryId" element={<MenuPage />} />
+          <Route path="about" element={<About />} />
+          <Route path="contact" element={<Contact />} />
+          <Route path="gallery" element={<Gallery />} />
+          <Route path="journey" element={<Journey />} />
+          <Route path="review" element={<Review />} />
+          <Route path="orderDetails" element={<OrderDetailsPage />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="address/new" element={<UpdateAddress />} />
+          <Route path="address/:addressId" element={<UpdateAddress />} />
+
           <Route
-            path="/cart"
+            path="cart"
             element={
               <PrivateRoute>
                 <CartPage />
               </PrivateRoute>
             }
           />
+
           <Route
-            path="/wishlist"
+            path="wishlist"
             element={
               <PrivateRoute>
                 <WishlistPage />
@@ -90,33 +103,54 @@ function App() {
             }
           />
         </Route>
-        {/* Admin Routes */}
-        <Route path="/admin" element={<AdminLayout />}>
+
+        {/* ================= ADMIN ================= */}
+        <Route
+          path="/admin"
+          element={
+            <RoleRoute allowedRoles={["admin"]}>
+              <AdminLayout />
+            </RoleRoute>
+          }
+        >
           <Route index element={<Dashboard />} />
+
           <Route path="products" element={<Products />} />
           <Route path="add-product" element={<AddProduct />} />
+          <Route path="update-product/:id" element={<AddProduct />} />
+
           <Route path="category" element={<Category />} />
           <Route path="add-category" element={<AddCategory />} />
-          <Route path="/admin/update-product/:id" element={<AddProduct />} /> {/* ✅ Same component */}
-          <Route path="/admin/update-category/:id" element={<AddCategory />} />
-          <Route path="/admin/orders" element={<Orders />} />
-          <Route path="/admin/profile" element={<AdminProfile />} />
-          <Route path="/admin/users" element={<Users />} />
-          <Route path="/admin/user/:id" element={<UserDetails />} />
-          <Route path="/admin/update-user/:id" element={<UserDetails />} />
-          <Route path="/admin/riders" element={<Riders />} />
-          <Route path="/admin/orders/dine-in" element={<DineInOrders />} />
-          <Route path="/admin/orders/dine-in/:id" element={<DineInDetails />} />
-          <Route path="/admin/orders/delivery" element={<DeliveryOrders />} />
-          <Route path="/admin/orders/delivery/:id" element={<DeliveryDetailsPage />} />
-          <Route path="admin/users" element={<Users />} />
-          <Route path="/admin/tables" element={<TablePage />} />
+          <Route path="update-category/:id" element={<AddCategory />} />
+
+          <Route path="orders" element={<Orders />} />
+
+          <Route path="profile" element={<AdminProfile />} />
+
+          <Route path="users" element={<Users />} />
+          <Route path="user/:id" element={<UserDetails />} />
+          <Route path="update-user/:id" element={<UserDetails />} />
+
+          <Route path="riders" element={<Riders />} />
+          <Route path="rider/:id" element={<RiderDetails />} />
+
+          <Route path="orders/dine-in" element={<DineInOrders />} />
+          <Route path="orders/dine-in/:id" element={<DineInDetails />} />
+
+          <Route path="orders/delivery" element={<DeliveryOrders />} />
+          <Route
+            path="orders/delivery/:id"
+            element={<DeliveryDetailsPage />}
+          />
+
+          <Route path="tables" element={<TablePage />} />
         </Route>
+
+        {/* ================= AUTH ================= */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
 
       </Routes>
-
     </BrowserRouter>
   );
 }

@@ -16,6 +16,8 @@ const protect = async (req, res, next) => {
       token = req.cookies.adminToken;
     }
 
+    console.log(token)
+
     // Authorization Header (optional)
     if (
       !token &&

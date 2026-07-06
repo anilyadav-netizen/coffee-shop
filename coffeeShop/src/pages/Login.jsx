@@ -94,22 +94,16 @@ const Login = () => {
         const result = await dispatch(loginUser({ email, password }));
 
         console.log("LOGIN RESULT", result);
-
         if (loginUser.fulfilled.match(result)) {
 
-            console.log("Login Success");
+            const profile = await dispatch(getProfile()).unwrap();
 
-            const profileResult = await dispatch(getProfile());
-
-            console.log("Profile Result", profileResult);
-
-            navigate("/");
-
-        } else {
-
-            console.log("Login Failed");
-
+            navigate("/", { replace: true });
         }
+
+        console.log("Login Failed");
+
+
     };
 
     // ✅ Display error from Redux or local
