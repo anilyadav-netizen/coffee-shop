@@ -43,7 +43,7 @@ export const getSingleProduct = createAsyncThunk(
     async (id, { rejectWithValue }) => {
         try {
             const { data } = await API.get(`/coffee/${id}`);
-            return data;
+            return data.data; // ✅ Return only product object
         } catch (error) {
             return rejectWithValue(
                 error.response?.data?.message || "Failed to fetch product"

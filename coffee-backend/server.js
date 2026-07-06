@@ -3,11 +3,14 @@ const express = require("express");
 const dns = require("dns");
 const cors = require("cors");
 const http = require("http");
+const cookies = require("cookie-parser")
 const { Server } = require("socket.io");
 
 const app = express();
 
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
+
+app.use(cookies())
 
 const Port = process.env.PORT || 5000;
 
@@ -34,6 +37,8 @@ const io = new Server(server, {
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   },
 });
+
+
 
 // Make io available everywhere
 app.set("io", io);

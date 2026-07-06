@@ -180,11 +180,10 @@ exports.verifyPayment = async (req, res) => {
 
     // Verify Razorpay Signature
     const generatedSignature = crypto
-    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-    .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-    .digest("hex");
-    
-    // console.log("Payment Table:", payment.table);
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest("hex");
+
     if (generatedSignature !== razorpay_signature) {
       return res.status(400).json({
         success: false,
@@ -301,15 +300,25 @@ exports.verifyPayment = async (req, res) => {
       });
     }
 
+    console.log(payment.user)
+
+    const today = new Date().toISOString().split("T")[0];
+
+
     // Clear Cart
-    await Cart.findOneAndUpdate(
-      { user: payment.user },
+     const cart = await Cart.findOneAndUpdate(
+      {
+        user: payment.user,
+        date: today,
+      },
       {
         $set: {
           items: [],
         },
       }
     );
+
+    console.log("Deleted Cart:", cart);
 
     return res.status(200).json({
       success: true,

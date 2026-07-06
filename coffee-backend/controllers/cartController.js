@@ -94,6 +94,8 @@ exports.getCart = async (req, res) => {
       date: today,
     }).populate("items.coffee");
 
+    console.log(cart)
+
     res.status(200).json({
       success: true,
       data: cart || {

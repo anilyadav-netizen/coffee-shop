@@ -97,7 +97,7 @@ const CartPage = () => {
 
     useEffect(() => {
         dispatch(getCart());
-    }, [dispatch]);
+    }, [dispatch])
 
     // ✅ Navbar force dark
     useEffect(() => {

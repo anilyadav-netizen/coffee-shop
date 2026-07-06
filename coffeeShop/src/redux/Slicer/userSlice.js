@@ -19,15 +19,38 @@ export const getAllUsers = createAsyncThunk(
     }
 );
 
+// ================= DELETE USER =================
+export const deleteUser = createAsyncThunk(
+    "users/deleteUser",
+    async (userId, { rejectWithValue }) => {
+        try {
+            const { data } = await API.delete(`/auth/delete/${userId}`);
+
+            console.log("✅ DELETE USER RESPONSE:", data);
+
+            return {
+                userId,
+                ...data,
+            };
+        } catch (error) {
+            console.error("❌ DELETE USER ERROR:", error);
+
+            return rejectWithValue(
+                error.response?.data?.message || "Failed to delete user"
+            );
+        }
+    }
+);
+
 // ================= SLICE =================
 const userSlice = createSlice({
     name: "users",
 
     initialState: {
         usersList: {
-            users: [],      // Array of user objects
-            count: 0,       // Total count
-            success: false  // API success status
+            users: [],
+            count: 0,
+            success: false
         },
         loading: false,
         error: null,
@@ -71,7 +94,25 @@ const userSlice = createSlice({
                     count: 0,
                     success: false
                 };
-            });
+            })
+            .addCase(deleteUser.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(deleteUser.fulfilled, (state, action) => {
+                state.loading = false;
+                state.usersList.users = state.usersList.users.filter(
+                    (user) => user._id !== action.payload.userId
+                );
+                state.usersList.count = state.usersList.users.length;
+                state.error = null;
+                console.log("🗑️ User deleted:", action.payload.userId);
+            })
+            .addCase(deleteUser.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+
     },
 });
 

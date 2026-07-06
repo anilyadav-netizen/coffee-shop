@@ -3,12 +3,9 @@ import { Link } from "react-router-dom";
 import {
   FaUsers,
   FaUserCheck,
-  FaUserSlash,
   FaUserPlus,
   FaSearch,
   FaEye,
-  FaEdit,
-  FaBan,
   FaTrashAlt,
   FaChevronLeft,
   FaChevronRight,
@@ -17,7 +14,7 @@ import {
 } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllUsers } from "../../redux/Slicer/userSlice";
+import { getAllUsers, deleteUser } from "../../redux/Slicer/userSlice";
 
 const StatCard = ({ icon, label, value, color }) => {
   return (
@@ -73,7 +70,6 @@ const Users = () => {
   // Calculate statistics from users
   const totalUsers = users.length;
   const activeUsers = users.filter(u => u.isAvailable === true).length;
-  const blockedUsers = users.filter(u => u.isAvailable === false).length;
   const newUsers = users.filter(u => {
     if (!u.createdAt) return false;
     const createdDate = new Date(u.createdAt);
@@ -92,7 +88,6 @@ const Users = () => {
 
     if (filter === "all") return matchesSearch;
     if (filter === "active") return matchesSearch && user.isAvailable === true;
-    if (filter === "blocked") return matchesSearch && user.isAvailable === false;
     if (filter === "new") {
       if (!user.createdAt) return false;
       const createdDate = new Date(user.createdAt);
@@ -116,8 +111,8 @@ const Users = () => {
     setShowViewModal(true);
   };
 
-  const handleDelete = (user) => {
-    setSelectedUser(user);
+  const handleDelete = (id) => {
+    setSelectedUser(users.find(user => user._id === id));
     setShowDeleteModal(true);
   };
 
@@ -133,19 +128,6 @@ const Users = () => {
       } catch (error) {
         toast.error(error?.message || "Failed to delete user");
       }
-    }
-  };
-
-  const handleBlockToggle = async (user) => {
-    const newStatus = user.isAvailable ? false : true;
-    try {
-      // Dispatch update action - you'll need to implement this in your slice
-      // await dispatch(updateUserStatus({ userId: user._id, isAvailable: newStatus })).unwrap();
-      toast.success(`${user.name} ${newStatus ? "unblocked" : "blocked"}`);
-      // Refresh users list after status change
-      dispatch(getAllUsers());
-    } catch (error) {
-      toast.error("Failed to update user status");
     }
   };
 
@@ -186,8 +168,8 @@ const Users = () => {
         </div>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Statistics Cards - Removed Blocked Users */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard
           icon={<FaUsers className="text-indigo-600 dark:text-indigo-400 text-xl" />}
           label="Total Users"
@@ -201,12 +183,6 @@ const Users = () => {
           color="bg-emerald-100 dark:bg-emerald-900/30"
         />
         <StatCard
-          icon={<FaUserSlash className="text-rose-600 dark:text-rose-400 text-xl" />}
-          label="Blocked Users"
-          value={blockedUsers}
-          color="bg-rose-100 dark:bg-rose-900/30"
-        />
-        <StatCard
           icon={<FaUserPlus className="text-amber-600 dark:text-amber-400 text-xl" />}
           label="New Users (7 days)"
           value={newUsers}
@@ -214,9 +190,9 @@ const Users = () => {
         />
       </div>
 
-      {/* Filter Chips */}
+      {/* Filter Chips - Removed "blocked" filter */}
       <div className="flex flex-wrap gap-2">
-        {["all", "active", "blocked", "new"].map((chip) => (
+        {["all", "active", "new"].map((chip) => (
           <FilterChip
             key={chip}
             label={chip.charAt(0).toUpperCase() + chip.slice(1)}
@@ -239,7 +215,6 @@ const Users = () => {
                 <th className="px-4 py-3 text-lg">Full Name</th>
                 <th className="px-4 py-3 hidden md:table-cell text-lg">Email</th>
                 <th className="px-4 py-3 hidden lg:table-cell text-lg">User ID</th>
-                <th className="px-4 py-3 text-lg">Status</th>
                 <th className="px-4 py-3 hidden sm:table-cell text-lg">Joined</th>
                 <th className="px-4 py-3 text-center text-lg">Actions</th>
               </tr>
@@ -247,7 +222,7 @@ const Users = () => {
             <tbody className="divide-y divide-gray-100 dark:divide-dark-border">
               {currentUsers.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="px-4 py-12 text-center text-gray-500 dark:text-dark-text">
+                  <td colSpan="6" className="px-4 py-12 text-center text-gray-500 dark:text-dark-text">
                     <div className="flex flex-col items-center gap-2">
                       <FaUsers className="text-4xl text-gray-300 dark:text-gray-600" />
                       <p>No users found</p>
@@ -269,48 +244,21 @@ const Users = () => {
                     <td className="px-4 py-3 text-gray-600 dark:text-dark-text hidden lg:table-cell text-base font-mono">
                       {user._id?.slice(-8) || "N/A"}
                     </td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2.5 py-1 rounded-full text-base font-medium ${
-                        user.isAvailable
-                          ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300"
-                          : "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300"
-                      }`}>
-                        {user.isAvailable ? "Active" : "Blocked"}
-                      </span>
-                    </td>
                     <td className="px-4 py-3 text-gray-500 dark:text-dark-text hidden sm:table-cell text-base">
                       {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-center gap-2 flex-wrap">
-                        <button 
-                          onClick={() => handleViewUser(user)} 
-                          className="p-1.5 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition" 
+                        <button
+                          onClick={() => handleViewUser(user)}
+                          className="p-1.5 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition"
                           title="View"
                         >
                           <FaEye size="18" />
                         </button>
-                        <Link 
-                          to={`/admin/update-user/${user._id}`} 
-                          className="p-1.5 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition" 
-                          title="Edit"
-                        >
-                          <FaEdit size="18" />
-                        </Link>
-                        <button 
-                          onClick={() => handleBlockToggle(user)} 
-                          className={`p-1.5 ${
-                            user.isAvailable
-                              ? "text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20" 
-                              : "text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
-                          } rounded-lg transition`} 
-                          title={user.isAvailable ? "Block" : "Unblock"}
-                        >
-                          <FaBan size="18" />
-                        </button>
-                        <button 
-                          onClick={() => handleDelete(user)} 
-                          className="p-1.5 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition" 
+                        <button
+                          onClick={() => handleDelete(user._id)}
+                          className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition"
                           title="Delete"
                         >
                           <FaTrashAlt size="17" />
@@ -356,10 +304,10 @@ const Users = () => {
       {/* View User Modal */}
       {showViewModal && selectedUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white dark:bg-dark-card rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-200 dark:border-dark-border">
+          <div className="bg-white dark:bg-dark-card rounded-2xl max-w-lg w-full shadow-2xl border border-gray-200 dark:border-dark-border">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-dark-border">
-              <h3 className="text-xl font-semibold text-gray-800 dark:text-dark-heading flex items-center gap-2">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-dark-border">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-dark-heading flex items-center gap-2">
                 <FaUsers className="text-indigo-600 dark:text-indigo-400" />
                 User Details
               </h3>
@@ -368,98 +316,73 @@ const Users = () => {
                   setShowViewModal(false);
                   setSelectedUser(null);
                 }}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-dark-bg rounded-lg transition text-gray-500 dark:text-dark-text"
+                className="p-1.5 hover:bg-gray-100 dark:hover:bg-dark-bg rounded-lg transition text-gray-500 dark:text-dark-text"
               >
-                <FaTimes size="20" />
+                <FaTimes size="18" />
               </button>
             </div>
 
             {/* User Info */}
-            <div className="p-6 space-y-4">
-              <div className="flex items-center gap-4 pb-4 border-b border-gray-100 dark:border-dark-border">
-                <div className="w-16 h-16 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-2xl font-bold">
+            <div className="p-4 space-y-3">
+              <div className="flex items-center gap-3 pb-3 border-b border-gray-100 dark:border-dark-border">
+                <div className="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-xl font-bold">
                   {selectedUser.name?.charAt(0).toUpperCase() || "U"}
                 </div>
                 <div>
-                  <h4 className="text-lg font-semibold text-gray-800 dark:text-dark-heading">
+                  <h4 className="font-semibold text-gray-800 dark:text-dark-heading">
                     {selectedUser.name || "N/A"}
                   </h4>
                   <p className="text-sm text-gray-500 dark:text-dark-text">
-                    {selectedUser.email || "No email provided"}
+                    {selectedUser.email || "No email"}
                   </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-2 text-sm">
                 <div>
-                  <label className="text-xs font-medium text-gray-500 dark:text-dark-text uppercase tracking-wider">User ID</label>
-                  <p className="text-sm text-gray-800 dark:text-dark-heading font-mono mt-1">
-                    {selectedUser._id || "N/A"}
+                  <label className="text-xs text-gray-500 dark:text-dark-text">User ID</label>
+                  <p className="text-gray-800 dark:text-dark-heading font-mono truncate">
+                    {selectedUser._id?.slice(-8) || "N/A"}
                   </p>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-500 dark:text-dark-text uppercase tracking-wider">Status</label>
-                  <p className="mt-1">
-                    <span className={`px-2.5 py-1 rounded-full text-sm font-medium ${
-                      selectedUser.isAvailable
-                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300"
-                        : "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300"
-                    }`}>
-                      {selectedUser.isAvailable ? "Active" : "Blocked"}
-                    </span>
+                  <label className="text-xs text-gray-500 dark:text-dark-text">Role</label>
+                  <p className="text-gray-800 dark:text-dark-heading capitalize">
+                    {selectedUser.role || "User"}
                   </p>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-500 dark:text-dark-text uppercase tracking-wider">Joined Date</label>
-                  <p className="text-sm text-gray-800 dark:text-dark-heading mt-1">
-                    {selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleString() : "N/A"}
+                  <label className="text-xs text-gray-500 dark:text-dark-text">Joined</label>
+                  <p className="text-gray-800 dark:text-dark-heading">
+                    {selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString() : "N/A"}
                   </p>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-500 dark:text-dark-text uppercase tracking-wider">Last Updated</label>
-                  <p className="text-sm text-gray-800 dark:text-dark-heading mt-1">
-                    {selectedUser.updatedAt ? new Date(selectedUser.updatedAt).toLocaleString() : "N/A"}
+                  <label className="text-xs text-gray-500 dark:text-dark-text">Phone</label>
+                  <p className="text-gray-800 dark:text-dark-heading">
+                    {selectedUser.phone || "N/A"}
                   </p>
                 </div>
               </div>
-
-              {/* Additional user info if available */}
-              {selectedUser.phone && (
-                <div>
-                  <label className="text-xs font-medium text-gray-500 dark:text-dark-text uppercase tracking-wider">Phone</label>
-                  <p className="text-sm text-gray-800 dark:text-dark-heading mt-1">
-                    {selectedUser.phone}
-                  </p>
-                </div>
-              )}
 
               {selectedUser.address && (
-                <div>
-                  <label className="text-xs font-medium text-gray-500 dark:text-dark-text uppercase tracking-wider">Address</label>
-                  <p className="text-sm text-gray-800 dark:text-dark-heading mt-1">
+                <div className="text-sm pt-1">
+                  <label className="text-xs text-gray-500 dark:text-dark-text">Address</label>
+                  <p className="text-gray-800 dark:text-dark-heading">
                     {selectedUser.address}
-                  </p>
-                </div>
-              )}
-
-              {selectedUser.role && (
-                <div>
-                  <label className="text-xs font-medium text-gray-500 dark:text-dark-text uppercase tracking-wider">Role</label>
-                  <p className="text-sm text-gray-800 dark:text-dark-heading mt-1 capitalize">
-                    {selectedUser.role}
                   </p>
                 </div>
               )}
             </div>
 
             {/* Modal Footer */}
-            <div className="flex justify-end p-6 border-t border-gray-200 dark:border-dark-border">
+            <div className="flex justify-end p-3 border-t border-gray-200 dark:border-dark-border">
               <button
                 onClick={() => {
                   setShowViewModal(false);
                   setSelectedUser(null);
                 }}
-                className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-dark-bg text-gray-700 dark:text-dark-text hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+                className="px-4 py-1.5 rounded-lg bg-gray-100 dark:bg-dark-bg text-gray-700 dark:text-dark-text hover:bg-gray-200 dark:hover:bg-gray-700 transition text-sm"
               >
                 Close
               </button>
@@ -469,12 +392,12 @@ const Users = () => {
       )}
 
       {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
+      {showDeleteModal && selectedUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-white dark:bg-dark-card rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-200 dark:border-dark-border">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-dark-heading">Confirm Delete</h3>
             <p className="text-gray-600 dark:text-dark-text mt-2">
-              Are you sure you want to delete <span className="font-medium">{selectedUser?.name}</span>? This action cannot be undone.
+              Are you sure you want to delete <span className="font-medium">{selectedUser.name}</span>? This action cannot be undone.
             </p>
             <div className="flex justify-end gap-3 mt-6">
               <button
@@ -485,7 +408,7 @@ const Users = () => {
               </button>
               <button
                 onClick={confirmDelete}
-                className="px-4 py-2 rounded-lg bg-rose-600 text-white hover:bg-rose-700 transition"
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition"
               >
                 Delete
               </button>

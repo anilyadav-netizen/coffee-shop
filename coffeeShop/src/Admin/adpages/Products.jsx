@@ -103,7 +103,6 @@ const Products = () => {
                             <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Name</th>
                             <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Price</th>
                             <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Stock</th>
-                            <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Status</th>
                             <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Actions</th>
                         </tr>
                     </thead>
@@ -139,17 +138,6 @@ const Products = () => {
                                                 }`}
                                         >
                                             {product.stock}
-                                        </span>
-                                    </td>
-
-                                    <td className="p-2 md:p-4">
-                                        <span
-                                            className={`px-2 py-1 text-sm font-medium rounded-full ${product.status === "active"
-                                                ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400"
-                                                : "bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400"
-                                                }`}
-                                        >
-                                            {product.status === "active" ? "Active" : "Inactive"}
                                         </span>
                                     </td>
 
