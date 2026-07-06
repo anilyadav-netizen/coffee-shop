@@ -189,13 +189,14 @@ io.on("connection", (socket) => {
 app.use(express.json({ limit: "500mb" }));
 app.use(express.urlencoded({ limit: "500mb", extended: true }));
 
+const cors = require("cors");
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    origin: "http://localhost:5173", // frontend URL
+    credentials: true,
   })
 );
-
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/coffee", coffeeRoutes);

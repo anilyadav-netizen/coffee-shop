@@ -11,12 +11,18 @@ const generateToken = (id) => {
   );
 };
 
+// Cookie Options
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production", // true on https
+  sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 Days
+};
+
 // Register
 const register = async (req, res) => {
   try {
     const { name, mobile, email, password } = req.body;
-
-    // g malik 
 
     const existingUser = await User.findOne({ email });
 
@@ -38,9 +44,11 @@ const register = async (req, res) => {
 
     const token = generateToken(user._id);
 
+    // Save Token in Cookie
+    res.cookie("token", token, cookieOptions);
+
     return res.status(201).json({
       message: "User created successfully",
-      token,
       user: {
         _id: user._id,
         name: user.name,
@@ -68,10 +76,7 @@ const login = async (req, res) => {
       });
     }
 
-    const isMatch = await bcryptjs.compare(
-      password,
-      user.password
-    );
+    const isMatch = await bcryptjs.compare(password, user.password);
 
     if (!isMatch) {
       return res.status(400).json({
@@ -79,16 +84,26 @@ const login = async (req, res) => {
       });
     }
 
-    const token = generateToken(user._id, user.role, user.email, user.name);
+    const token = generateToken(user._id);
+
+    // Role based cookie name
+    const cookieName = user.role === "admin" ? "adminToken" : "token";
+
+    // Optional: Clear opposite cookie
+    res.clearCookie(cookieName === "adminToken" ? "token" : "adminToken");
+
+    // Save Token in Cookie
+    res.cookie(cookieName, token, cookieOptions);
 
     return res.status(200).json({
       message: "Login successful",
-      token,
+      role: user.role,
       user: {
         _id: user._id,
         name: user.name,
         mobile: user.mobile,
         email: user.email,
+        role: user.role,
       },
     });
   } catch (err) {
@@ -101,8 +116,18 @@ const login = async (req, res) => {
 // Logout
 const logout = async (req, res) => {
   try {
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite:
+        process.env.NODE_ENV === "production" ? "None" : "Lax",
+    };
+
+    res.clearCookie("token", cookieOptions);
+    res.clearCookie("adminToken", cookieOptions);
+
     return res.status(200).json({
-      message: "Logout successful. Remove token from client.",
+      message: "Logout successful",
     });
   } catch (err) {
     return res.status(500).json({
@@ -110,6 +135,7 @@ const logout = async (req, res) => {
     });
   }
 };
+
 
 // Get Profile
 const getProfile = async (req, res) => {
