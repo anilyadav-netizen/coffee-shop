@@ -16,8 +16,7 @@ const AdminProfile = () => {
   const dispatch = useDispatch();
 
   const { user, loading } = useSelector((state) => state.auth);
-  console.log("ADMIN PROFILE =", user);
-  console.log("LocalStorage User:", JSON.parse(localStorage.getItem("user")));
+
 
   const [isEditing, setIsEditing] = useState(false);
 

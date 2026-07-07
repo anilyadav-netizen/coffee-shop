@@ -147,11 +147,10 @@ const FilterChip = ({ label, active, onClick }) => {
   return (
     <button
       onClick={onClick}
-      className={`px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-200 ${
-        active
+      className={`px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-200 ${active
           ? "bg-indigo-600 text-white shadow-md shadow-indigo-200 dark:shadow-indigo-900/30"
           : "bg-gray-100 dark:bg-dark-card text-gray-700 dark:text-dark-text hover:bg-gray-200 dark:hover:bg-gray-700"
-      }`}
+        }`}
     >
       {label}
     </button>
@@ -278,9 +277,8 @@ const CreateRiderModal = ({ isOpen, onClose, onSave }) => {
               value={formData.name}
               onChange={handleChange}
               placeholder="Enter full name"
-              className={`w-full px-4 py-2.5 bg-white dark:bg-dark-bg border ${
-                errors.name ? "border-rose-500" : "border-gray-200 dark:border-dark-border"
-              } rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-gray-800 dark:text-dark-heading placeholder-gray-400 dark:placeholder-gray-500`}
+              className={`w-full px-4 py-2.5 bg-white dark:bg-dark-bg border ${errors.name ? "border-rose-500" : "border-gray-200 dark:border-dark-border"
+                } rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-gray-800 dark:text-dark-heading placeholder-gray-400 dark:placeholder-gray-500`}
             />
             {errors.name && <p className="mt-1 text-sm text-rose-500">{errors.name}</p>}
           </div>
@@ -297,9 +295,8 @@ const CreateRiderModal = ({ isOpen, onClose, onSave }) => {
               value={formData.email}
               onChange={handleChange}
               placeholder="Enter email address"
-              className={`w-full px-4 py-2.5 bg-white dark:bg-dark-bg border ${
-                errors.email ? "border-rose-500" : "border-gray-200 dark:border-dark-border"
-              } rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-gray-800 dark:text-dark-heading placeholder-gray-400 dark:placeholder-gray-500`}
+              className={`w-full px-4 py-2.5 bg-white dark:bg-dark-bg border ${errors.email ? "border-rose-500" : "border-gray-200 dark:border-dark-border"
+                } rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-gray-800 dark:text-dark-heading placeholder-gray-400 dark:placeholder-gray-500`}
             />
             {errors.email && <p className="mt-1 text-sm text-rose-500">{errors.email}</p>}
           </div>
@@ -316,9 +313,8 @@ const CreateRiderModal = ({ isOpen, onClose, onSave }) => {
               value={formData.phone}
               onChange={handleChange}
               placeholder="Enter phone number"
-              className={`w-full px-4 py-2.5 bg-white dark:bg-dark-bg border ${
-                errors.phone ? "border-rose-500" : "border-gray-200 dark:border-dark-border"
-              } rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-gray-800 dark:text-dark-heading placeholder-gray-400 dark:placeholder-gray-500`}
+              className={`w-full px-4 py-2.5 bg-white dark:bg-dark-bg border ${errors.phone ? "border-rose-500" : "border-gray-200 dark:border-dark-border"
+                } rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-gray-800 dark:text-dark-heading placeholder-gray-400 dark:placeholder-gray-500`}
             />
             {errors.phone && <p className="mt-1 text-sm text-rose-500">{errors.phone}</p>}
           </div>
@@ -608,16 +604,15 @@ const Riders = () => {
                           <FaEye size={18} />
                         </Link>
                         <Link to={`/admin/update-rider/${rider.id}`} className="p-1.5 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition" title="Edit">
-                          <FaEdit size={18}/>
+                          <FaEdit size={18} />
                         </Link>
                         <button
                           onClick={() => handleBlockToggle(rider)}
-                          className={`p-1.5 ${
-                            rider.accountStatus === "active" 
-                              ? "text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20" 
+                          className={`p-1.5 ${rider.accountStatus === "active"
+                              ? "text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20"
                               : "text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
-                          } rounded-lg transition`}
-                          title={rider.accountStatus === "active" ? "Block" : "Unblock"}a 
+                            } rounded-lg transition`}
+                          title={rider.accountStatus === "active" ? "Block" : "Unblock"} a
                         >
                           <FaBan size={18} />
                         </button>

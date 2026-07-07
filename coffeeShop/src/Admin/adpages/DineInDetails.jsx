@@ -714,13 +714,11 @@ const DineInDetails = () => {
                                 <span className="text-sm text-[#64748B] dark:text-[#94A3B8]">Paid Amount</span>
                                 <span className="text-sm text-[#0F172A] dark:text-white font-bold flex items-center gap-0.5">
                                     <FaRupeeSign className="text-xs" />
-                                    {order.payment?.amount || order.amount || 0}
+                                     {Math.round((order.amount || 0) * 1.05)}
                                 </span>
                             </div>
                         </div>
                     </div>
-
-                  
                 </div>
             </div>
 

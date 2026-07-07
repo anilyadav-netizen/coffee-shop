@@ -144,7 +144,6 @@ const CartPage = () => {
     useEffect(() => {
         if (orderType === 'delivery' && addresses.length > 0 && !selectedAddress) {
             const defaultAddress = addresses.find(addr => addr.isDefault) || addresses[0];
-            console.log("📦 Auto-selected default address:", defaultAddress);
             setSelectedAddress(defaultAddress);
         }
     }, [orderType, addresses, selectedAddress]);

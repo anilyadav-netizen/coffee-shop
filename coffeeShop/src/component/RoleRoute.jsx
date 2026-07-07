@@ -6,8 +6,6 @@ const RoleRoute = ({ children, allowedRoles }) => {
         (state) => state.auth
     );
 
-    console.log(user)
-
     // Profile load hone ka wait karo
     if (loading) {
         return <div>Loading...</div>;

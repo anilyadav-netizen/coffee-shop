@@ -17,6 +17,7 @@ const Sidebar = ({
     // Navigation icons mapping
     const getNavIcon = (name) => {
         const icons = {
+           
             'Home': Home,
             'Menu': Coffee,
             'About': Users,

@@ -10,8 +10,6 @@ export const getTables = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const { data } = await API.get("/tables");
-            console.log("✅ GET TABLES RESPONSE:", data);
-            // data = { success: true, tables: [...] }
             return data;
         } catch (error) {
             console.error("❌ GET TABLES ERROR:", error);
@@ -130,8 +128,6 @@ const tableSlice = createSlice({
                     success: action.payload.success || false
                 };
                 state.error = null;
-                console.log("📦 Tables stored in Redux:", state.tables);
-                console.log("🪑 Tables array:", state.tables.tables);
             })
             .addCase(getTables.rejected, (state, action) => {
                 state.loading = false;

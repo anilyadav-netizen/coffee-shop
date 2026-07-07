@@ -52,11 +52,8 @@ export const getProfile = createAsyncThunk(
     "auth/getProfile",
     async (_, thunkAPI) => {
         try {
-            console.log("STEP 1");
 
             const { data } = await API.get("/auth/profile");
-
-            console.log("STEP 3", data);
 
             return data.user;
         } catch (error) {

@@ -637,10 +637,7 @@ const MenuPage = () => {
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <div className="flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-xs font-medium text-green-400 bg-green-500/20  px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full flex-shrink-0">
-                                                        <TrendingUp size={10} className="sm:w-3 sm:h-3" />
-                                                        {item.points || 0} Pts
-                                                    </div>
+                                                   
                                                 </div>
 
                                                 {/* Add to Cart Button */}

@@ -35,7 +35,7 @@ import { useNavigate } from 'react-router-dom';
 // --- Reusable Components with Glass Effect ---
 
 const GlassCard = ({ children, className = '' }) => (
-    <div className={`bg-white/20 backdrop-blur-md rounded-2xl shadow-md shadow-black/5 border border-white/30 p-6 transition-all duration-500 hover:shadow-lg hover:-translate-y-0.5 ${className}`}>
+    <div className={`bg-white/20 backdrop-blur-md rounded-2xl shadow-md shadow-black/5 border border-white/30 p-3 transition-all duration-500 hover:shadow-lg hover:-translate-y-0.5 ${className}`}>
         {children}
     </div>
 );
@@ -71,7 +71,6 @@ const getAddressIcon = (type) => {
 const Profile = () => {
     const dispatch = useDispatch();
     const { user, isLoading, isAuthenticated } = useSelector((state) => state.auth);
-    console.log("USER PROFILE =", user);
     const { orders, loading: ordersLoading } = useSelector((state) => state.payment);
     const { items: wishlistItems, loading: wishlistLoading } = useSelector((state) => state.wishlist);
     const { loading: addressDeleting } = useSelector((state) => state.address);
@@ -340,7 +339,7 @@ const Profile = () => {
     };
 
     return (
-        <div className="min-h-screen relative px-4 py-8 pt-20 sm:pt-24 overflow-hidden">
+        <div className="min-h-screen relative px-2 py-8 pt-20 sm:pt-24 overflow-hidden">
             {/* Glass Background - Same as About Page */}
             <div className="absolute inset-0 -z-10">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />
@@ -356,7 +355,7 @@ const Profile = () => {
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto relative z-10">
+            <div className="max-w-7xl mx-auto relative z-10 mt-3">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                     {/* --- Left Sidebar Profile Card --- */}
@@ -439,7 +438,7 @@ const Profile = () => {
                         <GlassCard>
                             <div className="flex items-center justify-between mb-4">
                                 <div>
-                                    <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                                    <h3 className="text-sm md:text-lg font-semibold text-gray-800 flex items-center gap-2">
                                         <MapPin className="w-5 h-5 text-[#0D7C53]" />
                                         Saved Addresses
                                     </h3>
@@ -461,7 +460,7 @@ const Profile = () => {
                                     {addresses.map((address) => (
                                         <div
                                             key={address._id || address.id}
-                                            className={`bg-white/40 backdrop-blur-sm rounded-xl p-4 border transition-all hover:shadow-md ${
+                                            className={`bg-white/40 backdrop-blur-sm rounded-xl p-2 border transition-all hover:shadow-md ${
                                                 address.isDefault
                                                     ? "border-[#0D7C53]/40 bg-[#0D7C53]/5"
                                                     : "border-white/30"
@@ -859,7 +858,6 @@ const Profile = () => {
                                 </button>
                             </div>
                         </GlassCard>
-
                     </div>
                 </div>
             </div>

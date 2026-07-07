@@ -50,43 +50,43 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
       {
         name: "Products",
         path: "/admin/products",
-        icon: <FaCoffee size={18} />,
+        icon: <FaCoffee size={20} />,
         roles: ["admin"]
       },
       {
         name: "Category",
         path: "/admin/category",
-        icon: <FaTags size={18} />,
+        icon: <FaTags size={20} />,
         roles: ["admin"]
       },
       {
         name: "Tables",
         path: "/admin/tables",
-        icon: <FaChair size={18} />,
+        icon: <FaChair size={20} />,
         roles: ["admin"]
       },
       {
         name: "Dine In Orders",
         path: "/admin/orders/dine-in",
-        icon: <GiKnifeFork size={18} />,
+        icon: <GiKnifeFork size={20} />,
         roles: ["admin", "rider"]
       },
       {
         name: "Delivery Orders",
         path: "/admin/orders/delivery",
-        icon: <FaTruck size={18} />,
+        icon: <FaTruck size={20} />,
         roles: ["admin", "rider"]
       },
       {
         name: "Rider",
         path: "/admin/riders",
-        icon: <FaUserCircle size={18} />,
+        icon: <FaUserCircle size={20} />,
         roles: ["admin"]
       },
       {
         name: "Users",
         path: "/admin/users",
-        icon: <FaUsers size={18} />,
+        icon: <FaUsers size={20} />,
         roles: ["admin"]
       },
     ];

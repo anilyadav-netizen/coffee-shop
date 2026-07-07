@@ -7,7 +7,6 @@ export const getAllUsers = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const { data } = await API.get("/auth/all");
-            console.log("✅ GET ALL USERS RESPONSE:", data);
             // data = { success: true, count: 6, users: [...] }
             return data;
         } catch (error) {
@@ -83,8 +82,7 @@ const userSlice = createSlice({
                     success: action.payload.success || false
                 };
                 state.error = null;
-                console.log("📦 Users stored in Redux:", state.usersList);
-                console.log("👥 Users array:", state.usersList.users);
+              
             })
             .addCase(getAllUsers.rejected, (state, action) => {
                 state.loading = false;

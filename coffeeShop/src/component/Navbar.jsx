@@ -162,7 +162,10 @@ const Navbar = () => {
             <Sidebar
                 isOpen={isMenuOpen}
                 onClose={() => setIsMenuOpen(false)}
-                navItems={navItems}
+                navItems={[
+                    ...(user ? [{ name: "My Profile", path: "/profile" }] : []),
+                    ...navItems,
+                ]}
                 handleWishlistClick={handleWishlistClick}
                 handleCartClick={handleCartClick}
                 wishlistCount={wishlistCount}
