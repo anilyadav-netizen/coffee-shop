@@ -306,7 +306,7 @@ exports.verifyPayment = async (req, res) => {
 
 
     // Clear Cart
-     const cart = await Cart.findOneAndUpdate(
+    const cart = await Cart.findOneAndUpdate(
       {
         user: payment.user,
         date: today,
@@ -398,6 +398,153 @@ exports.getUserOrders = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: error.message,
+    });
+  }
+};
+
+
+exports.getPurchaseAnalytics = async (req, res) => {
+  try {
+    const now = new Date();
+
+    // Today
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    // Last 7 Days
+    const last7Days = new Date();
+    last7Days.setDate(now.getDate() - 7);
+
+    // Last 15 Days
+    const last15Days = new Date();
+    last15Days.setDate(now.getDate() - 15);
+
+    // Current Month
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const [
+      todayPurchase,
+      last7Purchase,
+      last15Purchase,
+      monthPurchase,
+      totalPurchase,
+    ] = await Promise.all([
+      Payment.aggregate([
+        {
+          $match: {
+            status: "paid",
+            createdAt: { $gte: todayStart },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalAmount: { $sum: "$amount" },
+            totalOrders: { $sum: 1 },
+          },
+        },
+      ]),
+
+      Payment.aggregate([
+        {
+          $match: {
+            status: "paid",
+            createdAt: { $gte: last7Days },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalAmount: { $sum: "$amount" },
+            totalOrders: { $sum: 1 },
+          },
+        },
+      ]),
+
+      Payment.aggregate([
+        {
+          $match: {
+            status: "paid",
+            createdAt: { $gte: last15Days },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalAmount: { $sum: "$amount" },
+            totalOrders: { $sum: 1 },
+          },
+        },
+      ]),
+
+      Payment.aggregate([
+        {
+          $match: {
+            status: "paid",
+            createdAt: { $gte: monthStart },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalAmount: { $sum: "$amount" },
+            totalOrders: { $sum: 1 },
+          },
+        },
+      ]),
+
+      Payment.aggregate([
+        {
+          $match: {
+            status: "paid",
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalAmount: { $sum: "$amount" },
+            totalOrders: { $sum: 1 },
+          },
+        },
+      ]),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        today: todayPurchase[0] || {
+          totalAmount: 0,
+          totalOrders: 0,
+        },
+
+        last7Days: last7Purchase[0] || {
+          totalAmount: 0,
+          totalOrders: 0,
+        },
+
+        last15Days: last15Purchase[0] || {
+          totalAmount: 0,
+          totalOrders: 0,
+        },
+
+        currentMonth: monthPurchase[0] || {
+          totalAmount: 0,
+          totalOrders: 0,
+        },
+
+        overall: totalPurchase[0] || {
+          totalAmount: 0,
+          totalOrders: 0,
+        },
+      },
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch purchase analytics",
+      error: error.message,
     });
   }
 };

@@ -8,6 +8,7 @@ const {
   verifyPayment,
   getMyOrders,
   getUserOrders,
+  getPurchaseAnalytics,
 } = require("../controllers/paymentController");
 
 // Create Razorpay Order
@@ -30,6 +31,9 @@ router.get(
   protect,
   getUserOrders
 );
+
+router.get("/analytics", protect, getPurchaseAnalytics);
+
 
 
 module.exports = router;
