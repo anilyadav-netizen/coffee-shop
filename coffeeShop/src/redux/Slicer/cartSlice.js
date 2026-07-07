@@ -8,7 +8,6 @@ export const getCart = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const { data } = await API.get("/cart");
-            console.log("✅ GET CART response:", data);
             return data;
         } catch (error) {
             console.error("❌ GET CART error:", error);
@@ -199,10 +198,6 @@ const cartSlice = createSlice({
                         sum + item.quantity * (item.coffee?.price || 0),
                     0
                 );
-                console.log("📊 Cart loaded:", {
-                    totalItems: state.totalItems,
-                    totalPrice: state.totalPrice
-                });
             })
             .addCase(getCart.rejected, (state, action) => {
                 state.loading = false;

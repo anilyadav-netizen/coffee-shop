@@ -76,7 +76,7 @@ const Hero = () => {
                     {/* Main Heading with Animation */}
                     <h1 className="text-4xl sm:text-5xl md:text-8xl font-bold text-white mb-2 md:mb-6 leading-tight animate-fade-in-up">
                         Discover Your
-                        <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#0D7C53] to-green-400">
+                        <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#15a872] to-green-500">
                             Perfect Cup
                         </span>
                     </h1>

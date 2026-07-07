@@ -94,7 +94,7 @@ const Journey = () => {
                     <h2 className="text-3xl md:text-5xl font-bold text-white">
                         {sectionData.title.split(' ').map((word, index) => (
                             word === sectionData.titleHighlight ?
-                                <span key={index} className="text-[#0D7C53]">{word} </span> :
+                                <span key={index} className="text-[#10be7f]">{word} </span> :
                                 <span key={index}>{word} </span>
                         ))}
                     </h2>

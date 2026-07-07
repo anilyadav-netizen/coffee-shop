@@ -7,8 +7,7 @@ export const loginUser = createAsyncThunk(
     async (userData, thunkAPI) => {
         try {
             const { data } = await API.post("/auth/login", userData);
-            localStorage.setItem("token", data.token);
-            localStorage.setItem("user", JSON.stringify(data.user));
+            console.log("LOGIN RESPONSE =", data);
             return data;
         } catch (error) {
             return thunkAPI.rejectWithValue(
@@ -24,8 +23,6 @@ export const registerUser = createAsyncThunk(
     async (userData, thunkAPI) => {
         try {
             const { data } = await API.post("/auth/register", userData);
-            localStorage.setItem("token", data.token);
-            localStorage.setItem("user", JSON.stringify(data.user));
             return data;
         } catch (error) {
             return thunkAPI.rejectWithValue(
@@ -36,15 +33,16 @@ export const registerUser = createAsyncThunk(
 );
 
 /* ---------------- LOGOUT ---------------- */
-export const logoutUser = createAsyncThunk(
+export const logout = createAsyncThunk(
     "auth/logout",
     async (_, thunkAPI) => {
         try {
-            localStorage.removeItem("token");
-            localStorage.removeItem("user");
+            await API.post("/auth/logout");
             return true;
         } catch (error) {
-            return thunkAPI.rejectWithValue("Logout Failed");
+            return thunkAPI.rejectWithValue(
+                error.response?.data?.message || "Logout Failed"
+            );
         }
     }
 );
@@ -54,26 +52,28 @@ export const getProfile = createAsyncThunk(
     "auth/getProfile",
     async (_, thunkAPI) => {
         try {
+
             const { data } = await API.get("/auth/profile");
+
             return data.user;
         } catch (error) {
+            console.log("PROFILE ERROR =", error.response);
+            console.log("STATUS =", error.response?.status);
+            console.log("DATA =", error.response?.data);
+
             return thunkAPI.rejectWithValue(
-                error.response?.data?.message || "Failed to fetch profile"
+                error.response?.data?.message || "Failed"
             );
         }
     }
 );
-
-// ✅ ADD THIS - Alias for logout
-export const logout = logoutUser;
-
 /* ---------------- INITIAL STATE ---------------- */
 const initialState = {
     user: JSON.parse(localStorage.getItem("user")) || null,
-    token: localStorage.getItem("token") || null,
-    isAuthenticated: !!localStorage.getItem("token"),
+    isAuthenticated: !!localStorage.getItem("user"),
     loading: false,
     error: null,
+    authChecked: false,
 };
 
 /* ---------------- SLICE ---------------- */
@@ -83,20 +83,29 @@ const authSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
+
             /* ===== LOGIN ===== */
             .addCase(loginUser.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
             .addCase(loginUser.fulfilled, (state, action) => {
+                console.log("LOGIN FULFILLED USER =", action.payload.user);
+
                 state.loading = false;
                 state.user = action.payload.user;
-                state.token = action.payload.token;
                 state.isAuthenticated = true;
+                state.error = null;
+
+                localStorage.setItem("user", JSON.stringify(action.payload.user));
+
+                console.log("LOCAL STORAGE AFTER LOGIN =", JSON.parse(localStorage.getItem("user")));
             })
             .addCase(loginUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
+                state.user = null;
+                state.isAuthenticated = false;
             })
 
             /* ===== REGISTER ===== */
@@ -107,8 +116,8 @@ const authSlice = createSlice({
             .addCase(registerUser.fulfilled, (state, action) => {
                 state.loading = false;
                 state.user = action.payload.user;
-                state.token = action.payload.token;
                 state.isAuthenticated = true;
+                state.error = null;
             })
             .addCase(registerUser.rejected, (state, action) => {
                 state.loading = false;
@@ -116,31 +125,35 @@ const authSlice = createSlice({
             })
 
             /* ===== LOGOUT ===== */
-            .addCase(logoutUser.fulfilled, (state) => {
+            .addCase(logout.fulfilled, (state) => {
                 state.user = null;
-                state.token = null;
                 state.isAuthenticated = false;
                 state.loading = false;
                 state.error = null;
+
+                localStorage.removeItem("user");
             })
+
             /* ===== GET PROFILE ===== */
             .addCase(getProfile.pending, (state) => {
                 state.loading = true;
-                state.error = null;
             })
-
             .addCase(getProfile.fulfilled, (state, action) => {
-                state.loading = false;
                 state.user = action.payload;
                 state.isAuthenticated = true;
+                state.loading = false;
+                state.authChecked = true;
 
-                // LocalStorage bhi update kar do
                 localStorage.setItem("user", JSON.stringify(action.payload));
             })
 
-            .addCase(getProfile.rejected, (state, action) => {
+            .addCase(getProfile.rejected, (state) => {
+                state.user = null;
+                state.isAuthenticated = false;
                 state.loading = false;
-                state.error = action.payload;
+                state.authChecked = true;
+
+                localStorage.removeItem("user");
             })
     },
 });

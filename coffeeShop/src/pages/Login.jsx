@@ -25,7 +25,7 @@ const Login = () => {
     const navigate = useNavigate();
 
     // ✅ Redux state se loading aur error le rahe hain
-    const { loading, error, isAuthenticated } = useSelector(
+    const { loading, error, state, user, isAuthenticated } = useSelector(
         (state) => state.auth
     );
 
@@ -43,8 +43,12 @@ const Login = () => {
 
     // ✅ Check if already logged in
     useEffect(() => {
-        if (isAuthenticated) {
-            navigate(from, { replace: true });
+        if (isAuthenticated && user) {
+            if (user.role === "admin") {
+                navigate("/admin", { replace: true });
+            } else {
+                navigate(from === "/" ? "/" : from, { replace: true });
+            }
         }
     }, [isAuthenticated, navigate, from]);
 
@@ -93,23 +97,27 @@ const Login = () => {
         // Login API
         const result = await dispatch(loginUser({ email, password }));
 
-        console.log("LOGIN RESULT", result);
+        console.log("LOGIN RESULT =", result);
 
         if (loginUser.fulfilled.match(result)) {
 
-            console.log("Login Success");
+            // Latest profile fetch
+            const profile = await dispatch(getProfile()).unwrap();
 
-            const profileResult = await dispatch(getProfile());
+            console.log("PROFILE =", profile);
 
-            console.log("Profile Result", profileResult);
-
-            navigate("/");
+            // ✅ Role based redirect
+            if (profile.role === "admin") {
+                navigate("/admin", { replace: true });
+            } else {
+                navigate("/", { replace: true });
+            }
 
         } else {
-
             console.log("Login Failed");
-
         }
+
+
     };
 
     // ✅ Display error from Redux or local
@@ -245,11 +253,7 @@ const Login = () => {
                         </div>
 
                         {/* Error/Success Messages */}
-                        {displayError && (
-                            <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 text-sm text-red-500">
-                                {displayError}
-                            </div>
-                        )}
+                        
                         {isAuthenticated && (
                             <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-3 text-sm text-green-600">
                                 Login successful! Redirecting...

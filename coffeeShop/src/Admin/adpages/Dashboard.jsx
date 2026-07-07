@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import { getProducts } from "../../redux/Slicer/adminProductSlice";
 import { getCategories } from "../../redux/Slicer/categorySlice";
-import { getMyOrders } from "../../redux/Slicer/paymentSlice";
+import { getAllOrders } from "../../redux/Slicer/adminOrder";
 import { useEffect, useState } from "react";
 import {
     FiPackage,
@@ -24,7 +24,7 @@ const Dashboard = () => {
     const dispatch = useDispatch();
     const { products } = useSelector((state) => state.adminProducts);
     const { categories } = useSelector((state) => state.category);
-    const { orders, loading } = useSelector((state) => state.payment);
+    const { orders, loading } = useSelector((state) => state.adminOrder); // Changed to adminOrders
     const [stats, setStats] = useState({
         totalRevenue: 0,
         todayRevenue: 0,
@@ -44,7 +44,7 @@ const Dashboard = () => {
     useEffect(() => {
         dispatch(getProducts());
         dispatch(getCategories());
-        dispatch(getMyOrders());
+        dispatch(getAllOrders()); // Changed to getAllOrders
     }, [dispatch]);
 
     useEffect(() => {
@@ -82,7 +82,6 @@ const Dashboard = () => {
 
             // Get recent orders (last 5)
             const recentOrders = orders
-                // .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
                 .slice(0, 5)
                 .map(order => ({
                     id: order._id?.slice(-6) || 'N/A',
@@ -424,10 +423,10 @@ const Dashboard = () => {
                                     </div>
                                 </div>
                                 <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${item.growth > 0
-                                        ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400'
-                                        : item.growth < 0
-                                            ? 'bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400'
-                                            : 'bg-gray-50 dark:bg-gray-950/30 text-gray-600 dark:text-gray-400'
+                                    ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400'
+                                    : item.growth < 0
+                                        ? 'bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400'
+                                        : 'bg-gray-50 dark:bg-gray-950/30 text-gray-600 dark:text-gray-400'
                                     }`}>
                                     {item.growth > 0 ? <FiArrowUp className="w-3 h-3" /> : item.growth < 0 ? <FiArrowDown className="w-3 h-3" /> : null}
                                     {item.growth !== 0 ? Math.abs(item.growth) + '%' : '—'}
@@ -444,6 +443,7 @@ const Dashboard = () => {
                         Recent Orders
                     </h3>
                     <div className="mt-4 space-y-3">
+                        console.log(recentOrders);
                         {stats.recentOrders.map((order, idx) => (
                             <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-[#F8FAFC] dark:bg-dark-bg/50">
                                 <div>

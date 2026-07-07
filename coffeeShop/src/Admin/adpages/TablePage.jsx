@@ -417,7 +417,6 @@ const TablePage = () => {
               ? Array.from({ length: 6 }).map((_, index) => <SkeletonCard key={index} />)
               : currentTables.map((table) => {
                   const tableId = getTableId(table);
-                  console.log(`Table ${table.tableNumber} ID:`, tableId);
                   return (
                     <div
                       key={tableId || table.tableNumber}

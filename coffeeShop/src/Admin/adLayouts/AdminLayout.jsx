@@ -80,7 +80,7 @@ const AdminLayout = () => {
                             <FaBars className="text-[#0F172A] dark:text-dark-heading text-base sm:text-xl" />
                         </button>
 
-                        <Link to="/admin" className="text-sm sm:text-base md:text-xl font-semibold text-[#0F172A] dark:text-dark-heading truncate">
+                        <Link to="/admin" className="text-lg sm:text-xl md:text-2xl font-semibold text-[#0F172A] dark:text-dark-heading truncate">
                             Admin Panel
                         </Link>
                     </div>

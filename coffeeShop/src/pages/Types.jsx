@@ -18,7 +18,6 @@ const Types = () => {
     useEffect(() => {
         dispatch(getCategories())
     }, [dispatch])
-    console.log(categories)
 
     const navigate = useNavigate();
     const handleCategoryClick = (category) => {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   FaUserCircle,
   FaEnvelope,
@@ -8,124 +8,158 @@ import {
   FaCamera,
   FaMapMarkerAlt,
   FaCalendarAlt,
-  FaClipboardList,
-  FaStar,
-  FaCheckCircle,
 } from "react-icons/fa";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { getProfile } from "../../redux/Slicer/authSlice";
 
 const AdminProfile = () => {
-  const { user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+
+  const { user, loading } = useSelector((state) => state.auth);
+
+
   const [isEditing, setIsEditing] = useState(false);
 
+  // useEffect(() => {
+  //   dispatch(getProfile());
+  // }, [dispatch]);
 
-  const adminInfo = [
-    {
-      label: "Full Name",
-      value: user?.name || "Admin User",
-      icon: FaUserCircle,
-    },
-    {
-      label: "Email Address",
-      value: user?.email || "admin@coffee.com",
-      icon: FaEnvelope,
-    },
-    {
-      label: "Phone Number",
-      value: user?.mobile || "+1 (555) 123-4567",
-      icon: FaPhone,
-    },
-    {
-      label: "Role",
-      value: user?.role || "Super Admin",
-      icon: FaUserShield,
-    },
-    {
-      label: "Location",
-      value: "New York, USA",
-      icon: FaMapMarkerAlt,
-    },
-    {
-      label: "Member Since",
-      value: "January 2024",
-      icon: FaCalendarAlt,
-    },
-  ];
+  const adminInfo = useMemo(
+    () => [
+      {
+        label: "Full Name",
+        value: user?.name || "-",
+        icon: FaUserCircle,
+      },
+      {
+        label: "Email Address",
+        value: user?.email || "-",
+        icon: FaEnvelope,
+      },
+      {
+        label: "Phone Number",
+        value:
+          user?.mobile ||
+          user?.addresses?.[0]?.phone ||
+          user?.addresses?.[0]?.secondPhone ||
+          "-",
+        icon: FaPhone,
+      },
+      {
+        label: "Role",
+        value: user?.role || "-",
+        icon: FaUserShield,
+      },
+      {
+        label: "Location",
+        value:
+          user?.addresses?.[0]?.city ||
+          user?.addresses?.[0]?.address ||
+          "-",
+        icon: FaMapMarkerAlt,
+      },
+      {
+        label: "Member Since",
+        value: user?.createdAt
+          ? new Date(user.createdAt).toLocaleDateString()
+          : "-",
+        icon: FaCalendarAlt,
+      },
+    ],
+    [user]
+  );
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[70vh] text-xl font-semibold">
+        Loading Profile...
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
-      {/* Header Section */}
-      <div className="mb-8">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-[#0F172A] dark:text-white">
-              Profile Settings
-            </h2>
-            <p className="text-[#64748B] dark:text-[#94A3B8] mt-1">
-              Manage your personal information and preferences
-            </p>
-          </div>
-          <button
-            onClick={() => setIsEditing(!isEditing)}
-            className="mt-4 md:mt-0 flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] text-white rounded-xl hover:shadow-lg hover:shadow-[#4F46E5]/25 transition-all duration-300 font-medium"
-          >
-            <FaEdit className="text-sm" />
-            {isEditing ? "Save Changes" : "Edit Profile"}
-          </button>
+      {/* Header */}
+      <div className="mb-8 flex flex-col md:flex-row md:justify-between md:items-center">
+        <div>
+          <h2 className="text-3xl font-bold text-[#0F172A] dark:text-white">
+            Profile Settings
+          </h2>
+
+          <p className="text-gray-500 dark:text-gray-400 mt-1">
+            Manage your profile information
+          </p>
         </div>
+
+        <button
+          onClick={() => setIsEditing(!isEditing)}
+          className="mt-4 md:mt-0 px-6 py-2 rounded-xl bg-[#4F46E5] text-white"
+        >
+          {isEditing ? "Save Changes" : "Edit Profile"}
+        </button>
       </div>
 
+      {/* Card */}
+      <div className="bg-white dark:bg-[#1E293B] rounded-2xl shadow border overflow-hidden">
 
-      {/* Profile Card */}
-      <div className="bg-white dark:bg-[#1E293B] rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-[#334155] overflow-hidden">
-        {/* Cover Image */}
+        {/* Banner */}
         <div className="h-32 bg-gradient-to-r from-[#4F46E5] via-[#7C3AED] to-[#4F46E5] relative">
-          <div className="absolute -bottom-12 left-8 flex items-end gap-4">
+
+          <div className="absolute left-8 -bottom-12 flex items-end gap-4">
+
             <div className="relative">
-              <FaUserCircle className="text-7xl text-white bg-[#0F172A] dark:bg-[#0F172A] rounded-full shadow-2xl" />
-              <button className="absolute bottom-0 right-0 p-1.5 bg-[#4F46E5] text-white rounded-full hover:bg-[#4338CA] transition-colors duration-200 shadow-lg">
-                <FaCamera className="text-xs" />
+              <FaUserCircle className="text-7xl text-white rounded-full" />
+
+              <button className="absolute bottom-0 right-0 bg-[#4F46E5] p-2 rounded-full text-white">
+                <FaCamera size={12} />
               </button>
             </div>
-            <div className="hidden sm:block">
-              <h3 className="text-xl font-bold text-white">
-                {user?.name || "Admin User"}
+
+            <div className="hidden sm:block -mb-1">
+              <h3 className="text-2xl font-bold text-white mt-3">
+                {user?.name}
               </h3>
-              <p className="text-sm text-white/80">
-                {user?.role || "Super Admin"}
+
+              <p className="text-white/80 capitalize">
+                {user?.role}
               </p>
             </div>
+
           </div>
+
         </div>
 
-        {/* Profile Info */}
-        <div className="pt-16 pb-8 px-6 md:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Body */}
+        <div className="pt-16 px-8 pb-8">
+
+          <div className="grid md:grid-cols-2 gap-5">
+
             {adminInfo.map((item, index) => {
               const Icon = item.icon;
+
               return (
                 <div
                   key={index}
-                  className={`flex items-center gap-4 p-4 rounded-xl transition-all duration-200 ${isEditing
-                    ? "bg-[#F8FAFC] dark:bg-[#0F172A] border-2 border-[#4F46E5]/30 dark:border-[#4F46E5]/20"
-                    : "bg-[#F8FAFC] dark:bg-[#0F172A]"
-                    }`}
+                  className="flex items-center gap-4 bg-gray-50 dark:bg-[#0F172A] p-4 rounded-xl"
                 >
-                  <div className="p-2.5 rounded-lg bg-white dark:bg-[#1E293B] shadow-sm">
-                    <Icon className="text-[#4F46E5] dark:text-[#818CF8] text-lg" />
+                  <div className="p-3 bg-white dark:bg-[#1E293B] rounded-lg shadow">
+                    <Icon className="text-[#4F46E5]" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider font-semibold">
+
+                  <div className="flex-1">
+                    <p className="text-xs uppercase text-gray-500">
                       {item.label}
                     </p>
-                    {isEditing && item.label !== "Role" && item.label !== "Member Since" ? (
+
+                    {isEditing &&
+                      item.label !== "Role" &&
+                      item.label !== "Member Since" ? (
                       <input
-                        type="text"
                         defaultValue={item.value}
-                        className="w-full mt-0.5 bg-transparent border-b-2 border-[#4F46E5]/40 dark:border-[#4F46E5]/30 focus:border-[#4F46E5] dark:focus:border-[#818CF8] outline-none text-[#0F172A] dark:text-white font-medium py-0.5 transition-colors duration-200"
+                        className="mt-1 w-full border-b outline-none bg-transparent"
                       />
                     ) : (
-                      <p className="text-[#0F172A] dark:text-white font-medium truncate">
+                      <p className="font-semibold text-[#0F172A] dark:text-white">
                         {item.value}
                       </p>
                     )}
@@ -133,18 +167,21 @@ const AdminProfile = () => {
                 </div>
               );
             })}
+
           </div>
 
-          {/* Action Buttons */}
-          <div className="mt-8 pt-6 border-t border-[#E2E8F0] dark:border-[#334155] flex flex-wrap gap-3">
-            <button className="px-6 py-2.5 bg-[#4F46E5] text-white rounded-xl hover:bg-[#4338CA] transition-colors duration-200 font-medium shadow-sm hover:shadow-md">
+          <div className="border-t mt-8 pt-6 flex gap-4">
+
+            <button className="px-6 py-2 bg-[#4F46E5] text-white rounded-lg">
               Change Password
             </button>
 
-            <button className="px-6 py-2.5 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded-xl hover:bg-red-100 dark:hover:bg-red-950/30 transition-colors duration-200 font-medium">
+            <button className="px-6 py-2 bg-red-100 text-red-600 rounded-lg">
               Deactivate Account
             </button>
+
           </div>
+
         </div>
       </div>
     </div>

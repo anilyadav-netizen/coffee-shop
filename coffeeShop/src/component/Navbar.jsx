@@ -94,7 +94,7 @@ const Navbar = () => {
                         <div className="absolute -inset-1 bg-amber-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
                     <h1 className="text-2xl font-bold text-white drop-shadow-lg tracking-tight">
-                        Coffee<span className="text-[#0D7C53]">Hub</span>
+                        Coffee<span className="text-[#10be7f]">Hub</span>
                     </h1>
                 </Link>
 
@@ -162,7 +162,10 @@ const Navbar = () => {
             <Sidebar
                 isOpen={isMenuOpen}
                 onClose={() => setIsMenuOpen(false)}
-                navItems={navItems}
+                navItems={[
+                    ...(user ? [{ name: "My Profile", path: "/profile" }] : []),
+                    ...navItems,
+                ]}
                 handleWishlistClick={handleWishlistClick}
                 handleCartClick={handleCartClick}
                 wishlistCount={wishlistCount}
