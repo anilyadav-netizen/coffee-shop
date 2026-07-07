@@ -7,6 +7,7 @@ export const loginUser = createAsyncThunk(
     async (userData, thunkAPI) => {
         try {
             const { data } = await API.post("/auth/login", userData);
+            console.log("LOGIN RESPONSE =", data);
             return data;
         } catch (error) {
             return thunkAPI.rejectWithValue(
@@ -71,10 +72,11 @@ export const getProfile = createAsyncThunk(
 );
 /* ---------------- INITIAL STATE ---------------- */
 const initialState = {
-    user: null,
-    isAuthenticated: false,
-    loading: true,
+    user: JSON.parse(localStorage.getItem("user")) || null,
+    isAuthenticated: !!localStorage.getItem("user"),
+    loading: false,
     error: null,
+    authChecked: false,
 };
 
 /* ---------------- SLICE ---------------- */
@@ -91,10 +93,16 @@ const authSlice = createSlice({
                 state.error = null;
             })
             .addCase(loginUser.fulfilled, (state, action) => {
+                console.log("LOGIN FULFILLED USER =", action.payload.user);
+
                 state.loading = false;
                 state.user = action.payload.user;
                 state.isAuthenticated = true;
                 state.error = null;
+
+                localStorage.setItem("user", JSON.stringify(action.payload.user));
+
+                console.log("LOCAL STORAGE AFTER LOGIN =", JSON.parse(localStorage.getItem("user")));
             })
             .addCase(loginUser.rejected, (state, action) => {
                 state.loading = false;
@@ -125,6 +133,8 @@ const authSlice = createSlice({
                 state.isAuthenticated = false;
                 state.loading = false;
                 state.error = null;
+
+                localStorage.removeItem("user");
             })
 
             /* ===== GET PROFILE ===== */
@@ -136,6 +146,8 @@ const authSlice = createSlice({
                 state.isAuthenticated = true;
                 state.loading = false;
                 state.authChecked = true;
+
+                localStorage.setItem("user", JSON.stringify(action.payload));
             })
 
             .addCase(getProfile.rejected, (state) => {
@@ -143,6 +155,8 @@ const authSlice = createSlice({
                 state.isAuthenticated = false;
                 state.loading = false;
                 state.authChecked = true;
+
+                localStorage.removeItem("user");
             })
     },
 });

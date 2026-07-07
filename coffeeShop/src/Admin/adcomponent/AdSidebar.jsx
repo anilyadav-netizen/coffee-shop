@@ -22,24 +22,21 @@ import {
 import { MdDashboard } from "react-icons/md";
 import { GiKnifeFork } from "react-icons/gi";
 import { FaTruck } from "react-icons/fa";
+import { useSelector, useDispatch } from "react-redux";
+import { logout } from "../../redux/Slicer/authSlice";
 
 const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
+
+
+  const dispatch = useDispatch();
+
+  const { user } = useSelector(state => state.auth);
   const navigate = useNavigate();
   const [profileOpen, setProfileOpen] = useState(false);
   const [hoveredItem, setHoveredItem] = useState(null);
   const profileRef = useRef(null);
   const buttonRef = useRef(null);
 
-  // Get user from localStorage with error handling
-  const user = useMemo(() => {
-    try {
-      const userData = localStorage.getItem("user");
-      return userData ? JSON.parse(userData) : null;
-    } catch (error) {
-      console.error("Error parsing user data:", error);
-      return null;
-    }
-  }, []);
 
   // Role-based menu configuration
   const menuItems = useMemo(() => {
@@ -93,12 +90,6 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
         roles: ["admin"]
       },
     ];
-
-    // Filter menus based on user role
-    if (!user || !user.role) {
-      return allMenus.filter(item => item.roles.includes("user"));
-    }
-
     return allMenus.filter(item => item.roles.includes(user.role));
   }, [user]);
 
@@ -150,16 +141,13 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    navigate("/login");
-  };
+  const handleLogout = async () => {
 
-  // Get user display info with fallbacks
-  const userDisplayName = user?.name || "Guest User";
-  const userEmail = user?.email || "guest@coffee.com";
-  const userRole = user?.role || "user";
+    await dispatch(logout());
+
+    navigate("/", { replace: true });
+
+  };
 
   return (
     <aside className="w-72 h-screen flex flex-col border-r shadow-2xl bg-white dark:bg-[#0F172A] border-[#E2E8F0] dark:border-[#1E293B] relative transition-colors duration-300">
@@ -207,10 +195,9 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
             onMouseEnter={() => setHoveredItem(index)}
             onMouseLeave={() => setHoveredItem(null)}
             className={({ isActive }) =>
-              `relative flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group ${
-                isActive
-                  ? "font-semibold bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] text-white shadow-lg shadow-[#4F46E5]/25 dark:shadow-[#4F46E5]/30"
-                  : "text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] hover:text-[#0F172A] dark:hover:text-white"
+              `relative flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group ${isActive
+                ? "font-semibold bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] text-white shadow-lg shadow-[#4F46E5]/25 dark:shadow-[#4F46E5]/30"
+                : "text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] hover:text-[#0F172A] dark:hover:text-white"
               }`
             }
           >
@@ -229,11 +216,10 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
                   <span className="flex-1 text-xl">{item.name}</span>
                   {item.badge && (
                     <span
-                      className={`px-2.5 py-0.5 text-xs font-bold rounded-full ${
-                        isActive
-                          ? "bg-white/20 text-white"
-                          : "bg-[#4F46E5]/10 dark:bg-[#4F46E5]/20 text-[#4F46E5] dark:text-[#818CF8]"
-                      }`}
+                      className={`px-2.5 py-0.5 text-xs font-bold rounded-full ${isActive
+                        ? "bg-white/20 text-white"
+                        : "bg-[#4F46E5]/10 dark:bg-[#4F46E5]/20 text-[#4F46E5] dark:text-[#818CF8]"
+                        }`}
                     >
                       {item.badge}
                     </span>
@@ -241,9 +227,8 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
                 </span>
                 {/* Hover background effect */}
                 <span
-                  className={`absolute inset-0 rounded-2xl transition-all duration-300 ${
-                    isActive ? "opacity-100" : "opacity-0"
-                  }`}
+                  className={`absolute inset-0 rounded-2xl transition-all duration-300 ${isActive ? "opacity-100" : "opacity-0"
+                    }`}
                 />
               </>
             )}
@@ -265,22 +250,11 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
                 <FaUserCircle className="text-5xl text-[#4F46E5] dark:text-[#818CF8]" />
                 <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-[#0F172A] rounded-full" />
               </div>
-
-              <div className="text-left">
-                <h3 className="font-semibold text-[#0F172A] dark:text-white text-xl">
-                  {userDisplayName}
-                </h3>
-
-                <p className="text-sm text-[#64748B] dark:text-[#94A3B8]">
-                  {userEmail}
-                </p>
-              </div>
             </div>
 
             <FaChevronUp
-              className={`text-[#64748B] dark:text-[#94A3B8] transition-all duration-300 ${
-                profileOpen ? "rotate-180" : ""
-              } group-hover:text-[#0F172A] dark:group-hover:text-white`}
+              className={`text-[#64748B] dark:text-[#94A3B8] transition-all duration-300 ${profileOpen ? "rotate-180" : ""
+                } group-hover:text-[#0F172A] dark:group-hover:text-white`}
             />
           </button>
 

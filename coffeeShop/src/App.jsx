@@ -51,17 +51,15 @@ import TablePage from "./Admin/adpages/TablePage";
 import { useSelector } from "react-redux";
 
 function App() {
-  const dispatch = useDispatch();
-  const auth = useSelector(state => state.auth);
 
-  console.log("APP AUTH =", auth);
+  const dispatch = useDispatch();
+  const { token, authChecked } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    console.log("App Mounted");
-    dispatch(getProfile());
-
-  }, [dispatch]);
-
+    if (token && !authChecked) {
+      dispatch(getProfile());
+    }
+  }, [dispatch, token, authChecked]);
   return (
     <BrowserRouter>
       <ScrollToTop />

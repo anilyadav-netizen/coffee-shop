@@ -15,7 +15,13 @@ import {
   FaSpinner,
   FaMotorcycle,
   FaClock,
-  FaCheckCircle
+  FaCheckCircle,
+  FaPlus,
+  FaTimes,
+  FaEnvelope,
+  FaPhone,
+  FaIdCard,
+  FaStar
 } from "react-icons/fa";
 import { toast } from "react-toastify";
 
@@ -141,10 +147,11 @@ const FilterChip = ({ label, active, onClick }) => {
   return (
     <button
       onClick={onClick}
-      className={`px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-200 ${active
+      className={`px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-200 ${
+        active
           ? "bg-indigo-600 text-white shadow-md shadow-indigo-200 dark:shadow-indigo-900/30"
           : "bg-gray-100 dark:bg-dark-card text-gray-700 dark:text-dark-text hover:bg-gray-200 dark:hover:bg-gray-700"
-        }`}
+      }`}
     >
       {label}
     </button>
@@ -180,6 +187,221 @@ const AccountStatusBadge = ({ status }) => {
   );
 };
 
+// Create Rider Form Component
+const CreateRiderModal = ({ isOpen, onClose, onSave }) => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    vehicle: "Motorcycle",
+    currentStatus: "available",
+    accountStatus: "active"
+  });
+  const [errors, setErrors] = useState({});
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    // Clear error for this field
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.name.trim()) newErrors.name = "Name is required";
+    if (!formData.email.trim()) newErrors.email = "Email is required";
+    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Email is invalid";
+    if (!formData.phone.trim()) newErrors.phone = "Phone is required";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (validate()) {
+      const newRider = {
+        id: Date.now(),
+        ...formData,
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.name)}&background=6366f1&color=fff&size=40`,
+        assignedOrders: 0,
+        completedDeliveries: 0,
+        joined: new Date().toISOString().split('T')[0],
+        rating: 0
+      };
+      onSave(newRider);
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        vehicle: "Motorcycle",
+        currentStatus: "available",
+        accountStatus: "active"
+      });
+      onClose();
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fadeIn">
+      <div className="bg-white dark:bg-dark-card rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-gray-200 dark:border-dark-border max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="text-xl font-bold text-gray-800 dark:text-dark-heading flex items-center gap-2">
+              <FaMotorcycle className="text-indigo-600 dark:text-indigo-400" />
+              Create New Rider
+            </h3>
+            <p className="text-sm text-gray-500 dark:text-dark-text mt-1">Add a new delivery rider to the system</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          >
+            <FaTimes className="text-gray-500 dark:text-gray-400 text-xl" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Full Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text mb-1.5">
+              <FaIdCard className="inline mr-2 text-indigo-500" />
+              Full Name
+            </label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Enter full name"
+              className={`w-full px-4 py-2.5 bg-white dark:bg-dark-bg border ${
+                errors.name ? "border-rose-500" : "border-gray-200 dark:border-dark-border"
+              } rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-gray-800 dark:text-dark-heading placeholder-gray-400 dark:placeholder-gray-500`}
+            />
+            {errors.name && <p className="mt-1 text-sm text-rose-500">{errors.name}</p>}
+          </div>
+
+          {/* Email */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text mb-1.5">
+              <FaEnvelope className="inline mr-2 text-indigo-500" />
+              Email Address
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Enter email address"
+              className={`w-full px-4 py-2.5 bg-white dark:bg-dark-bg border ${
+                errors.email ? "border-rose-500" : "border-gray-200 dark:border-dark-border"
+              } rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-gray-800 dark:text-dark-heading placeholder-gray-400 dark:placeholder-gray-500`}
+            />
+            {errors.email && <p className="mt-1 text-sm text-rose-500">{errors.email}</p>}
+          </div>
+
+          {/* Phone */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text mb-1.5">
+              <FaPhone className="inline mr-2 text-indigo-500" />
+              Phone Number
+            </label>
+            <input
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="Enter phone number"
+              className={`w-full px-4 py-2.5 bg-white dark:bg-dark-bg border ${
+                errors.phone ? "border-rose-500" : "border-gray-200 dark:border-dark-border"
+              } rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-gray-800 dark:text-dark-heading placeholder-gray-400 dark:placeholder-gray-500`}
+            />
+            {errors.phone && <p className="mt-1 text-sm text-rose-500">{errors.phone}</p>}
+          </div>
+
+          {/* Vehicle Type */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text mb-1.5">
+              <FaTruck className="inline mr-2 text-indigo-500" />
+              Vehicle Type
+            </label>
+            <select
+              name="vehicle"
+              value={formData.vehicle}
+              onChange={handleChange}
+              className="w-full px-4 py-2.5 bg-white dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-gray-800 dark:text-dark-heading"
+            >
+              <option value="Motorcycle">Motorcycle</option>
+              <option value="Scooter">Scooter</option>
+              <option value="Bicycle">Bicycle</option>
+              <option value="Car">Car</option>
+              <option value="Van">Van</option>
+            </select>
+          </div>
+
+          {/* Current Status */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text mb-1.5">
+              <FaClock className="inline mr-2 text-indigo-500" />
+              Current Status
+            </label>
+            <select
+              name="currentStatus"
+              value={formData.currentStatus}
+              onChange={handleChange}
+              className="w-full px-4 py-2.5 bg-white dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-gray-800 dark:text-dark-heading"
+            >
+              <option value="available">Available</option>
+              <option value="on-delivery">On Delivery</option>
+              <option value="offline">Offline</option>
+            </select>
+          </div>
+
+          {/* Account Status */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text mb-1.5">
+              <FaUserCheck className="inline mr-2 text-indigo-500" />
+              Account Status
+            </label>
+            <select
+              name="accountStatus"
+              value={formData.accountStatus}
+              onChange={handleChange}
+              className="w-full px-4 py-2.5 bg-white dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-gray-800 dark:text-dark-heading"
+            >
+              <option value="active">Active</option>
+              <option value="blocked">Blocked</option>
+              <option value="suspended">Suspended</option>
+            </select>
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-dark-border">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-dark-border hover:bg-gray-50 dark:hover:bg-dark-bg transition text-gray-700 dark:text-dark-text font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-medium transition shadow-md shadow-indigo-200 dark:shadow-indigo-900/30 flex items-center gap-2"
+            >
+              <FaPlus className="text-sm" />
+              Create Rider
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 // Main Riders Component
 const Riders = () => {
   const [riders, setRiders] = useState(mockRiders);
@@ -189,6 +411,7 @@ const Riders = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRider, setSelectedRider] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const ridersPerPage = 5;
 
   // Calculate statistics
@@ -219,6 +442,11 @@ const Riders = () => {
   const totalPages = Math.ceil(filteredRiders.length / ridersPerPage);
 
   // Handlers
+  const handleCreateRider = (newRider) => {
+    setRiders(prev => [newRider, ...prev]);
+    toast.success(`${newRider.name} created successfully!`);
+  };
+
   const handleDelete = (rider) => {
     setSelectedRider(rider);
     setShowDeleteModal(true);
@@ -263,15 +491,24 @@ const Riders = () => {
             Total {totalRiders} riders registered
           </p>
         </div>
-        <div className="relative w-full sm:w-72">
-          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
-          <input
-            type="text"
-            placeholder="Search by name, email, phone..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-gray-800 dark:text-dark-heading placeholder-gray-400 dark:placeholder-gray-500"
-          />
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="relative flex-1 sm:w-64">
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
+            <input
+              type="text"
+              placeholder="Search riders..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-gray-800 dark:text-dark-heading placeholder-gray-400 dark:placeholder-gray-500"
+            />
+          </div>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition shadow-md shadow-indigo-200 dark:shadow-indigo-900/30 whitespace-nowrap"
+          >
+            <FaPlus className="text-sm" />
+            Create Rider
+          </button>
         </div>
       </div>
 
@@ -322,13 +559,13 @@ const Riders = () => {
             <thead className="bg-gray-50 dark:bg-dark-bg text-gray-600 dark:text-dark-text uppercase text-xs tracking-wider">
               <tr>
                 <th className="px-4 py-3 text-base">Profile</th>
-                <th className="px-4 py-3  text-base">Full Name</th>
-                <th className="px-4 py-3 hidden md:table-cell  text-base">Email</th>
-                <th className="px-4 py-3 hidden lg:table-cell  text-base">Phone</th>
-                <th className="px-4 py-3 hidden xl:table-cell  text-base">Assigned</th>
-                <th className="px-4 py-3 hidden xl:table-cell  text-base">Completed</th>
+                <th className="px-4 py-3 text-base">Full Name</th>
+                <th className="px-4 py-3 hidden md:table-cell text-base">Email</th>
+                <th className="px-4 py-3 hidden lg:table-cell text-base">Phone</th>
+                <th className="px-4 py-3 hidden xl:table-cell text-base">Assigned</th>
+                <th className="px-4 py-3 hidden xl:table-cell text-base">Completed</th>
                 <th className="px-4 py-3 text-lg">Status</th>
-                <th className="px-4 py-3 hidden sm:table-cell  text-base">Account</th>
+                <th className="px-4 py-3 hidden sm:table-cell text-base">Account</th>
                 <th className="px-4 py-3 hidden sm:table-cell text-base">Joined</th>
                 <th className="px-4 py-3 text-center text-base">Actions</th>
               </tr>
@@ -375,8 +612,12 @@ const Riders = () => {
                         </Link>
                         <button
                           onClick={() => handleBlockToggle(rider)}
-                          className={`p-1.5 ${rider.accountStatus === "active" ? "text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20" : "text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"} rounded-lg transition`}
-                          title={rider.accountStatus === "active" ? "Block" : "Unblock"}
+                          className={`p-1.5 ${
+                            rider.accountStatus === "active" 
+                              ? "text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20" 
+                              : "text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                          } rounded-lg transition`}
+                          title={rider.accountStatus === "active" ? "Block" : "Unblock"}a 
                         >
                           <FaBan size={18} />
                         </button>
@@ -425,6 +666,13 @@ const Riders = () => {
         )}
       </div>
 
+      {/* Create Rider Modal */}
+      <CreateRiderModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSave={handleCreateRider}
+      />
+
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
@@ -450,6 +698,17 @@ const Riders = () => {
           </div>
         </div>
       )}
+
+      {/* CSS Animations */}
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.2s ease-out forwards;
+        }
+      `}</style>
     </div>
   );
 };

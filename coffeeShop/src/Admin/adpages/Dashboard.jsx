@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import { getProducts } from "../../redux/Slicer/adminProductSlice";
 import { getCategories } from "../../redux/Slicer/categorySlice";
-import { getMyOrders } from "../../redux/Slicer/paymentSlice";
+import { getAllOrders } from "../../redux/Slicer/adminOrder";
 import { useEffect, useState } from "react";
 import {
     FiPackage,
@@ -24,7 +24,7 @@ const Dashboard = () => {
     const dispatch = useDispatch();
     const { products } = useSelector((state) => state.adminProducts);
     const { categories } = useSelector((state) => state.category);
-    const { orders, loading } = useSelector((state) => state.payment);
+    const { orders, loading } = useSelector((state) => state.adminOrder); // Changed to adminOrders
     const [stats, setStats] = useState({
         totalRevenue: 0,
         todayRevenue: 0,
@@ -44,7 +44,7 @@ const Dashboard = () => {
     useEffect(() => {
         dispatch(getProducts());
         dispatch(getCategories());
-        dispatch(getMyOrders());
+        dispatch(getAllOrders()); // Changed to getAllOrders
     }, [dispatch]);
 
     useEffect(() => {
@@ -82,7 +82,6 @@ const Dashboard = () => {
 
             // Get recent orders (last 5)
             const recentOrders = orders
-                // .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
                 .slice(0, 5)
                 .map(order => ({
                     id: order._id?.slice(-6) || 'N/A',

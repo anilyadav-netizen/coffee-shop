@@ -104,7 +104,7 @@ const WhyUs = () => {
 
                     <h2 className="text-3xl md:text-5xl font-bold text-white mb-2">
                         Why Coffee Lovers
-                        <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#0D7C53] to-[#169466]">
+                        <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#10be7f] to-[#169466]">
                             Choose Us
                         </span>
                     </h2>
@@ -129,7 +129,7 @@ const WhyUs = () => {
                                     <feature.icon className={`w-7 h-7 ${feature.iconColor}`} />
                                 </div>
 
-                                <h3 className="text-xl font-bold text-white mb-1 group-hover:text-[#169466] transition-colors">
+                                <h3 className="text-xl font-bold text-white mb-1 group-hover:text-[#10be7f] transition-colors">
                                     {feature.title}
                                 </h3>
 
@@ -148,7 +148,7 @@ const WhyUs = () => {
                             key={index}
                             className="bg-black/40 border border-white/10 rounded-2xl p-3 text-center hover:bg-white/10 transition-all duration-300 hover:-translate-y-1 group"
                         >
-                            <div className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#0D7C53] to-[#169466] group-hover:scale-110 transition-transform duration-300">
+                            <div className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#10be7f] to-[#169466] group-hover:scale-110 transition-transform duration-300">
                                 {stat.value}
                             </div>
                             <div className="text-white/60 text-sm mt-1 font-medium">

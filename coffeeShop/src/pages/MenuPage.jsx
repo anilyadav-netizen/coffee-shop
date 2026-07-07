@@ -616,7 +616,7 @@ const MenuPage = () => {
 
                                             {/* Content */}
                                             <div className="p-3 sm:p-4 md:p-5 flex flex-col flex-1 bg-white/10">
-                                                <h3 className="font-bold text-white text-sm sm:text-base md:text-lg group-hover:text-[#169466] transition-colors mb-0.5 sm:mb-1 truncate">
+                                                <h3 className="font-bold text-white text-sm sm:text-base md:text-lg group-hover:text-[#10be7f] transition-colors mb-0.5 sm:mb-1 truncate">
                                                     {item.name}
                                                 </h3>
 
