@@ -10,7 +10,8 @@ const {
   getAllUsers,
   deleteUser,
   createAddress,
-  deleteAddress
+  deleteAddress,
+  updateUserRole
 } = require("../controllers/authController");
 const { protect } = require("../middleware/authMiddleware");
 
@@ -30,6 +31,11 @@ router.delete("/address/:addressId", protect, deleteAddress);
 
 router.get("/all", protect, getAllUsers);
 router.delete("/delete/:id", protect, deleteUser);
+
+router.put(
+  "/update-role/:id",
+  updateUserRole
+);
 
 
 

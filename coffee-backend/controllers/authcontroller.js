@@ -407,6 +407,68 @@ const deleteUser = async (req, res) => {
   }
 };
 
+const updateUserRole = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { role } = req.body;
+
+    const allowedRoles = ["user", "admin", "rider", "chef"];
+
+    if (!role) {
+      return res.status(400).json({
+        success: false,
+        message: "Role is required",
+      });
+    }
+
+    if (!allowedRoles.includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid role",
+      });
+    }
+
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    user.role = role;
+
+    // Agar rider nahi hai to location reset kar do
+    if (role !== "rider") {
+      user.currentLocation = {
+        latitude: null,
+        longitude: null,
+        updatedAt: null,
+      };
+
+      user.isAvailable = false;
+    }
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "User role updated successfully",
+      data: user,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+
 module.exports = {
   register,
   login,
@@ -416,5 +478,6 @@ module.exports = {
   getAllUsers,
   deleteUser,
   createAddress,
-  deleteAddress
+  deleteAddress,
+  updateUserRole
 };
