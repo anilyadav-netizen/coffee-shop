@@ -44,6 +44,8 @@ const MenuPage = () => {
     const [visibleCards, setVisibleCards] = useState(new Set());
     const cardRefs = useRef({});
     const [isAnimating, setIsAnimating] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 8;
 
     // Fetch data
     useEffect(() => {
@@ -59,22 +61,32 @@ const MenuPage = () => {
             return;
         }
 
-        // Reset visibility
+        // Only animate when filter changes (not on page change)
+        // We track if it's a filter change by checking if the filtered items length changed
         setVisibleCards(new Set());
         setIsAnimating(true);
 
-        // Auto show items with delay (2-3 seconds)
+        // Auto show items with delay
         const timer = setTimeout(() => {
-            const allIds = filteredItems.map(item => item._id);
+            // Show only current page items
+            const startIdx = (currentPage - 1) * itemsPerPage;
+            const endIdx = startIdx + itemsPerPage;
+            const currentPageItems = filteredItems.slice(startIdx, endIdx);
+            const allIds = currentPageItems.map(item => item._id);
             setVisibleCards(new Set(allIds));
             setIsAnimating(false);
-        }, 300); // 300ms delay for smooth appearance
+        }, 300);
 
         return () => {
             clearTimeout(timer);
             setIsAnimating(false);
         };
-    }, [filteredItems, categoryId, searchTerm]);
+    }, [filteredItems, currentPage]);
+
+    // Reset to first page when search or category changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, categoryId]);
 
     // ===== Create "All" category =====
     const allCategories = useMemo(() => {
@@ -167,6 +179,17 @@ const MenuPage = () => {
             setFilteredItems(filtered);
         }
     }, [searchTerm, categoryProducts]);
+
+    // Pagination logic
+    const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentItems = filteredItems.slice(startIndex, endIndex);
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+        // Animation will be triggered by the useEffect that depends on currentPage
+    };
 
     // ✅ Handle Add to Cart - FIXED: Added amount field
     const handleAddToCart = (item, e) => {
@@ -527,9 +550,9 @@ const MenuPage = () => {
                         </div>
 
                         {/* Items Grid with Auto Animation */}
-                        {filteredItems && filteredItems.length > 0 ? (
+                        {currentItems && currentItems.length > 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 pb-12">
-                                {filteredItems.map((item, index) => {
+                                {currentItems.map((item, index) => {
                                     let itemCategoryName = 'Uncategorized';
                                     if (item.category && typeof item.category === 'object') {
                                         itemCategoryName = item.category.name;
@@ -676,6 +699,51 @@ const MenuPage = () => {
                                         </button>
                                     )}
                                 </div>
+                            </div>
+                        )}
+
+                        {/* Pagination */}
+                        {totalPages > 1 && (
+                            <div className="flex flex-wrap items-center justify-center gap-2 mt-4 sm:mt-6 pb-6">
+                                <button
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-white/20 text-white text-sm sm:text-base transition-all duration-200 ${
+                                        currentPage === 1
+                                            ? "opacity-50 cursor-not-allowed"
+                                            : "hover:bg-white/20 hover:border-white/30"
+                                    }`}
+                                >
+                                    Previous
+                                </button>
+                                
+                                <div className="flex flex-wrap gap-1">
+                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                                        <button
+                                            key={page}
+                                            onClick={() => handlePageChange(page)}
+                                            className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg border transition-all duration-200 text-sm sm:text-base ${
+                                                currentPage === page
+                                                    ? "bg-[#0D7C53] text-white border-[#0D7C53] shadow-lg shadow-[#0D7C53]/30"
+                                                    : "border-white/20 text-white hover:bg-white/20 hover:border-white/30"
+                                            }`}
+                                        >
+                                            {page}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-white/20 text-white text-sm sm:text-base transition-all duration-200 ${
+                                        currentPage === totalPages
+                                            ? "opacity-50 cursor-not-allowed"
+                                            : "hover:bg-white/20 hover:border-white/30"
+                                    }`}
+                                >
+                                    Next
+                                </button>
                             </div>
                         )}
                     </div>

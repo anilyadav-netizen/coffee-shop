@@ -98,7 +98,7 @@ exports.updateCoffee = async (req, res) => {
 exports.getAllCoffee = async (req, res) => {
   try {
     const coffees = await Coffee.find()
-      .select("name price image category")
+      .select("name price image description category")
       .populate("category", "name icon")
       .lean();
 
@@ -117,7 +117,7 @@ exports.getAllCoffee = async (req, res) => {
 exports.getCoffeeById = async (req, res) => {
   try {
     const coffee = await Coffee.findById(req.params.id)
-      .populate("category", "name icon");
+      .populate("category", "name  icon");
 
     if (!coffee) {
       return res.status(404).json({

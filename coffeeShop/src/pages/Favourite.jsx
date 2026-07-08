@@ -279,7 +279,7 @@ const Favourite = () => {
                                             <img
                                                 src={item.image}
                                                 alt={item.name}
-                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                                className="w-full h-full object-fill group-hover:scale-110 transition-transform duration-700"
                                                 onError={(e) => {
                                                     e.target.src = "https://placehold.co/400x300/e2e8f0/64748b?text=No+Image";
                                                 }}

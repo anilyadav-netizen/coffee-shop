@@ -36,19 +36,18 @@ const Category = () => {
     );
 
     const handleDelete = async (id, name) => {
-        if (window.confirm(`Are you sure you want to delete "${name}"?`)) {
-            try {
-                setDeleteLoading(true);
-                const result = await dispatch(deleteCategory(id)).unwrap();
-                toast.success(`Category "${name}" deleted successfully!`);
-                // Refresh the list after deletion
-                await dispatch(getCategories());
-            } catch (error) {
-                toast.error(error || "Failed to delete category");
-            } finally {
-                setDeleteLoading(false);
-            }
+        try {
+            setDeleteLoading(true);
+            const result = await dispatch(deleteCategory(id)).unwrap();
+            toast.success(`Category "${name}" deleted successfully!`);
+            // Refresh the list after deletion
+            await dispatch(getCategories());
+        } catch (error) {
+            toast.error(error || "Failed to delete category");
+        } finally {
+            setDeleteLoading(false);
         }
+
     };
 
     const handleEdit = (id) => {
@@ -68,7 +67,7 @@ const Category = () => {
     }
 
     return (
-        <div className="bg-white dark:bg-dark-card rounded-xl p-3 sm:p-4 md:p-6 border border-[#E2E8F0] dark:border-dark-border shadow-sm dark:shadow-xl">
+        <div className=" rounded-xl p-3 sm:p-4 md:p-6 shadow-sm dark:shadow-xl">
             {/* Header - Responsive */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div>

@@ -12,31 +12,47 @@ const Products = () => {
         (state) => state.adminProducts
     );
     const [search, setSearch] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     useEffect(() => {
         dispatch(getProducts());
     }, [dispatch]);
 
     const handleDelete = (id) => {
-        if (window.confirm("Are you sure you want to delete this product?")) {
-            dispatch(deleteProduct(id))
-                .unwrap()
-                .then(() => {
-                    toast.success("Product deleted successfully!");
-                })
-                .catch((error) => {
-                    toast.error(error || "Failed to delete product");
-                });
-        }
+        dispatch(deleteProduct(id))
+            .unwrap()
+            .then(() => {
+                toast.success("Product deleted successfully!");
+            })
+            .catch((error) => {
+                toast.error(error || "Failed to delete product");
+            });
     };
 
     const handleEdit = (id) => {
         navigate(`/admin/update-product/${id}`);
     };
 
+    // Filter products based on search
     const filteredProducts = products.filter((product) =>
         product.name?.toLowerCase().includes(search.toLowerCase())
     );
+
+    // Pagination logic
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentProducts = filteredProducts.slice(startIndex, endIndex);
+
+    // Reset to first page when search changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [search]);
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
 
     if (loading) {
         return (
@@ -47,7 +63,7 @@ const Products = () => {
     }
 
     return (
-        <div className="bg-white dark:bg-dark-card rounded-xl p-4 md:p-6 border border-[#E2E8F0] dark:border-dark-border shadow-sm dark:shadow-xl">
+        <div className=" rounded-xl p-4 md:p-6  shadow-sm dark:shadow-xl">
             {/* Header - Responsive */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
@@ -72,12 +88,6 @@ const Products = () => {
             <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
                 <div className="flex flex-wrap gap-2 md:gap-4 text-base md:text-lg text-[#64748B] dark:text-dark-text">
                     <span className="bg-[#F8FAFC] dark:bg-dark-bg/50 px-3 py-1 rounded-full border border-[#E2E8F0] dark:border-dark-border">All ({products.length})</span>
-                    <span className="bg-[#F8FAFC] dark:bg-dark-bg/50 px-3 py-1 rounded-full border border-[#E2E8F0] dark:border-dark-border">
-                        In Stock ({products.filter((p) => p.stock > 0).length})
-                    </span>
-                    <span className="bg-[#F8FAFC] dark:bg-dark-bg/50 px-3 py-1 rounded-full border border-[#E2E8F0] dark:border-dark-border">
-                        Out Of Stock ({products.filter((p) => p.stock === 0).length})
-                    </span>
                 </div>
 
                 <div className="w-full sm:w-auto">
@@ -102,14 +112,13 @@ const Products = () => {
                             <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Image</th>
                             <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Name</th>
                             <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Price</th>
-                            <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Stock</th>
                             <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Actions</th>
                         </tr>
                     </thead>
 
                     <tbody>
-                        {filteredProducts.length > 0 ? (
-                            filteredProducts.map((product) => (
+                        {currentProducts.length > 0 ? (
+                            currentProducts.map((product) => (
                                 <tr
                                     key={product._id}
                                     className="border-b border-[#E2E8F0] dark:border-dark-border hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-colors duration-150"
@@ -128,17 +137,6 @@ const Products = () => {
 
                                     <td className="p-2 md:p-4 text-[#0F172A] dark:text-dark-heading text-base md:text-lg whitespace-nowrap">
                                         ₹{product.price}
-                                    </td>
-
-                                    <td className="p-2 md:p-4">
-                                        <span
-                                            className={`px-2 py-1 text-sm border rounded-md ${product.stock === 0
-                                                ? "text-red-600 dark:text-red-400 border-red-300 dark:border-red-700"
-                                                : "text-[#0F172A] dark:text-dark-heading border-[#E2E8F0] dark:border-dark-border"
-                                                }`}
-                                        >
-                                            {product.stock}
-                                        </span>
                                     </td>
 
                                     <td className="p-2 md:p-4">
@@ -164,7 +162,7 @@ const Products = () => {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="6" className="text-center py-8 text-[#64748B] dark:text-dark-text text-base">
+                                <td colSpan="4" className="text-center py-8 text-[#64748B] dark:text-dark-text text-base">
                                     No Products Found
                                 </td>
                             </tr>
@@ -172,6 +170,48 @@ const Products = () => {
                     </tbody>
                 </table>
             </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <div className="flex flex-wrap items-center justify-center gap-2 mt-6">
+                    <button
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className={`px-4 py-2 rounded-md border border-[#E2E8F0] dark:border-dark-border text-base transition-colors duration-200 ${currentPage === 1
+                                ? "opacity-50 cursor-not-allowed text-[#94A3B8] dark:text-dark-text"
+                                : "hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 text-[#0F172A] dark:text-dark-heading"
+                            }`}
+                    >
+                        Previous
+                    </button>
+
+                    <div className="flex flex-wrap gap-1">
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                            <button
+                                key={page}
+                                onClick={() => handlePageChange(page)}
+                                className={`w-10 h-10 rounded-md border border-[#E2E8F0] dark:border-dark-border transition-colors duration-200 text-base ${currentPage === page
+                                        ? "bg-[#4F46E5] dark:bg-dark-primary text-white border-[#4F46E5] dark:border-dark-primary"
+                                        : "text-[#0F172A] dark:text-dark-heading hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50"
+                                    }`}
+                            >
+                                {page}
+                            </button>
+                        ))}
+                    </div>
+
+                    <button
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                        className={`px-4 py-2 rounded-md border border-[#E2E8F0] dark:border-dark-border text-base transition-colors duration-200 ${currentPage === totalPages
+                                ? "opacity-50 cursor-not-allowed text-[#94A3B8] dark:text-dark-text"
+                                : "hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 text-[#0F172A] dark:text-dark-heading"
+                            }`}
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

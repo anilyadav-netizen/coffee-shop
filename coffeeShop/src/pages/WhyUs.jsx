@@ -97,7 +97,7 @@ const WhyUs = () => {
                         <span className="px-6 py-2 bg-gradient-to-r from-[#0D7C53] to-[#169466] text-white text-xs font-semibold rounded-full tracking-wider">
                             WHY CHOOSE US
                         </span>
-                        <span className="px-4 text-[#0D7C53] text-xs font-medium">
+                        <span className="px-4 text-white text-xs font-medium">
                             ✦ PREMIUM COFFEE
                         </span>
                     </div>
@@ -162,7 +162,7 @@ const WhyUs = () => {
                 <div className="mt-12 text-center">
                     <div className="inline-flex items-center gap-3 bg-gradient-to-r from-[#0D7C53]/20 to-[#169466]/20 border border-white/20 rounded-full px-6 py-3">
                         <Sparkles className="w-5 h-5 text-[#169466]" />
-                        <span className="text-white/80 text-sm font-medium">
+                        <span className="text-white text-sm font-medium">
                             Join thousands of happy coffee lovers
                         </span>
                         <button className="px-6 py-2 bg-gradient-to-r from-[#0D7C53] to-[#169466] text-white text-sm font-semibold rounded-full hover:shadow-lg hover:shadow-[#0D7C53]/30 transition-all duration-300 hover:scale-105">

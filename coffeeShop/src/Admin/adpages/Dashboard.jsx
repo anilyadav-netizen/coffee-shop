@@ -3,6 +3,7 @@ import { getProducts } from "../../redux/Slicer/adminProductSlice";
 import { getCategories } from "../../redux/Slicer/categorySlice";
 import { getAllOrders } from "../../redux/Slicer/adminOrder";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
     FiPackage,
     FiGrid,
@@ -25,6 +26,7 @@ const Dashboard = () => {
     const { products } = useSelector((state) => state.adminProducts);
     const { categories } = useSelector((state) => state.category);
     const { orders, loading } = useSelector((state) => state.adminOrder); // Changed to adminOrders
+    const navigate = useNavigate()
     const [stats, setStats] = useState({
         totalRevenue: 0,
         todayRevenue: 0,
@@ -180,7 +182,8 @@ const Dashboard = () => {
             icon: FiPackage,
             bgColor: "bg-[#E2E8F0]/30 dark:bg-dark-card/50",
             textColor: "text-[#4F46E5] dark:text-dark-primary",
-            growth: "+12%"
+            growth: "+12%",
+            path: "/admin/products"
         },
         {
             title: "Categories",
@@ -188,7 +191,8 @@ const Dashboard = () => {
             icon: FiGrid,
             bgColor: "bg-[#E2E8F0]/30 dark:bg-dark-card/50",
             textColor: "text-[#7C3AED] dark:text-dark-accent",
-            growth: "+5%"
+            growth: "+5%",
+            path: "/admin/category"
         },
         {
             title: "Total Orders",
@@ -330,8 +334,9 @@ const Dashboard = () => {
                     return (
                         <div
                             key={index}
-                            className="p-6 rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300 border bg-white dark:bg-dark-card border-[#E2E8F0] dark:border-dark-border"
-                        >
+                            onClick={() => stat.path && navigate(stat.path)}
+                            className={`p-6 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border bg-white dark:bg-dark-card border-[#E2E8F0] dark:border-dark-border ${stat.path ? "cursor-pointer hover:-translate-y-1" : ""
+                                }`}                        >
                             <div className="flex justify-between items-start">
                                 <div>
                                     <p className="text-sm font-medium text-[#64748B] dark:text-dark-text">

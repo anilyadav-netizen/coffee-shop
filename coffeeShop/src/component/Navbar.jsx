@@ -16,15 +16,17 @@ import { getCart } from '../redux/Slicer/cartSlice';
 import { getWishlist } from '../redux/Slicer/wishlistSlice';
 
 const Navbar = () => {
-    const location = useLocation();
 
+
+    const location = useLocation();
     const [open, setOpen] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const navigate = useNavigate();
-
+    
     const dispatch = useDispatch();
-    const { user, isAuthenticated } = useSelector((state) => state.auth);
+    const { user, isAuthenticated, token } = useSelector((state) => state.auth);
+    const isLoggedIn = !!user || !!token;
 
     // ✅ Redux se cart aur wishlist
     const { totalItems } = useSelector((state) => state.cart);
@@ -116,34 +118,46 @@ const Navbar = () => {
                 {/* Right Side */}
                 <div className="flex items-center gap-4">
                     {/* Wishlist Button */}
-                    <button
-                        onClick={handleWishlistClick}
-                        className="relative p-2 rounded-full hover:bg-white/10 transition-all duration-300 hover:scale-110 group hidden md:block"
-                    >
-                        <Heart size={22} className="text-white/80 group-hover:text-white transition-colors" />
-                        {wishlistCount > 0 ? (
-                            <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-pink-500 to-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold shadow-lg animate-pulse">
-                                {wishlistCount}
-                            </span>
-                        ) : (
-                            <span className="absolute -top-1 -right-1 w-2 h-2 bg-pink-400 rounded-full shadow-lg"></span>
-                        )}
-                    </button>
+                    {isLoggedIn && (
+                        <button
+                            onClick={handleWishlistClick}
+                            className="relative p-2 rounded-full hover:bg-white/10 transition-all duration-300 hover:scale-110 group hidden md:block"
+                        >
+                            <Heart
+                                size={22}
+                                className="text-white/80 group-hover:text-white transition-colors"
+                            />
+
+                            {wishlistCount > 0 ? (
+                                <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-pink-500 to-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold shadow-lg animate-pulse">
+                                    {wishlistCount}
+                                </span>
+                            ) : (
+                                <span className="absolute -top-1 -right-1 w-2 h-2 bg-pink-400 rounded-full shadow-lg"></span>
+                            )}
+                        </button>
+                    )}
 
                     {/* Cart Button */}
-                    <button
-                        onClick={handleCartClick}
-                        className="relative p-2 rounded-full hover:bg-white/10 transition-all duration-300 hover:scale-110 group hidden md:block"
-                    >
-                        <ShoppingCart size={22} className="text-white/80 group-hover:text-white" />
-                        {totalItems > 0 ? (
-                            <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-[#0D7C53] to-green-600 text-white text-xs rounded-full flex items-center justify-center font-bold shadow-lg animate-pulse">
-                                {totalItems}
-                            </span>
-                        ) : (
-                            <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full shadow-lg"></span>
-                        )}
-                    </button>
+                    {isLoggedIn && (
+                        <button
+                            onClick={handleCartClick}
+                            className="relative p-2 rounded-full hover:bg-white/10 transition-all duration-300 hover:scale-110 group hidden md:block"
+                        >
+                            <ShoppingCart
+                                size={22}
+                                className="text-white/80 group-hover:text-white"
+                            />
+
+                            {totalItems > 0 ? (
+                                <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-[#0D7C53] to-green-600 text-white text-xs rounded-full flex items-center justify-center font-bold shadow-lg animate-pulse">
+                                    {totalItems}
+                                </span>
+                            ) : (
+                                <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full shadow-lg"></span>
+                            )}
+                        </button>
+                    )}
 
                     {/* Profile Button */}
                     <ProfileDropdown />
