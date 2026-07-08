@@ -556,82 +556,11 @@ const DineInDetails = () => {
                     </div>
 
                     {/* Order Timeline */}
-                    {timeline.length > 0 && (
-                        <div className="bg-white dark:bg-[#1E293B] rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] overflow-hidden">
-                            <div className="p-4 border-b border-[#E2E8F0] dark:border-[#1E293B] bg-gradient-to-r from-[#F8FAFC] to-[#F1F5F9] dark:from-[#1E293B] dark:to-[#0F172A]">
-                                <h3 className="font-semibold text-[#0F172A] dark:text-white flex items-center gap-2">
-                                    <FaHistory className="text-[#4F46E5]" />
-                                    Order Timeline
-                                </h3>
-                            </div>
-                            <div className="p-4">
-                                <div className="relative">
-                                    {/* Vertical line */}
-                                    <div className="absolute left-5 top-0 bottom-0 w-0.5 bg-[#E2E8F0] dark:bg-[#1E293B]"></div>
-                                    {timeline.map((event, index) => (
-                                        <div key={index} className="relative flex gap-4 pb-6 last:pb-0">
-                                            <div className="relative z-10 flex-shrink-0 w-10 h-10 rounded-full bg-white dark:bg-[#1E293B] border-2 border-[#E2E8F0] dark:border-[#1E293B] flex items-center justify-center">
-                                                <div className="w-8 h-8 rounded-full bg-[#F1F5F9] dark:bg-[#0F172A] flex items-center justify-center">
-                                                    {event.icon}
-                                                </div>
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-center justify-between gap-2 flex-wrap">
-                                                    <p className="font-medium text-[#0F172A] dark:text-white">
-                                                        {event.status}
-                                                    </p>
-                                                    <p className="text-xs text-[#64748B] dark:text-[#94A3B8]">
-                                                        {event.time ? new Date(event.time).toLocaleString() : 'N/A'}
-                                                    </p>
-                                                </div>
-                                                {event.message && (
-                                                    <p className="text-sm text-[#64748B] dark:text-[#94A3B8] mt-0.5">
-                                                        {event.message}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                   
                 </div>
 
                 {/* Right Column - Sidebar */}
                 <div className="space-y-6">
-                    {/* Action Buttons */}
-                    {getActionButtons() && getActionButtons().length > 0 && (
-                        <div className="bg-white dark:bg-[#1E293B] rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] overflow-hidden">
-                            <div className="p-4 border-b border-[#E2E8F0] dark:border-[#1E293B] bg-gradient-to-r from-[#F8FAFC] to-[#F1F5F9] dark:from-[#1E293B] dark:to-[#0F172A]">
-                                <h3 className="font-semibold text-[#0F172A] dark:text-white flex items-center gap-2">
-                                    <FaTools className="text-[#4F46E5]" />
-                                    Actions
-                                </h3>
-                            </div>
-                            <div className="p-4 space-y-2">
-                                {getActionButtons().map((action, index) => (
-                                    <button
-                                        key={index}
-                                        onClick={action.action}
-                                        className={`w-full px-4 py-2.5 text-white rounded-lg font-medium flex items-center justify-center gap-2 transition-all ${action.color} hover:shadow-lg hover:scale-[1.02]`}
-                                    >
-                                        {action.icon}
-                                        {action.label}
-                                    </button>
-                                ))}
-                                {statusInfo.canCancel && (
-                                    <button
-                                        onClick={() => setShowCancelModal(true)}
-                                        className="w-full px-4 py-2.5 border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all hover:scale-[1.02]"
-                                    >
-                                        <FaBan />
-                                        Cancel Order
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    )}
 
                     {/* Order Summary */}
                     <div className="bg-white dark:bg-[#1E293B] rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] overflow-hidden">
@@ -723,7 +652,7 @@ const DineInDetails = () => {
             </div>
 
             {/* Cancel Order Modal */}
-            {showCancelModal && (
+            {/* {showCancelModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white dark:bg-[#1E293B] rounded-xl max-w-md w-full p-6 border border-[#E2E8F0] dark:border-[#1E293B]">
                         <div className="flex items-center justify-between mb-4">
@@ -765,7 +694,7 @@ const DineInDetails = () => {
                         </div>
                     </div>
                 </div>
-            )}
+            )} */}
         </div>
     );
 };

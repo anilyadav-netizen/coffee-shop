@@ -1,3 +1,4 @@
+import { useSelector } from "react-redux";
 import { useState, useEffect } from "react";
 import { Link, Outlet } from "react-router-dom";
 import { FaUserCircle, FaSignOutAlt, FaMoon, FaSun, FaBars, FaTimes } from "react-icons/fa";
@@ -6,6 +7,7 @@ import AdSidebar from "../adcomponent/AdSidebar";
 const AdminLayout = () => {
     const [open, setOpen] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const { user } = useSelector((state) => state.auth);
 
     // Initialize theme state from localStorage
     const [isDark, setIsDark] = useState(() => {
@@ -80,8 +82,11 @@ const AdminLayout = () => {
                             <FaBars className="text-[#0F172A] dark:text-dark-heading text-base sm:text-xl" />
                         </button>
 
-                        <Link to="/admin" className="text-lg sm:text-xl md:text-2xl font-semibold text-[#0F172A] dark:text-dark-heading truncate">
-                            Admin Panel
+                        <Link
+                            to="/admin"
+                            className="text-lg sm:text-xl md:text-2xl font-semibold text-[#0F172A] dark:text-dark-heading truncate"
+                        >
+                            {user?.role === "rider" ? "Rider Panel" : "Admin Panel"}
                         </Link>
                     </div>
 

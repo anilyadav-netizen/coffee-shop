@@ -49,11 +49,12 @@ import DeliveryOrders from "./Admin/adpages/DeliveryOrders";
 import DeliveryDetailsPage from "./Admin/adpages/DeliveryDetailsPage";
 import TablePage from "./Admin/adpages/TablePage";
 import { useSelector } from "react-redux";
+import { Navigate } from "react-router-dom";
 
 function App() {
 
   const dispatch = useDispatch();
-  const { token, authChecked } = useSelector((state) => state.auth);
+  const { token, authChecked, user } = useSelector((state) => state.auth);
 
   useEffect(() => {
     if (token && !authChecked) {
@@ -106,12 +107,21 @@ function App() {
         <Route
           path="/admin"
           element={
-            <RoleRoute allowedRoles={["admin"]}>
+            <RoleRoute allowedRoles={["admin", "rider"]}>
               <AdminLayout />
             </RoleRoute>
           }
         >
-          <Route index element={<Dashboard />} />
+          <Route
+            index
+            element={
+              user?.role === "rider" ? (
+                <Navigate to="/admin/orders/delivery" replace />
+              ) : (
+                <Dashboard />
+              )
+            }
+          />
 
           <Route path="products" element={<Products />} />
           <Route path="add-product" element={<AddProduct />} />

@@ -27,9 +27,7 @@ import { logout } from "../../redux/Slicer/authSlice";
 
 const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
 
-
   const dispatch = useDispatch();
-
   const { user } = useSelector(state => state.auth);
   const navigate = useNavigate();
   const [profileOpen, setProfileOpen] = useState(false);
@@ -45,7 +43,7 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
         name: "Dashboard",
         path: "/admin",
         icon: <MdDashboard size={20} />,
-        roles: ["admin", "rider", "user"]
+        roles: ["admin"]
       },
       {
         name: "Products",
@@ -69,7 +67,7 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
         name: "Dine In Orders",
         path: "/admin/orders/dine-in",
         icon: <GiKnifeFork size={20} />,
-        roles: ["admin", "rider"]
+        roles: ["admin"]
       },
       {
         name: "Delivery Orders",

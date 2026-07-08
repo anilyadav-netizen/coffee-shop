@@ -560,16 +560,6 @@ const DeliveryOrders = () => {
               Manage and track all delivery orders {notification ? '🔔' : ''}
             </p>
           </div>
-          
-          <div className="flex items-center gap-3 ml-12 md:ml-0">
-            <button className="px-4 py-2 bg-white dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#1E293B] rounded-lg text-sm text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#2D3748] transition-colors flex items-center gap-2">
-              <FaPrint />
-              <span className="hidden sm:inline">Export</span>
-            </button>
-            <button className="px-4 py-2 bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] text-white rounded-lg text-sm font-medium hover:shadow-lg hover:shadow-[#4F46E5]/25 transition-all hover:scale-105">
-              + New Delivery
-            </button>
-          </div>
         </div>
       </div>
 

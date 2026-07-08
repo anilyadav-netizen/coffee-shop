@@ -101,14 +101,14 @@ const Login = () => {
 
         if (loginUser.fulfilled.match(result)) {
 
-            // Latest profile fetch
             const profile = await dispatch(getProfile()).unwrap();
 
-            console.log("PROFILE =", profile);
-
-            // ✅ Role based redirect
             if (profile.role === "admin") {
                 navigate("/admin", { replace: true });
+
+            } else if (profile.role === "rider") {
+                navigate("/admin", { replace: true });   // ✅ Change yahi hai
+
             } else {
                 navigate("/", { replace: true });
             }
@@ -253,7 +253,7 @@ const Login = () => {
                         </div>
 
                         {/* Error/Success Messages */}
-                        
+
                         {isAuthenticated && (
                             <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-3 text-sm text-green-600">
                                 Login successful! Redirecting...

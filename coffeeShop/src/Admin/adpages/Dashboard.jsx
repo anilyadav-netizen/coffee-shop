@@ -443,7 +443,6 @@ const Dashboard = () => {
                         Recent Orders
                     </h3>
                     <div className="mt-4 space-y-3">
-                        console.log(recentOrders);
                         {stats.recentOrders.map((order, idx) => (
                             <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-[#F8FAFC] dark:bg-dark-bg/50">
                                 <div>
