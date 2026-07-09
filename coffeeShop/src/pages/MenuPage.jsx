@@ -576,6 +576,7 @@ const MenuPage = () => {
                                             key={item._id}
                                             ref={(el) => (cardRefs.current[item._id] = el)}
                                             data-id={item._id}
+                                            onClick={() => navigate(`/product/${item._id}`)} // ✅ Add this line
                                             className={`group  bg-white/10 border border-white/20 rounded-xl sm:rounded-2xl shadow-md shadow-black/10 hover:shadow-lg hover:shadow-[#0D7C53]/20 transition-all duration-700 overflow-hidden hover:-translate-y-1 flex flex-col h-full hover:bg-white/15
                                                 ${isVisible
                                                     ? 'opacity-100 translate-x-0'
@@ -590,7 +591,7 @@ const MenuPage = () => {
                                                 <img
                                                     src={item.image}
                                                     alt={item.name}
-                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                                    className="w-full h-full object-fill group-hover:scale-110 transition-transform duration-700"
                                                     onError={(e) => {
                                                         e.target.src = "https://placehold.co/400x300/e2e8f0/64748b?text=No+Image";
                                                     }}
@@ -660,7 +661,7 @@ const MenuPage = () => {
                                                             </span>
                                                         )}
                                                     </div>
-                                                   
+
                                                 </div>
 
                                                 {/* Add to Cart Button */}
@@ -708,25 +709,23 @@ const MenuPage = () => {
                                 <button
                                     onClick={() => handlePageChange(currentPage - 1)}
                                     disabled={currentPage === 1}
-                                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-white/20 text-white text-sm sm:text-base transition-all duration-200 ${
-                                        currentPage === 1
-                                            ? "opacity-50 cursor-not-allowed"
-                                            : "hover:bg-white/20 hover:border-white/30"
-                                    }`}
+                                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-white/20 text-white text-sm sm:text-base transition-all duration-200 ${currentPage === 1
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : "hover:bg-white/20 hover:border-white/30"
+                                        }`}
                                 >
                                     Previous
                                 </button>
-                                
+
                                 <div className="flex flex-wrap gap-1">
                                     {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                                         <button
                                             key={page}
                                             onClick={() => handlePageChange(page)}
-                                            className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg border transition-all duration-200 text-sm sm:text-base ${
-                                                currentPage === page
-                                                    ? "bg-[#0D7C53] text-white border-[#0D7C53] shadow-lg shadow-[#0D7C53]/30"
-                                                    : "border-white/20 text-white hover:bg-white/20 hover:border-white/30"
-                                            }`}
+                                            className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg border transition-all duration-200 text-sm sm:text-base ${currentPage === page
+                                                ? "bg-[#0D7C53] text-white border-[#0D7C53] shadow-lg shadow-[#0D7C53]/30"
+                                                : "border-white/20 text-white hover:bg-white/20 hover:border-white/30"
+                                                }`}
                                         >
                                             {page}
                                         </button>
@@ -736,11 +735,10 @@ const MenuPage = () => {
                                 <button
                                     onClick={() => handlePageChange(currentPage + 1)}
                                     disabled={currentPage === totalPages}
-                                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-white/20 text-white text-sm sm:text-base transition-all duration-200 ${
-                                        currentPage === totalPages
-                                            ? "opacity-50 cursor-not-allowed"
-                                            : "hover:bg-white/20 hover:border-white/30"
-                                    }`}
+                                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-white/20 text-white text-sm sm:text-base transition-all duration-200 ${currentPage === totalPages
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : "hover:bg-white/20 hover:border-white/30"
+                                        }`}
                                 >
                                     Next
                                 </button>

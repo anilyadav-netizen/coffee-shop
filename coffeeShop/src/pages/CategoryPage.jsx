@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux"
+import { useNavigate } from "react-router-dom";
 import {
   COFFEE_PRODUCTS,
   getDiscountPercentage,
@@ -68,6 +69,7 @@ const CategoryPage = () => {
   };
 
   // ✅ Handle Add to Cart from Card - FIXED: Added amount field
+  const navigate = useNavigate()
   const handleAddToCart = (product, e) => {
     e.stopPropagation();
 
@@ -259,8 +261,8 @@ const CategoryPage = () => {
                   <div
                     onMouseEnter={() => setHoveredId(productId)}
                     onMouseLeave={() => setHoveredId(null)}
-                    onClick={() => setSelectedProduct(product)}
-                    className="group backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl overflow-hidden shadow-2xl shadow-black/10 hover:shadow-[#0D7C53]/20 transition-all duration-500 hover:-translate-y-2 hover:bg-white/15 relative"
+                    onClick={() => navigate(`/product/${productId}`)}
+                    className="group backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl overflow-hidden shadow-2xl shadow-black/10 hover:shadow-[#0D7C53]/20 transition-all duration-500 hover:-translate-y-2 hover:bg-white/15 relative cursor-pointer"
                   >
                     <div className="relative overflow-hidden aspect-[4/3]">
                       <img
@@ -284,7 +286,10 @@ const CategoryPage = () => {
                       {/* Wishlist Button */}
                       <button
                         className="absolute top-3 right-3 z-10 w-9 h-9 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:bg-white transition-all duration-300 hover:scale-110"
-                        onClick={(e) => handleWishlistToggle(product, e)}
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent navigation when clicking wishlist
+                          handleWishlistToggle(product, e);
+                        }}
                       >
                         <HeartIcon isWishlisted={isWishlisted} />
                       </button>
@@ -329,7 +334,10 @@ const CategoryPage = () => {
 
                       <button
                         className="mt-2 w-full bg-gradient-to-r bg-emerald-500 hover:bg-emerald-600 text-white from-[#0D7C53] to-[#169466] py-2.5 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 group/btn"
-                        onClick={(e) => handleAddToCart(product, e)}
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent navigation when clicking Add to Cart
+                          handleAddToCart(product, e);
+                        }}
                       >
                         <svg className="w-4 h-4 group-hover/btn:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />

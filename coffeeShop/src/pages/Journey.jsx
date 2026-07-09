@@ -73,17 +73,6 @@ const Journey = () => {
 
     return (
         <section ref={sectionRef} className="relative py-2 md:py-6 px-4 overflow-hidden">
-            {/* ========== GLASS BACKGROUND ========== */}
-            {/* <div className="absolute inset-0 -z-10">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />
-                <div className="absolute inset-0 bg-gradient-to-tr from-[#EDE0D4]/20 via-transparent to-[#D4B896]/10" />
-                <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-amber-400/15 rounded-full blur-[120px] animate-pulse-slow" />
-                <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-amber-700/10 rounded-full blur-[100px] animate-pulse-slow-delay" />
-                <div className="absolute inset-0 pointer-events-none opacity-10">
-                    <div className="absolute top-20 left-10 text-6xl rotate-12 animate-float">🫘</div>
-                    <div className="absolute bottom-32 right-20 text-6xl -rotate-12 animate-float-delay">☕</div>
-                </div>
-            </div> */}
 
             <div className="max-w-[104rem] mx-auto relative z-10">
                 {/* ========== HEADER ========== */}
@@ -112,7 +101,7 @@ const Journey = () => {
                             <img
                                 src={currentStep.image}
                                 alt={currentStep.title}
-                                className="w-full h-[350px] md:h-[450px] lg:h-[500px] object-cover transition-transform duration-700 group-hover:scale-105"
+                                className="w-full h-[350px] md:h-[450px] lg:h-[500px] object-fill transition-transform duration-700 group-hover:scale-105"
                             />
                             {/* Gradient Overlay */}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>

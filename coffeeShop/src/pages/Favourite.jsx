@@ -369,8 +369,8 @@ const Favourite = () => {
                                             <button
                                                 onClick={(e) => handleAddToCart(item, e)}
                                                 className={`w-full mt-2 font-medium py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group/btn ${isAdded
-                                                        ? "bg-emerald-500 text-white hover:bg-emerald-600"
-                                                        : "bg-gradient-to-r from-[#0D7C53] to-[#169466] text-white hover:shadow-lg hover:shadow-[#0D7C53]/30 hover:scale-[1.02]"
+                                                    ? "bg-emerald-500 text-white hover:bg-emerald-600"
+                                                    : "bg-gradient-to-r from-[#0D7C53] to-[#169466] text-white hover:shadow-lg hover:shadow-[#0D7C53]/30 hover:scale-[1.02]"
                                                     }`}
                                             >
                                                 {isAdded ? (

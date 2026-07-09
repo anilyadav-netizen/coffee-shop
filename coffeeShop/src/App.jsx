@@ -50,6 +50,7 @@ import DeliveryDetailsPage from "./Admin/adpages/DeliveryDetailsPage";
 import TablePage from "./Admin/adpages/TablePage";
 import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
+import DetailsPage from "./pages/DetailsPage";
 
 function App() {
 
@@ -83,6 +84,7 @@ function App() {
           <Route path="profile" element={<Profile />} />
           <Route path="address/new" element={<UpdateAddress />} />
           <Route path="address/:addressId" element={<UpdateAddress />} />
+          <Route path="/product/:id" element={<DetailsPage />} />
 
           <Route
             path="cart"

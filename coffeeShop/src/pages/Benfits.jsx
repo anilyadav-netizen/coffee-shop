@@ -18,23 +18,7 @@ const Benefits = () => {
 
     return (
 
-        <section className="relative py-6 px-4 overflow-hidden">
-
-            {/* ========== GLASS EFFECT BACKGROUND ========== */}
-            {/* <div className="absolute inset-0 -z-10">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />
-                <div className="absolute inset-0 bg-gradient-to-tr from-[#EDE0D4]/20 via-transparent to-[#D4B896]/10" />
-                <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-amber-400/15 rounded-full blur-[120px] animate-pulse-slow" />
-                <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-amber-700/10 rounded-full blur-[100px] animate-pulse-slow-delay" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[150px] animate-pulse-slow" />
-                <div className="absolute inset-0 pointer-events-none opacity-10">
-                    <div className="absolute top-20 left-10 text-6xl rotate-12 animate-float">🫘</div>
-                    <div className="absolute bottom-32 right-20 text-6xl -rotate-12 animate-float-delay">🫘</div>
-                    <div className="absolute top-1/3 right-1/4 text-4xl rotate-45 animate-float-slow">☕</div>
-                    <div className="absolute bottom-1/4 left-1/3 text-5xl -rotate-45 animate-float-delay">🫘</div>
-                </div>
-            </div> */}
-
+        <section className="relative py-6 px-4 overflow-hidden">          
             {/* ========== CONTENT ========== */}
             <div className="max-w-[104rem] mx-auto relative z-10">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center rounded-xl">
@@ -46,7 +30,7 @@ const Benefits = () => {
                             <img
                                 src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&h=900&fit=crop&auto=format"
                                 alt="Coffee Benefits"
-                                className="w-full h-[400px] md:h-[450px] lg:h-[500px] object-cover"
+                                className="w-full h-[400px] md:h-[450px] lg:h-[500px] object-fill"
                             />
 
                             {/* Gradient Overlay */}

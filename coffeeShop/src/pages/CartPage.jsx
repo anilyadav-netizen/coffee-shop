@@ -225,7 +225,6 @@ const CartPage = () => {
 
     // ✅ Clear cart
     const handleClearCart = async () => {
-        if (window.confirm('Are you sure you want to clear your cart?')) {
             setError(null);
             try {
                 for (const item of cartItems) {
@@ -239,7 +238,7 @@ const CartPage = () => {
                 console.error("❌ Failed to clear cart:", error);
                 setError("Failed to clear cart. Please try again.");
             }
-        }
+        
     };
 
     const handleContinueShopping = () => {
@@ -483,7 +482,6 @@ const CartPage = () => {
                         };
 
                         await dispatch(verifyPayment(verificationData)).unwrap();
-                        alert("🎉 Payment successful! Your order has been placed.");
                         await dispatch(getCart()).unwrap();
                         navigate("/orderDetails");
 
