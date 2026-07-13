@@ -125,18 +125,32 @@ const Journey = () => {
 
                     {/* ---------- RIGHT SIDE: BIG IMAGE (COMPLETELY OPEN - NO BORDER, NO DIV) ---------- */}
                     <div className="flex-1 w-full lg:max-w-md xl:max-w-lg">
-                        {/* No wrapper div - directly the image with animation */}
                         <div
                             key={currentStep?.id}
-                            className="relative w-full aspect-[4/3] bg-cover bg-center transition-all duration-700 ease-in-out transform hover:scale-[1.02]"
-                            style={{ backgroundImage: `url(${currentStep?.rightImage})` }}
+                            className="
+            relative
+            w-full
+            aspect-[4/3]
+            bg-cover
+            bg-center
+            bg-no-repeat
+            rounded-2xl
+            overflow-hidden
+            transition-all
+            duration-700
+            ease-in-out
+            hover:scale-[1.02]
+        "
+                            style={{
+                                backgroundImage: `url(${currentStep?.rightImage})`,
+                            }}
                         >
-                            {/* Only a subtle gradient overlay for text readability */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent rounded-2xl"></div>
+                            {/* Soft Overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent"></div>
 
-                            {/* Step indicator on image */}
+                            {/* Step Indicator */}
                             <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-full text-xs font-mono font-bold text-[#4A2C1D] shadow-md">
-                                {String(activeStep).padStart(2, '0')} / {String(allSteps.length).padStart(2, '0')}
+                                {String(activeStep).padStart(2, "0")} / {String(allSteps.length).padStart(2, "0")}
                             </div>
                         </div>
                     </div>
