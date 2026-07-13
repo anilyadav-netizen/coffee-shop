@@ -198,7 +198,7 @@ const Favourite = () => {
             {/* Content */}
             <div className="max-w-[104rem] mx-auto relative z-10">
                 {/* Header */}
-                <div className="bg-gradient-to-r from-white to-[#FFF8F5] rounded-3xl p-8 shadow-lg shadow-[#E85D3A]/5 border border-[#FEE7DD] mb-10 transition-all duration-700">
+                <div className="bg-gradient-to-r from-white to-[#FFF8F5] rounded-3xl p-8 shadow-lg shadow-[#E85D3A]/5 border border-[#FEE7DD] mb-12 transition-all duration-700">
                     <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                         <div>
                             <h2 className="text-4xl md:text-5xl font-bold text-[#1F2937] tracking-tight mb-2 flex items-center gap-3">
@@ -209,7 +209,11 @@ const Favourite = () => {
                         </div>
                         <button
                             onClick={handleViewAll}
+<<<<<<< HEAD
+                            className="group flex items-center gap-3 px-8 py-3.5 bg-white text-[#1F2937] rounded-full font-medium hover:bg-[#E85D3A] hover:text-white transition-all duration-500 border border-[#FEE7DD] hover:border-transparent hover:scale-105 hover:shadow-lg hover:shadow-[#E85D3A]/20"
+=======
                             className="group flex items-center gap-3 px-8 py-3.5  rounded-full font-medium bg-white text-[#E85D3A] hover:bg-[#E85D3A] hover:text-white transition-all duration-500 border border-[#FEE7DD] hover:border-transparent hover:scale-105 hover:shadow-lg hover:shadow-[#E85D3A]/20"
+>>>>>>> 4123e31e74c2021489caabb5d4ff78c95ef623e8
                         >
                             <span>View All Menu</span>
                             <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
@@ -237,7 +241,7 @@ const Favourite = () => {
                                 return (
                                     <div
                                         key={item._id}
-                                        className="group rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-500 hover:-translate-y-2 border border-[#F3F4F6] hover:border-[#FEE7DD]"
+                                        className="group rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-[#F3F4F6] hover:border-[#FEE7DD]"
                                     >
                                         {/* Image Container */}
                                         <div
@@ -283,17 +287,19 @@ const Favourite = () => {
                                             {/* Wishlist Icon */}
                                             <button
                                                 onClick={(e) => handleWishlistToggle(item, e)}
-                                                className={`absolute top-3 right-3 z-20 w-9 h-9 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 border ${isWishlisted
-                                                    ? "border-[#E85D3A] bg-[#FFF0EA]"
-                                                    : "border-[#F3F4F6] hover:border-[#E85D3A]"
-                                                    }`}
+                                                className={`absolute top-3 right-3 z-20 w-9 h-9 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 border ${
+                                                    isWishlisted
+                                                        ? "border-[#E85D3A] bg-[#FFF0EA]"
+                                                        : "border-[#F3F4F6] hover:border-[#E85D3A]"
+                                                }`}
                                             >
                                                 <Heart
                                                     size={16}
-                                                    className={`transition-colors duration-300 ${isWishlisted
-                                                        ? "fill-[#E85D3A] text-[#E85D3A]"
-                                                        : "text-[#6B7280]"
-                                                        }`}
+                                                    className={`transition-colors duration-300 ${
+                                                        isWishlisted
+                                                            ? "fill-[#E85D3A] text-[#E85D3A]"
+                                                            : "text-[#6B7280]"
+                                                    }`}
                                                 />
                                             </button>
 
@@ -351,10 +357,11 @@ const Favourite = () => {
                                             {/* Add to Cart Button - Improved Food Style */}
                                             <button
                                                 onClick={(e) => handleAddToCart(item, e)}
-                                                className={`w-full mt-3.5 font-semibold py-2.5 rounded-xl transition-all duration-500 flex items-center justify-center gap-2 text-sm group/btn ${isAdded
-                                                    ? "bg-gradient-to-r from-[#10B981] to-[#059669] text-white shadow-lg shadow-[#10B981]/30"
-                                                    : "bg-gradient-to-r from-[#E85D3A] to-[#F0744F] text-white hover:shadow-2xl hover:shadow-[#E85D3A]/30 hover:scale-[1.02] hover:-translate-y-0.5"
-                                                    }`}
+                                                className={`w-full mt-3.5 font-semibold py-2.5 rounded-xl transition-all duration-500 flex items-center justify-center gap-2 text-sm group/btn ${
+                                                    isAdded
+                                                        ? "bg-gradient-to-r from-[#10B981] to-[#059669] text-white shadow-lg shadow-[#10B981]/30"
+                                                        : "bg-gradient-to-r from-[#E85D3A] to-[#F0744F] text-white hover:shadow-2xl hover:shadow-[#E85D3A]/30 hover:scale-[1.02] hover:-translate-y-0.5"
+                                                }`}
                                             >
                                                 {isAdded ? (
                                                     <>

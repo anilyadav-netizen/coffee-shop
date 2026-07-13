@@ -18,7 +18,7 @@ const Benefits = () => {
 
     return (
 
-        <section className="relative py-6 px-4 overflow-hidden">
+        <section className="relative py-6 px-4 overflow-hidden ">
             {/* ========== CONTENT ========== */}
             <div className="max-w-[104rem] mx-auto relative z-10">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center rounded-xl">
