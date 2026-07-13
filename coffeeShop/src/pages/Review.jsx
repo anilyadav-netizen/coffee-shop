@@ -134,7 +134,7 @@ const Review = () => {
                             {visibleReviews.map((review) => (
                                 <div
                                     key={review.id}
-                                    className="bg-[#FDF8F4] rounded-2xl p-3 border border-[#F5E6D8] hover:border-[#E8D5C4] transition-all duration-300 hover:shadow-lg"
+                                    className="bg-[#FBF6F0] rounded-2xl p-3 border border-[#F5E6D8] hover:border-[#E8D5C4] transition-all duration-300 hover:shadow-lg"
                                 >
                                     {/* Header: Avatar + Name + Location */}
                                     <div className="flex items-center gap-3 mb-3">

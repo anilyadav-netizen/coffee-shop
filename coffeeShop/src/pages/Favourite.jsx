@@ -209,11 +209,7 @@ const Favourite = () => {
                         </div>
                         <button
                             onClick={handleViewAll}
-<<<<<<< HEAD
-                            className="group flex items-center gap-3 px-8 py-3.5 bg-white text-[#1F2937] rounded-full font-medium hover:bg-[#E85D3A] hover:text-white transition-all duration-500 border border-[#FEE7DD] hover:border-transparent hover:scale-105 hover:shadow-lg hover:shadow-[#E85D3A]/20"
-=======
                             className="group flex items-center gap-3 px-8 py-3.5  rounded-full font-medium bg-white text-[#E85D3A] hover:bg-[#E85D3A] hover:text-white transition-all duration-500 border border-[#FEE7DD] hover:border-transparent hover:scale-105 hover:shadow-lg hover:shadow-[#E85D3A]/20"
->>>>>>> 4123e31e74c2021489caabb5d4ff78c95ef623e8
                         >
                             <span>View All Menu</span>
                             <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
