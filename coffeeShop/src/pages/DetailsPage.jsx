@@ -26,6 +26,18 @@ import {
     Info
 } from 'lucide-react';
 
+// Define HeartIcon component
+const HeartIcon = ({ isWishlisted = false, className = "" }) => (
+    <svg
+        className={`w-5 h-5 transition-colors ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-400 group-hover:text-red-500'} ${className}`}
+        fill={isWishlisted ? "currentColor" : "none"}
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+    >
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+    </svg>
+);
+
 const DetailsPage = () => {
     const { id } = useParams();
     const dispatch = useDispatch();
@@ -49,7 +61,10 @@ const DetailsPage = () => {
     const isProductInWishlist = React.useMemo(() => {
         if (!product || !wishlistItems) return false;
         return wishlistItems.some(
-            (item) => item.coffee?._id === product._id || item.coffee === product._id
+            (item) => {
+                const itemId = item.coffee?._id || item.coffee?.id || item._id || item.id;
+                return itemId === product._id;
+            }
         );
     }, [product, wishlistItems]);
 
@@ -72,6 +87,17 @@ const DetailsPage = () => {
             categoryName.includes(keyword) || categoryType.includes(keyword)
         );
     }, [product]);
+
+    // Function to check if a product is in wishlist (for related products)
+    const isInWishlist = (productId) => {
+        if (!productId || !wishlistItems) return false;
+        return wishlistItems.some(
+            (item) => {
+                const itemId = item.coffee?._id || item.coffee?.id || item._id || item.id;
+                return itemId === productId;
+            }
+        );
+    };
 
     // Fetch product and wishlist on mount
     useEffect(() => {
@@ -114,7 +140,7 @@ const DetailsPage = () => {
         }
     };
 
-    // Handle Add to Cart
+    // Handle Add to Cart for main product
     const handleAddToCart = () => {
         if (!isAuthenticated) {
             toast.error("Please login to add items to cart");
@@ -143,7 +169,38 @@ const DetailsPage = () => {
             });
     };
 
-    // Handle Wishlist toggle
+    // Handle Add to Cart for related products
+    const handleRelatedAddToCart = (relatedProduct, e) => {
+        e.stopPropagation();
+
+        if (!isAuthenticated) {
+            toast.error("Please login to add items to cart");
+            navigate("/login");
+            return;
+        }
+
+        if (relatedProduct?.stock === 0) {
+            toast.error("Product is out of stock");
+            return;
+        }
+
+        const cartData = {
+            coffeeId: relatedProduct._id,
+            quantity: 1,
+            amount: relatedProduct.discountPrice || relatedProduct.price,
+        };
+
+        dispatch(addToCart(cartData))
+            .unwrap()
+            .then(() => {
+                toast.success(`${relatedProduct.name} added to cart!`);
+            })
+            .catch((error) => {
+                toast.error(error.message || "Failed to add to cart");
+            });
+    };
+
+    // Handle Wishlist toggle for main product
     const handleWishlistToggle = () => {
         if (!isAuthenticated) {
             toast.error("Please login to manage wishlist");
@@ -155,7 +212,10 @@ const DetailsPage = () => {
 
         if (isProductInWishlist) {
             const wishlistItem = wishlistItems.find(
-                (item) => item.coffee?._id === product._id || item.coffee === product._id
+                (item) => {
+                    const itemId = item.coffee?._id || item.coffee?.id || item._id || item.id;
+                    return itemId === product._id;
+                }
             );
 
             if (wishlistItem) {
@@ -172,6 +232,47 @@ const DetailsPage = () => {
                 .catch((error) => {
                     toast.error(error.message || "Failed to add to wishlist");
                     dispatch(localToggleWishlist({ coffeeId: product._id }));
+                });
+        }
+    };
+
+    // Handle Wishlist toggle for related products
+    const handleRelatedWishlistToggle = (relatedProduct, e) => {
+        e.stopPropagation();
+
+        if (!isAuthenticated) {
+            toast.error("Please login to manage wishlist");
+            navigate("/login");
+            return;
+        }
+
+        const productId = relatedProduct._id;
+        const isWishlisted = isInWishlist(productId);
+
+        dispatch(localToggleWishlist({ coffeeId: productId }));
+
+        if (isWishlisted) {
+            const wishlistItem = wishlistItems.find(
+                (item) => {
+                    const itemId = item.coffee?._id || item.coffee?.id || item._id || item.id;
+                    return itemId === productId;
+                }
+            );
+
+            if (wishlistItem) {
+                dispatch(removeFromWishlist(wishlistItem._id))
+                    .unwrap()
+                    .catch((error) => {
+                        toast.error(error.message || "Failed to remove from wishlist");
+                        dispatch(localToggleWishlist({ coffeeId: productId }));
+                    });
+            }
+        } else {
+            dispatch(addToWishlist({ coffeeId: productId }))
+                .unwrap()
+                .catch((error) => {
+                    toast.error(error.message || "Failed to add to wishlist");
+                    dispatch(localToggleWishlist({ coffeeId: productId }));
                 });
         }
     };
@@ -474,63 +575,97 @@ const DetailsPage = () => {
                             Related <span className="text-[#0D7C53]">Products</span>
                         </h2>
                         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-                            {relatedProducts.map((relatedProduct) => (
-                                <div
-                                    key={relatedProduct._id}
-                                    className="group bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-[1.02] flex flex-col"
-                                    onClick={() => navigate(`/product/${relatedProduct._id}`)}
-                                >
-                                    <div className="relative overflow-hidden bg-white/50 flex-shrink-0">
-                                        <img
-                                            src={relatedProduct.image}
-                                            alt={relatedProduct.name}
-                                            className="w-full h-[120px] sm:h-[150px] md:h-[180px] lg:h-[200px] object-cover group-hover:scale-105 transition-transform duration-300"
-                                        />
-                                        {relatedProduct.discountPrice && (
-                                            <span className="absolute top-2 right-2 bg-red-500 text-white px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold">
-                                                {relatedProduct.discountPercentage}% OFF
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div className="p-2 sm:p-3 md:p-4 flex flex-col flex-1">
-                                        <h3 className="font-semibold text-gray-800 text-sm sm:text-base truncate">
-                                            {relatedProduct.name}
-                                        </h3>
+                            {relatedProducts.map((relatedProduct) => {
+                                // Calculate discount if needed
+                                const discount = relatedProduct.discountPrice
+                                    ? Math.round(((relatedProduct.price - relatedProduct.discountPrice) / relatedProduct.price) * 100)
+                                    : 0;
 
-                                        {/* Description - New */}
-                                        <p className="text-gray-500 text-[12px] sm:text-sm mt-1 line-clamp-2 flex-1">
-                                            {relatedProduct.description || 'Delicious item from our menu'}
-                                        </p>
+                                const isWishlisted = isInWishlist(relatedProduct._id);
 
-                                        <div className="flex items-center gap-2 mt-2">
-                                            {relatedProduct.discountPrice ? (
-                                                <>
-                                                    <span className="font-bold text-[#0D7C53] text-sm sm:text-base">
-                                                        ₹{relatedProduct.discountPrice}
+                                return (
+                                    <div
+                                        key={relatedProduct._id}
+                                        onClick={() => navigate(`/product/${relatedProduct._id}`)}
+                                        className="group backdrop-blur-xl bg-white/30 border border-white/40 rounded-3xl overflow-hidden shadow-2xl shadow-black/10 hover:shadow-[#0D7C53]/20 transition-all duration-500 hover:-translate-y-2 hover:bg-white/40 relative cursor-pointer flex flex-col"
+                                    >
+                                        <div className="relative overflow-hidden aspect-[4/3] bg-white/50">
+                                            <img
+                                                src={relatedProduct.image}
+                                                alt={relatedProduct.name}
+                                                className="w-full h-full object-fill group-hover:scale-[1.02] transition duration-700 ease-out"
+                                            />
+
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                                            {relatedProduct.discountPrice && (
+                                                <span className="absolute top-3 left-3 z-10 bg-gradient-to-r from-green-600 to-[#0D7C53] text-white text-xs px-3.5 py-1.5 rounded-full font-bold shadow-lg flex items-center gap-1">
+                                                    <span className="relative flex h-2 w-2">
+                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
                                                     </span>
-                                                    <span className="text-xs line-through text-gray-400">
-                                                        ₹{relatedProduct.price}
-                                                    </span>
-                                                </>
-                                            ) : (
-                                                <span className="font-bold text-[#0D7C53] text-sm sm:text-base">
-                                                    ₹{relatedProduct.price}
+                                                    {discount}% OFF
                                                 </span>
                                             )}
+
+                                            {/* Wishlist Button */}
+                                            <button
+                                                className="absolute top-3 right-3 z-10 w-9 h-9 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:bg-white transition-all duration-300 hover:scale-110"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleRelatedWishlistToggle(relatedProduct, e);
+                                                }}
+                                            >
+                                                <HeartIcon isWishlisted={isWishlisted} />
+                                            </button>
                                         </div>
 
-                                        <button
-                                            className="mt-2 w-full py-1.5 sm:py-2 bg-[#0D7C53] text-white rounded-full text-xs sm:text-sm font-medium hover:bg-green-700 transition-colors"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                navigate(`/product/${relatedProduct._id}`);
-                                            }}
-                                        >
-                                            View Details
-                                        </button>
+                                        {/* Content Area */}
+                                        <div className="p-4 bg-gradient-to-b from-white/20 to-white/10 backdrop-blur-sm flex flex-col flex-1">
+                                            <h3 className="font-semibold text-gray-800 text-sm sm:text-base truncate">
+                                                {relatedProduct.name}
+                                            </h3>
+
+                                            <p className="text-gray-500 text-[12px] sm:text-sm mt-1 line-clamp-2 flex-1">
+                                                {relatedProduct.description || 'Delicious item from our menu'}
+                                            </p>
+
+                                            <div className="flex items-center gap-2 mt-2">
+                                                {relatedProduct.discountPrice ? (
+                                                    <>
+                                                        <span className="font-bold text-[#0D7C53] text-sm sm:text-base">
+                                                            ₹{relatedProduct.discountPrice}
+                                                        </span>
+                                                        <span className="text-xs line-through text-gray-400">
+                                                            ₹{relatedProduct.price}
+                                                        </span>
+                                                        <span className="ml-auto text-xs bg-green-100 text-[#0D7C53] px-2 py-0.5 rounded-full font-semibold">
+                                                            Save ₹{relatedProduct.price - relatedProduct.discountPrice}
+                                                        </span>
+                                                    </>
+                                                ) : (
+                                                    <span className="font-bold text-[#0D7C53] text-sm sm:text-base">
+                                                        ₹{relatedProduct.price}
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            <button
+                                                className="mt-2 w-full bg-gradient-to-r bg-emerald-500 hover:bg-emerald-600 text-white from-[#0D7C53] to-[#169466] py-2.5 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 group/btn text-sm"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleRelatedAddToCart(relatedProduct, e);
+                                                }}
+                                            >
+                                                <svg className="w-4 h-4 group-hover/btn:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                                </svg>
+                                                Add to Cart
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
                 )}

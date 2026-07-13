@@ -12,12 +12,13 @@ import bgImage from '../assets/Images/HomePageBgImage.png'
 import homeImage from '../assets/Images/homeImage.png'
 import zero from '../assets/Images/zero.png'
 import WhyUs from './WhyUs'
+import OurStore from './OurStore'
 const Home = () => {
     return (
         <div
-            className="relative min-h-screen bg-cover bg-center bg-fixed"
+            className="relative min-h-screen bg-cover bg-black bg-center bg-fixed"
             style={{
-                backgroundImage: `url(${zero})`,
+                backgroundImage: `url()`,
             }}
         >
             {/* Overlay */}
@@ -32,6 +33,7 @@ const Home = () => {
                 <WhyUs/> 
                 <Benfits />
                 <Journey />
+                <OurStore/>
                 <Review />
             </div>
         </div>

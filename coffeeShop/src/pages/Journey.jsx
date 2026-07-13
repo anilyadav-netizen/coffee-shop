@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from "react-router-dom";
 import {
     Coffee,
     Flame,
@@ -16,6 +17,9 @@ import {
 } from '../data/journeyData';
 
 const Journey = () => {
+
+    const navigate = useNavigate();
+
     const [activeStep, setActiveStep] = useState(0);
     const [isVisible, setIsVisible] = useState(false);
     const sectionRef = useRef(null);
@@ -35,6 +39,10 @@ const Journey = () => {
             Package: <Package className={className} />
         };
         return icons[iconName] || <Coffee className={className} />;
+    };
+
+    const handleJourneyClick = () => {
+        navigate("/coffee-journey");
     };
 
     useEffect(() => {
@@ -74,7 +82,10 @@ const Journey = () => {
     return (
         <section ref={sectionRef} className="relative py-2 md:py-6 px-4 overflow-hidden">
 
-            <div className="max-w-[104rem] mx-auto relative z-10">
+            <div
+                onClick={handleJourneyClick}
+                className="max-w-[104rem] mx-auto relative z-10 cursor-pointer"
+            >
                 {/* ========== HEADER ========== */}
                 <div className="text-center mb-8">
                     <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10  rounded-full mb-2 border border-white/20">

@@ -551,7 +551,7 @@ const MenuPage = () => {
 
                         {/* Items Grid with Auto Animation */}
                         {currentItems && currentItems.length > 0 ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 pb-12">
+                            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 pb-12">
                                 {currentItems.map((item, index) => {
                                     let itemCategoryName = 'Uncategorized';
                                     if (item.category && typeof item.category === 'object') {
@@ -587,7 +587,7 @@ const MenuPage = () => {
                                             }}
                                         >
                                             {/* Image Container */}
-                                            <div className="relative h-40 sm:h-48 md:h-56 overflow-hidden bg-black/30 flex-shrink-0">
+                                            <div className="relative h-28 sm:h-48 md:h-56 overflow-hidden bg-black/30 flex-shrink-0">
                                                 <img
                                                     src={item.image}
                                                     alt={item.name}
@@ -650,7 +650,7 @@ const MenuPage = () => {
                                                     </p>
                                                 </div>
 
-                                                <div className="flex items-center justify-between border-t border-white/10 pt-2 mt-2">
+                                                <div className="flex items-center justify-between border-t border-white/10 pt-0 md:pt-2 mt-0 md:mt-2">
                                                     <div className="flex items-center gap-1 sm:gap-2">
                                                         <span className="text-base sm:text-lg md:text-xl font-bold text-white">
                                                             ₹{displayPrice.toFixed(2)}
@@ -667,7 +667,7 @@ const MenuPage = () => {
                                                 {/* Add to Cart Button */}
                                                 <button
                                                     onClick={(e) => handleAddToCart(item, e)}
-                                                    className="w-full mt-2 sm:mt-3 md:mt-4 font-medium py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base flex-shrink-0 bg-gradient-to-r from-[#0D7C53] to-[#169466] text-white hover:shadow-lg hover:shadow-[#0D7C53]/40 hover:scale-[1.02]"
+                                                    className="w-full mt-1 sm:mt-3 md:mt-4 font-medium py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base flex-shrink-0 bg-gradient-to-r from-[#0D7C53] to-[#169466] text-white hover:shadow-lg hover:shadow-[#0D7C53]/40 hover:scale-[1.02]"
                                                 >
                                                     <ShoppingBag size={16} />
                                                     Add to Cart

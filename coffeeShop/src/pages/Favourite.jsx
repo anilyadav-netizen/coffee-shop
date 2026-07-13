@@ -161,10 +161,13 @@ const Favourite = () => {
 
     if (isLoading) {
         return (
-            <div className="min-h-[400px] flex items-center justify-center">
+            <div className="min-h-[600px] flex items-center justify-center">
                 <div className="text-center">
-                    <div className="w-12 h-12 border-4 border-[#0D7C53] border-t-transparent rounded-full animate-spin mx-auto"></div>
-                    <p className="mt-4 text-gray-600 font-medium">Loading favourites...</p>
+                    <div className="relative w-16 h-16 mx-auto">
+                        <div className="absolute inset-0 rounded-full border-2 border-[#C8A97E]/20"></div>
+                        <div className="absolute inset-0 rounded-full border-2 border-[#C8A97E] border-t-transparent animate-spin"></div>
+                    </div>
+                    <p className="mt-6 text-[#B6B6B6] font-light tracking-wide">Loading favourites...</p>
                 </div>
             </div>
         );
@@ -172,78 +175,67 @@ const Favourite = () => {
 
     if (favourites.length === 0) {
         return (
-            <section className="relative py-16 px-4 overflow-hidden">
+            <section className="relative py-20 px-4 overflow-hidden min-h-screen">
+                {/* Premium Background */}
                 <div className="absolute inset-0 -z-10">
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />
-                    <div className="absolute inset-0 bg-gradient-to-tr from-[#EDE0D4]/20 via-transparent to-[#D4B896]/10" />
-                    <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-amber-400/15 rounded-full blur-[120px] animate-pulse-slow" />
-                    <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-amber-700/10 rounded-full blur-[100px] animate-pulse-slow-delay" />
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(200,169,126,.12),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(111,78,55,.10),transparent_35%),#0F0F0F]"></div>
+                    <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[#C8A97E]/5 rounded-full blur-[150px]"></div>
+                    <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#6F4E37]/8 rounded-full blur-[120px]"></div>
                 </div>
 
                 <div className="max-w-7xl mx-auto text-center relative z-10">
-                    <div className=" bg-white/20 border border-white/30 rounded-3xl p-12 shadow-2xl shadow-black/5 max-w-2xl mx-auto">
+                    <div className="backdrop-blur-2xl bg-white/5 border border-white/10 rounded-3xl p-16 shadow-2xl shadow-black/40 max-w-2xl mx-auto hover:scale-[1.02] transition-all duration-700 hover:shadow-[0_30px_80px_rgba(200,169,126,.15)]">
                         <div className="relative inline-block">
-                            <div className="w-32 h-32 bg-[#0D7C53]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <Heart className="w-16 h-16 text-[#0D7C53]" />
+                            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#6F4E37]/20 to-[#C8A97E]/20 flex items-center justify-center mx-auto mb-8 backdrop-blur-xl border border-white/10">
+                                <Heart className="w-16 h-16 text-[#C8A97E]" strokeWidth={1.5} />
                             </div>
-                            <div className="absolute -top-2 -right-2 w-8 h-8 bg-amber-400 rounded-full flex items-center justify-center text-white text-sm font-bold animate-pulse">
+                            <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-[#C8A97E] to-[#6F4E37] rounded-full flex items-center justify-center text-[#0F0F0F] text-xs font-bold shadow-lg shadow-[#C8A97E]/20">
                                 0
                             </div>
                         </div>
-                        <h2 className="text-3xl font-bold text-gray-800 mb-3">No Favourites Yet</h2>
-                        <p className="text-gray-500 max-w-md mx-auto mb-8">
-                            Start exploring our delicious menu and add your favourite items by clicking the heart icon.
+                        <h2 className="text-4xl font-bold text-[#F8F6F3] mb-4 tracking-tight">No Favourites Yet</h2>
+                        <p className="text-[#B6B6B6] max-w-md mx-auto mb-10 text-lg font-light leading-relaxed">
+                            Discover our curated collection of premium coffees and add your favourites with a single touch.
                         </p>
                         <button
                             onClick={handleViewAll}
-                            className="px-8 py-3 bg-gradient-to-r from-[#0D7C53] to-green-600 text-white rounded-full font-medium hover:shadow-lg transition-all duration-300 hover:scale-105"
+                            className="px-10 py-4 bg-gradient-to-r from-[#6F4E37] via-[#A67C52] to-[#C8A97E] text-[#F8F6F3] rounded-full font-medium shadow-lg shadow-[#C8A97E]/20 hover:shadow-[#C8A97E]/40 transition-all duration-500 hover:scale-105 hover:-translate-y-1 relative overflow-hidden group"
                         >
-                            Explore Menu
+                            <span className="relative z-10">Explore Premium Menu</span>
+                            <div className="absolute inset-0 bg-gradient-to-r from-[#C8A97E] via-[#A67C52] to-[#6F4E37] opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                         </button>
                     </div>
                 </div>
-
-                <style>{`
-                    @keyframes pulse-slow {
-                        0%, 100% { transform: scale(1); opacity: 0.5; }
-                        50% { transform: scale(1.1); opacity: 0.8; }
-                    }
-                    @keyframes pulse-slow-delay {
-                        0%, 100% { transform: scale(1); opacity: 0.5; }
-                        50% { transform: scale(1.15); opacity: 0.7; }
-                    }
-                    .animate-pulse-slow {
-                        animation: pulse-slow 8s ease-in-out infinite;
-                    }
-                    .animate-pulse-slow-delay {
-                        animation: pulse-slow-delay 10s ease-in-out infinite;
-                    }
-                `}</style>
             </section>
         );
     }
 
     return (
-        <section className="relative px-4 overflow-hidden pb-5">
+        <section className="relative py-12 px-4 overflow-hidden min-h-screen">
+            {/* Premium Layered Background */}
+            <div className="absolute inset-0 -z-10">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(200,169,126,.12),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(111,78,55,.10),transparent_35%),#0F0F0F]"></div>
+                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[#C8A97E]/5 rounded-full blur-[200px]"></div>
+                <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[#6F4E37]/8 rounded-full blur-[150px]"></div>
+            </div>
+
             {/* Content */}
             <div className="max-w-[104rem] mx-auto relative z-10">
-                {/* Header - Glass Effect */}
-                <div className="rounded-3xl p-6">
-                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                {/* Header - Premium Glass */}
+                <div className="backdrop-blur-2xl bg-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl shadow-black/30 mb-12 transition-all duration-700">
+                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                         <div>
-                            <div className="flex items-center gap-3">
-                                <div>
-                                    <h2 className="text-3xl font-bold text-white">All Time Favourites</h2>
-                                    <p className="text-gray-300 text-base">Items Customer love the most</p>
-                                </div>
-                            </div>
+                            <h2 className="text-4xl md:text-5xl font-bold text-[#F8F6F3] tracking-tight mb-2">
+                                All Time Favourites
+                            </h2>
+                            <p className="text-[#B6B6B6] text-lg font-light">Curated selections our customers adore</p>
                         </div>
                         <button
                             onClick={handleViewAll}
-                            className="flex items-center gap-2 px-6 py-2.5 bg-[#0D7C53]/20 text-white rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30"
+                            className="group flex items-center gap-3 px-8 py-3.5 bg-gradient-to-r from-[#6F4E37]/20 to-[#C8A97E]/20 text-[#F8F6F3] rounded-full font-medium hover:bg-gradient-to-r hover:from-[#6F4E37] hover:to-[#C8A97E] transition-all duration-500 border border-white/10 hover:border-transparent hover:scale-105 hover:shadow-lg hover:shadow-[#C8A97E]/20"
                         >
-                            View All Menu
-                            <ChevronRight size={18} />
+                            <span>View All Menu</span>
+                            <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
                         </button>
                     </div>
                 </div>
@@ -251,7 +243,7 @@ const Favourite = () => {
                 {/* Favourites Grid */}
                 {uniqueCategoryItems.length > 0 ? (
                     <>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 md:gap-8">
                             {displayItems.map((item) => {
                                 const isAdded = addedItems[item._id];
                                 const isWishlisted = wishlistItems.some(
@@ -269,122 +261,132 @@ const Favourite = () => {
                                 return (
                                     <div
                                         key={item._id}
-                                        className="group bg-white/30 border border-white/20 rounded-3xl overflow-hidden shadow-2xl shadow-black/10 hover:shadow-[#0D7C53]/20 transition-all duration-500 hover:-translate-y-2 hover:bg-white/15 relative"
+                                        className="group backdrop-blur-2xl bg-white/5 border border-white/10 rounded-3xl overflow-hidden shadow-2xl shadow-black/40 transition-all duration-500 hover:-translate-y-2 hover:scale-[1.01] hover:shadow-[0_20px_60px_rgba(200,169,126,.12)]"
                                     >
                                         {/* Image Container */}
                                         <div
-                                            className="relative h-56 overflow-hidden bg-gray-900/30 cursor-pointer"
+                                            className="relative h-64 overflow-hidden bg-[#181818] cursor-pointer"
                                             onClick={() => handleItemClick(item)}
                                         >
                                             <img
                                                 src={item.image}
                                                 alt={item.name}
-                                                className="w-full h-full object-fill group-hover:scale-110 transition-transform duration-700"
+                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                                 onError={(e) => {
-                                                    e.target.src = "https://placehold.co/400x300/e2e8f0/64748b?text=No+Image";
+                                                    e.target.src = "https://placehold.co/400x300/181818/B6B6B6?text=No+Image";
                                                 }}
                                             />
 
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                            {/* Dark Overlay */}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-[#0F0F0F] via-transparent to-transparent opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
 
-                                            {/* Discount Badge */}
+                                            {/* Category Badge - Top Left */}
+                                            <div className="absolute top-4 left-4 z-10 backdrop-blur-xl bg-white/10 border border-white/10 px-4 py-2 rounded-full shadow-xl">
+                                                <div className="flex items-center gap-2">
+                                                    {category?.icon && (
+                                                        <img
+                                                            src={category.icon}
+                                                            alt={category.name}
+                                                            className="w-5 h-5 rounded-full object-cover"
+                                                        />
+                                                    )}
+                                                    <span className="text-xs font-medium text-[#C8A97E] tracking-wider">
+                                                        {category?.name || 'Uncategorized'}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {/* Discount Badge - Premium */}
                                             {item.discountPrice && item.discountPrice < item.price && (
-                                                <div className="absolute top-3 left-3 z-10 bg-gradient-to-r from-green-600 to-[#0D7C53] text-white text-xs px-3 py-1.5 rounded-full font-bold shadow-lg flex items-center gap-1">
+                                                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 bg-gradient-to-r from-[#6F4E37] to-[#C8A97E] text-[#F8F6F3] text-xs px-4 py-2 rounded-full font-bold shadow-xl shadow-[#C8A97E]/20 flex items-center gap-2 backdrop-blur-sm border border-white/10">
                                                     <span className="relative flex h-2 w-2">
-                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C8A97E] opacity-75"></span>
+                                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-[#C8A97E]"></span>
                                                     </span>
                                                     {Math.round(((item.price - item.discountPrice) / item.price) * 100)}% OFF
                                                 </div>
                                             )}
 
-                                            {/* Wishlist Icon */}
+                                            {/* Wishlist Icon - Premium & Visible */}
                                             <button
                                                 onClick={(e) => handleWishlistToggle(item, e)}
-                                                className={`absolute top-3 right-3 z-10 w-9 h-9 bg-white/80 rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-110 hover:bg-white ${isWishlisted ? "bg-red-50" : ""
-                                                    }`}
+                                                className={`absolute top-4 right-4 z-20 w-11 h-11 backdrop-blur-xl rounded-full flex items-center justify-center shadow-xl transition-all duration-300 hover:scale-110 ${
+                                                    isWishlisted 
+                                                        ? "bg-[#C8A97E]/30 border border-[#C8A97E]/40" 
+                                                        : "bg-white/10 border border-white/20 hover:bg-white/20"
+                                                }`}
                                             >
                                                 <Heart
-                                                    size={18}
-                                                    className={
+                                                    size={20}
+                                                    className={`transition-colors duration-300 ${
                                                         isWishlisted
-                                                            ? "fill-red-500 text-red-500"
-                                                            : "text-gray-700"
-                                                    }
+                                                            ? "fill-[#C8A97E] text-[#C8A97E]"
+                                                            : "text-[#F8F6F3] opacity-80"
+                                                    }`}
                                                 />
                                             </button>
 
-                                            {/* Category Badge */}
-                                            <div className="absolute top-3 left-3 flex items-center gap-2 bg-white/90 px-3 py-1.5 rounded-full shadow-md">
-                                                {category?.icon && (
-                                                    <img
-                                                        src={category.icon}
-                                                        alt={category.name}
-                                                        className="w-5 h-5 rounded-full object-cover"
-                                                    />
-                                                )}
-                                                <span className="text-xs font-semibold text-[#0D7C53]">
-                                                    {category?.name || 'Uncategorized'}
-                                                </span>
-                                            </div>
-
-                                            {/* Quick View Button */}
+                                            {/* Quick View Button - Premium */}
                                             <button
                                                 onClick={() => handleItemClick(item)}
-                                                className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 text-gray-800 px-6 py-2.5 rounded-full font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-[#0D7C53] hover:text-white shadow-lg border border-white/30 hover:scale-105"
+                                                className="absolute bottom-6 left-1/2 -translate-x-1/2 backdrop-blur-xl bg-white/15 text-[#F8F6F3] px-8 py-3.5 rounded-full font-medium opacity-0 group-hover:opacity-100 transition-all duration-500 hover:bg-gradient-to-r hover:from-[#6F4E37] hover:to-[#C8A97E] border border-white/20 shadow-2xl hover:scale-105 whitespace-nowrap"
                                             >
-                                                View Item
+                                                Explore Item
                                             </button>
                                         </div>
 
-                                        {/* Content */}
-                                        <div className="p-4 bg-gradient-to-b from-white/15 to-white/10">
-                                            <div className="flex items-start justify-between">
+                                        {/* Content - Premium */}
+                                        <div className="p-6 bg-gradient-to-b from-white/5 to-transparent">
+                                            <div className="flex items-start justify-between mb-1">
                                                 <h3
-                                                    className="font-bold text-white text-lg transition-colors cursor-pointer line-clamp-1"
+                                                    className="font-bold text-[#F8F6F3] text-lg cursor-pointer hover:text-[#C8A97E] transition-colors duration-300 line-clamp-1"
                                                     onClick={() => handleItemClick(item)}
                                                 >
                                                     {item.name}
                                                 </h3>
                                             </div>
 
-                                            <p className="text-white/80 text-sm mb-2 line-clamp-2">
+                                            <p className="text-[#B6B6B6] text-sm mb-3 line-clamp-2 font-light leading-relaxed">
                                                 {item.description}
                                             </p>
 
-                                            <div className="flex items-center justify-between pt-1 border-t border-white/20">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-xl font-bold text-white">
+                                            <div className="flex items-center justify-between pt-3 border-t border-white/5">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-xl font-bold text-[#F8F6F3]">
                                                         ₹{displayPrice.toFixed(2)}
                                                     </span>
                                                     {item.discountPrice && item.discountPrice < item.price && (
-                                                        <span className="text-sm text-white/50 line-through">
+                                                        <span className="text-sm text-[#B6B6B6] line-through">
                                                             ₹{originalPrice.toFixed(2)}
                                                         </span>
                                                     )}
                                                 </div>
                                             </div>
 
-                                            {/* Add to Cart Button */}
+                                            {/* Add to Cart Button - Premium */}
                                             <button
                                                 onClick={(e) => handleAddToCart(item, e)}
-                                                className={`w-full mt-2 font-medium py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group/btn ${isAdded
-                                                    ? "bg-emerald-500 text-white hover:bg-emerald-600"
-                                                    : "bg-gradient-to-r from-[#0D7C53] to-[#169466] text-white hover:shadow-lg hover:shadow-[#0D7C53]/30 hover:scale-[1.02]"
-                                                    }`}
+                                                className={`w-full mt-4 font-medium py-3.5 rounded-xl transition-all duration-500 flex items-center justify-center gap-2 group/btn ${
+                                                    isAdded
+                                                        ? "bg-gradient-to-r from-[#6F4E37] to-[#C8A97E] text-[#F8F6F3] shadow-lg shadow-[#C8A97E]/20"
+                                                        : "bg-gradient-to-r from-[#6F4E37] via-[#A67C52] to-[#C8A97E] text-[#F8F6F3] hover:shadow-2xl hover:shadow-[#C8A97E]/30 hover:scale-[1.02] hover:-translate-y-0.5"
+                                                }`}
                                             >
                                                 {isAdded ? (
-                                                    <span>Added ✓</span>
+                                                    <>
+                                                        <span>Added to Cart</span>
+                                                        <span className="text-[#C8A97E]">✓</span>
+                                                    </>
                                                 ) : (
                                                     <>
                                                         <ShoppingBag
                                                             size={18}
-                                                            className="group-hover/btn:scale-110 transition-transform"
+                                                            className="group-hover/btn:scale-110 transition-transform duration-300"
                                                         />
-                                                        Add to Cart
+                                                        <span>Add to Cart</span>
                                                         <ChevronRight
                                                             size={16}
-                                                            className="group-hover/btn:translate-x-1 transition-transform"
+                                                            className="group-hover/btn:translate-x-1 transition-transform duration-300"
                                                         />
                                                     </>
                                                 )}
@@ -395,22 +397,22 @@ const Favourite = () => {
                             })}
                         </div>
 
-                        {/* View More / Show Less Button */}
+                        {/* View More / Show Less Button - Centered */}
                         {uniqueCategoryItems.length > 10 && (
-                            <div className="flex justify-center mt-8">
+                            <div className="flex justify-center mt-12">
                                 <button
                                     onClick={() => setShowAll(!showAll)}
-                                    className="flex items-center gap-2 px-8 py-3 bg-[#0D7C53]/20 text-white rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30 hover:scale-105"
+                                    className="group flex items-center gap-3 px-10 py-4 backdrop-blur-2xl bg-white/5 border border-white/10 text-[#F8F6F3] rounded-full font-medium hover:bg-gradient-to-r hover:from-[#6F4E37] hover:to-[#C8A97E] transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-[#C8A97E]/20"
                                 >
                                     {showAll ? (
                                         <>
-                                            Show Less
-                                            <ChevronRight size={18} className="rotate-90" />
+                                            <span>Show Less</span>
+                                            <ChevronRight size={18} className="rotate-90 group-hover:rotate-[-90deg] transition-transform duration-500" />
                                         </>
                                     ) : (
                                         <>
-                                            View More ({uniqueCategoryItems.length - 10} more)
-                                            <ChevronRight size={18} />
+                                            <span>View More ({uniqueCategoryItems.length - 10} more)</span>
+                                            <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
                                         </>
                                     )}
                                 </button>
@@ -418,65 +420,17 @@ const Favourite = () => {
                         )}
                     </>
                 ) : (
-                    <div className="text-center py-16">
-                        <div className=" bg-white/20 border border-white/30 rounded-3xl p-12 shadow-2xl shadow-black/5 max-w-2xl mx-auto">
-                            <div className="w-20 h-20 bg-gray-100/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <Search size={32} className="text-gray-400" />
+                    <div className="text-center py-20">
+                        <div className="backdrop-blur-2xl bg-white/5 border border-white/10 rounded-3xl p-16 shadow-2xl shadow-black/40 max-w-2xl mx-auto">
+                            <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6 border border-white/10">
+                                <Search size={32} className="text-[#B6B6B6]" strokeWidth={1.5} />
                             </div>
-                            <h3 className="text-xl font-bold text-gray-700">No Items in this Category</h3>
-                            <p className="text-gray-500 mt-2">Try selecting a different category</p>
+                            <h3 className="text-2xl font-bold text-[#F8F6F3] mb-2">No Items in this Category</h3>
+                            <p className="text-[#B6B6B6] font-light">Try selecting a different category</p>
                         </div>
                     </div>
                 )}
             </div>
-
-            {/* CSS Animations */}
-            <style>{`
-                @keyframes pulse-slow {
-                    0%, 100% { transform: scale(1); opacity: 0.5; }
-                    50% { transform: scale(1.1); opacity: 0.8; }
-                }
-                
-                @keyframes pulse-slow-delay {
-                    0%, 100% { transform: scale(1); opacity: 0.5; }
-                    50% { transform: scale(1.15); opacity: 0.7; }
-                }
-                
-                @keyframes float {
-                    0%, 100% { transform: translateY(0px) rotate(12deg); }
-                    50% { transform: translateY(-20px) rotate(15deg); }
-                }
-                
-                @keyframes float-delay {
-                    0%, 100% { transform: translateY(0px) rotate(-12deg); }
-                    50% { transform: translateY(20px) rotate(-15deg); }
-                }
-                
-                @keyframes float-slow {
-                    0%, 100% { transform: translateY(0px) rotate(45deg); }
-                    50% { transform: translateY(-15px) rotate(50deg); }
-                }
-                
-                .animate-pulse-slow {
-                    animation: pulse-slow 8s ease-in-out infinite;
-                }
-                
-                .animate-pulse-slow-delay {
-                    animation: pulse-slow-delay 10s ease-in-out infinite;
-                }
-                
-                .animate-float {
-                    animation: float 6s ease-in-out infinite;
-                }
-                
-                .animate-float-delay {
-                    animation: float-delay 7s ease-in-out infinite;
-                }
-                
-                .animate-float-slow {
-                    animation: float-slow 9s ease-in-out infinite;
-                }
-            `}</style>
         </section>
     );
 };
