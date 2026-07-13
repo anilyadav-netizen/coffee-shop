@@ -319,7 +319,7 @@ const CategoryPage = () => {
                               </span>
                             </>
                           ) : (
-                            <span className="text-xs text-[#6B7280]">
+                            <span className="text-base text-[#1F2937] font-bold">
                               ₹{product.price}
                             </span>
                           )}
