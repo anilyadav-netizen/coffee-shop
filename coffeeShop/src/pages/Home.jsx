@@ -16,13 +16,13 @@ import OurStore from './OurStore'
 const Home = () => {
     return (
         <div
-            className="relative min-h-screen bg-cover bg-black bg-center bg-fixed"
+            className="relative min-h-screen bg-cover bg-[#ebe0ce] bg-center bg-fixed"
             style={{
                 backgroundImage: `url()`,
             }}
         >
             {/* Overlay */}
-            <div className="absolute inset-0 bg-black/50"></div>
+            <div className="absolute inset-0"></div>
 
             {/* Content */}
             <div className="relative z-10">
@@ -30,10 +30,10 @@ const Home = () => {
                 <Types />
                 <CategoryPage />
                 <Favourite />
-                <WhyUs/> 
+                <WhyUs />
                 <Benfits />
                 <Journey />
-                <OurStore/>
+                <OurStore />
                 <Review />
             </div>
         </div>

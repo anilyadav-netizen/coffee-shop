@@ -19,18 +19,12 @@ import { toast } from "react-toastify";
 // Icons
 const HeartIcon = ({ isWishlisted = false, className = "" }) => (
   <svg
-    className={`w-5 h-5 transition-colors ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-400 group-hover:text-red-500'} ${className}`}
+    className={`w-5 h-5 transition-colors ${isWishlisted ? 'fill-[#E85D3A] text-[#E85D3A]' : 'text-gray-400 group-hover:text-[#E85D3A]'} ${className}`}
     fill={isWishlisted ? "currentColor" : "none"}
     stroke="currentColor"
     viewBox="0 0 24 24"
   >
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-  </svg>
-);
-
-const CoffeeIcon = () => (
-  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
   </svg>
 );
 
@@ -209,7 +203,7 @@ const CategoryPage = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#E85D3A]"></div>
       </div>
     );
   }
@@ -262,7 +256,7 @@ const CategoryPage = () => {
                     onMouseEnter={() => setHoveredId(productId)}
                     onMouseLeave={() => setHoveredId(null)}
                     onClick={() => navigate(`/product/${productId}`)}
-                    className="group backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl overflow-hidden shadow-2xl shadow-black/10 hover:shadow-[#0D7C53]/20 transition-all duration-500 hover:-translate-y-2 hover:bg-white/15 relative cursor-pointer"
+                    className="group backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl overflow-hidden shadow-2xl shadow-black/10 hover:shadow-[#E85D3A]/20 transition-all duration-500 hover:-translate-y-2 hover:bg-white/15 relative cursor-pointer"
                   >
                     <div className="relative overflow-hidden aspect-[4/3]">
                       <img
@@ -274,7 +268,7 @@ const CategoryPage = () => {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                       {discount > 0 && (
-                        <span className="absolute top-3 left-3 z-10 bg-gradient-to-r from-green-600 to-[#0D7C53] text-white text-xs px-3.5 py-1.5 rounded-full font-bold shadow-lg flex items-center gap-1">
+                        <span className="absolute top-3 left-3 z-10 bg-gradient-to-r from-[#E85D3A] to-[#F0744F] text-white text-xs px-3.5 py-1.5 rounded-full font-bold shadow-lg flex items-center gap-1">
                           <span className="relative flex h-2 w-2">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
@@ -295,18 +289,18 @@ const CategoryPage = () => {
                       </button>
 
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                        <span className="bg-[#0D7C53]/90 backdrop-blur-sm text-white px-5 py-2 rounded-full text-sm font-semibold shadow-lg transform scale-90 group-hover:scale-100 transition-transform duration-300 cursor-pointer">
+                        <span className="bg-[#E85D3A]/90 backdrop-blur-sm text-white px-5 py-2 rounded-full text-sm font-semibold shadow-lg transform scale-90 group-hover:scale-100 transition-transform duration-300 cursor-pointer">
                           Quick View
                         </span>
                       </div>
                     </div>
 
-                    {/* Content Area */}
-                    <div className="p-4 bg-gradient-to-b from-white/15 to-white/10 backdrop-blur-sm">
-                      <h3 className="font-bold text-lg text-white line-clamp-1 transition-colors">
+                    {/* Content Area - Updated with Food Colors */}
+                    <div className="p-4 bg-gradient-to-b bg-white backdrop-blur-sm">
+                      <h3 className="font-bold text-[#1F2937] text-base cursor-pointer hover:text-[#E85D3A] transition-colors duration-300 line-clamp-1 flex-1">
                         {product.name}
                       </h3>
-                      <p className="text-white/80 text-base mb-2 line-clamp-2">
+                      <p className="text-[#7b818f] text-sm mb-3 line-clamp-2 leading-relaxed">
                         {product.description}
                       </p>
 
@@ -314,18 +308,18 @@ const CategoryPage = () => {
                         <div className="flex items-center gap-3 mt-0">
                           {product.discountPrice ? (
                             <>
-                              <span className="font-bold text-2xl text-white tracking-tight">
+                              <span className="font-bold text-2xl text-[#F0744F] tracking-tight">
                                 ₹{product.discountPrice}
                               </span>
-                              <span className="text-sm text-white line-through">
+                              <span className="text-lg font-bold text-[#1F2937]">
                                 ₹{product.price}
                               </span>
-                              <span className="ml-auto text-xs bg-green-100 text-white px-2 py-0.5 rounded-full font-semibold">
+                              <span className="ml-auto text-xs bg-[#FFF0EA] text-[#E85D3A] px-2 py-0.5 rounded-full font-semibold">
                                 Save ₹{product.price - product.discountPrice}
                               </span>
                             </>
                           ) : (
-                            <span className="font-bold text-2xl text-white tracking-tight">
+                            <span className="text-xs text-[#6B7280]">
                               ₹{product.price}
                             </span>
                           )}
@@ -333,7 +327,7 @@ const CategoryPage = () => {
                       </div>
 
                       <button
-                        className="mt-2 w-full bg-gradient-to-r bg-emerald-500 hover:bg-emerald-600 text-white from-[#0D7C53] to-[#169466] py-2.5 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 group/btn"
+                        className="mt-2 w-full bg-gradient-to-r from-[#E85D3A] to-[#F0744F] hover:shadow-lg hover:shadow-[#E85D3A]/30 text-white py-2.5 rounded-xl font-semibold transition-all duration-300 shadow-md flex items-center justify-center gap-2 group/btn"
                         onClick={(e) => {
                           e.stopPropagation(); // Prevent navigation when clicking Add to Cart
                           handleAddToCart(product, e);
@@ -367,7 +361,7 @@ const CategoryPage = () => {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Image Section */}
-            <div className="relative w-full h-[310px] sm:h-96 bg-green-50/30">
+            <div className="relative w-full h-[310px] sm:h-96 bg-[#FFF5F0]/30">
               <img
                 src={selectedProduct.image}
                 alt={selectedProduct.name}
@@ -387,7 +381,7 @@ const CategoryPage = () => {
               </button>
 
               {selectedProduct.discountPrice && (
-                <span className="absolute top-3 left-3 bg-gradient-to-r from-green-600 to-[#0D7C53] text-white text-xs px-3 py-1.5 rounded-full font-bold shadow-lg flex items-center gap-1.5">
+                <span className="absolute top-3 left-3 bg-gradient-to-r from-[#E85D3A] to-[#F0744F] text-white text-xs px-3 py-1.5 rounded-full font-bold shadow-lg flex items-center gap-1.5">
                   <span className="relative flex h-1.5 w-1.5">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white"></span>
@@ -408,22 +402,22 @@ const CategoryPage = () => {
               </button>
             </div>
 
-            {/* Content Section */}
+            {/* Content Section - Updated with Food Colors */}
             <div className="p-5 pt-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <span className="inline-block px-2.5 py-0.5 bg-green-100 text-green-700 text-[10px] font-semibold tracking-wider uppercase rounded-full mb-1.5">
-                    Premium Blend
+                  <span className="inline-block px-2.5 py-0.5 bg-[#FFF0EA] text-[#E85D3A] text-[10px] font-semibold tracking-wider uppercase rounded-full mb-1.5">
+                    Premium Food
                   </span>
-                  <h2 className="text-xl font-extrabold text-gray-800 leading-tight line-clamp-1">
+                  <h2 className="text-xl font-extrabold text-[#1F2937]  leading-tight line-clamp-1">
                     {selectedProduct.name}
                   </h2>
                 </div>
 
-                <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex items-center gap-2 text-[#7b818f] flex-shrink-0">
                   {selectedProduct.discountPrice ? (
                     <>
-                      <span className="text-2xl font-extrabold text-[#0D7C53]">
+                      <span className="text-2xl font-extrabold text-[#E85D3A]">
                         ₹{selectedProduct.discountPrice}
                       </span>
                       <span className="text-xs text-gray-400 line-through">
@@ -431,7 +425,7 @@ const CategoryPage = () => {
                       </span>
                     </>
                   ) : (
-                    <span className="text-2xl font-extrabold text-[#0D7C53]">
+                    <span className="text-2xl font-extrabold text-[#E85D3A]">
                       ₹{selectedProduct.price}
                     </span>
                   )}
@@ -440,7 +434,7 @@ const CategoryPage = () => {
 
               {selectedProduct.discountPrice && (
                 <div className="mt-1.5 flex items-center gap-2">
-                  <span className="bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full text-xs font-semibold flex items-center gap-1">
+                  <span className="bg-[#FFF0EA] text-[#E85D3A] px-2.5 py-0.5 rounded-full text-xs font-semibold flex items-center gap-1">
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -471,7 +465,7 @@ const CategoryPage = () => {
 
                 <button
                   onClick={handleModalAddToCart}
-                  className="flex-1 bg-[#0D7C53] text-white py-2.5 rounded-lg font-semibold hover:bg-green-800 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm"
+                  className="flex-1 bg-gradient-to-r from-[#E85D3A] to-[#F0744F] text-white py-2.5 rounded-lg font-semibold hover:shadow-lg hover:shadow-[#E85D3A]/30 transition-all duration-300 flex items-center justify-center gap-2 text-sm"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />

@@ -4,17 +4,11 @@ import { getFavouriteItems, toggleFavourite, getFavouriteCount } from '../data/f
 import {
     Heart,
     Star,
-    Trash2,
     ShoppingBag,
-    TrendingUp,
     ChevronRight,
-    Coffee,
-    Utensils,
-    Cake,
-    Package,
-    Leaf,
-    X,
-    Search
+    Search,
+    Clock,
+    Flame
 } from 'lucide-react';
 import { getProducts } from '../redux/Slicer/adminProductSlice';
 import { useDispatch, useSelector } from 'react-redux';
@@ -67,11 +61,8 @@ const Favourite = () => {
         loadFavourites();
     }, []);
 
-    // ✅ Handle Add to Cart - FIXED: Added amount field
     const handleAddToCart = async (item, e) => {
         e.stopPropagation();
-
-        // Calculate the amount (use discountPrice if available, otherwise use price)
         const amount = item.discountPrice || item.price;
 
         try {
@@ -79,10 +70,10 @@ const Favourite = () => {
                 addToCart({
                     coffeeId: item._id,
                     quantity: 1,
-                    amount: amount // ✅ Added amount field
+                    amount: amount
                 })
             ).unwrap();
-            toast.success("Item added to cart successfully!");
+            toast.success("Added to cart! 🍔");
 
             setAddedItems((prev) => ({
                 ...prev,
@@ -102,7 +93,6 @@ const Favourite = () => {
         }
     };
 
-    // ✅ Handle Wishlist Toggle - FIXED: Consistent ID handling
     const handleWishlistToggle = async (item, e) => {
         e.stopPropagation();
 
@@ -116,20 +106,15 @@ const Favourite = () => {
 
             if (existingItem) {
                 await dispatch(removeFromWishlist(existingItem._id)).unwrap();
-                toast.info("Item Removed from wishlist");
+                toast.info("Removed from wishlist");
             } else {
                 await dispatch(addToWishlist({ coffeeId: item._id })).unwrap();
-                toast.success("Item Added to wishlist ❤️");
+                toast.success("Added to wishlist ❤️");
             }
         } catch (error) {
             console.error("Wishlist Error:", error);
             toast.error("Failed to update wishlist");
         }
-    };
-
-    const handleRemoveFavourite = (itemId) => {
-        toggleFavourite(itemId);
-        setFavourites(favourites.filter(item => item.id !== itemId));
     };
 
     const handleItemClick = (item) => {
@@ -140,7 +125,6 @@ const Favourite = () => {
         navigate('/menu');
     };
 
-    // ✅ Get unique category items (1 item per category)
     const getUniqueCategoryItems = () => {
         const uniqueItems = [];
         const seenCategories = new Set();
@@ -164,10 +148,10 @@ const Favourite = () => {
             <div className="min-h-[600px] flex items-center justify-center">
                 <div className="text-center">
                     <div className="relative w-16 h-16 mx-auto">
-                        <div className="absolute inset-0 rounded-full border-2 border-[#C8A97E]/20"></div>
-                        <div className="absolute inset-0 rounded-full border-2 border-[#C8A97E] border-t-transparent animate-spin"></div>
+                        <div className="absolute inset-0 rounded-full border-2 border-[#E85D3A]/20"></div>
+                        <div className="absolute inset-0 rounded-full border-2 border-[#E85D3A] border-t-transparent animate-spin"></div>
                     </div>
-                    <p className="mt-6 text-[#B6B6B6] font-light tracking-wide">Loading favourites...</p>
+                    <p className="mt-6 text-[#6B7280] font-light tracking-wide">Loading favourites...</p>
                 </div>
             </div>
         );
@@ -175,34 +159,27 @@ const Favourite = () => {
 
     if (favourites.length === 0) {
         return (
-            <section className="relative py-20 px-4 overflow-hidden min-h-screen">
-                {/* Premium Background */}
-                <div className="absolute inset-0 -z-10">
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(200,169,126,.12),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(111,78,55,.10),transparent_35%),#0F0F0F]"></div>
-                    <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[#C8A97E]/5 rounded-full blur-[150px]"></div>
-                    <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#6F4E37]/8 rounded-full blur-[120px]"></div>
-                </div>
-
+            <section className="relative py-20 px-4 overflow-hidden min-h-scree">
                 <div className="max-w-7xl mx-auto text-center relative z-10">
-                    <div className="backdrop-blur-2xl bg-white/5 border border-white/10 rounded-3xl p-16 shadow-2xl shadow-black/40 max-w-2xl mx-auto hover:scale-[1.02] transition-all duration-700 hover:shadow-[0_30px_80px_rgba(200,169,126,.15)]">
+                    <div className="bg-gradient-to-br from-white to-[#FFF5F0] rounded-3xl p-16 shadow-xl max-w-2xl mx-auto hover:shadow-2xl transition-all duration-700 border border-[#FEE7DD]">
                         <div className="relative inline-block">
-                            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#6F4E37]/20 to-[#C8A97E]/20 flex items-center justify-center mx-auto mb-8 backdrop-blur-xl border border-white/10">
-                                <Heart className="w-16 h-16 text-[#C8A97E]" strokeWidth={1.5} />
+                            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#FFE8DE] to-[#FDD7C8] flex items-center justify-center mx-auto mb-8">
+                                <Heart className="w-16 h-16 text-[#E85D3A]" strokeWidth={1.5} />
                             </div>
-                            <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-[#C8A97E] to-[#6F4E37] rounded-full flex items-center justify-center text-[#0F0F0F] text-xs font-bold shadow-lg shadow-[#C8A97E]/20">
+                            <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-[#E85D3A] to-[#F0744F] rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg shadow-[#E85D3A]/30">
                                 0
                             </div>
                         </div>
-                        <h2 className="text-4xl font-bold text-[#F8F6F3] mb-4 tracking-tight">No Favourites Yet</h2>
-                        <p className="text-[#B6B6B6] max-w-md mx-auto mb-10 text-lg font-light leading-relaxed">
-                            Discover our curated collection of premium coffees and add your favourites with a single touch.
+                        <h2 className="text-4xl font-bold text-[#1F2937] mb-4 tracking-tight">No Favourites Yet</h2>
+                        <p className="text-[#6B7280] max-w-md mx-auto mb-10 text-lg font-light leading-relaxed">
+                            Discover our mouth-watering fast-food items and add your favourites with a single touch.
                         </p>
                         <button
                             onClick={handleViewAll}
-                            className="px-10 py-4 bg-gradient-to-r from-[#6F4E37] via-[#A67C52] to-[#C8A97E] text-[#F8F6F3] rounded-full font-medium shadow-lg shadow-[#C8A97E]/20 hover:shadow-[#C8A97E]/40 transition-all duration-500 hover:scale-105 hover:-translate-y-1 relative overflow-hidden group"
+                            className="px-10 py-4 bg-gradient-to-r from-[#E85D3A] to-[#F0744F] text-white rounded-full font-medium shadow-lg shadow-[#E85D3A]/30 hover:shadow-[#E85D3A]/50 transition-all duration-500 hover:scale-105 hover:-translate-y-1 relative overflow-hidden group"
                         >
-                            <span className="relative z-10">Explore Premium Menu</span>
-                            <div className="absolute inset-0 bg-gradient-to-r from-[#C8A97E] via-[#A67C52] to-[#6F4E37] opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            <span className="relative z-10">Explore Our Menu</span>
+                            <div className="absolute inset-0 bg-gradient-to-r from-[#F0744F] to-[#E85D3A] opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                         </button>
                     </div>
                 </div>
@@ -212,27 +189,27 @@ const Favourite = () => {
 
     return (
         <section className="relative py-12 px-4 overflow-hidden min-h-screen">
-            {/* Premium Layered Background */}
-            <div className="absolute inset-0 -z-10">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(200,169,126,.12),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(111,78,55,.10),transparent_35%),#0F0F0F]"></div>
-                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[#C8A97E]/5 rounded-full blur-[200px]"></div>
-                <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[#6F4E37]/8 rounded-full blur-[150px]"></div>
+            {/* Subtle Background Pattern */}
+            <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#E85D3A]/[0.03] rounded-full blur-[150px]"></div>
+                <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#F0744F]/[0.03] rounded-full blur-[120px]"></div>
             </div>
 
             {/* Content */}
             <div className="max-w-[104rem] mx-auto relative z-10">
-                {/* Header - Premium Glass */}
-                <div className="backdrop-blur-2xl bg-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl shadow-black/30 mb-12 transition-all duration-700">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-white to-[#FFF8F5] rounded-3xl p-8 shadow-lg shadow-[#E85D3A]/5 border border-[#FEE7DD] mb-12 transition-all duration-700">
                     <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                         <div>
-                            <h2 className="text-4xl md:text-5xl font-bold text-[#F8F6F3] tracking-tight mb-2">
+                            <h2 className="text-4xl md:text-5xl font-bold text-[#1F2937] tracking-tight mb-2 flex items-center gap-3">
                                 All Time Favourites
+                                <span className="text-3xl">🔥</span>
                             </h2>
-                            <p className="text-[#B6B6B6] text-lg font-light">Curated selections our customers adore</p>
+                            <p className="text-[#6B7280] text-lg font-light">Curated selections our customers adore</p>
                         </div>
                         <button
                             onClick={handleViewAll}
-                            className="group flex items-center gap-3 px-8 py-3.5 bg-gradient-to-r from-[#6F4E37]/20 to-[#C8A97E]/20 text-[#F8F6F3] rounded-full font-medium hover:bg-gradient-to-r hover:from-[#6F4E37] hover:to-[#C8A97E] transition-all duration-500 border border-white/10 hover:border-transparent hover:scale-105 hover:shadow-lg hover:shadow-[#C8A97E]/20"
+                            className="group flex items-center gap-3 px-8 py-3.5 bg-white text-[#1F2937] rounded-full font-medium hover:bg-[#E85D3A] hover:text-white transition-all duration-500 border border-[#FEE7DD] hover:border-transparent hover:scale-105 hover:shadow-lg hover:shadow-[#E85D3A]/20"
                         >
                             <span>View All Menu</span>
                             <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
@@ -254,18 +231,17 @@ const Favourite = () => {
                                 );
                                 const category = item.category;
 
-                                // Calculate amount for display
                                 const displayPrice = item.discountPrice || item.price;
                                 const originalPrice = item.price;
 
                                 return (
                                     <div
                                         key={item._id}
-                                        className="group backdrop-blur-2xl bg-white/5 border border-white/10 rounded-3xl overflow-hidden shadow-2xl shadow-black/40 transition-all duration-500 hover:-translate-y-2 hover:scale-[1.01] hover:shadow-[0_20px_60px_rgba(200,169,126,.12)]"
+                                        className="group rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-[#F3F4F6] hover:border-[#FEE7DD]"
                                     >
                                         {/* Image Container */}
                                         <div
-                                            className="relative h-64 overflow-hidden bg-[#181818] cursor-pointer"
+                                            className="relative h-56 overflow-hidden bg-[#FAFAFA] cursor-pointer"
                                             onClick={() => handleItemClick(item)}
                                         >
                                             <img
@@ -273,121 +249,129 @@ const Favourite = () => {
                                                 alt={item.name}
                                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                                 onError={(e) => {
-                                                    e.target.src = "https://placehold.co/400x300/181818/B6B6B6?text=No+Image";
+                                                    e.target.src = "https://placehold.co/400x300/FAFAFA/6B7280?text=No+Image";
                                                 }}
                                             />
 
-                                            {/* Dark Overlay */}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-[#0F0F0F] via-transparent to-transparent opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
+                                            {/* Gradient Overlay */}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-[#1F2937]/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-                                            {/* Category Badge - Top Left */}
-                                            <div className="absolute top-4 left-4 z-10 backdrop-blur-xl bg-white/10 border border-white/10 px-4 py-2 rounded-full shadow-xl">
-                                                <div className="flex items-center gap-2">
+                                            {/* Category Badge */}
+                                            <div className="absolute top-3 left-3 z-10 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg border border-[#F3F4F6]">
+                                                <div className="flex items-center gap-1.5">
                                                     {category?.icon && (
                                                         <img
                                                             src={category.icon}
                                                             alt={category.name}
-                                                            className="w-5 h-5 rounded-full object-cover"
+                                                            className="w-4 h-4 rounded-full object-cover"
                                                         />
                                                     )}
-                                                    <span className="text-xs font-medium text-[#C8A97E] tracking-wider">
+                                                    <span className="text-[10px] font-semibold text-[#E85D3A] tracking-wider uppercase">
                                                         {category?.name || 'Uncategorized'}
                                                     </span>
                                                 </div>
                                             </div>
 
-                                            {/* Discount Badge - Premium */}
+                                            {/* Discount Badge */}
                                             {item.discountPrice && item.discountPrice < item.price && (
-                                                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 bg-gradient-to-r from-[#6F4E37] to-[#C8A97E] text-[#F8F6F3] text-xs px-4 py-2 rounded-full font-bold shadow-xl shadow-[#C8A97E]/20 flex items-center gap-2 backdrop-blur-sm border border-white/10">
-                                                    <span className="relative flex h-2 w-2">
-                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C8A97E] opacity-75"></span>
-                                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-[#C8A97E]"></span>
-                                                    </span>
+                                                <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 bg-gradient-to-r from-[#E85D3A] to-[#F0744F] text-white text-[10px] px-3 py-1.5 rounded-full font-bold shadow-lg shadow-[#E85D3A]/30 flex items-center gap-1.5">
+                                                    <Flame size={12} className="fill-white" />
                                                     {Math.round(((item.price - item.discountPrice) / item.price) * 100)}% OFF
                                                 </div>
                                             )}
 
-                                            {/* Wishlist Icon - Premium & Visible */}
+                                            {/* Wishlist Icon */}
                                             <button
                                                 onClick={(e) => handleWishlistToggle(item, e)}
-                                                className={`absolute top-4 right-4 z-20 w-11 h-11 backdrop-blur-xl rounded-full flex items-center justify-center shadow-xl transition-all duration-300 hover:scale-110 ${
-                                                    isWishlisted 
-                                                        ? "bg-[#C8A97E]/30 border border-[#C8A97E]/40" 
-                                                        : "bg-white/10 border border-white/20 hover:bg-white/20"
+                                                className={`absolute top-3 right-3 z-20 w-9 h-9 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 border ${
+                                                    isWishlisted
+                                                        ? "border-[#E85D3A] bg-[#FFF0EA]"
+                                                        : "border-[#F3F4F6] hover:border-[#E85D3A]"
                                                 }`}
                                             >
                                                 <Heart
-                                                    size={20}
+                                                    size={16}
                                                     className={`transition-colors duration-300 ${
                                                         isWishlisted
-                                                            ? "fill-[#C8A97E] text-[#C8A97E]"
-                                                            : "text-[#F8F6F3] opacity-80"
+                                                            ? "fill-[#E85D3A] text-[#E85D3A]"
+                                                            : "text-[#6B7280]"
                                                     }`}
                                                 />
                                             </button>
 
-                                            {/* Quick View Button - Premium */}
+                                            {/* Quick View Button */}
                                             <button
                                                 onClick={() => handleItemClick(item)}
-                                                className="absolute bottom-6 left-1/2 -translate-x-1/2 backdrop-blur-xl bg-white/15 text-[#F8F6F3] px-8 py-3.5 rounded-full font-medium opacity-0 group-hover:opacity-100 transition-all duration-500 hover:bg-gradient-to-r hover:from-[#6F4E37] hover:to-[#C8A97E] border border-white/20 shadow-2xl hover:scale-105 whitespace-nowrap"
+                                                className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white text-[#1F2937] px-6 py-2.5 rounded-full text-sm font-medium opacity-0 group-hover:opacity-100 transition-all duration-500 hover:bg-[#E85D3A] hover:text-white shadow-lg hover:scale-105 whitespace-nowrap"
                                             >
-                                                Explore Item
+                                                Quick View
                                             </button>
                                         </div>
 
-                                        {/* Content - Premium */}
-                                        <div className="p-6 bg-gradient-to-b from-white/5 to-transparent">
-                                            <div className="flex items-start justify-between mb-1">
+                                        {/* Content - Improved Food Website Style */}
+                                        <div className="p-4 bg-white">
+                                            <div className="flex items-start justify-between mb-1.5">
                                                 <h3
-                                                    className="font-bold text-[#F8F6F3] text-lg cursor-pointer hover:text-[#C8A97E] transition-colors duration-300 line-clamp-1"
+                                                    className="font-bold text-[#1F2937] text-base cursor-pointer hover:text-[#E85D3A] transition-colors duration-300 line-clamp-1 flex-1"
                                                     onClick={() => handleItemClick(item)}
                                                 >
                                                     {item.name}
                                                 </h3>
+                                                <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+                                                    <Star size={14} className="fill-[#FBBF24] text-[#FBBF24]" />
+                                                    <span className="text-xs font-semibold text-[#1F2937]">4.8</span>
+                                                </div>
                                             </div>
 
-                                            <p className="text-[#B6B6B6] text-sm mb-3 line-clamp-2 font-light leading-relaxed">
-                                                {item.description}
+                                            <p className="text-[#7b818f] text-sm mb-3 line-clamp-2 leading-relaxed">
+                                                {item.description || "Delicious fast food item"}
                                             </p>
 
-                                            <div className="flex items-center justify-between pt-3 border-t border-white/5">
-                                                <div className="flex items-center gap-3">
-                                                    <span className="text-xl font-bold text-[#F8F6F3]">
+                                            <div className="flex items-center justify-between pt-1.5 border-t border-[#F3F4F6]">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-lg font-bold text-[#1F2937]">
                                                         ₹{displayPrice.toFixed(2)}
                                                     </span>
                                                     {item.discountPrice && item.discountPrice < item.price && (
-                                                        <span className="text-sm text-[#B6B6B6] line-through">
+                                                        <span className="text-xs text-[#6B7280] line-through">
                                                             ₹{originalPrice.toFixed(2)}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className="text-[10px] text-[#10B981] font-medium bg-[#ECFDF5] px-2 py-0.5 rounded-full">
+                                                        In Stock
+                                                    </span>
+                                                    {item.discountPrice && (
+                                                        <span className="text-[10px] text-[#E85D3A] font-medium bg-[#FFF0EA] px-2 py-0.5 rounded-full">
+                                                            Save ₹{(originalPrice - displayPrice).toFixed(2)}
                                                         </span>
                                                     )}
                                                 </div>
                                             </div>
 
-                                            {/* Add to Cart Button - Premium */}
+                                            {/* Add to Cart Button - Improved Food Style */}
                                             <button
                                                 onClick={(e) => handleAddToCart(item, e)}
-                                                className={`w-full mt-4 font-medium py-3.5 rounded-xl transition-all duration-500 flex items-center justify-center gap-2 group/btn ${
+                                                className={`w-full mt-3.5 font-semibold py-2.5 rounded-xl transition-all duration-500 flex items-center justify-center gap-2 text-sm group/btn ${
                                                     isAdded
-                                                        ? "bg-gradient-to-r from-[#6F4E37] to-[#C8A97E] text-[#F8F6F3] shadow-lg shadow-[#C8A97E]/20"
-                                                        : "bg-gradient-to-r from-[#6F4E37] via-[#A67C52] to-[#C8A97E] text-[#F8F6F3] hover:shadow-2xl hover:shadow-[#C8A97E]/30 hover:scale-[1.02] hover:-translate-y-0.5"
+                                                        ? "bg-gradient-to-r from-[#10B981] to-[#059669] text-white shadow-lg shadow-[#10B981]/30"
+                                                        : "bg-gradient-to-r from-[#E85D3A] to-[#F0744F] text-white hover:shadow-2xl hover:shadow-[#E85D3A]/30 hover:scale-[1.02] hover:-translate-y-0.5"
                                                 }`}
                                             >
                                                 {isAdded ? (
                                                     <>
                                                         <span>Added to Cart</span>
-                                                        <span className="text-[#C8A97E]">✓</span>
+                                                        <span className="text-white text-lg">✓</span>
                                                     </>
                                                 ) : (
                                                     <>
                                                         <ShoppingBag
-                                                            size={18}
+                                                            size={16}
                                                             className="group-hover/btn:scale-110 transition-transform duration-300"
                                                         />
                                                         <span>Add to Cart</span>
-                                                        <ChevronRight
-                                                            size={16}
-                                                            className="group-hover/btn:translate-x-1 transition-transform duration-300"
-                                                        />
+                                                        <span className="text-xs opacity-70">+</span>
                                                     </>
                                                 )}
                                             </button>
@@ -397,12 +381,12 @@ const Favourite = () => {
                             })}
                         </div>
 
-                        {/* View More / Show Less Button - Centered */}
+                        {/* View More / Show Less Button */}
                         {uniqueCategoryItems.length > 10 && (
                             <div className="flex justify-center mt-12">
                                 <button
                                     onClick={() => setShowAll(!showAll)}
-                                    className="group flex items-center gap-3 px-10 py-4 backdrop-blur-2xl bg-white/5 border border-white/10 text-[#F8F6F3] rounded-full font-medium hover:bg-gradient-to-r hover:from-[#6F4E37] hover:to-[#C8A97E] transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-[#C8A97E]/20"
+                                    className="group flex items-center gap-3 px-10 py-4 bg-white text-[#1F2937] rounded-full font-medium hover:bg-[#E85D3A] hover:text-white transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-[#E85D3A]/20 border border-[#F3F4F6]"
                                 >
                                     {showAll ? (
                                         <>
@@ -421,12 +405,12 @@ const Favourite = () => {
                     </>
                 ) : (
                     <div className="text-center py-20">
-                        <div className="backdrop-blur-2xl bg-white/5 border border-white/10 rounded-3xl p-16 shadow-2xl shadow-black/40 max-w-2xl mx-auto">
-                            <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6 border border-white/10">
-                                <Search size={32} className="text-[#B6B6B6]" strokeWidth={1.5} />
+                        <div className="bg-white rounded-3xl p-16 shadow-xl max-w-2xl mx-auto border border-[#F3F4F6]">
+                            <div className="w-20 h-20 bg-[#FFF0EA] rounded-full flex items-center justify-center mx-auto mb-6">
+                                <Search size={32} className="text-[#6B7280]" strokeWidth={1.5} />
                             </div>
-                            <h3 className="text-2xl font-bold text-[#F8F6F3] mb-2">No Items in this Category</h3>
-                            <p className="text-[#B6B6B6] font-light">Try selecting a different category</p>
+                            <h3 className="text-2xl font-bold text-[#1F2937] mb-2">No Items in this Category</h3>
+                            <p className="text-[#6B7280] font-light">Try selecting a different category</p>
                         </div>
                     </div>
                 )}
