@@ -214,10 +214,10 @@ const CategoryPage = () => {
         <div className="max-w-[104rem] mx-auto relative">
           {/* Header */}
           <div className="rounded-2xl p-8 mb-2 text-center">
-            <h2 className="text-2xl md:text-5xl font-bold text-white tracking-normal">
+            <h2 className="text-2xl md:text-5xl font-bold text-black tracking-normal">
               Discover Delicious Dishes
             </h2>
-            <p className="text-gray-300 mt-1 max-w-2xl mx-auto">
+            <p className="text-[#6B7280] mt-1 max-w-2xl mx-auto">
               Freshly brewed happiness in every cup — discover your perfect blend.
             </p>
           </div>
@@ -240,7 +240,7 @@ const CategoryPage = () => {
               1024: { slidesPerView: 4 },
               1280: { slidesPerView: 5 },
             }}
-            className="!pb-12"
+            className=""
           >
             {products.map((product) => {
               const productId = product._id || product.id;
