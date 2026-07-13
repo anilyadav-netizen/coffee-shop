@@ -16,7 +16,7 @@ import OurStore from './OurStore'
 const Home = () => {
     return (
         <div
-            className="relative min-h-screen bg-cover bg-[#ebe0ce] bg-center bg-fixed"
+            className="relative min-h-screen bg-cover bg-center bg-fixed"
             style={{
                 backgroundImage: `url()`,
             }}

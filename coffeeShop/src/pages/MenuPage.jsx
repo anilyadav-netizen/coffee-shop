@@ -14,7 +14,8 @@ import {
     Heart,
     Search,
     X,
-    Grid3x3
+    Grid3x3,
+    Flame
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../redux/slicer/cartSlice";
@@ -45,7 +46,7 @@ const MenuPage = () => {
     const cardRefs = useRef({});
     const [isAnimating, setIsAnimating] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 8;
+    const itemsPerPage = 20; // Changed from 8 to 20
 
     // Fetch data
     useEffect(() => {
@@ -61,8 +62,6 @@ const MenuPage = () => {
             return;
         }
 
-        // Only animate when filter changes (not on page change)
-        // We track if it's a filter change by checking if the filtered items length changed
         setVisibleCards(new Set());
         setIsAnimating(true);
 
@@ -265,56 +264,56 @@ const MenuPage = () => {
     // ============ LOADING STATE ============
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#1A0F0A] to-[#3D2013] overflow-x-hidden">
+            <div className="min-h-screen flex items-center justify-center bg-[#ebe0ce] overflow-x-hidden">
                 <div className="text-center">
                     <div className="relative w-48 h-64 mx-auto">
                         <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                            <div className="w-16 h-12 bg-[#6B4F3A] rounded-t-full rounded-b-lg shadow-lg relative">
-                                <div className="absolute -bottom-2 right-0 w-6 h-3 bg-[#6B4F3A] rounded-br-full"></div>
+                            <div className="w-16 h-12 bg-[#E85D3A] rounded-t-full rounded-b-lg shadow-lg relative">
+                                <div className="absolute -bottom-2 right-0 w-6 h-3 bg-[#E85D3A] rounded-br-full"></div>
                                 <div className="absolute top-2 left-2 w-3 h-6 bg-white/10 rounded-full"></div>
                             </div>
                         </div>
 
                         <div className="absolute top-10 left-1/2 transform -translate-x-1/2">
-                            <div className="w-3 h-32 bg-gradient-to-b from-[#3C1A0A] to-[#5C2A12] rounded-full animate-pour"></div>
-                            <div className="absolute -left-6 top-8 w-5 h-7 bg-[#4A2512] rounded-full animate-drop-big-1 shadow-lg"></div>
-                            <div className="absolute right-6 top-14 w-4 h-6 bg-[#3C1A0A] rounded-full animate-drop-big-2 shadow-lg"></div>
-                            <div className="absolute -left-8 top-24 w-6 h-8 bg-[#4A2512] rounded-full animate-drop-big-3 shadow-lg"></div>
-                            <div className="absolute right-8 top-28 w-4 h-5 bg-[#3C1A0A] rounded-full animate-drop-big-4 shadow-lg"></div>
-                            <div className="absolute left-2 top-10 w-1.5 h-2 bg-[#5C2A12] rounded-full animate-splash-1"></div>
-                            <div className="absolute right-2 top-16 w-1.5 h-2 bg-[#5C2A12] rounded-full animate-splash-2"></div>
+                            <div className="w-3 h-32 bg-gradient-to-b from-[#E85D3A] to-[#F0744F] rounded-full animate-pour"></div>
+                            <div className="absolute -left-6 top-8 w-5 h-7 bg-[#E85D3A] rounded-full animate-drop-big-1 shadow-lg"></div>
+                            <div className="absolute right-6 top-14 w-4 h-6 bg-[#F0744F] rounded-full animate-drop-big-2 shadow-lg"></div>
+                            <div className="absolute -left-8 top-24 w-6 h-8 bg-[#E85D3A] rounded-full animate-drop-big-3 shadow-lg"></div>
+                            <div className="absolute right-8 top-28 w-4 h-5 bg-[#F0744F] rounded-full animate-drop-big-4 shadow-lg"></div>
+                            <div className="absolute left-2 top-10 w-1.5 h-2 bg-[#E85D3A] rounded-full animate-splash-1"></div>
+                            <div className="absolute right-2 top-16 w-1.5 h-2 bg-[#E85D3A] rounded-full animate-splash-2"></div>
                         </div>
 
                         <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2">
                             <div className="relative">
-                                <div className="w-32 h-36 bg-[#8B6B4A] rounded-b-2xl rounded-t-lg shadow-2xl relative">
-                                    <div className="absolute inset-0 bg-gradient-to-b from-[#7A5D40] to-[#6B4F3A] rounded-b-2xl rounded-t-lg"></div>
-                                    <div className="absolute bottom-0 left-0 right-0 h-28 bg-[#3C1A0A] rounded-b-2xl animate-fill-coffee">
-                                        <div className="absolute -top-1 left-0 right-0 h-2 bg-gradient-to-b from-[#5C2A12] to-[#3C1A0A]">
-                                            <div className="absolute top-0 left-4 w-8 h-0.5 bg-[#6B3A1A] rounded-full animate-ripple"></div>
-                                            <div className="absolute top-0 right-6 w-6 h-0.5 bg-[#6B3A1A] rounded-full animate-ripple-2"></div>
+                                <div className="w-32 h-36 bg-[#FFF0EA] rounded-b-2xl rounded-t-lg shadow-2xl relative border border-[#FEE7DD]">
+                                    <div className="absolute inset-0 bg-gradient-to-b from-[#FFF8F5] to-[#FFF0EA] rounded-b-2xl rounded-t-lg"></div>
+                                    <div className="absolute bottom-0 left-0 right-0 h-28 bg-[#E85D3A] rounded-b-2xl animate-fill-coffee">
+                                        <div className="absolute -top-1 left-0 right-0 h-2 bg-gradient-to-b from-[#F0744F] to-[#E85D3A]">
+                                            <div className="absolute top-0 left-4 w-8 h-0.5 bg-[#FBBF24] rounded-full animate-ripple"></div>
+                                            <div className="absolute top-0 right-6 w-6 h-0.5 bg-[#FBBF24] rounded-full animate-ripple-2"></div>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="absolute -top-1 left-0 right-0 h-2.5 bg-[#9B7B5A] rounded-t-lg shadow-lg"></div>
-                                <div className="absolute -right-5 top-4 w-7 h-16 border-[5px] border-[#8B6B4A] rounded-r-full border-l-0"></div>
+                                <div className="absolute -top-1 left-0 right-0 h-2.5 bg-[#E85D3A] rounded-t-lg shadow-lg"></div>
+                                <div className="absolute -right-5 top-4 w-7 h-16 border-[5px] border-[#FFF0EA] rounded-r-full border-l-0"></div>
                             </div>
                         </div>
 
                         <div className="absolute bottom-32 left-1/2 transform -translate-x-1/2">
-                            <div className="w-2 h-3 bg-[#5C2A12] rounded-full animate-splash-surface-1"></div>
-                            <div className="w-2 h-3 bg-[#5C2A12] rounded-full animate-splash-surface-2"></div>
-                            <div className="w-2 h-3 bg-[#5C2A12] rounded-full animate-splash-surface-3"></div>
+                            <div className="w-2 h-3 bg-[#E85D3A] rounded-full animate-splash-surface-1"></div>
+                            <div className="w-2 h-3 bg-[#F0744F] rounded-full animate-splash-surface-2"></div>
+                            <div className="w-2 h-3 bg-[#E85D3A] rounded-full animate-splash-surface-3"></div>
                         </div>
 
                         <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 -mt-8 flex gap-5">
-                            <div className="w-1.5 h-16 bg-gradient-to-t from-white/20 to-transparent rounded-full animate-steam-1"></div>
-                            <div className="w-1.5 h-20 bg-gradient-to-t from-white/20 to-transparent rounded-full animate-steam-2"></div>
-                            <div className="w-1.5 h-14 bg-gradient-to-t from-white/20 to-transparent rounded-full animate-steam-3"></div>
+                            <div className="w-1.5 h-16 bg-gradient-to-t from-[#E85D3A]/20 to-transparent rounded-full animate-steam-1"></div>
+                            <div className="w-1.5 h-20 bg-gradient-to-t from-[#E85D3A]/20 to-transparent rounded-full animate-steam-2"></div>
+                            <div className="w-1.5 h-14 bg-gradient-to-t from-[#E85D3A]/20 to-transparent rounded-full animate-steam-3"></div>
                         </div>
                     </div>
 
-                    <p className="mt-6 text-[#D4A574] font-medium text-lg tracking-wider">
+                    <p className="mt-6 text-[#E85D3A] font-medium text-lg tracking-wider">
                         Loading Menu...
                     </p>
                 </div>
@@ -413,23 +412,19 @@ const MenuPage = () => {
     // ===== No categories case =====
     if (!categories || categories.length === 0) {
         return (
-            <div className="min-h-screen flex items-center justify-center overflow-x-hidden">
-                <div className="absolute inset-0 -z-10">
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />
-                    <div className="absolute inset-0 bg-gradient-to-tr from-[#EDE0D4]/20 via-transparent to-[#D4B896]/10" />
-                </div>
+            <div className="min-h-screen flex items-center justify-center overflow-x-hidden bg-[#ebe0ce]">
                 <div className="text-center max-w-md mx-auto p-8 relative z-10">
-                    <div className=" bg-white/20 border border-white/30 rounded-3xl p-12 shadow-2xl shadow-black/5">
-                        <div className="w-24 h-24 bg-yellow-100/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div className="bg-white rounded-3xl p-12 shadow-lg shadow-[#E85D3A]/5 border border-[#FEE7DD]">
+                        <div className="w-24 h-24 bg-[#FFF0EA] rounded-full flex items-center justify-center mx-auto mb-4">
                             <span className="text-4xl">📋</span>
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-700 mb-2">No Categories Available</h2>
-                        <p className="text-gray-500 mb-6">
+                        <h2 className="text-2xl font-bold text-[#1F2937] mb-2">No Categories Available</h2>
+                        <p className="text-[#6B7280] mb-6">
                             Please add some categories to get started.
                         </p>
                         <button
                             onClick={() => navigate('/')}
-                            className="px-6 py-2 bg-[#0D7C53] text-white rounded-full hover:bg-green-700 transition shadow-lg hover:shadow-xl"
+                            className="px-6 py-2 bg-gradient-to-r from-[#E85D3A] to-[#F0744F] text-white rounded-full hover:shadow-lg hover:shadow-[#E85D3A]/30 transition shadow-lg"
                         >
                             Go Back Home
                         </button>
@@ -442,7 +437,7 @@ const MenuPage = () => {
     // ============ MAIN CONTENT ============
     return (
         <>
-            <div className="min-h-screen overflow-x-hidden">
+            <div className="min-h-screen overflow-x-hidden bg-[#ebe0ce]">
                 {/* Hero Banner */}
                 <div className="relative pt-24 pb-20 md:pb-72 overflow-hidden">
                     <div className="absolute inset-0 w-full h-full">
@@ -455,7 +450,7 @@ const MenuPage = () => {
                     </div>
 
                     <div className="absolute top-0 right-0 w-32 sm:w-64 h-32 sm:h-64 bg-white/10 rounded-full blur-3xl opacity-50"></div>
-                    <div className="absolute bottom-0 left-0 w-24 sm:w-48 h-24 sm:h-48 bg-yellow-400/10 rounded-full blur-2xl opacity-50"></div>
+                    <div className="absolute bottom-0 left-0 w-24 sm:w-48 h-24 sm:h-48 bg-[#FBBF24]/10 rounded-full blur-2xl opacity-50"></div>
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 sm:w-96 h-48 sm:h-96 bg-white/5 rounded-full blur-3xl opacity-30"></div>
 
                     <div className="container mx-auto px-4 relative z-10">
@@ -471,7 +466,7 @@ const MenuPage = () => {
                             <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold text-white mb-4 drop-shadow-lg">
                                 {currentCategory?.name || 'Menu'}
                             </h1>
-                            <div className="w-24 h-1 bg-gradient-to-r from-transparent via-white to-transparent mx-auto mb-4"></div>
+                            <div className="w-24 h-1 bg-gradient-to-r from-transparent via-[#E85D3A] to-transparent mx-auto mb-4"></div>
                             <p className="text-white/90 text-center max-w-2xl mx-auto text-base sm:text-lg drop-shadow">
                                 {currentCategory?.isAll
                                     ? 'Explore our complete menu'
@@ -481,34 +476,34 @@ const MenuPage = () => {
                     </div>
                 </div>
 
-                {/* ===== CONTENT SECTION WITH BACKGROUND IMAGE ===== */}
+                {/* ===== CONTENT SECTION WITH FOOD COLORS ===== */}
                 <div className="relative -mt-16 pb-12">
-                    {/* ===== BACKGROUND IMAGE ===== */}
+                    {/* ===== BACKGROUND - Updated with Food Colors ===== */}
                     <div className="absolute inset-0 -z-10 overflow-hidden">
                         <img
                             src={imagebg}
                             alt="Menu Background"
                             className="absolute inset-0 w-full h-full object-cover"
                         />
-                        <div className="absolute inset-0 bg-black/60"></div>
-                        <div className="absolute inset-0 bg-gradient-to-br from-[#0D7C53]/30 via-transparent to-[#169466]/20"></div>
+                        <div className="absolute inset-0 bg-white/90"></div>
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#FFF8F5]/50 via-white/80 to-[#FFF0EA]/50"></div>
 
-                        {/* Decorative Glows */}
-                        <div className="absolute -top-40 -left-40 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-amber-400/20 rounded-full blur-[80px] sm:blur-[120px] animate-pulse-slow"></div>
-                        <div className="absolute -bottom-40 -right-40 w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] bg-amber-700/20 rounded-full blur-[70px] sm:blur-[100px] animate-pulse-slow-delay"></div>
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-emerald-500/10 rounded-full blur-[100px] sm:blur-[150px] animate-pulse-slow"></div>
+                        {/* Decorative Glows - Updated with Food Colors */}
+                        <div className="absolute -top-40 -left-40 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-[#E85D3A]/10 rounded-full blur-[80px] sm:blur-[120px] animate-pulse-slow"></div>
+                        <div className="absolute -bottom-40 -right-40 w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] bg-[#F0744F]/10 rounded-full blur-[70px] sm:blur-[100px] animate-pulse-slow-delay"></div>
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-[#E85D3A]/5 rounded-full blur-[100px] sm:blur-[150px] animate-pulse-slow"></div>
 
-                        <div className="absolute inset-0 pointer-events-none opacity-20">
-                            <div className="absolute top-20 left-10 text-2xl sm:text-6xl rotate-12 animate-float">🫘</div>
-                            <div className="absolute bottom-32 right-20 text-2xl sm:text-6xl -rotate-12 animate-float-delay">🫘</div>
-                            <div className="absolute top-1/3 right-[15%] text-xl sm:text-4xl rotate-45 animate-float-slow">☕</div>
-                            <div className="absolute bottom-[25%] left-[15%] text-2xl sm:text-5xl -rotate-45 animate-float-delay">🫘</div>
+                        <div className="absolute inset-0 pointer-events-none opacity-10">
+                            <div className="absolute top-20 left-10 text-2xl sm:text-6xl rotate-12 animate-float">🍔</div>
+                            <div className="absolute bottom-32 right-20 text-2xl sm:text-6xl -rotate-12 animate-float-delay">🍕</div>
+                            <div className="absolute top-1/3 right-[15%] text-xl sm:text-4xl rotate-45 animate-float-slow">🌮</div>
+                            <div className="absolute bottom-[25%] left-[15%] text-2xl sm:text-5xl -rotate-45 animate-float-delay">🍟</div>
                         </div>
                     </div>
 
                     <div className="container mx-auto px-3 sm:px-4 relative z-10">
-                        {/* Category Selector */}
-                        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-4 sm:mb-6  bg-white/10 border border-white/20 p-2 sm:p-3 rounded-xl sm:rounded-2xl shadow-2xl shadow-black/5">
+                        {/* Category Selector - Updated with Food Colors */}
+                        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-4 sm:mb-6 bg-white border border-[#FEE7DD] p-2 sm:p-3 rounded-xl sm:rounded-2xl shadow-lg shadow-[#E85D3A]/5">
                             {allCategories.map((cat) => (
                                 <button
                                     key={cat._id}
@@ -517,8 +512,8 @@ const MenuPage = () => {
                                         setVisibleCards(new Set());
                                     }}
                                     className={`px-2 sm:px-4 py-1 sm:py-2 rounded-full text-[10px] sm:text-sm font-medium transition-all duration-300 flex items-center gap-1 ${String(currentCategory?._id) === String(cat._id)
-                                        ? 'bg-[#0D7C53] text-white shadow-lg'
-                                        : ' bg-white/20 border border-white/20 text-white hover:bg-white/30'
+                                        ? 'bg-gradient-to-r from-[#E85D3A] to-[#F0744F] text-white shadow-lg shadow-[#E85D3A]/30'
+                                        : 'bg-[#FFF8F5] border border-[#FEE7DD] text-[#6B7280] hover:bg-[#FFF0EA] hover:text-[#E85D3A]'
                                         }`}
                                 >
                                     {cat.isAll && <Grid3x3 size={14} />}
@@ -527,21 +522,21 @@ const MenuPage = () => {
                             ))}
                         </div>
 
-                        {/* Search Bar */}
+                        {/* Search Bar - Updated with Food Colors */}
                         <div className="max-w-md mx-auto mb-6 sm:mb-8">
                             <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60" size={18} />
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]" size={18} />
                                 <input
                                     type="text"
                                     placeholder={`Search ${currentCategory?.isAll ? 'Menu' : currentCategory?.name}...`}
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full pl-9 sm:pl-10 pr-8 sm:pr-10 py-2 sm:py-3  bg-white/10 border-2 border-white/20 rounded-full shadow-xl shadow-black/5 focus:outline-none focus:ring-2 focus:ring-[#0D7C53] focus:border-transparent transition-all text-white placeholder:text-white/60"
+                                    className="w-full pl-9 sm:pl-10 pr-8 sm:pr-10 py-2 sm:py-3 bg-white border-2 border-[#FEE7DD] rounded-full shadow-lg shadow-[#E85D3A]/5 focus:outline-none focus:ring-2 focus:ring-[#E85D3A] focus:border-transparent transition-all text-[#1F2937] placeholder:text-[#6B7280]"
                                 />
                                 {searchTerm && (
                                     <button
                                         onClick={clearSearch}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#E85D3A]"
                                     >
                                         <X size={16} />
                                     </button>
@@ -549,9 +544,9 @@ const MenuPage = () => {
                             </div>
                         </div>
 
-                        {/* Items Grid with Auto Animation */}
+                        {/* Items Grid with Auto Animation - Updated with Food Colors */}
                         {currentItems && currentItems.length > 0 ? (
-                            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 pb-12">
+                            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6 pb-12">
                                 {currentItems.map((item, index) => {
                                     let itemCategoryName = 'Uncategorized';
                                     if (item.category && typeof item.category === 'object') {
@@ -576,8 +571,8 @@ const MenuPage = () => {
                                             key={item._id}
                                             ref={(el) => (cardRefs.current[item._id] = el)}
                                             data-id={item._id}
-                                            onClick={() => navigate(`/product/${item._id}`)} // ✅ Add this line
-                                            className={`group  bg-white/10 border border-white/20 rounded-xl sm:rounded-2xl shadow-md shadow-black/10 hover:shadow-lg hover:shadow-[#0D7C53]/20 transition-all duration-700 overflow-hidden hover:-translate-y-1 flex flex-col h-full hover:bg-white/15
+                                            onClick={() => navigate(`/product/${item._id}`)}
+                                            className={`group bg-white border border-[#F3F4F6] rounded-xl sm:rounded-2xl shadow-sm hover:shadow-xl hover:shadow-[#E85D3A]/10 transition-all duration-700 overflow-hidden hover:-translate-y-2 flex flex-col h-full hover:border-[#FEE7DD]
                                                 ${isVisible
                                                     ? 'opacity-100 translate-x-0'
                                                     : `opacity-0 ${direction === 'left' ? '-translate-x-16' : 'translate-x-16'}`
@@ -587,21 +582,21 @@ const MenuPage = () => {
                                             }}
                                         >
                                             {/* Image Container */}
-                                            <div className="relative h-28 sm:h-48 md:h-56 overflow-hidden bg-black/30 flex-shrink-0">
+                                            <div className="relative h-28 sm:h-48 md:h-56 overflow-hidden bg-[#FAFAFA] flex-shrink-0">
                                                 <img
                                                     src={item.image}
                                                     alt={item.name}
                                                     className="w-full h-full object-fill group-hover:scale-110 transition-transform duration-700"
                                                     onError={(e) => {
-                                                        e.target.src = "https://placehold.co/400x300/e2e8f0/64748b?text=No+Image";
+                                                        e.target.src = "https://placehold.co/400x300/FAFAFA/6B7280?text=No+Image";
                                                     }}
                                                 />
 
-                                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                                <div className="absolute inset-0 bg-gradient-to-t from-[#1F2937]/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-                                                {/* Discount Badge */}
+                                                {/* Discount Badge - Updated with Food Colors */}
                                                 {item.discountPrice && item.discountPrice < item.price && (
-                                                    <div className="absolute top-2 sm:top-3 left-2 sm:left-3 z-10 bg-gradient-to-r from-green-600 to-[#0D7C53] text-white text-[8px] sm:text-xs px-2 sm:px-3 py-0.5 sm:py-1.5 rounded-full font-bold shadow-lg flex items-center gap-0.5 sm:gap-1">
+                                                    <div className="absolute top-2 sm:top-3 left-2 sm:left-3 z-10 bg-gradient-to-r from-[#E85D3A] to-[#F0744F] text-white text-[8px] sm:text-xs px-2 sm:px-3 py-0.5 sm:py-1.5 rounded-full font-bold shadow-lg shadow-[#E85D3A]/30 flex items-center gap-0.5 sm:gap-1">
                                                         <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
                                                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                                                             <span className="relative inline-flex rounded-full h-full w-full bg-white"></span>
@@ -611,63 +606,62 @@ const MenuPage = () => {
                                                 )}
 
                                                 {item.isFeatured && (
-                                                    <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-gradient-to-r from-[#0D7C53] to-green-500 text-white text-[8px] sm:text-xs font-bold px-2 sm:px-3 py-0.5 sm:py-1.5 rounded-full shadow-md flex items-center gap-0.5 sm:gap-1 ">
-                                                        <Star size={10} className="sm:w-3 sm:h-3 fill-yellow-400" />
+                                                    <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-gradient-to-r from-[#FBBF24] to-[#F59E0B] text-white text-[8px] sm:text-xs font-bold px-2 sm:px-3 py-0.5 sm:py-1.5 rounded-full shadow-md flex items-center gap-0.5 sm:gap-1">
+                                                        <Star size={10} className="sm:w-3 sm:h-3 fill-white" />
                                                         Featured
                                                     </div>
                                                 )}
 
                                                 {currentCategory?.isAll && (
-                                                    <div className="absolute bottom-2 left-2 bg-black/60  text-white text-[8px] sm:text-xs px-2 py-0.5 sm:py-1 rounded-full">
+                                                    <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm text-white text-[8px] sm:text-xs px-2 py-0.5 sm:py-1 rounded-full">
                                                         {itemCategoryName}
                                                     </div>
                                                 )}
 
-                                                {/* Wishlist Button */}
+                                                {/* Wishlist Button - Updated */}
                                                 <button
                                                     onClick={(e) => handleWishlistToggle(item, e)}
-                                                    className="absolute top-2 sm:top-3 right-2 sm:right-3 z-10 w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 bg-white/80  rounded-full flex items-center justify-center shadow-md hover:bg-white transition-all duration-300 hover:scale-110"
+                                                    className="absolute top-2 sm:top-3 right-2 sm:right-3 z-10 w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:bg-white transition-all duration-300 hover:scale-110 border border-[#F3F4F6]"
                                                 >
                                                     <Heart
                                                         size={16}
                                                         className={`sm:w-[18px] sm:h-[18px] transition-colors ${isInWishlist(item._id)
-                                                            ? 'fill-red-500 text-red-500'
-                                                            : 'text-gray-600 hover:text-red-500'
+                                                            ? 'fill-[#E85D3A] text-[#E85D3A]'
+                                                            : 'text-[#6B7280] hover:text-[#E85D3A]'
                                                             }`}
                                                     />
                                                 </button>
                                             </div>
 
-                                            {/* Content */}
-                                            <div className="p-3 sm:p-4 md:p-5 flex flex-col flex-1 bg-white/10">
-                                                <h3 className="font-bold text-white text-sm sm:text-base md:text-lg group-hover:text-[#10be7f] transition-colors mb-0.5 sm:mb-1 truncate">
+                                            {/* Content - Updated with Food Colors */}
+                                            <div className="p-3 sm:p-4 md:p-5 flex flex-col flex-1 bg-white">
+                                                <h3 className="font-bold text-[#1F2937] text-sm sm:text-base md:text-lg group-hover:text-[#E85D3A] transition-colors mb-0.5 sm:mb-1 truncate">
                                                     {item.name}
                                                 </h3>
 
                                                 <div className="h-8 sm:h-10 md:h-12 overflow-hidden">
-                                                    <p className="text-white/70 text-[10px] sm:text-sm line-clamp-2">
+                                                    <p className="text-[#6B7280] text-[10px] sm:text-sm line-clamp-2">
                                                         {item.description || 'Delicious item from our menu'}
                                                     </p>
                                                 </div>
 
-                                                <div className="flex items-center justify-between border-t border-white/10 pt-0 md:pt-2 mt-0 md:mt-2">
+                                                <div className="flex items-center justify-between border-t border-[#F3F4F6] pt-0 md:pt-2 mt-0 md:mt-2">
                                                     <div className="flex items-center gap-1 sm:gap-2">
-                                                        <span className="text-base sm:text-lg md:text-xl font-bold text-white">
+                                                        <span className="text-base sm:text-lg md:text-xl font-bold text-[#1F2937]">
                                                             ₹{displayPrice.toFixed(2)}
                                                         </span>
                                                         {item.discountPrice && item.discountPrice < item.price && (
-                                                            <span className="text-[8px] sm:text-xs text-white/40 line-through">
+                                                            <span className="text-[8px] sm:text-xs text-[#6B7280] line-through">
                                                                 ₹{originalPrice.toFixed(2)}
                                                             </span>
                                                         )}
                                                     </div>
-
                                                 </div>
 
-                                                {/* Add to Cart Button */}
+                                                {/* Add to Cart Button - Updated with Food Colors */}
                                                 <button
                                                     onClick={(e) => handleAddToCart(item, e)}
-                                                    className="w-full mt-1 sm:mt-3 md:mt-4 font-medium py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base flex-shrink-0 bg-gradient-to-r from-[#0D7C53] to-[#169466] text-white hover:shadow-lg hover:shadow-[#0D7C53]/40 hover:scale-[1.02]"
+                                                    className="w-full mt-1 sm:mt-3 md:mt-4 font-medium py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base flex-shrink-0 bg-gradient-to-r from-[#E85D3A] to-[#F0744F] text-white hover:shadow-lg hover:shadow-[#E85D3A]/40 hover:scale-[1.02]"
                                                 >
                                                     <ShoppingBag size={16} />
                                                     Add to Cart
@@ -679,14 +673,14 @@ const MenuPage = () => {
                             </div>
                         ) : (
                             <div className="text-center py-12 sm:py-20">
-                                <div className=" bg-white/10 border border-white/20 rounded-2xl sm:rounded-3xl p-6 sm:p-12 shadow-2xl shadow-black/5 max-w-2xl mx-auto">
-                                    <div className="w-16 h-16 sm:w-24 sm:h-24 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                                        <Search size={28} className="sm:w-10 sm:h-10 text-white/40" />
+                                <div className="bg-white border border-[#FEE7DD] rounded-2xl sm:rounded-3xl p-6 sm:p-12 shadow-lg shadow-[#E85D3A]/5 max-w-2xl mx-auto">
+                                    <div className="w-16 h-16 sm:w-24 sm:h-24 bg-[#FFF0EA] rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                                        <Search size={28} className="sm:w-10 sm:h-10 text-[#6B7280]" />
                                     </div>
-                                    <h3 className="text-lg sm:text-2xl font-bold text-white">No Items Found</h3>
-                                    <p className="text-sm sm:text-base text-white/60 mt-1 sm:mt-2">
+                                    <h3 className="text-lg sm:text-2xl font-bold text-[#1F2937]">No Items Found</h3>
+                                    <p className="text-sm sm:text-base text-[#6B7280] mt-1 sm:mt-2">
                                         {searchTerm ? (
-                                            <>No results for "<span className="font-medium text-white/80">{searchTerm}</span>"</>
+                                            <>No results for "<span className="font-medium text-[#1F2937]">{searchTerm}</span>"</>
                                         ) : (
                                             <>This category is currently empty. Check back later!</>
                                         )}
@@ -694,7 +688,7 @@ const MenuPage = () => {
                                     {searchTerm && (
                                         <button
                                             onClick={clearSearch}
-                                            className="mt-3 sm:mt-4 px-4 sm:px-6 py-1.5 sm:py-2  bg-white/20 border border-white/20 text-white rounded-full hover:bg-white/30 transition-colors text-sm sm:text-base"
+                                            className="mt-3 sm:mt-4 px-4 sm:px-6 py-1.5 sm:py-2 bg-[#FFF0EA] border border-[#FEE7DD] text-[#E85D3A] rounded-full hover:bg-[#E85D3A] hover:text-white transition-colors text-sm sm:text-base"
                                         >
                                             Clear Search
                                         </button>
@@ -703,15 +697,15 @@ const MenuPage = () => {
                             </div>
                         )}
 
-                        {/* Pagination */}
+                        {/* Pagination - Updated with Food Colors */}
                         {totalPages > 1 && (
                             <div className="flex flex-wrap items-center justify-center gap-2 mt-4 sm:mt-6 pb-6">
                                 <button
                                     onClick={() => handlePageChange(currentPage - 1)}
                                     disabled={currentPage === 1}
-                                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-white/20 text-white text-sm sm:text-base transition-all duration-200 ${currentPage === 1
+                                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-[#FEE7DD] text-[#6B7280] text-sm sm:text-base transition-all duration-200 ${currentPage === 1
                                         ? "opacity-50 cursor-not-allowed"
-                                        : "hover:bg-white/20 hover:border-white/30"
+                                        : "hover:bg-[#FFF0EA] hover:border-[#E85D3A] hover:text-[#E85D3A]"
                                         }`}
                                 >
                                     Previous
@@ -723,8 +717,8 @@ const MenuPage = () => {
                                             key={page}
                                             onClick={() => handlePageChange(page)}
                                             className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg border transition-all duration-200 text-sm sm:text-base ${currentPage === page
-                                                ? "bg-[#0D7C53] text-white border-[#0D7C53] shadow-lg shadow-[#0D7C53]/30"
-                                                : "border-white/20 text-white hover:bg-white/20 hover:border-white/30"
+                                                ? "bg-gradient-to-r from-[#E85D3A] to-[#F0744F] text-white border-[#E85D3A] shadow-lg shadow-[#E85D3A]/30"
+                                                : "border-[#FEE7DD] text-[#6B7280] hover:bg-[#FFF0EA] hover:border-[#E85D3A] hover:text-[#E85D3A]"
                                                 }`}
                                         >
                                             {page}
@@ -735,9 +729,9 @@ const MenuPage = () => {
                                 <button
                                     onClick={() => handlePageChange(currentPage + 1)}
                                     disabled={currentPage === totalPages}
-                                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-white/20 text-white text-sm sm:text-base transition-all duration-200 ${currentPage === totalPages
+                                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-[#FEE7DD] text-[#6B7280] text-sm sm:text-base transition-all duration-200 ${currentPage === totalPages
                                         ? "opacity-50 cursor-not-allowed"
-                                        : "hover:bg-white/20 hover:border-white/30"
+                                        : "hover:bg-[#FFF0EA] hover:border-[#E85D3A] hover:text-[#E85D3A]"
                                         }`}
                                 >
                                     Next

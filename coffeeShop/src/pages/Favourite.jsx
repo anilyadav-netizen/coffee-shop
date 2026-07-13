@@ -159,7 +159,7 @@ const Favourite = () => {
 
     if (favourites.length === 0) {
         return (
-            <section className="relative py-20 px-4 overflow-hidden min-h-scree">
+            <section className="relative py-20 px-4 overflow-hidden">
                 <div className="max-w-7xl mx-auto text-center relative z-10">
                     <div className="bg-gradient-to-br from-white to-[#FFF5F0] rounded-3xl p-16 shadow-xl max-w-2xl mx-auto hover:shadow-2xl transition-all duration-700 border border-[#FEE7DD]">
                         <div className="relative inline-block">
@@ -188,7 +188,7 @@ const Favourite = () => {
     }
 
     return (
-        <section className="relative py-12 px-4 overflow-hidden min-h-screen">
+        <section className="relative py-12 px-4 overflow-hidden ">
             {/* Subtle Background Pattern */}
             <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#E85D3A]/[0.03] rounded-full blur-[150px]"></div>
