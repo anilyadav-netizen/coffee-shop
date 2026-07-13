@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     Coffee,
     Flame,
@@ -8,29 +8,133 @@ import {
     CheckCircle,
     Clock,
     Bean,
-    ChevronRight
+    ChevronRight,
+    ChevronLeft,
+    Award,
+    Zap,
+    Star,
+    Heart,
+    Users,
+    MapPin,
+    Phone,
+    Mail,
 } from 'lucide-react';
-import {
-    getJourneySteps,
-    getJourneySectionData,
-    getJourneyStepCount
-} from '../data/journeyData';
 
+// ===== COFFEE SHOP DATA =====
+const COFFEE_SHOP = {
+    name: "Brew & Bloom",
+    tagline: "Artisan Coffee · Crafted with Love",
+    description: "A cozy sanctuary where premium coffee meets community.",
+    address: "123 Coffee Lane, Downtown District",
+    phone: "+1 (555) 234-5678",
+    email: "hello@brewandbloom.com",
+    social: {
+        instagram: "@brewandbloom",
+        facebook: "BrewAndBloom",
+        twitter: "@brewandbloom"
+    },
+    specialties: [
+        "Single Origin Espresso",
+        "Pour Over V60",
+        "Cold Brew",
+        "Latte Art",
+        "Pastry Pairings"
+    ],
+    hours: {
+        weekdays: "6:30 AM - 8:00 PM",
+        weekend: "7:00 AM - 9:00 PM"
+    }
+};
+
+// ===== CUSTOM TWITTER ICON =====
+const TwitterIcon = ({ className = "w-3.5 h-3.5" }) => (
+    <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"/>
+    </svg>
+);
+
+// ===== JOURNEY DATA =====
+const journeySteps = [
+    {
+        id: 1,
+        stepNumber: 1,
+        title: "Bean Selection",
+        subtitle: "Ethiopia Yirgacheffe",
+        description: "Hand-picked premium Arabica beans from the highlands of Ethiopia, known for their floral and fruity notes.",
+        icon: "Bean",
+        duration: "2-3 weeks",
+        image: "https://images.unsplash.com/photo-1511537190424-bbbab87ac5eb?q=80&w=2070&auto=format&fit=crop",
+        color: "from-amber-400 to-amber-600",
+        bgColor: "bg-amber-500/10",
+        borderColor: "border-amber-400/30",
+        zoomDirection: "top-to-bottom"
+    },
+    {
+        id: 2,
+        stepNumber: 2,
+        title: "Roasting Process",
+        subtitle: "Medium Roast",
+        description: "Artisan roasted to perfection, unlocking rich caramel and dark chocolate flavors with a smooth finish.",
+        icon: "Flame",
+        duration: "12-15 min",
+        image: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?q=80&w=2070&auto=format&fit=crop",
+        color: "from-orange-400 to-orange-600",
+        bgColor: "bg-orange-500/10",
+        borderColor: "border-orange-400/30",
+        zoomDirection: "bottom-to-top"
+    },
+    {
+        id: 3,
+        stepNumber: 3,
+        title: "Brewing Excellence",
+        subtitle: "Pour Over · 93°C",
+        description: "Precision brewing using the V60 method, extracting the perfect balance of acidity and sweetness.",
+        icon: "Droplets",
+        duration: "3-4 min",
+        image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=2070&auto=format&fit=crop",
+        color: "from-blue-400 to-blue-600",
+        bgColor: "bg-blue-500/10",
+        borderColor: "border-blue-400/30",
+        zoomDirection: "left-to-right"
+    },
+    {
+        id: 4,
+        stepNumber: 4,
+        title: "Tasting Notes",
+        subtitle: "Floral · Citrus",
+        description: "Experience complex flavor profiles with hints of jasmine, bergamot, and dark cocoa.",
+        icon: "Coffee",
+        duration: "5-7 min",
+        image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=2070&auto=format&fit=crop",
+        color: "from-purple-400 to-purple-600",
+        bgColor: "bg-purple-500/10",
+        borderColor: "border-purple-400/30",
+        zoomDirection: "right-to-left"
+    },
+    {
+        id: 5,
+        stepNumber: 5,
+        title: "Perfect Serve",
+        subtitle: "Artisanal Presentation",
+        description: "Served at optimal temperature with latte art, creating the ultimate coffee experience.",
+        icon: "Package",
+        duration: "2-3 min",
+        image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=2070&auto=format&fit=crop",
+        color: "from-rose-400 to-rose-600",
+        bgColor: "bg-rose-500/10",
+        borderColor: "border-rose-400/30",
+        zoomDirection: "center"
+    }
+];
+
+// ===== MAIN COMPONENT =====
 const Journey = () => {
-
-    const navigate = useNavigate();
-
-    const [activeStep, setActiveStep] = useState(0);
+    const [activeStep, setActiveStep] = useState(2);
     const [isVisible, setIsVisible] = useState(false);
     const sectionRef = useRef(null);
 
-    // Get data from global
-    const journeySteps = getJourneySteps();
-    const sectionData = getJourneySectionData();
-    const totalSteps = getJourneyStepCount();
-
-    // Clean Icon mapping - matches Lucide icons
-    const getIcon = (iconName, className = "w-7 h-7") => {
+    // Icon mapping
+    const getIcon = (iconName, className = "w-5 h-5") => {
         const icons = {
             Bean: <Bean className={className} />,
             Flame: <Flame className={className} />,
@@ -41,10 +145,7 @@ const Journey = () => {
         return icons[iconName] || <Coffee className={className} />;
     };
 
-    const handleJourneyClick = () => {
-        navigate("/coffee-journey");
-    };
-
+    // Intersection Observer
     useEffect(() => {
         const observer = new IntersectionObserver(
             (entries) => {
@@ -75,205 +176,454 @@ const Journey = () => {
         }, 5000);
 
         return () => clearInterval(interval);
-    }, [isVisible, journeySteps.length]);
+    }, [isVisible]);
 
     const currentStep = journeySteps[activeStep];
 
+    // Navigation handlers
+    const goToPrevious = () => {
+        setActiveStep((prev) => (prev - 1 + journeySteps.length) % journeySteps.length);
+    };
+
+    const goToNext = () => {
+        setActiveStep((prev) => (prev + 1) % journeySteps.length);
+    };
+
+    // ===== SLOW, SMOOTH ZOOM ANIMATIONS =====
+    const getZoomVariants = (direction) => {
+        const variants = {
+            "top-to-bottom": {
+                initial: { scale: 0.5, opacity: 0, y: -250 },
+                animate: { 
+                    scale: 1, 
+                    opacity: 1, 
+                    y: 0,
+                    transition: { 
+                        duration: 1.2, 
+                        ease: [0.25, 0.46, 0.45, 0.94],
+                        opacity: { duration: 0.8 }
+                    }
+                },
+                exit: { 
+                    scale: 0.5, 
+                    opacity: 0, 
+                    y: 250,
+                    transition: { 
+                        duration: 0.9, 
+                        ease: [0.55, 0.085, 0.68, 0.53]
+                    }
+                }
+            },
+            "bottom-to-top": {
+                initial: { scale: 0.5, opacity: 0, y: 250 },
+                animate: { 
+                    scale: 1, 
+                    opacity: 1, 
+                    y: 0,
+                    transition: { 
+                        duration: 1.2, 
+                        ease: [0.25, 0.46, 0.45, 0.94],
+                        opacity: { duration: 0.8 }
+                    }
+                },
+                exit: { 
+                    scale: 0.5, 
+                    opacity: 0, 
+                    y: -250,
+                    transition: { 
+                        duration: 0.9, 
+                        ease: [0.55, 0.085, 0.68, 0.53]
+                    }
+                }
+            },
+            "left-to-right": {
+                initial: { scale: 0.5, opacity: 0, x: -250 },
+                animate: { 
+                    scale: 1, 
+                    opacity: 1, 
+                    x: 0,
+                    transition: { 
+                        duration: 1.2, 
+                        ease: [0.25, 0.46, 0.45, 0.94],
+                        opacity: { duration: 0.8 }
+                    }
+                },
+                exit: { 
+                    scale: 0.5, 
+                    opacity: 0, 
+                    x: 250,
+                    transition: { 
+                        duration: 0.9, 
+                        ease: [0.55, 0.085, 0.68, 0.53]
+                    }
+                }
+            },
+            "right-to-left": {
+                initial: { scale: 0.5, opacity: 0, x: 250 },
+                animate: { 
+                    scale: 1, 
+                    opacity: 1, 
+                    x: 0,
+                    transition: { 
+                        duration: 1.2, 
+                        ease: [0.25, 0.46, 0.45, 0.94],
+                        opacity: { duration: 0.8 }
+                    }
+                },
+                exit: { 
+                    scale: 0.5, 
+                    opacity: 0, 
+                    x: -250,
+                    transition: { 
+                        duration: 0.9, 
+                        ease: [0.55, 0.085, 0.68, 0.53]
+                    }
+                }
+            },
+            "center": {
+                initial: { scale: 0.2, opacity: 0, rotate: -15 },
+                animate: { 
+                    scale: 1, 
+                    opacity: 1, 
+                    rotate: 0,
+                    transition: { 
+                        duration: 1.3, 
+                        ease: [0.34, 1.56, 0.64, 1],
+                        opacity: { duration: 0.8 }
+                    }
+                },
+                exit: { 
+                    scale: 0.2, 
+                    opacity: 0, 
+                    rotate: 15,
+                    transition: { 
+                        duration: 0.9, 
+                        ease: [0.55, 0.085, 0.68, 0.53]
+                    }
+                }
+            }
+        };
+        return variants[direction] || variants["center"];
+    };
+
+    // Get current zoom direction
+    const currentZoom = currentStep?.zoomDirection || "center";
+
     return (
-        <section ref={sectionRef} className="relative py-2 md:py-6 px-4 overflow-hidden">
-
-            <div
-                onClick={handleJourneyClick}
-                className="max-w-[104rem] mx-auto relative z-10 cursor-pointer"
-            >
-                {/* ========== HEADER ========== */}
-                <div className="text-center mb-8">
-                    <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10  rounded-full mb-2 border border-white/20">
-                        <span className="flex items-center gap-2 px-6 py-2.5 bg-[#0D7C53]/20  text-white rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30">{sectionData.badge}</span>
-                    </div>
-                    <h2 className="text-3xl md:text-5xl font-bold text-white">
-                        {sectionData.title.split(' ').map((word, index) => (
-                            word === sectionData.titleHighlight ?
-                                <span key={index} className="text-[#10be7f]">{word} </span> :
-                                <span key={index}>{word} </span>
-                        ))}
-                    </h2>
-                    <p className="text-gray-200 mt-3 max-w-2xl mx-auto">
-                        {sectionData.subtitle}
-                    </p>
-                    <div className="w-16 h-1 bg-[#0D7C53] mx-auto mt-2 rounded-full"></div>
-                </div>
-
-                {/* ========== MAIN CONTENT - IMAGE LEFT + STEPS RIGHT ========== */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start  rounded-3xl">
-                    {/* ===== LEFT SIDE - IMAGE ===== */}
-                    <div className="relative order-2 lg:order-1">
-                        <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-black/5 border border-white/30  bg-white/10">
-                            <img
-                                src={currentStep.image}
-                                alt={currentStep.title}
-                                className="w-full h-[350px] md:h-[450px] lg:h-[500px] object-fill transition-transform duration-700 group-hover:scale-105"
-                            />
-                            {/* Gradient Overlay */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-
-                            {/* Step Badge */}
-                            <div className="absolute bottom-4 left-4  bg-white/40 border border-white/30 rounded-xl px-4 py-2 shadow-xl">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-white font-bold text-lg">Step {currentStep.stepNumber}</span>
-                                    <span className="text-white/60 text-sm">/ {totalSteps}</span>
-                                </div>
-                            </div>
-
-                            {/* Duration Badge */}
-                            <div className="absolute top-4 right-4  bg-white/40 border border-white/30 rounded-full px-4 py-1.5 shadow-xl flex items-center gap-2">
-                                <Clock className="w-4 h-4 text-white" />
-                                <span className="text-sm font-medium text-gray-200">{currentStep.duration}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* ===== RIGHT SIDE - VERTICAL STEP ROADMAP ===== */}
-                    <div className="order-1 lg:order-2">
-                        <div className=" border border-white/30 rounded-3xl p-6 shadow-2xl shadow-black/5">
-                            <h3 className="text-xl font-bold text-white mb-6 text-center">
-                                Journey Steps
-                            </h3>
-
-                            {/* Vertical Timeline */}
-                            <div className="relative">
-                                {/* Vertical Line */}
-                                <div className="absolute left-6 top-2 bottom-2 w-0.5 bg-gradient-to-b from-[#0D7C53] via-green-400 to-amber-400 rounded-full"></div>
-
-                                <div className="space-y-4">
-                                    {journeySteps.map((step, index) => {
-                                        const isActive = index === activeStep;
-                                        const isPast = index < activeStep;
-
-                                        return (
-                                            <button
-                                                key={step.id}
-                                                onClick={() => setActiveStep(index)}
-                                                className={`
-                                                    w-full flex items-start gap-4 p-3 rounded-2xl transition-all duration-300 text-left
-                                                    ${isActive
-                                                        ? ' bg-white/40 border-2 border-[#0D7C53] shadow-xl'
-                                                        : isPast
-                                                            ? ' bg-white/20 border border-white/30 opacity-70'
-                                                            : ' bg-white/10 border border-white/20 hover:bg-white/30'}
-                                                `}
-                                            >
-                                                {/* Step Circle with Number */}
-                                                <div className="relative flex-shrink-0">
-                                                    <div className={`
-                                                        w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300
-                                                        ${isActive
-                                                            ? 'bg-[#0D7C53] text-white shadow-lg shadow-[#0D7C53]/30 scale-110'
-                                                            : isPast
-                                                                ? 'bg-[#0D7C53]/60 text-white'
-                                                                : 'bg-white/40 text-[#0D7C53] border-2 border-white/30'}
-                                                    `}>
-                                                        {isPast ? (
-                                                            <CheckCircle className="w-6 h-6" />
-                                                        ) : (
-                                                            <span className="font-bold text-sm">{step.stepNumber}</span>
-                                                        )}
-                                                    </div>
-
-                                                    {/* Connecting dot on line */}
-                                                    {index < journeySteps.length - 1 && (
-                                                        <div className={`
-                                                            absolute -bottom-4 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full
-                                                            ${isPast || isActive ? 'bg-[#0D7C53]' : 'bg-gray-300'}
-                                                        `}></div>
-                                                    )}
-                                                </div>
-
-                                                {/* Step Content */}
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className={`
-                                                            font-semibold text-sm transition-colors duration-300
-                                                            ${isActive ? 'text-white' : isPast ? 'text-white' : 'text-white'}
-                                                        `}>
-                                                            {step.title}
-                                                        </span>
-                                                        {isActive && (
-                                                            <span className="text-xs flex items-center gap-2 px-2 py-0.5 bg-[#0D7C53]/20  text-white rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30">
-                                                                Active
-                                                            </span>
-                                                        )}
-                                                        {isPast && (
-                                                            <span className="text-xs px-2 py-0.5 flex items-center gap-2 bg-[#0D7C53]/20  text-white rounded-full font-medium hover:bg-[#0D7C53] hover:text-white transition-all duration-300 border border-white/30">
-                                                                Done
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    <p className={`
-                                                        text-xs mt-0.5 line-clamp-2 transition-colors duration-300
-                                                        ${isActive ? 'text-gray-200' : 'text-gray-100'}
-                                                    `}>
-                                                        {step.subtitle}
-                                                    </p>
-                                                    {/* Show icon for active step */}
-                                                    {isActive && (
-                                                        <div className="flex items-center gap-1 mt-1">
-                                                            {getIcon(step.icon, "w-3.5 h-3.5 text-white")}
-                                                            <span className="text-xs text-gray-200">{step.duration}</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                {/* Arrow indicator for active */}
-                                                {isActive && (
-                                                    <ChevronRight className="w-5 h-5 text-white flex-shrink-0 animate-pulse" />
-                                                )}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <section 
+            ref={sectionRef} 
+            className="relative min-h-screen py-8 px-4 overflow-hidden bg-[#ead9be]"
+        >
+            {/* ===== BACKGROUND - Updated for White Background ===== */}
+            <div className="absolute inset-0 -z-10">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#E85D3A]/5 via-transparent to-[#F0744F]/5" />
+                <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[#E85D3A]/10 rounded-full blur-[120px] animate-pulse-slow" />
+                <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-amber-500/10 rounded-full blur-[100px] animate-pulse-slow-delay" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#E85D3A]/5 rounded-full blur-[150px]" />
+                <div className="absolute top-10 left-10 text-7xl opacity-[0.03] animate-float">🫘</div>
+                <div className="absolute bottom-20 right-20 text-7xl opacity-[0.03] animate-float-delay">☕</div>
+                <div className="absolute top-1/3 right-1/4 text-5xl opacity-[0.02] animate-float-slow">✦</div>
+                <div className="absolute bottom-1/4 left-1/3 text-5xl opacity-[0.02] animate-float-delay">✦</div>
             </div>
 
-            {/* ========== CSS ANIMATIONS ========== */}
-            <style >{`
+            <div className="max-w-6xl mx-auto relative z-10">
+                {/* ===== HEADER - Updated for White Background ===== */}
+                <div className="text-center mb-4 md:mb-10">
+                    <div className="inline-flex items-center gap-3 bg-white border border-gray-200 rounded-full px-5 py-2 mb-4 shadow-sm">
+                        <Award className="w-4 h-4 text-[#E85D3A]" />
+                        <span className="text-gray-700 font-medium text-sm tracking-wider">
+                            {COFFEE_SHOP.name} · {COFFEE_SHOP.tagline}
+                        </span>
+                    </div>
+                    
+                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 leading-tight">
+                        From <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E85D3A] to-[#F0744F]">Bean</span> to <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E85D3A] to-rose-400">Cup</span>
+                    </h2>
+                    
+                    <p className="text-gray-600 max-w-2xl mx-auto text-sm md:text-lg font-light">
+                        {COFFEE_SHOP.description}
+                    </p>
+                    
+                    {/* Stats - Updated for White Background */}
+                    <div className="flex flex-wrap justify-center gap-4 mt-6 text-xs text-gray-500">
+                        <span className="flex items-center gap-2">
+                            <Users className="w-4 h-4 text-[#E85D3A]" />
+                            <span>1,200+ Happy Customers</span>
+                        </span>
+                        <span className="flex items-center gap-2">
+                            <Star className="w-4 h-4 text-[#E85D3A]" />
+                            <span>4.9 ★ Rating</span>
+                        </span>
+                        <span className="flex items-center gap-2">
+                            <Heart className="w-4 h-4 text-rose-500" />
+                            <span>100% Arabica</span>
+                        </span>
+                    </div>
+                </div>
+
+                {/* ===== MAIN CONTENT - HORIZONTAL CAROUSEL STYLE ===== */}
+                <div className="relative">
+                    {/* Step Counter */}
+                    <div className="text-center mb-4">
+                        <span className="text-sm text-gray-400">
+                            Step {currentStep.stepNumber} of {journeySteps.length}
+                        </span>
+                    </div>
+
+                    {/* Main Card - Updated for White Background */}
+                    <div className="relative bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+                            {/* ===== LEFT: IMAGE WITH SLOW ZOOM EFFECT ===== */}
+                            <div className="relative h-[300px] md:h-[400px] lg:h-[500px] overflow-hidden">
+                                <AnimatePresence mode="wait">
+                                    <motion.div
+                                        key={activeStep}
+                                        initial="initial"
+                                        animate="animate"
+                                        exit="exit"
+                                        variants={getZoomVariants(currentZoom)}
+                                        className="w-full h-full"
+                                    >
+                                        <motion.img
+                                            src={currentStep.image}
+                                            alt={currentStep.title}
+                                            className="w-full h-full object-cover"
+                                            whileHover={{ scale: 1.12 }}
+                                            transition={{ duration: 0.8, ease: "easeOut" }}
+                                        />
+                                    </motion.div>
+                                </AnimatePresence>
+                                
+                                {/* Zoom Direction Badge - Updated */}
+                                <motion.div 
+                                    initial={{ opacity: 0, y: -20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.3, duration: 0.5 }}
+                                    className="absolute top-4 right-4 bg-white/90 backdrop-blur-md border border-gray-200 rounded-full px-3 py-1 shadow-sm"
+                                >
+                                    <span className="text-[8px] text-gray-500 uppercase tracking-wider">
+                                        ✦ {currentZoom.replace('-', ' → ')}
+                                    </span>
+                                </motion.div>
+
+                                {/* Gradient Overlay */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-gray-900/60 via-gray-900/10 to-transparent" />
+                                
+                                {/* Step Badge with animation - Updated */}
+                                <motion.div 
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.4, duration: 0.6 }}
+                                    className="absolute bottom-4 left-4 right-4 flex items-center justify-between"
+                                >
+                                    <div className="flex items-center gap-3 bg-white/90 backdrop-blur-md border border-gray-200 rounded-2xl px-4 py-2 shadow-sm">
+                                        <span className="text-gray-900 font-bold text-lg">
+                                            Step {currentStep.stepNumber}
+                                        </span>
+                                        <span className="text-gray-400 text-sm">/ {journeySteps.length}</span>
+                                    </div>
+                                    <motion.div 
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ delay: 0.5, duration: 0.4 }}
+                                        className="flex items-center gap-2 bg-white/90 backdrop-blur-md border border-gray-200 rounded-full px-4 py-1.5 shadow-sm"
+                                    >
+                                        <Clock className="w-4 h-4 text-[#E85D3A]" />
+                                        <span className="text-sm font-medium text-gray-900">
+                                            {currentStep.duration}
+                                        </span>
+                                    </motion.div>
+                                </motion.div>
+
+                                {/* Live Indicator - Updated */}
+                                <motion.div 
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.3, duration: 0.5 }}
+                                    className="absolute top-4 left-4 bg-[#E85D3A]/10 backdrop-blur-md border border-[#E85D3A]/30 rounded-full px-3 py-1 flex items-center gap-2"
+                                >
+                                    <span className="w-2 h-2 rounded-full bg-[#E85D3A] animate-pulse" />
+                                    <span className="text-xs font-medium text-[#E85D3A]">LIVE</span>
+                                </motion.div>
+                            </div>
+
+                            {/* ===== RIGHT: CONTENT - Updated for White Background ===== */}
+                            <div className="p-6 md:p-8 lg:p-10 flex flex-col justify-between">
+                                <div>
+                                    {/* Icon & Title */}
+                                    <motion.div 
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.3, duration: 0.5 }}
+                                        className="flex items-center gap-3 mb-3"
+                                    >
+                                        <div className={`p-2 rounded-xl bg-gradient-to-br ${currentStep.color} bg-opacity-10`}>
+                                            {getIcon(currentStep.icon, "w-6 h-6 text-[#E85D3A]")}
+                                        </div>
+                                        <h3 className="text-2xl md:text-3xl font-bold text-gray-900">
+                                            {currentStep.title}
+                                        </h3>
+                                    </motion.div>
+                                    
+                                    <motion.p 
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        transition={{ delay: 0.4, duration: 0.5 }}
+                                        className="text-[#E85D3A] text-sm font-medium mb-2"
+                                    >
+                                        {currentStep.subtitle}
+                                    </motion.p>
+                                    
+                                    <motion.p 
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        transition={{ delay: 0.5, duration: 0.5 }}
+                                        className="text-gray-600 text-sm md:text-base leading-relaxed"
+                                    >
+                                        {currentStep.description}
+                                    </motion.p>
+
+                                    {/* Progress Dots - Updated */}
+                                    <div className="flex gap-2 mt-6">
+                                        {journeySteps.map((_, index) => (
+                                            <button
+                                                key={index}
+                                                onClick={() => setActiveStep(index)}
+                                                className={`
+                                                    h-2 rounded-full transition-all duration-500
+                                                    ${index === activeStep 
+                                                        ? `w-8 bg-gradient-to-r ${currentStep.color}` 
+                                                        : index < activeStep 
+                                                            ? 'w-2 bg-[#E85D3A]/50' 
+                                                            : 'w-2 bg-gray-200 hover:bg-gray-300'}
+                                                `}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Navigation Buttons - Updated */}
+                                <div className="flex items-center justify-between gap-4 mt-6 pt-6 border-t border-gray-200">
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={goToPrevious}
+                                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 border border-gray-200 transition-all duration-300 text-gray-700 text-sm"
+                                    >
+                                        <ChevronLeft className="w-4 h-4" />
+                                        Previous
+                                    </motion.button>
+                                    
+                                    <div className="flex gap-1">
+                                        {journeySteps.map((step, index) => (
+                                            <motion.button
+                                                key={index}
+                                                whileHover={{ scale: 1.1 }}
+                                                whileTap={{ scale: 0.9 }}
+                                                onClick={() => setActiveStep(index)}
+                                                className={`
+                                                    w-8 h-8 rounded-full text-xs font-medium transition-all duration-300
+                                                    ${index === activeStep 
+                                                        ? `bg-gradient-to-r ${step.color} text-white shadow-lg shadow-[#E85D3A]/20` 
+                                                        : index < activeStep 
+                                                            ? 'bg-[#E85D3A]/10 text-[#E85D3A] border border-[#E85D3A]/20' 
+                                                            : 'bg-gray-100 text-gray-400 border border-gray-200 hover:bg-gray-200'}
+                                                `}
+                                            >
+                                                {step.stepNumber}
+                                            </motion.button>
+                                        ))}
+                                    </div>
+                                    
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={goToNext}
+                                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#E85D3A] to-[#F0744F] hover:shadow-lg hover:shadow-[#E85D3A]/30 transition-all duration-300 text-white text-sm font-medium"
+                                    >
+                                        Next
+                                        <ChevronRight className="w-4 h-4" />
+                                    </motion.button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* ===== BOTTOM: SPECIALTIES - Updated ===== */}
+                <div className="mt-6 flex flex-wrap justify-center gap-3">
+                    {COFFEE_SHOP.specialties.map((item, index) => (
+                        <motion.span 
+                            key={index}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.6 + index * 0.05, duration: 0.4 }}
+                            whileHover={{ scale: 1.1, backgroundColor: "#FEF0EA" }}
+                            className="px-4 py-1.5 bg-gray-100 border border-gray-200 rounded-full text-xs text-gray-600 hover:text-[#E85D3A] transition-all duration-300 cursor-default"
+                        >
+                            {item}
+                        </motion.span>
+                    ))}
+                </div>
+
+                {/* ===== FOOTER WITH SOCIAL - Updated ===== */}
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.8, duration: 0.5 }}
+                    className="mt-8 pt-6 border-t border-gray-200 flex flex-wrap justify-between items-center gap-4"
+                >
+                    <div className="flex items-center gap-4">
+                        <span className="text-xs text-gray-400">Follow us</span>
+                        <div className="flex gap-3">
+                            <motion.div whileHover={{ scale: 1.2, rotate: 5 }} whileTap={{ scale: 0.9 }}>
+                                <TwitterIcon className="w-4 h-4 text-gray-400 hover:text-[#E85D3A] transition-colors cursor-pointer" />
+                            </motion.div>
+                        </div>
+                    </div>
+                    <div className="flex gap-4 text-[10px] text-gray-400">
+                        <span>🕐 {COFFEE_SHOP.hours.weekdays}</span>
+                        <span>📅 {COFFEE_SHOP.hours.weekend}</span>
+                    </div>
+                </motion.div>
+            </div>
+
+            {/* ===== ANIMATIONS ===== */}
+            <style jsx>{`
                 @keyframes pulse-slow {
                     0%, 100% { transform: scale(1); opacity: 0.5; }
                     50% { transform: scale(1.1); opacity: 0.8; }
                 }
-                
                 @keyframes pulse-slow-delay {
                     0%, 100% { transform: scale(1); opacity: 0.5; }
                     50% { transform: scale(1.15); opacity: 0.7; }
                 }
-                
                 @keyframes float {
-                    0%, 100% { transform: translateY(0px) rotate(12deg); }
-                    50% { transform: translateY(-20px) rotate(15deg); }
+                    0%, 100% { transform: translateY(0px) rotate(0deg); }
+                    50% { transform: translateY(-25px) rotate(5deg); }
                 }
-                
                 @keyframes float-delay {
-                    0%, 100% { transform: translateY(0px) rotate(-12deg); }
-                    50% { transform: translateY(20px) rotate(-15deg); }
+                    0%, 100% { transform: translateY(0px) rotate(0deg); }
+                    50% { transform: translateY(25px) rotate(-5deg); }
                 }
-                
+                @keyframes float-slow {
+                    0%, 100% { transform: translateY(0px) rotate(45deg); }
+                    50% { transform: translateY(-15px) rotate(50deg); }
+                }
                 .animate-pulse-slow {
                     animation: pulse-slow 8s ease-in-out infinite;
                 }
-                
                 .animate-pulse-slow-delay {
                     animation: pulse-slow-delay 10s ease-in-out infinite;
                 }
-                
-                .animate-float {
+                .floating-icon {
                     animation: float 6s ease-in-out infinite;
                 }
-                
-                .animate-float-delay {
+                .floating-icon-delay {
                     animation: float-delay 7s ease-in-out infinite;
+                }
+                .floating-icon-slow {
+                    animation: float-slow 9s ease-in-out infinite;
                 }
             `}</style>
         </section>
