@@ -3,7 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Coffee, ArrowRight, Clock, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from 'framer-motion';
-import video from '../assets/Video/coffeeVideo.mp4';
+// import video from '../assets/Video/coffeeVideo.mp4';
+import video from '../assets/Video/CoffeeMaking.mp4';
 import Navbar from '../component/Navbar';
 
 const Hero = () => {

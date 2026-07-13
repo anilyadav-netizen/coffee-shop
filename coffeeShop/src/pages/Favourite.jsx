@@ -159,7 +159,7 @@ const Favourite = () => {
 
     if (favourites.length === 0) {
         return (
-            <section className="relative py-20 px-4 overflow-hidden min-h-scree">
+            <section className="relative py-20 px-4 overflow-hidden">
                 <div className="max-w-7xl mx-auto text-center relative z-10">
                     <div className="bg-gradient-to-br from-white to-[#FFF5F0] rounded-3xl p-16 shadow-xl max-w-2xl mx-auto hover:shadow-2xl transition-all duration-700 border border-[#FEE7DD]">
                         <div className="relative inline-block">
@@ -188,7 +188,7 @@ const Favourite = () => {
     }
 
     return (
-        <section className="relative py-12 px-4 overflow-hidden min-h-screen">
+        <section className="relative py-12 px-4 overflow-hidden ">
             {/* Subtle Background Pattern */}
             <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#E85D3A]/[0.03] rounded-full blur-[150px]"></div>
@@ -209,7 +209,11 @@ const Favourite = () => {
                         </div>
                         <button
                             onClick={handleViewAll}
+<<<<<<< HEAD
                             className="group flex items-center gap-3 px-8 py-3.5 bg-white text-[#1F2937] rounded-full font-medium hover:bg-[#E85D3A] hover:text-white transition-all duration-500 border border-[#FEE7DD] hover:border-transparent hover:scale-105 hover:shadow-lg hover:shadow-[#E85D3A]/20"
+=======
+                            className="group flex items-center gap-3 px-8 py-3.5  rounded-full font-medium bg-white text-[#E85D3A] hover:bg-[#E85D3A] hover:text-white transition-all duration-500 border border-[#FEE7DD] hover:border-transparent hover:scale-105 hover:shadow-lg hover:shadow-[#E85D3A]/20"
+>>>>>>> 4123e31e74c2021489caabb5d4ff78c95ef623e8
                         >
                             <span>View All Menu</span>
                             <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
