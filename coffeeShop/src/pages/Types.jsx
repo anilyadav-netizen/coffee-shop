@@ -23,7 +23,7 @@ const Types = () => {
     };
 
     return (
-        <section className="relative bg-[#FFF8F2] py-8 overflow-hidden">
+        <section className="relative bg-[#f9ebe0] py-8 overflow-hidden">
 
             {/* Decorative Images */}
             <img
@@ -50,80 +50,121 @@ const Types = () => {
                     <div className="w-14 h-[3px] bg-[#d97745] mx-auto rounded-full mt-4"></div>
                 </div>
 
-                {/* Categories Grid */}
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-9 gap-4">
+                {/* Categories Swiper - Same gap as grid */}
+                <Swiper
+                    modules={[Autoplay]}
+                    autoplay={{
+                        delay: 2500,
+                        disableOnInteraction: false,
+                    }}
+                    loop={true}
+                    spaceBetween={16} // Same as grid gap-4
+                    breakpoints={{
+                        0: {
+                            slidesPerView: 1,
+                            spaceBetween: 16,
+                        },
+                        480: {
+                            slidesPerView: 2,
+                            spaceBetween: 16,
+                        },
+                        640: {
+                            slidesPerView: 3,
+                            spaceBetween: 16,
+                        },
+                        768: {
+                            slidesPerView: 4,
+                            spaceBetween: 16,
+                        },
+                        1024: {
+                            slidesPerView: 5,
+                            spaceBetween: 16,
+                        },
+                        1280: {
+                            slidesPerView: 7,
+                            spaceBetween: 16,
+                        },
+                        1536: {
+                            slidesPerView: 9,
+                            spaceBetween: 16,
+                        },
+                    }}
+                    className="pb-2"
+                >
                     {categories.map((category) => (
-                        <div
-                            key={category._id}
-                            onClick={() => handleCategoryClick(category)}
-                            className="
-                                bg-white
-                                rounded-2xl
-                                shadow-md
-                                hover:shadow-xl
-                                hover:shadow-[#E85D3A]/25
-                                transition-all
-                                duration-300
-                                cursor-pointer
-                                py-3
-                                px-3
-                                flex
-                                flex-col
-                                items-center
-                                justify-center
-                                hover:-translate-y-1
-                                group
-                            "
-                        >
-                            {/* Image Container */}
+                        <SwiperSlide key={category._id}>
                             <div
+                                onClick={() => handleCategoryClick(category)}
                                 className="
-                                    w-24
-                                    h-24
-                                    rounded-full
-                                    bg-[#FFF4EC]
-                                    flex
-                                    items-center
-                                    justify-center
-                                    overflow-hidden
-                                    relative
+                                    bg-white
+                                    rounded-2xl
+                                    shadow-md
+                                    hover:shadow-xl
+                                    hover:shadow-[#E85D3A]/25
                                     transition-all
                                     duration-300
+                                    cursor-pointer
+                                    py-3
+                                    lg:px-3
+                                    sm:px-1
+                                    flex
+                                    flex-col
+                                    items-center
+                                    justify-center
+                                    hover:-translate-y-1
+                                    group
                                 "
                             >
-                                {/* Gradient overlay */}
-                                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#E85D3A]/10 to-transparent pointer-events-none"></div>
-                                
-                                {/* Image */}
-                                <img
-                                    src={category.icon}
-                                    alt={category.name}
+                                {/* Image Container */}
+                                <div
                                     className="
-                                        w-full
-                                        h-full
-                                        object-cover
-                                        group-hover:scale-110
-                                        transition-transform
-                                        duration-500
-                                        ease-out
+                                        w-24
+                                        h-24
+                                        rounded-full
+                                        bg-[#FFF4EC]
+                                        flex
+                                        items-center
+                                        justify-center
+                                        overflow-hidden
+                                        relative
+                                        transition-all
+                                        duration-300
                                     "
-                                    onError={(e) => {
-                                        e.target.src = "https://via.placeholder.com/96/FFE8D6/d97745?text=?";
-                                    }}
-                                />
+                                >
+                                    {/* Gradient overlay */}
+                                    <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#E85D3A]/10 to-transparent pointer-events-none"></div>
+                                    
+                                    {/* Image */}
+                                    <img
+                                        src={category.icon}
+                                        alt={category.name}
+                                        className="
+                                            w-full
+                                            h-full
+                                            object-cover
+                                            group-hover:scale-110
+                                            transition-transform
+                                            duration-500
+                                            ease-out
+                                        "
+                                        onError={(e) => {
+                                            e.target.src = "https://via.placeholder.com/96/FFE8D6/d97745?text=?";
+                                        }}
+                                    />
 
-                                {/* Shine effect on hover */}
-                                <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                    <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-transparent via-white/30 to-transparent rounded-full transform rotate-45"></div>
+                                    {/* Shine effect on hover */}
+                                    <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-transparent via-white/30 to-transparent rounded-full transform rotate-45"></div>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <h3 className="mt-3 text-[16px] font-bold text-gray-800 group-hover:text-[#E85D3A] transition-colors duration-300 text-center">
-                                {category.name}
-                            </h3>
-                        </div>
+                                <h3 className="mt-3 text-[16px] font-bold text-gray-800 group-hover:text-[#E85D3A] transition-colors duration-300 text-center">
+                                    {category.name}
+                                </h3>
+                            </div>
+                        </SwiperSlide>
                     ))}
-                </div>
+                </Swiper>
 
             </div>
         </section>

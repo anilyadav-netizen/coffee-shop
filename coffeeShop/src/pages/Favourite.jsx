@@ -198,7 +198,7 @@ const Favourite = () => {
             {/* Content */}
             <div className="max-w-[104rem] mx-auto relative z-10">
                 {/* Header */}
-                <div className="bg-gradient-to-r from-white to-[#FFF8F5] rounded-3xl p-8 shadow-lg shadow-[#E85D3A]/5 border border-[#FEE7DD] mb-12 transition-all duration-700">
+                <div className="bg-[#FFF8F2] rounded-3xl p-8 shadow-lg shadow-[#E85D3A]/5 border border-[#FEE7DD] mb-12 transition-all duration-700">
                     <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                         <div>
                             <h2 className="text-4xl md:text-5xl font-bold text-[#1F2937] tracking-tight mb-2 flex items-center gap-3">
@@ -302,14 +302,14 @@ const Favourite = () => {
                                             {/* Quick View Button */}
                                             <button
                                                 onClick={() => handleItemClick(item)}
-                                                className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white text-[#1F2937] px-6 py-2.5 rounded-full text-sm font-medium opacity-0 group-hover:opacity-100 transition-all duration-500 hover:bg-[#E85D3A] hover:text-white shadow-lg hover:scale-105 whitespace-nowrap"
+                                                className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white text-[#1F2937] px-6 py-2.5 rounded-full text-sm font-medium opacity-0 group-hover:opacity-100 transition-all duration-500  hover:bg-[#D55B25] hover:text-white shadow-lg hover:scale-105 whitespace-nowrap"
                                             >
                                                 Quick View
                                             </button>
                                         </div>
 
                                         {/* Content - Improved Food Website Style */}
-                                        <div className="p-4 bg-white">
+                                        <div className="p-4 bg-[#FFF8F2]">
                                             <div className="flex items-start justify-between mb-1.5">
                                                 <h3
                                                     className="font-bold text-[#1F2937] text-base cursor-pointer hover:text-[#E85D3A] transition-colors duration-300 line-clamp-1 flex-1"
@@ -355,8 +355,8 @@ const Favourite = () => {
                                                 onClick={(e) => handleAddToCart(item, e)}
                                                 className={`w-full mt-3.5 font-semibold py-2.5 rounded-xl transition-all duration-500 flex items-center justify-center gap-2 text-sm group/btn ${
                                                     isAdded
-                                                        ? "bg-gradient-to-r from-[#10B981] to-[#059669] text-white shadow-lg shadow-[#10B981]/30"
-                                                        : "bg-gradient-to-r from-[#E85D3A] to-[#F0744F] text-white hover:shadow-2xl hover:shadow-[#E85D3A]/30 hover:scale-[1.02] hover:-translate-y-0.5"
+                                                        ? "bg-[#E86A33] hover:bg-[#D55B25] text-white shadow-lg shadow-[#10B981]/30"
+                                                        : "bg-[#E86A33] hover:bg-[#D55B25] text-white hover:shadow-2xl hover:shadow-[#E85D3A]/30 hover:scale-[1.02] hover:-translate-y-0.5"
                                                 }`}
                                             >
                                                 {isAdded ? (

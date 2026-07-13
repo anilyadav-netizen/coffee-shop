@@ -55,7 +55,8 @@ const Benefits = () => {
                         {/* Header - Updated with Food Colors */}
                         <div className="mb-8">
                             <div className="inline-flex items-center gap-2 rounded-full mb-2">
-                                <span className="text-sm tracking-wider flex items-center gap-2 px-6 py-2.5 bg-[#FFF0EA] text-[#E85D3A] rounded-full font-semibold hover:bg-[#E85D3A] hover:text-white transition-all duration-300 border border-[#FEE7DD]">
+                                <span className="text-sm tracking-wider flex items-center gap-2 px-6 py-2.5 bg-[#FFF0EA] text-[#E85D3A] rounded-full font-semibold hover:bg-[#E86A33]
+                         hover:text-white transition-all duration-300 border border-[#FEE7DD]">
                                     <Flame size={16} />
                                     COFFEE BENEFITS
                                 </span>
@@ -72,7 +73,7 @@ const Benefits = () => {
                             {benefits.map((benefit) => (
                                 <div
                                     key={benefit.id}
-                                    className="group bg-white border border-[#F3F4F6] rounded-2xl p-5 shadow-sm hover:shadow-xl hover:shadow-[#E85D3A]/10 transition-all duration-500 hover:-translate-y-1 hover:border-[#FEE7DD]"
+                                    className="group bg-[#FFF8F2] border border-[#F3F4F6] rounded-2xl p-5 shadow-sm hover:shadow-xl hover:shadow-[#E85D3A]/10 transition-all duration-500 hover:-translate-y-1 hover:border-[#FEE7DD]"
                                 >
                                     <div className="flex items-start gap-3">
                                         <div className={`p-2.5 ${benefit.bgColor} rounded-xl ${benefit.hoverBgColor} transition-colors`}>
