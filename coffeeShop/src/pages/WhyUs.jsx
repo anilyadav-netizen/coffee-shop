@@ -78,7 +78,7 @@ const WhyUs = () => {
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#E85D3A]/5 rounded-full blur-[150px]" />
             </div>
 
-            <div className="max-w-8xl mx-auto relative z-10">
+            <div className="max-w-[104rem] mx-auto relative z-10">
                 {/* ===== HEADER - Exactly as image ===== */}
                 <div className="text-center mb-6">
                     <div className="inline-flex items-center gap-2 bg-[#FFF0EA] rounded-full px-4 py-1.5 border border-[#FEE7DD] mb-4">

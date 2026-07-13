@@ -100,7 +100,7 @@ const Review = () => {
     const visibleReviews = getVisibleReviews();
 
     return (
-        <section className="py-16 px-4 bg-white">
+        <section className="py-8 px-4 bg-white">
             <div className="max-w-[95em] mx-auto">
                 {/* Header */}
                 <div className="text-center mb-12">
@@ -114,18 +114,18 @@ const Review = () => {
                     {/* Navigation Buttons */}
                     <button
                         onClick={goToPrevious}
-                        className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 p-2 bg-white border border-gray-200 rounded-full shadow-md hover:bg-gray-50 hover:shadow-lg transition-all duration-300"
+                        className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 p-2 border bg-[#E86A33] border-gray-200 rounded-full shadow-md hover:bg-gray-50 hover:shadow-lg transition-all duration-300"
                         aria-label="Previous"
                     >
-                        <ChevronLeft size={20} className="text-gray-600" />
+                        <ChevronLeft size={20} className="text-white" />
                     </button>
 
                     <button
                         onClick={goToNext}
-                        className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 p-2 bg-white border border-gray-200 rounded-full shadow-md hover:bg-gray-50 hover:shadow-lg transition-all duration-300"
+                        className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 p-2 border bg-[#E86A33] border-gray-200 rounded-full shadow-md hover:bg-gray-50 hover:shadow-lg transition-all duration-300"
                         aria-label="Next"
                     >
-                        <ChevronRight size={20} className="text-gray-600" />
+                        <ChevronRight size={20} className="text-white" />
                     </button>
 
                     {/* Cards Grid */}

@@ -23,7 +23,11 @@ const Types = () => {
     };
 
     return (
+<<<<<<< HEAD
         <section className="relative bg-[#f9ebe0] py-8 overflow-hidden">
+=======
+        <section className="relative bg-[#f0e9e4] py-8 overflow-hidden">
+>>>>>>> 0683ab4f6a52ab44644a82ad97945163a26b61a0
 
             {/* Decorative Images */}
             <img

@@ -118,7 +118,7 @@ const CategoryPage = () => {
   // ===== MAIN RENDER =====
   return (
     <section className="bg-white py-8 px-4">
-      <div className="max-w-8xl mx-auto">
+      <div className="max-w-[104rem] mx-auto">
         {/* ===== TOP BADGE ===== */}
         <div className="flex justify-center mb-3">
           <span className="bg-[#FFE8DA] text-[#E86A33] text-[11px] font-bold uppercase tracking-wider px-4 py-1 rounded-full">
@@ -161,7 +161,7 @@ const CategoryPage = () => {
                 <div
                   onClick={() => handleProductClick(id)}
                   className="
-                    bg-[#FFF8F2]
+                    bg-[#f5f1ef]
                     rounded-2xl
                     overflow-hidden
                     border
