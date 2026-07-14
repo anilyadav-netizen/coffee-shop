@@ -23,7 +23,7 @@ const Types = () => {
     };
 
     return (
-        <section className="relative bg-[#fff1e2] py-8 overflow-hidden">
+        <section className="relative bg-[#FCF2E9] py-8 overflow-hidden">
 
             {/* Decorative Images */}
             <img
@@ -112,7 +112,7 @@ const Types = () => {
                                     items-center
                                     justify-center
                                     group
-                                    border border-[#dbcec6]
+                                    border border-[#E86A33]/30
                                 "
                             >
                                 {/* Image Container */}
