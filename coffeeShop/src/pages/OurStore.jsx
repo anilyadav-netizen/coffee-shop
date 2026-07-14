@@ -232,7 +232,7 @@ const OurStore = () => {
                         {featuredProducts.map((product) => (
                             <div
                                 key={product.id}
-                                className="bg-white border border-[#F2E5D8] rounded-2xl p-4 hover:shadow-xl transition-all duration-500 hover:-translate-y-2 group cursor-pointer flex items-center gap-4"
+                                className="bg-white border border-[#F2E5D8] rounded-2xl p-4 hover:shadow-xl transition-all duration-500 hover:-translate-y-1 group cursor-pointer flex items-center gap-4"
                             >
                                 {/* Left - Small Circular Image */}
                                 <div className="relative flex-shrink-0">

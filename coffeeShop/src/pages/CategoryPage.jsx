@@ -118,7 +118,7 @@ const CategoryPage = () => {
   // ===== MAIN RENDER =====
   return (
     <section className="bg-white py-8 px-4">
-      <div className="max-w-[104rem] mx-auto">
+      <div className="max-w-[102rem] mx-auto">
         {/* ===== TOP BADGE ===== */}
         <div className="flex justify-center mb-3">
           <span className="bg-[#FFE8DA] text-[#E86A33] text-[11px] font-bold uppercase tracking-wider px-4 py-1 rounded-full">
@@ -161,20 +161,23 @@ const CategoryPage = () => {
                 <div
                   onClick={() => handleProductClick(id)}
                   className="
-                    bg-[#f5f1ef]
+                    bg-white/75
                     rounded-2xl
                     overflow-hidden
-                    border
-                    border-[#EFE7E1]
-                    shadow-sm
-                    hover:shadow-xl
-                    duration-300
+                    border-2
+                    border-[#E86A33]/30
+                    shadow-[0_8px_30px_rgb(0,0,0,0.12)]
+                    hover:shadow-[0_20px_50px_rgba(232,106,51,0.25)]
+                    hover:border-[#E86A33]/60
+                 
+                    hover:transition-all 
+                    duration-500
                     cursor-pointer
                     group
                   "
                 >
                   {/* ===== IMAGE ===== */}
-                  <div className="relative h-52 overflow-hidden">
+                  <div className="relative h-52 overflow-hidden rounded-t-2xl">
                     <img
                       src={product.image}
                       alt={product.name}
@@ -183,7 +186,9 @@ const CategoryPage = () => {
                         h-full
                         object-cover
                         duration-500
-                        group-hover:scale-105
+                        group-hover:scale-110
+                        transition-transform
+                        ease-in-out
                       "
                     />
 
@@ -204,6 +209,7 @@ const CategoryPage = () => {
                         justify-center
                         hover:bg-gray-50
                         transition
+                        z-10
                       "
                     >
                       <HeartIcon active={isInWishlist(id)} />
@@ -216,7 +222,7 @@ const CategoryPage = () => {
                       {product.name}
                     </h3>
 
-                    <p className="text-sm text-gray-500 mt-2 line-clamp-2 min-h-[42px]">
+                    <p className="text-md text-gray-700 mt-2 line-clamp-2 min-h-[42px] leading-relaxed">
                       {product.description}
                     </p>
 

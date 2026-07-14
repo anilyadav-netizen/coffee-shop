@@ -237,11 +237,11 @@ const Favourite = () => {
                                 return (
                                     <div
                                         key={item._id}
-                                        className="group rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-[#F3F4F6] hover:border-[#FEE7DD]"
+                                        className="group rounded-2xl overflow-hidden shadow-md  border-[#E86A33]/30 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-[#F3F4F6] hover:border-[#FEE7DD]"
                                     >
                                         {/* Image Container */}
                                         <div
-                                            className="relative h-56 overflow-hidden bg-[#FAFAFA] cursor-pointer"
+                                            className="relative h-56 overflow-hidden bg-[#FAFAFA]  cursor-pointer"
                                             onClick={() => handleItemClick(item)}
                                         >
                                             <img
@@ -254,10 +254,10 @@ const Favourite = () => {
                                             />
 
                                             {/* Gradient Overlay */}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-[#1F2937]/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                            <div className="absolute  inset-0 bg-gradient-to-t from-[#1F2937]/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
                                             {/* Category Badge */}
-                                            <div className="absolute top-3 left-3 z-10 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg border border-[#F3F4F6]">
+                                            <div className="absolute top-3 left-3 z-10 bg-white/95 backdrop-blur-sm px-3 py-1.5  rounded-full shadow-lg border border-[#F3F4F6]">
                                                 <div className="flex items-center gap-1.5">
                                                     {category?.icon && (
                                                         <img

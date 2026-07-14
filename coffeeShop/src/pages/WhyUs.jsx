@@ -103,7 +103,7 @@ const WhyUs = () => {
                     {features.map((feature) => (
                         <div
                             key={feature.id}
-                            className="group bg-[#FFF8F2] border border-gray-200 rounded-2xl p-6 hover:border-[#E85D3A]/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-[#E85D3A]/10"
+                            className="group bg-white border  rounded-2xl p-6 border-[#E85D3A]/30 transition-all duration-300 hover:-translate-y-1 shadow-lg shadow-[#E85D3A]/10"
                         >
                             <div className="flex items-start gap-4">
                                 <div className={`w-12 h-12 ${feature.bgColor} rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}>
@@ -127,7 +127,7 @@ const WhyUs = () => {
                     {stats.map((stat, index) => (
                         <div
                             key={index}
-                            className="bg-[#FFF8F2] border border-gray-200 rounded-2xl p-6 text-center hover:border-[#E85D3A]/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-[#E85D3A]/10"
+                            className="bg-white border  rounded-2xl p-6 text-center border-[#E85D3A]/30 transition-all duration-300 hover:-translate-y-1 shadow-md shadow-[#E85D3A]/10"
                         >
                             <div className="text-3xl md:text-4xl font-bold text-[#E85D3A]">
                                 {stat.value}
