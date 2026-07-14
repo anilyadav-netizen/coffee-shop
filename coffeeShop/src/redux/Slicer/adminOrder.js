@@ -40,6 +40,7 @@ const adminOrderSlice = createSlice({
             // ===============================
             // GET ALL ORDERS
             // ===============================
+            
             .addCase(getAllOrders.pending, (state) => {
                 state.loading = true;
                 state.error = null;
