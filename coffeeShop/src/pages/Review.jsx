@@ -105,7 +105,7 @@ const Review = () => {
                 {/* Header */}
                 <div className="text-center mb-12">
                     <h2 className="text-4xl font-bold text-[#1F2937]">
-                        What Our <span className="text-[#f08b17]">Food Lovers</span> Say
+                        What Our <span className="text-[#DC8D64]">Food Lovers</span> Say
                     </h2>
                 </div>
 
@@ -136,7 +136,7 @@ const Review = () => {
                             {visibleReviews.map((review) => (
                                 <div
                                     key={review.id}
-                                    className="bg-[#fffbf6] rounded-2xl p-3 border border-[#F5E6D8] hover:border-[#E8D5C4] transition-all duration-300 hover:shadow-lg"
+                                    className="bg-[#FEF5EC] rounded-2xl p-3 border border-[#F5E6D8] hover:border-[#E8D5C4] transition-all duration-300 hover:shadow-lg"
                                 >
                                     {/* Header: Avatar + Name + Location */}
                                     <div className="flex items-center gap-3 mb-3">
@@ -166,7 +166,7 @@ const Review = () => {
                                     </div>
 
                                     {/* Review Text */}
-                                    <p className="text-[#6D5A4C] text-[15px] leading-relaxed">
+                                    <p className="text-[#6D5A4C] line-clamp-3 leading-relaxed">
                                         {review.review}
                                     </p>
 

@@ -196,7 +196,7 @@ const Favourite = () => {
             </div>
 
             {/* Content */}
-            <div className="max-w-[104rem] mx-auto relative z-10">
+            <div className="max-w-[102rem] mx-auto relative z-10">
                 {/* Header */}
                 <div className="bg-[#FFF8F2] rounded-3xl p-8 shadow-lg shadow-[#E85D3A]/5 border border-[#FEE7DD] mb-12 transition-all duration-700">
                     <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
@@ -237,11 +237,11 @@ const Favourite = () => {
                                 return (
                                     <div
                                         key={item._id}
-                                        className="group rounded-2xl overflow-hidden shadow-md  border-[#E86A33]/30 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-[#F3F4F6] hover:border-[#FEE7DD]"
+                                        className="group rounded-2xl overflow-hidden shadow-md  border-[#E86A33]/30 hover:shadow-lg transition-all duration-500 hover:-translate-y-2 border border-[#F3F4F6] hover:border-[#FEE7DD]"
                                     >
                                         {/* Image Container */}
                                         <div
-                                            className="relative h-56 overflow-hidden bg-[#FAFAFA]  cursor-pointer"
+                                            className="relative h-56 overflow-hidden bg-[#FEFAF7]  cursor-pointer"
                                             onClick={() => handleItemClick(item)}
                                         >
                                             <img
