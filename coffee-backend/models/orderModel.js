@@ -1,3 +1,4 @@
+// models/Order.js
 const mongoose = require("mongoose");
 
 // Products Schema
@@ -49,6 +50,7 @@ const trackingSchema = new mongoose.Schema(
         "pending",
         "confirmed",
         "preparing",
+        "assigned_to_rider",
         "out_for_delivery",
         "delivered",
         "cancelled",
@@ -121,6 +123,7 @@ const orderSchema = new mongoose.Schema(
         "pending",
         "confirmed",
         "preparing",
+        "assigned_to_rider",
         "out_for_delivery",
         "delivered",
         "cancelled",
@@ -136,6 +139,35 @@ const orderSchema = new mongoose.Schema(
           message: "Order placed successfully",
         },
       ],
+    },
+
+    // ✅ Rider Assignment
+    assignedRider: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
+    // Store rider assignment details
+    riderAssignment: {
+      assignedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+      assignedAt: {
+        type: Date,
+        default: null,
+      },
+      notes: {
+        type: String,
+        default: "",
+      },
+    },
+
+    // Delivery completion
+    deliveredAt: {
+      type: Date,
+      default: null,
     },
   },
   {

@@ -1,3 +1,4 @@
+// models/User.js
 const mongoose = require("mongoose");
 
 const addressSchema = new mongoose.Schema(
@@ -94,7 +95,7 @@ const userSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ["user", "admin", "rider","chef"],
+      enum: ["user", "admin", "rider", "chef"],
       default: "user",
     },
 
@@ -125,6 +126,42 @@ const userSchema = new mongoose.Schema(
     isAvailable: {
       type: Boolean,
       default: false,
+    },
+
+    // Rider specific fields
+    riderDetails: {
+      vehicleType: {
+        type: String,
+        enum: ["bike", "car", "scooter", "cycle"],
+        default: "bike",
+      },
+      vehicleNumber: {
+        type: String,
+        trim: true,
+      },
+      totalDeliveries: {
+        type: Number,
+        default: 0,
+      },
+      rating: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 5,
+      },
+      totalEarnings: {
+        type: Number,
+        default: 0,
+      },
+      currentOrder: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Order",
+        default: null,
+      },
+      isBusy: {
+        type: Boolean,
+        default: false,
+      },
     },
   },
   {
