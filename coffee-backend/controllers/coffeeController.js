@@ -41,7 +41,7 @@ exports.createCoffee = async (req, res) => {
       );
     }
 
-    console.log(req.body,"body","filer", req.file)
+    console.log(req.body, "body", "filer", req.file)
 
     const coffee = await Coffee.create({
       ...req.body,
@@ -98,7 +98,7 @@ exports.updateCoffee = async (req, res) => {
 exports.getAllCoffee = async (req, res) => {
   try {
     const coffees = await Coffee.find()
-      .select("name price image description category")
+      .select("name price image description discountPrice discountPercentage category")
       .populate("category", "name icon")
       .lean();
 
