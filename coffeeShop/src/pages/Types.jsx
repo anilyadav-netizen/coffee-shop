@@ -23,11 +23,7 @@ const Types = () => {
     };
 
     return (
-<<<<<<< HEAD
-        <section className="relative bg-[#f9ebe0] py-8 overflow-hidden">
-=======
-        <section className="relative bg-[#f0e9e4] py-8 overflow-hidden">
->>>>>>> 0683ab4f6a52ab44644a82ad97945163a26b61a0
+        <section className="relative bg-[#fff1e2] py-8 overflow-hidden">
 
             {/* Decorative Images */}
             <img
@@ -41,7 +37,7 @@ const Types = () => {
                 className="absolute top-4 right-5 w-24"
             />
 
-            <div className="max-w-7xl mx-auto px-5">
+            <div className="max-w-[100rem] mx-auto px-5">
 
                 {/* Heading */}
                 <div className="text-center mb-8">
@@ -57,27 +53,27 @@ const Types = () => {
                 {/* Categories Swiper - Same gap as grid */}
                 <Swiper
                     modules={[Autoplay]}
-                    autoplay={{
-                        delay: 2500,
-                        disableOnInteraction: false,
-                    }}
-                    loop={true}
+                    // autoplay={{
+                    //     delay: 2500,
+                    //     disableOnInteraction: false,
+                    // }}
+                    // loop={true}
                     spaceBetween={16} // Same as grid gap-4
                     breakpoints={{
                         0: {
-                            slidesPerView: 1,
-                            spaceBetween: 16,
-                        },
-                        480: {
                             slidesPerView: 2,
                             spaceBetween: 16,
                         },
-                        640: {
+                        480: {
                             slidesPerView: 3,
                             spaceBetween: 16,
                         },
-                        768: {
+                        640: {
                             slidesPerView: 4,
+                            spaceBetween: 16,
+                        },
+                        768: {
+                            slidesPerView: 5,
                             spaceBetween: 16,
                         },
                         1024: {
@@ -101,9 +97,9 @@ const Types = () => {
                                 onClick={() => handleCategoryClick(category)}
                                 className="
                                     bg-white
-                                    rounded-2xl
-                                    shadow-md
-                                    hover:shadow-xl
+                                    rounded-xl
+                                    shandow-md
+                                    shadow-[#dbcec6]
                                     hover:shadow-[#E85D3A]/25
                                     transition-all
                                     duration-300
@@ -115,8 +111,8 @@ const Types = () => {
                                     flex-col
                                     items-center
                                     justify-center
-                                    hover:-translate-y-1
                                     group
+                                    border border-[#dbcec6]
                                 "
                             >
                                 {/* Image Container */}
@@ -137,7 +133,7 @@ const Types = () => {
                                 >
                                     {/* Gradient overlay */}
                                     <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#E85D3A]/10 to-transparent pointer-events-none"></div>
-                                    
+
                                     {/* Image */}
                                     <img
                                         src={category.icon}
