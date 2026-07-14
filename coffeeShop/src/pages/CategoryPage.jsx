@@ -14,9 +14,8 @@ import { getProducts } from "../redux/Slicer/adminProductSlice";
 // ===== ICONS =====
 const HeartIcon = ({ active }) => (
   <svg
-    className={`w-5 h-5 transition ${
-      active ? "fill-red-500 text-red-500" : "text-gray-400 hover:text-red-500"
-    }`}
+    className={`w-5 h-5 transition ${active ? "fill-red-500 text-red-500" : "text-gray-400 hover:text-red-500"
+      }`}
     fill={active ? "currentColor" : "none"}
     stroke="currentColor"
     viewBox="0 0 24 24"
@@ -121,7 +120,7 @@ const CategoryPage = () => {
       <div className="max-w-[102rem] mx-auto">
         {/* ===== TOP BADGE ===== */}
         <div className="flex justify-center mb-3">
-          <span className="bg-[#FFE8DA] text-[#E86A33] text-[11px] font-bold uppercase tracking-wider px-4 py-1 rounded-full">
+          <span className="bg-[#FFE8DA] text-[#B57863] text-[11px] font-bold uppercase tracking-wider px-4 py-1 rounded-full">
             Handpicked Just For You
           </span>
         </div>
@@ -161,14 +160,13 @@ const CategoryPage = () => {
                 <div
                   onClick={() => handleProductClick(id)}
                   className="
-                    bg-white/75
+                    bg-[#FEFAF7]
                     rounded-2xl
                     overflow-hidden
                     border-2
-                    border-[#E86A33]/30
+                    border-[#E86A33]/20
                     shadow-[0_8px_30px_rgb(0,0,0,0.12)]
                     hover:shadow-[0_20px_50px_rgba(232,106,51,0.25)]
-                    hover:border-[#E86A33]/60
                  
                     hover:transition-all 
                     duration-500
@@ -184,7 +182,7 @@ const CategoryPage = () => {
                       className="
                         w-full
                         h-full
-                        object-cover
+                        object-fill
                         duration-500
                         group-hover:scale-110
                         transition-transform
@@ -217,7 +215,7 @@ const CategoryPage = () => {
                   </div>
 
                   {/* ===== CONTENT ===== */}
-                  <div className="p-4">
+                  <div className="p-4 ">
                     <h3 className="font-bold text-[18px] text-[#222] line-clamp-1 hover:text-[#D55B25] ">
                       {product.name}
                     </h3>

@@ -86,14 +86,14 @@ const OurStore = () => {
 
 
                 {/* ========== MAIN TWO-COLUMN LAYOUT ========== */}
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-10">
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-6">
                     {/* LEFT COLUMN - Image (3 columns) */}
                     <div className="lg:col-span-3 relative group">
                         <div className="relative rounded-2xl overflow-hidden border-2 border-[#F2E5D8] bg-white shadow-lg">
                             <img
                                 src={currentLocation.image}
                                 alt={currentLocation.name}
-                                className="w-full h-[400px] md:h-[470px] object-cover transition-transform duration-700 group-hover:scale-110"
+                                className="w-full h-[310px] md:h-[470px] object-cover transition-transform duration-700 group-hover:scale-105"
                             />
                             {/* Gradient Overlay */}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
@@ -232,7 +232,7 @@ const OurStore = () => {
                         {featuredProducts.map((product) => (
                             <div
                                 key={product.id}
-                                className="bg-white border border-[#F2E5D8] rounded-2xl p-4 hover:shadow-xl transition-all duration-500 hover:-translate-y-1 group cursor-pointer flex items-center gap-4"
+                                className="bg-white border border-[#F2E5D8] rounded-2xl p-4 shadow hover:shadow-lg transition-all duration-500 hover:-translate-y-1 group cursor-pointer flex items-center gap-4"
                             >
                                 {/* Left - Small Circular Image */}
                                 <div className="relative flex-shrink-0">
@@ -240,7 +240,7 @@ const OurStore = () => {
                                         <img
                                             src={product.image}
                                             alt={product.name}
-                                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                                         />
                                     </div>
 
