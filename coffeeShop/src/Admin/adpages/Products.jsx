@@ -63,7 +63,7 @@ const Products = () => {
     }
 
     return (
-        <div className=" rounded-xl p-4 md:p-6  shadow-sm dark:shadow-xl">
+        <div className="rounded-xl p-4 md:p-6 shadow-sm dark:shadow-xl">
             {/* Header - Responsive */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
@@ -106,12 +106,14 @@ const Products = () => {
 
             {/* Table with Horizontal Scroll */}
             <div className="overflow-x-auto border border-[#E2E8F0] dark:border-dark-border rounded-lg">
-                <table className="w-full min-w-[750px]">
+                <table className="w-full min-w-[900px]">
                     <thead>
                         <tr className="border-b border-[#E2E8F0] dark:border-dark-border bg-[#F8FAFC] dark:bg-dark-bg/50">
                             <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Image</th>
                             <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Name</th>
-                            <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Price</th>
+                            <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Original Price</th>
+                            <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Discount</th>
+                            <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Final Price</th>
                             <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Actions</th>
                         </tr>
                     </thead>
@@ -140,6 +142,33 @@ const Products = () => {
                                     </td>
 
                                     <td className="p-2 md:p-4">
+                                        {product.discountPercentage ? (
+                                            <span className="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                                                -{product.discountPercentage}%
+                                            </span>
+                                        ) : (
+                                            <span className="text-[#94A3B8] dark:text-dark-text text-sm">No discount</span>
+                                        )}
+                                    </td>
+
+                                    <td className="p-2 md:p-4">
+                                        {product.discountPrice ? (
+                                            <div className="flex flex-col">
+                                                <span className="text-[#0F172A] dark:text-dark-heading text-base md:text-lg font-medium">
+                                                    ₹{product.discountPrice}
+                                                </span>
+                                                <span className="text-xs text-green-600 dark:text-green-400">
+                                                    Save ₹{product.price - product.discountPrice}
+                                                </span>
+                                            </div>
+                                        ) : (
+                                            <span className="text-[#0F172A] dark:text-dark-heading text-base md:text-lg">
+                                                ₹{product.price}
+                                            </span>
+                                        )}
+                                    </td>
+
+                                    <td className="p-2 md:p-4">
                                         <div className="flex items-center gap-1 md:gap-2">
                                             <button
                                                 onClick={() => handleEdit(product._id)}
@@ -162,7 +191,7 @@ const Products = () => {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="4" className="text-center py-8 text-[#64748B] dark:text-dark-text text-base">
+                                <td colSpan="6" className="text-center py-8 text-[#64748B] dark:text-dark-text text-base">
                                     No Products Found
                                 </td>
                             </tr>
@@ -177,10 +206,11 @@ const Products = () => {
                     <button
                         onClick={() => handlePageChange(currentPage - 1)}
                         disabled={currentPage === 1}
-                        className={`px-4 py-2 rounded-md border border-[#E2E8F0] dark:border-dark-border text-base transition-colors duration-200 ${currentPage === 1
+                        className={`px-4 py-2 rounded-md border border-[#E2E8F0] dark:border-dark-border text-base transition-colors duration-200 ${
+                            currentPage === 1
                                 ? "opacity-50 cursor-not-allowed text-[#94A3B8] dark:text-dark-text"
                                 : "hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 text-[#0F172A] dark:text-dark-heading"
-                            }`}
+                        }`}
                     >
                         Previous
                     </button>
@@ -190,10 +220,11 @@ const Products = () => {
                             <button
                                 key={page}
                                 onClick={() => handlePageChange(page)}
-                                className={`w-10 h-10 rounded-md border border-[#E2E8F0] dark:border-dark-border transition-colors duration-200 text-base ${currentPage === page
+                                className={`w-10 h-10 rounded-md border border-[#E2E8F0] dark:border-dark-border transition-colors duration-200 text-base ${
+                                    currentPage === page
                                         ? "bg-[#4F46E5] dark:bg-dark-primary text-white border-[#4F46E5] dark:border-dark-primary"
                                         : "text-[#0F172A] dark:text-dark-heading hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50"
-                                    }`}
+                                }`}
                             >
                                 {page}
                             </button>
@@ -203,10 +234,11 @@ const Products = () => {
                     <button
                         onClick={() => handlePageChange(currentPage + 1)}
                         disabled={currentPage === totalPages}
-                        className={`px-4 py-2 rounded-md border border-[#E2E8F0] dark:border-dark-border text-base transition-colors duration-200 ${currentPage === totalPages
+                        className={`px-4 py-2 rounded-md border border-[#E2E8F0] dark:border-dark-border text-base transition-colors duration-200 ${
+                            currentPage === totalPages
                                 ? "opacity-50 cursor-not-allowed text-[#94A3B8] dark:text-dark-text"
                                 : "hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 text-[#0F172A] dark:text-dark-heading"
-                            }`}
+                        }`}
                     >
                         Next
                     </button>
