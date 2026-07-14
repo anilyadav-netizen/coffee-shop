@@ -10,6 +10,8 @@ import orderReducer from './Slicer/orderSlice'
 import userReducer from './Slicer/userSlice'
 import tableReducer from './Slicer/tableSlice'
 import addressReducer from './Slicer/addressSlice'
+import riderAssignmentReducer from './Slicer/riderAssignmentSlice'
+
 export const store = configureStore({
     reducer: {
         auth: authReducer,
@@ -22,6 +24,7 @@ export const store = configureStore({
         orderStatus: orderReducer,
         getUser: userReducer,
         table: tableReducer,
-        address: addressReducer
+        address: addressReducer,
+        riderAssignment: riderAssignmentReducer
     }
 })
