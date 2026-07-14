@@ -18,9 +18,24 @@ const coffeeSchema = new mongoose.Schema(
       required: true,
     },
 
+    // Original Price (MRP)
     price: {
       type: Number,
       required: true,
+    },
+
+    // Discounted Selling Price
+    discountPrice: {
+      type: Number,
+      default: 0,
+    },
+
+    // Discount Percentage
+    discountPercentage: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 100,
     },
 
     stock: {
