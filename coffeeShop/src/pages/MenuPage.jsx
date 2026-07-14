@@ -437,7 +437,7 @@ const MenuPage = () => {
     // ============ MAIN CONTENT ============
     return (
         <>
-            <div className="min-h-screen overflow-x-hidden bg-[#ebe0ce]">
+            <div className="min-h-screen overflow-x-hidden bg-[#FCF2E9]">
                 {/* Hero Banner */}
                 <div className="relative pt-24 pb-20 md:pb-72 overflow-hidden">
                     <div className="absolute inset-0 w-full h-full">
@@ -503,7 +503,7 @@ const MenuPage = () => {
 
                     <div className="container mx-auto px-3 sm:px-4 relative z-10">
                         {/* Category Selector - Updated with Food Colors */}
-                        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-4 sm:mb-6 bg-white border border-[#FEE7DD] p-2 sm:p-3 rounded-xl sm:rounded-2xl shadow-lg shadow-[#E85D3A]/5">
+                        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-4 sm:mb-6 bg-[#FEFAF7] border border-[#FEE7DD] p-2 sm:p-3 rounded-xl sm:rounded-2xl shadow-lg shadow-[#E85D3A]/5">
                             {allCategories.map((cat) => (
                                 <button
                                     key={cat._id}
@@ -634,13 +634,13 @@ const MenuPage = () => {
                                             </div>
 
                                             {/* Content - Updated with Food Colors */}
-                                            <div className="p-3 sm:p-4 md:p-5 flex flex-col flex-1 bg-white">
+                                            <div className="p-3 sm:p-4 md:p-5 flex flex-col flex-1 bg-[#FEFAF7]">
                                                 <h3 className="font-bold text-[#1F2937] text-sm sm:text-base md:text-lg group-hover:text-[#E85D3A] transition-colors mb-0.5 sm:mb-1 truncate">
                                                     {item.name}
                                                 </h3>
 
                                                 <div className="h-8 sm:h-10 md:h-12 overflow-hidden">
-                                                    <p className="text-[#6B7280] text-[10px] sm:text-sm line-clamp-2">
+                                                    <p className="text-[#6B7280] text-[12px] sm:text-sm line-clamp-2">
                                                         {item.description || 'Delicious item from our menu'}
                                                     </p>
                                                 </div>
