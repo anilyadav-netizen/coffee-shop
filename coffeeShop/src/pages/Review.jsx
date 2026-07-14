@@ -100,8 +100,8 @@ const Review = () => {
     const visibleReviews = getVisibleReviews();
 
     return (
-        <section className="py-8 px-4 bg-white">
-            <div className="max-w-[95em] mx-auto">
+        <section className="py-4 px-4 bg-white">
+            <div className="max-w-[102rem] mx-auto">
                 {/* Header */}
                 <div className="text-center mb-12">
                     <h2 className="text-4xl font-bold text-[#1F2937]">

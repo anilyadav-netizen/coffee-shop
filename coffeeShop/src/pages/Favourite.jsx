@@ -188,7 +188,7 @@ const Favourite = () => {
     }
 
     return (
-        <section className="relative py-12 px-4 overflow-hidden ">
+        <section className="relative py-6 px-4 overflow-hidden ">
             {/* Subtle Background Pattern */}
             <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#E85D3A]/[0.03] rounded-full blur-[150px]"></div>
@@ -198,10 +198,10 @@ const Favourite = () => {
             {/* Content */}
             <div className="max-w-[102rem] mx-auto relative z-10">
                 {/* Header */}
-                <div className="bg-[#FFF8F2] rounded-3xl p-8 shadow-lg shadow-[#E85D3A]/5 border border-[#FEE7DD] mb-12 transition-all duration-700">
+                <div className="bg-[#FFF8F2] rounded-3xl p-8 shadow-lg shadow-[#E85D3A]/5 border border-[#FEE7DD] mb-7 transition-all duration-700">
                     <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                         <div>
-                            <h2 className="text-4xl md:text-5xl font-bold text-[#1F2937] tracking-tight mb-2 flex items-center gap-3">
+                            <h2 className="text-xl md:text-5xl font-bold text-[#1F2937] tracking-tight mb-2 flex items-center gap-3">
                                 All Time Favourites
                                 <span className="text-3xl">🔥</span>
                             </h2>

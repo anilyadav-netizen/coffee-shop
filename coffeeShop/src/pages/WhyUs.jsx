@@ -69,7 +69,7 @@ const WhyUs = () => {
     ];
 
     return (
-        <section className="relative py-8 px-4 overflow-hidden bg-gradient-to-br from-[#FFF8F2] to-white">
+        <section className="relative py-4 px-4 overflow-hidden bg-gradient-to-br from-[#FFF8F2] to-white">
             {/* Background Effects */}
             <div className="absolute inset-0 -z-10">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#E85D3A]/5 via-transparent to-[#F0744F]/5" />

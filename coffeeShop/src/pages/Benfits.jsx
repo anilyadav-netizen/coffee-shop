@@ -18,7 +18,7 @@ const Benefits = () => {
 
     return (
 
-        <section className="relative py-6 px-4 overflow-hidden ">
+        <section className="relative px-4 overflow-hidden ">
             {/* ========== CONTENT ========== */}
             <div className="max-w-[104rem] mx-auto relative z-10">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center rounded-xl">
@@ -26,11 +26,11 @@ const Benefits = () => {
                     {/* ========== LEFT SIDE - IMAGE WITH GLASS EFFECT ========== */}
                     <div className="relative order-1 lg:order-1">
                         {/* Main Image - Glass Effect */}
-                        <div className="relative rounded-3xl overflow-hidden shadow-xl shadow-[#E85D3A]/10 border border-[#FEE7DD] bg-[#FFF8F5]">
+                        <div className="relative rounded-2xl overflow-hidden shadow-xl shadow-[#E85D3A]/10 border border-[#FEE7DD] bg-[#FFF8F5]">
                             <img
                                 src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&h=900&fit=crop&auto=format"
                                 alt="Food Benefits"
-                                className="w-full h-[400px] md:h-[450px] lg:h-[500px] object-fill"
+                                className="w-full h-[320px] md:h-[450px] lg:h-[500px] object-fill"
                             />
 
                             {/* Gradient Overlay - Updated with Food Colors */}

@@ -32,7 +32,7 @@ const Journey = () => {
     };
 
     return (
-        <div className=" flex items-center justify-center font-serif py-12">
+        <div className=" flex items-center justify-center font-serif py-5">
             <div className="max-w-[104rem] w-full mx-auto overflow-hidden p-6 md:p-10 transition-all duration-500 bg-[#FBF6F0]">
 
                 {/* -------- LAYOUT: LEFT (text + timeline) + RIGHT (open image) -------- */}
