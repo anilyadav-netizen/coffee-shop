@@ -230,6 +230,9 @@ const Favourite = () => {
                                     }
                                 );
                                 const category = item.category;
+                                const hasDiscount = item.discountPrice && item.discountPrice < item.price;
+                                const discountPercent = item.discountPercentage || 
+                                    Math.round(((item.price - item.discountPrice) / item.price) * 100);
 
                                 const displayPrice = item.discountPrice || item.price;
                                 const originalPrice = item.price;
@@ -237,11 +240,11 @@ const Favourite = () => {
                                 return (
                                     <div
                                         key={item._id}
-                                        className="group rounded-2xl overflow-hidden shadow-md  border-[#E86A33]/30 hover:shadow-lg transition-all duration-500 hover:-translate-y-2 border border-[#F3F4F6] hover:border-[#FEE7DD]"
+                                        className="group rounded-2xl overflow-hidden shadow-md border-[#E86A33]/30 hover:shadow-lg transition-all duration-500 hover:-translate-y-2 border border-[#F3F4F6] hover:border-[#FEE7DD]"
                                     >
                                         {/* Image Container */}
                                         <div
-                                            className="relative h-56 overflow-hidden bg-[#FEFAF7]  cursor-pointer"
+                                            className="relative h-56 overflow-hidden bg-[#FEFAF7] cursor-pointer"
                                             onClick={() => handleItemClick(item)}
                                         >
                                             <img
@@ -254,33 +257,27 @@ const Favourite = () => {
                                             />
 
                                             {/* Gradient Overlay */}
-                                            <div className="absolute  inset-0 bg-gradient-to-t from-[#1F2937]/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                            <div className="absolute inset-0 bg-gradient-to-t from-[#1F2937]/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-                                            {/* Category Badge */}
-                                            <div className="absolute top-3 left-3 z-10 bg-white/95 backdrop-blur-sm px-3 py-1.5  rounded-full shadow-lg border border-[#F3F4F6]">
-                                                <div className="flex items-center gap-1.5">
-                                                    {category?.icon && (
-                                                        <img
-                                                            src={category.icon}
-                                                            alt={category.name}
-                                                            className="w-4 h-4 rounded-full object-cover"
-                                                        />
-                                                    )}
-                                                    <span className="text-[10px] font-semibold text-[#E85D3A] tracking-wider uppercase">
-                                                        {category?.name || 'Uncategorized'}
-                                                    </span>
-                                                </div>
+                                            {/* Category Icon Badge - Left Side */}
+                                            <div className="absolute top-3 left-3 z-10 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg border border-[#F3F4F6] flex items-center gap-1.5">
+                                                {category?.icon ? (
+                                                    <img
+                                                        src={category.icon}
+                                                        alt={category.name}
+                                                        className="w-5 h-5 rounded-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="w-5 h-5 rounded-full bg-gradient-to-r from-[#E86A33] to-[#F59E6B] flex items-center justify-center text-white text-[10px] font-bold">
+                                                        {category?.name?.charAt(0) || 'C'}
+                                                    </div>
+                                                )}
+                                                <span className="text-[10px] font-semibold text-[#E85D3A] tracking-wider uppercase">
+                                                    {category?.name || 'Category'}
+                                                </span>
                                             </div>
 
-                                            {/* Discount Badge */}
-                                            {item.discountPrice && item.discountPrice < item.price && (
-                                                <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 bg-gradient-to-r from-[#E85D3A] to-[#F0744F] text-white text-[10px] px-3 py-1.5 rounded-full font-bold shadow-lg shadow-[#E85D3A]/30 flex items-center gap-1.5">
-                                                    <Flame size={12} className="fill-white" />
-                                                    {Math.round(((item.price - item.discountPrice) / item.price) * 100)}% OFF
-                                                </div>
-                                            )}
-
-                                            {/* Wishlist Icon */}
+                                            {/* Wishlist Icon - Top Right */}
                                             <button
                                                 onClick={(e) => handleWishlistToggle(item, e)}
                                                 className={`absolute top-3 right-3 z-20 w-9 h-9 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 border ${
@@ -302,13 +299,13 @@ const Favourite = () => {
                                             {/* Quick View Button */}
                                             <button
                                                 onClick={() => handleItemClick(item)}
-                                                className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white text-[#1F2937] px-6 py-2.5 rounded-full text-sm font-medium opacity-0 group-hover:opacity-100 transition-all duration-500  hover:bg-[#D55B25] hover:text-white shadow-lg hover:scale-105 whitespace-nowrap"
+                                                className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white text-[#1F2937] px-6 py-2.5 rounded-full text-sm font-medium opacity-0 group-hover:opacity-100 transition-all duration-500 hover:bg-[#D55B25] hover:text-white shadow-lg hover:scale-105 whitespace-nowrap"
                                             >
                                                 Quick View
                                             </button>
                                         </div>
 
-                                        {/* Content - Improved Food Website Style */}
+                                        {/* Content */}
                                         <div className="p-4 bg-[#FFF8F2]">
                                             <div className="flex items-start justify-between mb-1.5">
                                                 <h3
@@ -317,40 +314,52 @@ const Favourite = () => {
                                                 >
                                                     {item.name}
                                                 </h3>
-                                                <div className="flex items-center gap-1 ml-2 flex-shrink-0">
-                                                    <Star size={14} className="fill-[#FBBF24] text-[#FBBF24]" />
-                                                    <span className="text-xs font-semibold text-[#1F2937]">4.8</span>
-                                                </div>
+                                                
+                                                {/* Discount Percentage - At the end of heading */}
+                                                {hasDiscount && (
+                                                    <div className="flex items-center gap-1 ml-2 flex-shrink-0 bg-gradient-to-r from-[#E86A33] to-[#F59E6B] text-white px-2 py-1 rounded-full text-[12px] font-bold shadow-md">
+                                                        {discountPercent}% OFF
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <p className="text-[#7b818f] text-sm mb-3 line-clamp-2 leading-relaxed">
                                                 {item.description || "Delicious fast food item"}
                                             </p>
 
+                                            {/* Price Section with Trusted Colors */}
                                             <div className="flex items-center justify-between pt-1.5 border-t border-[#F3F4F6]">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-lg font-bold text-[#1F2937]">
-                                                        ₹{displayPrice.toFixed(2)}
-                                                    </span>
-                                                    {item.discountPrice && item.discountPrice < item.price && (
-                                                        <span className="text-xs text-[#6B7280] line-through">
-                                                            ₹{originalPrice.toFixed(2)}
+                                                    {hasDiscount ? (
+                                                        <>
+                                                            <span className="text-lg font-bold text-[#E86A33]">
+                                                                ₹{displayPrice.toFixed(2)}
+                                                            </span>
+                                                            <span className="text-xs text-gray-400 line-through font-medium">
+                                                                ₹{originalPrice.toFixed(2)}
+                                                            </span>
+                                                        </>
+                                                    ) : (
+                                                        <span className="text-lg font-bold text-[#1F2937]">
+                                                            ₹{displayPrice.toFixed(2)}
                                                         </span>
                                                     )}
                                                 </div>
-                                                <div className="flex items-center gap-1.5">
-                                                    <span className="text-[10px] text-[#10B981] font-medium bg-[#ECFDF5] px-2 py-0.5 rounded-full">
-                                                        In Stock
-                                                    </span>
-                                                    {item.discountPrice && (
-                                                        <span className="text-[10px] text-[#E85D3A] font-medium bg-[#FFF0EA] px-2 py-0.5 rounded-full">
-                                                            Save ₹{(originalPrice - displayPrice).toFixed(2)}
+                                                
+                                                {/* Save Badge - Only when discount exists */}
+                                                {hasDiscount && (
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/50 flex items-center gap-0.5">
+                                                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                                            </svg>
+                                                            ₹{(originalPrice - displayPrice).toFixed(2)} OFF
                                                         </span>
-                                                    )}
-                                                </div>
+                                                    </div>
+                                                )}
                                             </div>
 
-                                            {/* Add to Cart Button - Improved Food Style */}
+                                            {/* Add to Cart Button */}
                                             <button
                                                 onClick={(e) => handleAddToCart(item, e)}
                                                 className={`w-full mt-3.5 font-semibold py-2.5 rounded-xl transition-all duration-500 flex items-center justify-center gap-2 text-sm group/btn ${

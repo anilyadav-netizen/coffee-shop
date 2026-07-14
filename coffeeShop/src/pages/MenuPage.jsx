@@ -651,7 +651,7 @@ const MenuPage = () => {
                                                             ₹{displayPrice.toFixed(2)}
                                                         </span>
                                                         {item.discountPrice && item.discountPrice < item.price && (
-                                                            <span className="text-[8px] sm:text-xs text-[#6B7280] line-through">
+                                                            <span className="text-[10px] sm:text-xs text-[#6B7280] line-through">
                                                                 ₹{originalPrice.toFixed(2)}
                                                             </span>
                                                         )}
