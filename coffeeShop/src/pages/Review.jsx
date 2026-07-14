@@ -105,7 +105,7 @@ const Review = () => {
                 {/* Header */}
                 <div className="text-center mb-12">
                     <h2 className="text-4xl font-bold text-[#1F2937]">
-                        What Our <span className="text-[#D97706]">Food Lovers</span> Say
+                        What Our <span className="text-[#f08b17]">Food Lovers</span> Say
                     </h2>
                 </div>
 
@@ -114,16 +114,18 @@ const Review = () => {
                     {/* Navigation Buttons */}
                     <button
                         onClick={goToPrevious}
-                        className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 p-2 border bg-[#E86A33] border-gray-200 rounded-full shadow-md hover:bg-gray-50 hover:shadow-lg transition-all duration-300"
+                        className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 p-2 bg-[#E86A33] rounded-full shadow-md hover:bg-[#d45a2a] focus:bg-[#d45a2a] active:bg-[#c04e24] transition-all duration-300 hover:shadow-lg focus:outline-none"
                         aria-label="Previous"
+                        style={{ border: 'none' }}
                     >
                         <ChevronLeft size={20} className="text-white" />
                     </button>
 
                     <button
                         onClick={goToNext}
-                        className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 p-2 border bg-[#E86A33] border-gray-200 rounded-full shadow-md hover:bg-gray-50 hover:shadow-lg transition-all duration-300"
+                        className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 p-2 bg-[#E86A33] rounded-full shadow-md hover:bg-[#d45a2a] focus:bg-[#d45a2a] active:bg-[#c04e24] transition-all duration-300 hover:shadow-lg focus:outline-none"
                         aria-label="Next"
+                        style={{ border: 'none' }}
                     >
                         <ChevronRight size={20} className="text-white" />
                     </button>
@@ -134,7 +136,7 @@ const Review = () => {
                             {visibleReviews.map((review) => (
                                 <div
                                     key={review.id}
-                                    className="bg-[#FBF6F0] rounded-2xl p-3 border border-[#F5E6D8] hover:border-[#E8D5C4] transition-all duration-300 hover:shadow-lg"
+                                    className="bg-[#fffbf6] rounded-2xl p-3 border border-[#F5E6D8] hover:border-[#E8D5C4] transition-all duration-300 hover:shadow-lg"
                                 >
                                     {/* Header: Avatar + Name + Location */}
                                     <div className="flex items-center gap-3 mb-3">
@@ -164,7 +166,7 @@ const Review = () => {
                                     </div>
 
                                     {/* Review Text */}
-                                    <p className="text-[#6D5A4C] text-sm leading-relaxed">
+                                    <p className="text-[#6D5A4C] text-[15px] leading-relaxed">
                                         {review.review}
                                     </p>
 

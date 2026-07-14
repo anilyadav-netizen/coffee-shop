@@ -225,14 +225,14 @@ const Hero = () => {
     const headingChars = headingText.split("");
 
     return (
-        <div className="relative h-[48vh] md:h-[80vh] min-h-[400px] md:min-h-[500px] lg:min-h-screen overflow-hidden">
+        <div className="relative h-[44vh] md:h-[80vh] min-h-[400px] md:min-h-[500px] lg:min-h-screen overflow-hidden">
             {/* ✅ Navbar Component */}
             <Navbar />
 
             {/* ✅ Hero Background with Video + Parallax */}
-            <div className="absolute inset-0 w-full h-[60vh] md:h-full">
+            <div className=" inset-0 w-full h-[60vh] md:h-full">
                 <motion.div
-                    className="w-full h-[40vh] md:h-full relative overflow-hidden"
+                    className="w-full md:h-full relative overflow-hidden"
                     style={{
                         transform: `scale(${1 + scrollY * 0.001})`,
                     }}
