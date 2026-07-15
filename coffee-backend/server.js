@@ -12,12 +12,18 @@ dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
 app.use(cookies());
 
+
+
 app.use(
   cors({
     origin: "http://localhost:5173", // frontend URL
     credentials: true,
   })
 );
+app.use(express.json({ limit: "500mb" }));
+app.use(express.urlencoded({ limit: "500mb", extended: true }));
+
+
 
 const Port = process.env.PORT || 5000;
 
@@ -396,8 +402,6 @@ io.on("connection", (socket) => {
 });
 
 // Middleware
-app.use(express.json({ limit: "500mb" }));
-app.use(express.urlencoded({ limit: "500mb", extended: true }));
 
 // Routes
 app.use("/api/auth", authRoutes);
