@@ -129,7 +129,7 @@ exports.assignRiderToOrder = async (req, res) => {
         mobile: rider.mobile,
       },
     });
-    
+
     res.status(200).json({
       success: true,
       message: "Rider assigned successfully",
@@ -204,24 +204,30 @@ exports.updateDeliveryStatus = async (req, res) => {
       .populate("user", "name email mobile");
 
     // Emit socket events
-    const io = getIO();
-    io.to(`admin`).emit("delivery_status_updated", {
+    // Emit socket events
+    const io = req.app.get("io");
+
+    // Send to admin
+    io.to(`admin-${riderId}`).emit("delivery_status_updated", {
       order: populatedOrder,
-      status: status,
-      message: `Order #${orderId} status updated to ${status}`,
+      status,
+      message: `Order #${order._id} status updated to ${status}`,
     });
 
-    io.to(`user_${order.user._id}`).emit("delivery_status_updated", {
-      orderId: orderId,
-      status: status,
+    // Send to customer
+    io.to(`user-${order.user._id}`).emit("delivery_status_updated", {
+      orderId: order._id,
+      status,
       message: message || `Your order is ${status}`,
     });
 
-    io.to(`rider_${riderId}`).emit("delivery_status_confirmed", {
-      orderId: orderId,
-      status: status,
+    // Send to rider
+    io.to(`rider-${riderId}`).emit("delivery_status_confirmed", {
+      orderId: order._id,
+      status,
       message: `Delivery status updated to ${status}`,
     });
+    
 
     res.status(200).json({
       success: true,
@@ -357,15 +363,25 @@ exports.unassignRiderFromOrder = async (req, res) => {
       .populate("user", "name email mobile");
 
     // Emit socket events
-    const io = getIO();
-    io.to(`rider_${previousRider}`).emit("order_unassigned", {
-      orderId: orderId,
+    // Emit socket events
+    const io = req.app.get("io");
+
+    // Send to rider
+    io.to(`rider-${previousRider}`).emit("order_unassigned", {
+      orderId: order._id,
       message: "Order has been unassigned from you",
     });
 
-    io.to(`admin_${adminId}`).emit("rider_unassigned", {
+    // Send to admin
+    io.to(`admin-${adminId}`).emit("rider_unassigned", {
       order: populatedOrder,
-      message: `Rider unassigned from order #${orderId}`,
+      message: `Rider unassigned from order #${order._id}`,
+    });
+
+    // Send to customer
+    io.to(`user-${order.user}`).emit("order_rider_unassigned", {
+      orderId: order._id,
+      message: "Your rider has been unassigned. A new rider will be assigned soon.",
     });
 
     res.status(200).json({
