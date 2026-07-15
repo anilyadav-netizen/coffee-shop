@@ -3,6 +3,9 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { getAllOrders } from '../../redux/Slicer/adminOrder';
+import {
+  getAvailableRiders, assignRiderToOrder, unassignRiderFromOrder,
+} from "../../redux/Slicer/riderAssignmentSlice";
 import Beep from '../../assets/Sounds/beep.wav'
 import io from 'socket.io-client';
 import {
@@ -38,6 +41,7 @@ const DeliveryOrders = () => {
   const socketRef = useRef(null);
 
   const { orders, error, loading } = useSelector((state) => state.adminOrder);
+  const { availableRiders, loading: riderLoading, } = useSelector((state) => state.riderAssignment);
 
   // State Management
   const [deliveryOrders, setDeliveryOrders] = useState([]);
@@ -52,6 +56,10 @@ const DeliveryOrders = () => {
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [notification, setNotification] = useState(null);
   const [isSoundEnabled, setIsSoundEnabled] = useState(true);
+
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [selectedRider, setSelectedRider] = useState("");
+  const [showAssignModal, setShowAssignModal] = useState(false);
 
   // Play notification sound
   const playNotificationSound = () => {
@@ -201,7 +209,9 @@ const DeliveryOrders = () => {
   // Fetch orders
   useEffect(() => {
     dispatch(getAllOrders());
+    dispatch(getAvailableRiders());
   }, [dispatch]);
+
 
   // Filter delivery orders
   useEffect(() => {
@@ -475,6 +485,38 @@ const DeliveryOrders = () => {
       </div>
     );
   }
+
+  console.log("Available Riders:", availableRiders);
+
+  const handleAssign = async () => {
+    if (!selectedRider) return;
+
+    await dispatch(
+      assignRiderToOrder({
+        orderId: selectedOrder._id,
+        riderId: selectedRider,
+      })
+    );
+
+    dispatch(getAllOrders());
+    dispatch(getAvailableRiders());
+
+    setShowAssignModal(false);
+    setSelectedOrder(null);
+    setSelectedRider("");
+  };
+  const handleUnassign = async (orderId) => {
+    await dispatch(unassignRiderFromOrder(orderId));
+
+    dispatch(getAllOrders());
+    dispatch(getAvailableRiders());
+  };
+
+  const handleChangeRider = (order) => {
+    setSelectedOrder(order);
+    setSelectedRider(order.rider?._id || "");
+    setShowAssignModal(true);
+  };
 
   return (
     <div className="p-4 md:p-6 bg-gray-50 dark:bg-[#0F172A] min-h-screen">
@@ -824,6 +866,7 @@ const DeliveryOrders = () => {
                         </div>
 
                         <div className="flex items-center gap-1.5">
+
                           <button
                             onClick={() => navigate(`/admin/orders/delivery/${order._id}`)}
                             className="p-2 bg-[#4F46E5] text-white rounded-lg hover:bg-[#4338CA] transition-all hover:scale-105 shadow-lg shadow-[#4F46E5]/20"
@@ -846,7 +889,44 @@ const DeliveryOrders = () => {
                               <FaBan className="text-sm" />
                             </button>
                           )}
-                        </div>
+                          {order.rider ? (
+                            <div className="mt-3 p-3 rounded-lg bg-gray-100 dark:bg-[#0F172A]">
+                              <p className="font-semibold">
+                                🚴 {order.rider.name}
+                              </p>
+
+                              <p className="text-sm text-gray-500">
+                                {order.rider.phone}
+                              </p>
+
+                              <div className="flex gap-2 mt-3">
+                                <button
+                                  onClick={() => handleChangeRider(order)}
+                                  className="px-3 py-1 rounded bg-blue-600 text-white"
+                                >
+                                  Change Rider
+                                </button>
+
+                                <button
+                                  onClick={() => handleUnassign(order._id)}
+                                  className="px-3 py-1 rounded bg-red-600 text-white"
+                                >
+                                  Unassign
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                setSelectedOrder(order);
+                                setSelectedRider("");
+                                setShowAssignModal(true);
+                              }}
+                              className="px-3 py-2 bg-orange-500 text-white rounded-lg"
+                            >
+                              Assign Rider
+                            </button>
+                          )}         </div>
                       </div>
                     </div>
                   </div>
@@ -889,6 +969,61 @@ const DeliveryOrders = () => {
                   Next
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* ================= Assign Rider Modal ================= */}
+
+          {showAssignModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+
+              <div className="bg-white dark:bg-[#1E293B] rounded-xl p-6 w-[400px]">
+
+                <h2 className="text-xl font-bold mb-4">
+                  Assign Rider
+                </h2>
+
+                <select
+                  className="w-full border p-3 rounded-lg"
+                  value={selectedRider}
+                  onChange={(e) => setSelectedRider(e.target.value)}
+                >
+
+                  <option value="">
+                    Select Rider
+                  </option>
+
+                  {availableRiders.map((rider) => (
+                    <option
+                      key={rider._id}
+                      value={rider._id}
+                    >
+                      {rider.name}
+                    </option>
+                  ))}
+
+                </select>
+
+                <div className="flex justify-end gap-3 mt-5">
+
+                  <button
+                    onClick={() => setShowAssignModal(false)}
+                    className="px-4 py-2 bg-gray-200 rounded"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    onClick={handleAssign}
+                    className="px-4 py-2 bg-indigo-600 text-white rounded"
+                  >
+                    Assign
+                  </button>
+
+                </div>
+
+              </div>
+
             </div>
           )}
         </>
