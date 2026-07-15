@@ -439,8 +439,11 @@ const updateUserRole = async (req, res) => {
 
     user.role = role;
 
-    // Agar rider nahi hai to location reset kar do
-    if (role !== "rider") {
+    if (role === "rider") {
+      // Rider banne par available kar do
+      user.isAvailable = true;
+    } else {
+      // Rider nahi hai to location aur availability reset
       user.currentLocation = {
         latitude: null,
         longitude: null,

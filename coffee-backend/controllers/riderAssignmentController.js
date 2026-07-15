@@ -73,7 +73,7 @@ exports.assignRiderToOrder = async (req, res) => {
       });
     }
 
-    if (!rider.isAvailable || rider.riderDetails.isBusy) {
+    if (!rider.isAvailable ) {
       return res.status(400).json({
         success: false,
         message: "Rider is not available or busy with another delivery",
