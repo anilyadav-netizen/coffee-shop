@@ -46,8 +46,7 @@ export const getDeliveryOrders = createAsyncThunk(
   async (status = "", { rejectWithValue }) => {
     try {
       const { data } = await API.get(
-        `/rider-assignment/admin/delivery-orders${
-          status ? `?status=${status}` : ""
+        `/rider-assignment/admin/delivery-orders${status ? `?status=${status}` : ""
         }`
       );
       return data;
@@ -118,6 +117,7 @@ export const updateDeliveryStatus = createAsyncThunk(
 // ==============================
 // Initial State
 // ==============================
+
 const initialState = {
   loading: false,
   error: null,

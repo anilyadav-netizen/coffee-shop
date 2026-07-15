@@ -10,6 +10,8 @@ exports.getAvailableRiders = async (req, res) => {
       isAvailable: true,
     }).select("-password");
 
+    console.log(riders)
+
     res.status(200).json({
       success: true,
       riders,

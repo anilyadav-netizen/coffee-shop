@@ -83,7 +83,7 @@ const SkeletonCard = () => {
 // Main TablePage Component
 const TablePage = () => {
   const dispatch = useDispatch();
-  
+
   // Redux state
   const { tables, loading, operationLoading, error, operationError } = useSelector(
     (state) => state.table
@@ -138,8 +138,8 @@ const TablePage = () => {
 
   // Filter and search logic
   const filteredTables = tableList.filter((table) => {
-    const matchesSearch = table.tableNumber?.toString().includes(searchTerm) || 
-                          table.tableNumber?.toString().includes(searchTerm);
+    const matchesSearch = table.tableNumber?.toString().includes(searchTerm) ||
+      table.tableNumber?.toString().includes(searchTerm);
     if (filter === 'all') return matchesSearch;
     return matchesSearch && table.status === filter;
   });
@@ -182,16 +182,16 @@ const TablePage = () => {
 
     const tableId = getTableId(selectedTable);
     console.log('Confirm delete - Table ID:', tableId);
-    
+
     if (!tableId) {
       toast.error('Table ID not found');
       return;
     }
-    
+
     try {
       const result = await dispatch(deleteTable(tableId));
       console.log('Delete result:', result);
-      
+
       if (deleteTable.fulfilled.match(result)) {
         toast.success(`Table ${selectedTable.tableNumber} deleted successfully`);
         setShowDeleteModal(false);
@@ -246,18 +246,18 @@ const TablePage = () => {
         const tableId = getTableId(selectedTable);
         console.log('Update table - ID:', tableId);
         console.log('Update table - Data:', tableData);
-        
+
         if (!tableId) {
           toast.error('Table ID not found');
           return;
         }
-        
+
         result = await dispatch(updateTable({
           id: tableId,
           tableData,
         }));
         console.log('Update result:', result);
-        
+
         if (updateTable.fulfilled.match(result)) {
           toast.success(`Table ${formData.tableNumber} updated successfully`);
           setShowAddEditModal(false);
@@ -269,7 +269,7 @@ const TablePage = () => {
         console.log('Create table - Data:', tableData);
         result = await dispatch(createTable(tableData));
         console.log('Create result:', result);
-        
+
         if (createTable.fulfilled.match(result)) {
           toast.success(`Table ${formData.tableNumber} added successfully`);
           setShowAddEditModal(false);
@@ -376,11 +376,10 @@ const TablePage = () => {
           <button
             key={chip}
             onClick={() => setFilter(chip)}
-            className={`px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-200 ${
-              filter === chip
+            className={`px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-200 ${filter === chip
                 ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200 dark:shadow-indigo-900/30'
                 : 'bg-white dark:bg-dark-card text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-dark-border'
-            }`}
+              }`}
           >
             {chip === 'all' ? 'All' : chip.charAt(0).toUpperCase() + chip.slice(1)}
           </button>
@@ -416,50 +415,50 @@ const TablePage = () => {
             {loading
               ? Array.from({ length: 6 }).map((_, index) => <SkeletonCard key={index} />)
               : currentTables.map((table) => {
-                  const tableId = getTableId(table);
-                  return (
-                    <div
-                      key={tableId || table.tableNumber}
-                      className="bg-white dark:bg-dark-card backdrop-blur-sm bg-opacity-90 dark:bg-opacity-90 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-dark-border hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group"
-                    >
-                      <div className="flex flex-col items-center">
-                        <div className="w-20 h-20 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mb-4 group-hover:bg-indigo-200 dark:group-hover:bg-indigo-800/30 transition-colors">
-                          <FaTable className="text-3xl text-indigo-600 dark:text-indigo-400" />
-                        </div>
-                        <h3 className="text-xl font-bold text-gray-800 dark:text-dark-heading mb-1">
-                          Table {table.tableNumber}
-                        </h3>
-                        <p className="text-sm text-gray-500 dark:text-dark-text mb-2">
-                          <FaCouch className="inline mr-1" /> {table.seats} Seats
-                        </p>
-                        <div className="mb-3">
-                          <StatusBadge status={table.status} />
-                        </div>
-                        <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
-                          Created: {formatDate(table.createdAt)}
-                        </p>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleAddEdit(table)}
-                            disabled={operationLoading}
-                            className="p-2 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Edit"
-                          >
-                            <FaEdit size={18} />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(table)}
-                            disabled={operationLoading}
-                            className="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Delete"
-                          >
-                            <FaTrashAlt size={18} />
-                          </button>
-                        </div>
+                const tableId = getTableId(table);
+                return (
+                  <div
+                    key={tableId || table.tableNumber}
+                    className="bg-white dark:bg-dark-card backdrop-blur-sm bg-opacity-90 dark:bg-opacity-90 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-dark-border hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group"
+                  >
+                    <div className="flex flex-col items-center">
+                      <div className="w-20 h-20 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mb-4 group-hover:bg-indigo-200 dark:group-hover:bg-indigo-800/30 transition-colors">
+                        <FaTable className="text-3xl text-indigo-600 dark:text-indigo-400" />
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-800 dark:text-dark-heading mb-1">
+                        Table {table.tableNumber}
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-dark-text mb-2">
+                        <FaCouch className="inline mr-1" /> {table.seats} Seats
+                      </p>
+                      <div className="mb-3">
+                        <StatusBadge status={table.status} />
+                      </div>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
+                        Created: {formatDate(table.createdAt)}
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleAddEdit(table)}
+                          disabled={operationLoading}
+                          className="p-2 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="Edit"
+                        >
+                          <FaEdit size={18} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(table)}
+                          disabled={operationLoading}
+                          className="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="Delete"
+                        >
+                          <FaTrashAlt size={18} />
+                        </button>
                       </div>
                     </div>
-                  );
-                })}
+                  </div>
+                );
+              })}
           </div>
 
           {/* Pagination */}
