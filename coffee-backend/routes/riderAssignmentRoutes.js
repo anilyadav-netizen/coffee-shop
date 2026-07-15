@@ -9,16 +9,16 @@ const {
   getDeliveryOrders,
   unassignRiderFromOrder,
 } = require("../controllers/riderAssignmentController");
-const { auth, isAdmin, isRider } = require("../middleware/auth");
+const { protect } = require("../middleware/authMiddleware");
 
 // Admin routes
-router.get("/admin/available-riders", auth, isAdmin, getAvailableRiders);
-router.post("/admin/assign-rider", auth, isAdmin, assignRiderToOrder);
-router.get("/admin/delivery-orders", auth, isAdmin, getDeliveryOrders);
-router.delete("/admin/unassign-rider/:orderId", auth, isAdmin, unassignRiderFromOrder);
+router.get("/admin/available-riders", protect, getAvailableRiders);
+router.post("/admin/assign-rider", protect, assignRiderToOrder);
+router.get("/admin/delivery-orders", protect, getDeliveryOrders);
+router.delete("/admin/unassign-rider/:orderId", protect, unassignRiderFromOrder);
 
 // Rider routes
-router.get("/rider/my-orders", auth, isRider, getRiderOrders);
-router.put("/rider/update-delivery-status", auth, isRider, updateDeliveryStatus);
+router.get("/rider/my-orders", protect, getRiderOrders);
+router.put("/rider/update-delivery-status", protect, updateDeliveryStatus);
 
 module.exports = router;

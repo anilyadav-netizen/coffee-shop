@@ -69,7 +69,7 @@ const WhyUs = () => {
     ];
 
     return (
-        <section className="relative py-8 px-4 overflow-hidden bg-gradient-to-br from-[#FFF8F2] to-white">
+        <section className="relative py-4 px-4 overflow-hidden bg-gradient-to-br from-[#FFF8F2] to-white">
             {/* Background Effects */}
             <div className="absolute inset-0 -z-10">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#E85D3A]/5 via-transparent to-[#F0744F]/5" />
@@ -140,7 +140,7 @@ const WhyUs = () => {
                 </div>
 
                 {/* ===== BOTTOM CTA - Exactly as image ===== */}
-                <div className="text-center">
+                {/* <div className="text-center">
                     <div className="inline-flex items-center gap-4 bg-white border border-gray-200 rounded-full px-6 py-3 hover:shadow-lg hover:shadow-[#E85D3A]/10 transition-all duration-300">
                         <Sparkles className="w-5 h-5 text-[#E85D3A]" />
                         <span className="text-gray-700 text-sm font-medium">
@@ -150,7 +150,7 @@ const WhyUs = () => {
                             Get Started
                         </button>
                     </div>
-                </div>
+                </div> */}
             </div>
 
             {/* CSS Animations */}

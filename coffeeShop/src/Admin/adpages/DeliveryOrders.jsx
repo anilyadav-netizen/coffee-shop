@@ -3,13 +3,16 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { getAllOrders } from '../../redux/Slicer/adminOrder';
+import {
+  getAvailableRiders, assignRiderToOrder, unassignRiderFromOrder,
+} from "../../redux/Slicer/riderAssignmentSlice";
 import Beep from '../../assets/Sounds/beep.wav'
 import io from 'socket.io-client';
-import { 
-  FaTruck, 
-  FaMapMarkerAlt, 
-  FaUser, 
-  FaPhone, 
+import {
+  FaTruck,
+  FaMapMarkerAlt,
+  FaUser,
+  FaPhone,
   FaEye,
   FaRupeeSign,
   FaClock,
@@ -27,7 +30,7 @@ import {
   FaBan,
   FaBell
 } from 'react-icons/fa';
-import { 
+import {
   MdDeliveryDining
 } from 'react-icons/md';
 import { BsThreeDotsVertical } from 'react-icons/bs';
@@ -36,9 +39,10 @@ const DeliveryOrders = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const socketRef = useRef(null);
-  
+
   const { orders, error, loading } = useSelector((state) => state.adminOrder);
-  
+  const { availableRiders, loading: riderLoading, } = useSelector((state) => state.riderAssignment);
+
   // State Management
   const [deliveryOrders, setDeliveryOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
@@ -53,6 +57,10 @@ const DeliveryOrders = () => {
   const [notification, setNotification] = useState(null);
   const [isSoundEnabled, setIsSoundEnabled] = useState(true);
 
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [selectedRider, setSelectedRider] = useState("");
+  const [showAssignModal, setShowAssignModal] = useState(false);
+
   // Play notification sound
   const playNotificationSound = () => {
     if (!isSoundEnabled) return;
@@ -66,10 +74,10 @@ const DeliveryOrders = () => {
   };
 
   const playNotification = () => {
-  const audio = new Audio(Beep);
-  audio.volume = 1;
-  audio.play().catch((err) => console.log(err));
-};
+    const audio = new Audio(Beep);
+    audio.volume = 1;
+    audio.play().catch((err) => console.log(err));
+  };
 
   // Socket Connection Setup
   useEffect(() => {
@@ -86,9 +94,9 @@ const DeliveryOrders = () => {
 
     // Listen for new orders
     socket.on('new-order-placed', (data) => {
-        playNotification(); 
+      playNotification();
       console.log('🔔 New delivery order received:', data);
-      
+
       if (data.order?.orderType === 'delivery') {
         setNotification({
           type: 'new-order',
@@ -101,7 +109,7 @@ const DeliveryOrders = () => {
         playNotificationSound();
 
         setDeliveryOrders(prev => [data.order, ...prev]);
-        
+
         if (!searchTerm && filterStatus === 'all' && filterPayment === 'all' && !dateRange.start && !dateRange.end) {
           setFilteredOrders(prev => [data.order, ...prev]);
         }
@@ -115,14 +123,14 @@ const DeliveryOrders = () => {
     // Listen for order status updates
     socket.on('order-status-updated', (data) => {
       console.log('🔄 Order status updated:', data);
-      
-      setDeliveryOrders(prev => prev.map(order => 
-        order._id === data.orderId 
-          ? { 
-              ...order, 
-              orderStatus: data.newStatus,
-              tracking: data.tracking ? [...order.tracking, data.tracking] : order.tracking
-            }
+
+      setDeliveryOrders(prev => prev.map(order =>
+        order._id === data.orderId
+          ? {
+            ...order,
+            orderStatus: data.newStatus,
+            tracking: data.tracking ? [...order.tracking, data.tracking] : order.tracking
+          }
           : order
       ));
 
@@ -141,9 +149,9 @@ const DeliveryOrders = () => {
     // Listen for order cancellations
     socket.on('order-cancelled', (data) => {
       console.log('❌ Order cancelled:', data);
-      
-      setDeliveryOrders(prev => prev.map(order => 
-        order._id === data.orderId 
+
+      setDeliveryOrders(prev => prev.map(order =>
+        order._id === data.orderId
           ? { ...order, orderStatus: 'cancelled' }
           : order
       ));
@@ -162,15 +170,15 @@ const DeliveryOrders = () => {
     // Listen for rider assignments
     socket.on('rider-assigned', (data) => {
       console.log('🚚 Rider assigned:', data);
-      
-      setDeliveryOrders(prev => prev.map(order => 
-        order._id === data.orderId 
-          ? { 
-              ...order, 
-              rider: data.rider,
-              riderId: data.riderId,
-              orderStatus: 'out_for_delivery'
-            }
+
+      setDeliveryOrders(prev => prev.map(order =>
+        order._id === data.orderId
+          ? {
+            ...order,
+            rider: data.rider,
+            riderId: data.riderId,
+            orderStatus: 'out_for_delivery'
+          }
           : order
       ));
 
@@ -201,7 +209,9 @@ const DeliveryOrders = () => {
   // Fetch orders
   useEffect(() => {
     dispatch(getAllOrders());
+    dispatch(getAvailableRiders());
   }, [dispatch]);
+
 
   // Filter delivery orders
   useEffect(() => {
@@ -219,7 +229,7 @@ const DeliveryOrders = () => {
 
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      result = result.filter(order => 
+      result = result.filter(order =>
         order._id?.toLowerCase().includes(term) ||
         order.user?.name?.toLowerCase().includes(term) ||
         order.user?.email?.toLowerCase().includes(term) ||
@@ -237,12 +247,12 @@ const DeliveryOrders = () => {
     }
 
     if (dateRange.start) {
-      result = result.filter(order => 
+      result = result.filter(order =>
         new Date(order.createdAt) >= new Date(dateRange.start)
       );
     }
     if (dateRange.end) {
-      result = result.filter(order => 
+      result = result.filter(order =>
         new Date(order.createdAt) <= new Date(dateRange.end)
       );
     }
@@ -250,7 +260,7 @@ const DeliveryOrders = () => {
     if (sortConfig.key) {
       result.sort((a, b) => {
         let aVal, bVal;
-        
+
         if (sortConfig.key === 'user') {
           aVal = a.user?.name || '';
           bVal = b.user?.name || '';
@@ -266,7 +276,7 @@ const DeliveryOrders = () => {
         }
 
         if (typeof aVal === 'string') {
-          return sortConfig.direction === 'asc' 
+          return sortConfig.direction === 'asc'
             ? aVal.localeCompare(bVal)
             : bVal.localeCompare(aVal);
         }
@@ -303,8 +313,8 @@ const DeliveryOrders = () => {
       });
 
       if (response.ok) {
-        setDeliveryOrders(prev => prev.map(order => 
-          order._id === orderId 
+        setDeliveryOrders(prev => prev.map(order =>
+          order._id === orderId
             ? { ...order, orderStatus: newStatus }
             : order
         ));
@@ -335,8 +345,8 @@ const DeliveryOrders = () => {
       });
 
       if (response.ok) {
-        setDeliveryOrders(prev => prev.map(order => 
-          order._id === orderId 
+        setDeliveryOrders(prev => prev.map(order =>
+          order._id === orderId
             ? { ...order, orderStatus: 'cancelled' }
             : order
         ));
@@ -421,7 +431,7 @@ const DeliveryOrders = () => {
   // Get sort icon
   const getSortIcon = (key) => {
     if (sortConfig.key !== key) return <FaSort className="text-[#94A3B8]" />;
-    return sortConfig.direction === 'asc' 
+    return sortConfig.direction === 'asc'
       ? <FaSortUp className="text-[#4F46E5]" />
       : <FaSortDown className="text-[#4F46E5]" />;
   };
@@ -465,7 +475,7 @@ const DeliveryOrders = () => {
           </div>
           <h3 className="text-lg font-semibold text-[#0F172A] dark:text-white mb-2">Failed to Load Orders</h3>
           <p className="text-[#64748B] dark:text-[#94A3B8] text-sm mb-4">{error}</p>
-          <button 
+          <button
             onClick={() => dispatch(getAllOrders())}
             className="px-6 py-2 bg-[#4F46E5] text-white rounded-lg hover:bg-[#4338CA] transition-colors"
           >
@@ -476,26 +486,56 @@ const DeliveryOrders = () => {
     );
   }
 
+  console.log("Available Riders:", availableRiders);
+
+  const handleAssign = async () => {
+    if (!selectedRider) return;
+
+    await dispatch(
+      assignRiderToOrder({
+        orderId: selectedOrder._id,
+        riderId: selectedRider,
+      })
+    );
+
+    dispatch(getAllOrders());
+    dispatch(getAvailableRiders());
+
+    setShowAssignModal(false);
+    setSelectedOrder(null);
+    setSelectedRider("");
+  };
+  const handleUnassign = async (orderId) => {
+    await dispatch(unassignRiderFromOrder(orderId));
+
+    dispatch(getAllOrders());
+    dispatch(getAvailableRiders());
+  };
+
+  const handleChangeRider = (order) => {
+    setSelectedOrder(order);
+    setSelectedRider(order.rider?._id || "");
+    setShowAssignModal(true);
+  };
+
   return (
     <div className="p-4 md:p-6 bg-gray-50 dark:bg-[#0F172A] min-h-screen">
       {/* Notification Popup */}
       {notification && (
         <div className="fixed top-6 right-6 z-50 max-w-md w-full animate-slideIn">
-          <div className={`rounded-xl shadow-2xl p-4 border-l-4 ${
-            notification.type === 'new-order' ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-[#1E293B] dark:to-[#0F172A] border-green-500' :
+          <div className={`rounded-xl shadow-2xl p-4 border-l-4 ${notification.type === 'new-order' ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-[#1E293B] dark:to-[#0F172A] border-green-500' :
             notification.type === 'status-update' ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-[#1E293B] dark:to-[#0F172A] border-blue-500' :
-            notification.type === 'cancelled' ? 'bg-gradient-to-r from-red-50 to-rose-50 dark:from-[#1E293B] dark:to-[#0F172A] border-red-500' :
-            notification.type === 'rider-assigned' ? 'bg-gradient-to-r from-orange-50 to-amber-50 dark:from-[#1E293B] dark:to-[#0F172A] border-orange-500' :
-            'bg-white dark:bg-[#1E293B] border-[#4F46E5]'
-          }`}>
+              notification.type === 'cancelled' ? 'bg-gradient-to-r from-red-50 to-rose-50 dark:from-[#1E293B] dark:to-[#0F172A] border-red-500' :
+                notification.type === 'rider-assigned' ? 'bg-gradient-to-r from-orange-50 to-amber-50 dark:from-[#1E293B] dark:to-[#0F172A] border-orange-500' :
+                  'bg-white dark:bg-[#1E293B] border-[#4F46E5]'
+            }`}>
             <div className="flex items-start gap-3">
-              <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                notification.type === 'new-order' ? 'bg-green-100 dark:bg-green-900/30' :
+              <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${notification.type === 'new-order' ? 'bg-green-100 dark:bg-green-900/30' :
                 notification.type === 'status-update' ? 'bg-blue-100 dark:bg-blue-900/30' :
-                notification.type === 'cancelled' ? 'bg-red-100 dark:bg-red-900/30' :
-                notification.type === 'rider-assigned' ? 'bg-orange-100 dark:bg-orange-900/30' :
-                'bg-[#4F46E5]/10'
-              }`}>
+                  notification.type === 'cancelled' ? 'bg-red-100 dark:bg-red-900/30' :
+                    notification.type === 'rider-assigned' ? 'bg-orange-100 dark:bg-orange-900/30' :
+                      'bg-[#4F46E5]/10'
+                }`}>
                 {notification.type === 'new-order' && <FaBell className="text-green-500 text-lg" />}
                 {notification.type === 'status-update' && <FaCheckCircle className="text-blue-500 text-lg" />}
                 {notification.type === 'cancelled' && <FaTimesCircle className="text-red-500 text-lg" />}
@@ -546,11 +586,10 @@ const DeliveryOrders = () => {
               </span>
               <button
                 onClick={() => setIsSoundEnabled(!isSoundEnabled)}
-                className={`ml-2 p-2 rounded-lg transition-colors ${
-                  isSoundEnabled 
-                    ? 'bg-[#4F46E5]/10 text-[#4F46E5] hover:bg-[#4F46E5]/20' 
-                    : 'bg-gray-100 dark:bg-[#1E293B] text-[#94A3B8] hover:bg-gray-200 dark:hover:bg-[#2D3748]'
-                }`}
+                className={`ml-2 p-2 rounded-lg transition-colors ${isSoundEnabled
+                  ? 'bg-[#4F46E5]/10 text-[#4F46E5] hover:bg-[#4F46E5]/20'
+                  : 'bg-gray-100 dark:bg-[#1E293B] text-[#94A3B8] hover:bg-gray-200 dark:hover:bg-[#2D3748]'
+                  }`}
                 title={isSoundEnabled ? 'Mute notifications' : 'Unmute notifications'}
               >
                 {isSoundEnabled ? '🔊' : '🔇'}
@@ -578,11 +617,10 @@ const DeliveryOrders = () => {
           <div
             key={stat.key}
             onClick={() => setFilterStatus(stat.key)}
-            className={`bg-white dark:bg-[#1E293B] rounded-xl p-3 border transition-all cursor-pointer hover:shadow-md ${
-              filterStatus === stat.key
-                ? 'border-[#4F46E5] ring-2 ring-[#4F46E5]/20 dark:ring-[#4F46E5]/10'
-                : 'border-[#E2E8F0] dark:border-[#1E293B] hover:border-[#4F46E5]/30'
-            }`}
+            className={`bg-white dark:bg-[#1E293B] rounded-xl p-3 border transition-all cursor-pointer hover:shadow-md ${filterStatus === stat.key
+              ? 'border-[#4F46E5] ring-2 ring-[#4F46E5]/20 dark:ring-[#4F46E5]/10'
+              : 'border-[#E2E8F0] dark:border-[#1E293B] hover:border-[#4F46E5]/30'
+              }`}
           >
             <p className="text-[10px] font-medium text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">
               {stat.label}
@@ -605,7 +643,7 @@ const DeliveryOrders = () => {
               className="w-full pl-10 pr-4 py-2.5 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E2E8F0] dark:border-[#1E293B] rounded-lg text-[#0F172A] dark:text-white placeholder-[#94A3B8] focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent outline-none transition-all"
             />
           </div>
-          
+
           <div className="flex flex-wrap items-center gap-3">
             <select
               value={filterStatus}
@@ -683,7 +721,7 @@ const DeliveryOrders = () => {
               const status = order.orderStatus || 'pending';
               const statusInfo = statusConfig[status] || statusConfig.pending;
               const paymentStatus = order.payment?.status || 'pending';
-              
+
               return (
                 <div
                   key={order._id}
@@ -826,8 +864,9 @@ const DeliveryOrders = () => {
                             {order.payment?.method || 'N/A'}
                           </p>
                         </div>
-                        
+
                         <div className="flex items-center gap-1.5">
+
                           <button
                             onClick={() => navigate(`/admin/orders/delivery/${order._id}`)}
                             className="p-2 bg-[#4F46E5] text-white rounded-lg hover:bg-[#4338CA] transition-all hover:scale-105 shadow-lg shadow-[#4F46E5]/20"
@@ -850,7 +889,44 @@ const DeliveryOrders = () => {
                               <FaBan className="text-sm" />
                             </button>
                           )}
-                        </div>
+                          {order.rider ? (
+                            <div className="mt-3 p-3 rounded-lg bg-gray-100 dark:bg-[#0F172A]">
+                              <p className="font-semibold">
+                                🚴 {order.rider.name}
+                              </p>
+
+                              <p className="text-sm text-gray-500">
+                                {order.rider.phone}
+                              </p>
+
+                              <div className="flex gap-2 mt-3">
+                                <button
+                                  onClick={() => handleChangeRider(order)}
+                                  className="px-3 py-1 rounded bg-blue-600 text-white"
+                                >
+                                  Change Rider
+                                </button>
+
+                                <button
+                                  onClick={() => handleUnassign(order._id)}
+                                  className="px-3 py-1 rounded bg-red-600 text-white"
+                                >
+                                  Unassign
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                setSelectedOrder(order);
+                                setSelectedRider("");
+                                setShowAssignModal(true);
+                              }}
+                              className="px-3 py-2 bg-orange-500 text-white rounded-lg"
+                            >
+                              Assign Rider
+                            </button>
+                          )}         </div>
                       </div>
                     </div>
                   </div>
@@ -877,11 +953,10 @@ const DeliveryOrders = () => {
                   <button
                     key={i}
                     onClick={() => setCurrentPage(i + 1)}
-                    className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
-                      currentPage === i + 1
-                        ? 'bg-[#4F46E5] text-white'
-                        : 'bg-white dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#1E293B] text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#2D3748]'
-                    }`}
+                    className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${currentPage === i + 1
+                      ? 'bg-[#4F46E5] text-white'
+                      : 'bg-white dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#1E293B] text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#2D3748]'
+                      }`}
                   >
                     {i + 1}
                   </button>
@@ -894,6 +969,61 @@ const DeliveryOrders = () => {
                   Next
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* ================= Assign Rider Modal ================= */}
+
+          {showAssignModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+
+              <div className="bg-white dark:bg-[#1E293B] rounded-xl p-6 w-[400px]">
+
+                <h2 className="text-xl font-bold mb-4">
+                  Assign Rider
+                </h2>
+
+                <select
+                  className="w-full border p-3 rounded-lg"
+                  value={selectedRider}
+                  onChange={(e) => setSelectedRider(e.target.value)}
+                >
+
+                  <option value="">
+                    Select Rider
+                  </option>
+
+                  {availableRiders.map((rider) => (
+                    <option
+                      key={rider._id}
+                      value={rider._id}
+                    >
+                      {rider.name}
+                    </option>
+                  ))}
+
+                </select>
+
+                <div className="flex justify-end gap-3 mt-5">
+
+                  <button
+                    onClick={() => setShowAssignModal(false)}
+                    className="px-4 py-2 bg-gray-200 rounded"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    onClick={handleAssign}
+                    className="px-4 py-2 bg-indigo-600 text-white rounded"
+                  >
+                    Assign
+                  </button>
+
+                </div>
+
+              </div>
+
             </div>
           )}
         </>

@@ -33,12 +33,23 @@ const AddProduct = () => {
         stock: "",
         status: "active",
         category: "",
+        discountPercentage: 0,
     });
 
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isFetching, setIsFetching] = useState(isEditMode);
+
+    // 🔥 Calculate discount price for display
+    const calculateDiscountPrice = () => {
+        const price = parseFloat(formData.price) || 0;
+        const discount = parseFloat(formData.discountPercentage) || 0;
+        if (discount > 0 && price > 0) {
+            return (price - (price * discount / 100)).toFixed(2);
+        }
+        return price.toFixed(2);
+    };
 
     useEffect(() => {
         if (isEditMode && id) {
@@ -52,6 +63,7 @@ const AddProduct = () => {
                         stock: data.stock || "",
                         status: data.status || "active",
                         category: data.category?._id || data.category || "",
+                        discountPercentage: data.discountPercentage || 0,
                     });
                     if (data.image) {
                         setImagePreview(data.image);
@@ -109,6 +121,7 @@ const AddProduct = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        // Validation
         if (!formData.name.trim()) {
             toast.error("Product name is required");
             return;
@@ -143,16 +156,36 @@ const AddProduct = () => {
 
         try {
             const submitData = new FormData();
+            
+            // Basic fields
             submitData.append("name", formData.name);
             submitData.append("description", formData.description);
             submitData.append("price", formData.price);
             submitData.append("stock", formData.stock);
             submitData.append("status", formData.status);
             submitData.append("category", formData.category);
+            submitData.append("discountPercentage", formData.discountPercentage);
+            
+            // ✅ Calculate and append discount price
+            const price = parseFloat(formData.price) || 0;
+            const discount = parseFloat(formData.discountPercentage) || 0;
+            const discountPrice = discount > 0 ? price - (price * discount / 100) : price;
+            submitData.append("discountPrice", Math.round(discountPrice));
 
+            // Image
             if (imageFile) {
                 submitData.append("image", imageFile);
             }
+
+            // Debug log
+            console.log("📦 Sending product data:", {
+                name: formData.name,
+                price: formData.price,
+                discountPercentage: formData.discountPercentage,
+                discountPrice: Math.round(discountPrice),
+                hasImage: !!imageFile,
+                isEditMode
+            });
 
             let result;
             if (isEditMode) {
@@ -162,6 +195,9 @@ const AddProduct = () => {
                 result = await dispatch(addProduct(submitData)).unwrap();
                 toast.success("Product added successfully!");
             }
+
+            // Log response
+            console.log("✅ Product saved:", result);
 
             navigate("/admin/products");
         } catch (error) {
@@ -310,8 +346,8 @@ const AddProduct = () => {
                             )}
                         </div>
 
-                        {/* PRICE & STOCK */}
-                        <div className="grid md:grid-cols-2 gap-6">
+                        {/* PRICE, DISCOUNT PERCENTAGE, DISCOUNT PRICE & STOCK */}
+                        <div className="grid md:grid-cols-4 gap-6">
                             <div>
                                 <label className="block text-sm font-semibold text-[#0F172A] dark:text-dark-heading mb-2">
                                     Price (₹) <span className="text-red-500">*</span>
@@ -326,6 +362,35 @@ const AddProduct = () => {
                                     step="1"
                                     className="w-full px-4 py-3 bg-[#F8FAFC] dark:bg-dark-bg border border-[#E2E8F0] dark:border-dark-border rounded-xl text-[#0F172A] dark:text-dark-heading placeholder-[#64748B] dark:placeholder-dark-text focus:outline-none focus:ring-2 focus:ring-[#4F46E5] dark:focus:ring-dark-primary focus:border-transparent transition-all duration-300"
                                     required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-[#0F172A] dark:text-dark-heading mb-2">
+                                    Discount (%)
+                                </label>
+                                <input
+                                    type="number"
+                                    name="discountPercentage"
+                                    value={formData.discountPercentage}
+                                    onChange={handleChange}
+                                    placeholder="0"
+                                    min="0"
+                                    max="100"
+                                    step="1"
+                                    className="w-full px-4 py-3 bg-[#F8FAFC] dark:bg-dark-bg border border-[#E2E8F0] dark:border-dark-border rounded-xl text-[#0F172A] dark:text-dark-heading placeholder-[#64748B] dark:placeholder-dark-text focus:outline-none focus:ring-2 focus:ring-[#4F46E5] dark:focus:ring-dark-primary focus:border-transparent transition-all duration-300"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-[#0F172A] dark:text-dark-heading mb-2">
+                                    Discount Price (₹)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={`₹ ${calculateDiscountPrice()}`}
+                                    disabled
+                                    className="w-full px-4 py-3 bg-[#F8FAFC] dark:bg-dark-bg border border-[#E2E8F0] dark:border-dark-border rounded-xl text-[#0F172A] dark:text-dark-heading cursor-not-allowed opacity-75"
                                 />
                             </div>
 

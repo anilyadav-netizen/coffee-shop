@@ -1,7 +1,6 @@
 // controllers/riderAssignmentController.js
-const Order = require("../models/Order");
-const User = require("../models/User");
-const { getIO } = require("../socket"); // We'll create this
+const Order = require("../models/orderModel");
+const User = require("../models/userModel");
 
 // Get all available riders
 exports.getAvailableRiders = async (req, res) => {
@@ -9,8 +8,9 @@ exports.getAvailableRiders = async (req, res) => {
     const riders = await User.find({
       role: "rider",
       isAvailable: true,
-      "riderDetails.isBusy": false,
     }).select("-password");
+
+    console.log(riders)
 
     res.status(200).json({
       success: true,
@@ -109,7 +109,7 @@ exports.assignRiderToOrder = async (req, res) => {
       .populate("riderAssignment.assignedBy", "name email");
 
     // Emit socket events
-    const io = getIO();
+    const io = req.app.get("io");
 
     // Send to rider
     io.to(`rider_${riderId}`).emit("new_order_assigned", {

@@ -23,7 +23,10 @@ import {
     Star,
     Clock,
     Flame,
-    Info
+    Info,
+    Shield,
+    Truck,
+    RotateCcw
 } from 'lucide-react';
 
 // Define HeartIcon component
@@ -277,35 +280,6 @@ const DetailsPage = () => {
         }
     };
 
-    // Handle Buy Now
-    const handleBuyNow = () => {
-        if (!isAuthenticated) {
-            toast.error("Please login to proceed");
-            navigate("/login");
-            return;
-        }
-
-        if (product?.stock === 0) {
-            toast.error("Product is out of stock");
-            return;
-        }
-
-        const cartData = {
-            coffeeId: product._id,
-            quantity: quantity,
-            amount: product.discountPrice || product.price,
-        };
-
-        dispatch(addToCart(cartData))
-            .unwrap()
-            .then(() => {
-                navigate("/checkout");
-            })
-            .catch((error) => {
-                toast.error(error.message || "Failed to process order");
-            });
-    };
-
     // Get related products
     const getRelatedProducts = () => {
         if (!products || !product || !product.category) return [];
@@ -394,18 +368,6 @@ const DetailsPage = () => {
                                     Only {product.stock} left
                                 </span>
                             ) : null}
-
-                            {/* Wishlist Button on Image */}
-                            <button
-                                onClick={handleWishlistToggle}
-                                disabled={wishlistLoading}
-                                className="absolute top-4 left-4 p-2.5 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110 disabled:opacity-50"
-                            >
-                                <Heart
-                                    className={`w-5 h-5 sm:w-6 sm:h-6 ${isProductInWishlist ? "fill-red-500 text-red-500" : "text-gray-600"
-                                        }`}
-                                />
-                            </button>
                         </div>
 
                         {/* Product Details */}
@@ -545,25 +507,55 @@ const DetailsPage = () => {
                                 </span>
                             </div>
 
-                            {/* Add to Cart Button */}
-                            <button
-                                onClick={handleAddToCart}
-                                disabled={product.stock === 0}
-                                className="mt-6 w-full py-3.5 sm:py-4 bg-gradient-to-r from-[#0D7C53] to-green-600 text-white rounded-full font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 text-base sm:text-lg"
-                            >
-                                <ShoppingBag size={20} className="sm:w-6 sm:h-6" />
-                                <span>Add to Cart</span>
-                                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                            </button>
+                            {/* Action Buttons - Add to Cart and Wishlist in one line */}
+                            <div className="mt-6 flex gap-3">
+                                <button
+                                    onClick={handleAddToCart}
+                                    disabled={product.stock === 0}
+                                    className="flex-1 py-3.5 sm:py-4 bg-gradient-to-r from-[#0D7C53] to-green-600 text-white rounded-full font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 text-base sm:text-lg"
+                                >
+                                    <ShoppingBag size={20} className="sm:w-6 sm:h-6" />
+                                    <span>Add to Cart</span>
+                                </button>
+                                
+                                <button
+                                    onClick={handleWishlistToggle}
+                                    disabled={wishlistLoading}
+                                    className={`px-5 sm:px-6 py-3.5 sm:py-4 rounded-full font-semibold transition-all duration-300 flex items-center justify-center gap-2 border-2 ${
+                                        isProductInWishlist
+                                            ? 'bg-red-50 border-red-500 text-red-500 hover:bg-red-100'
+                                            : 'bg-white/80 border-gray-300 text-gray-700 hover:border-[#0D7C53] hover:text-[#0D7C53]'
+                                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                >
+                                    <Heart 
+                                        size={20} 
+                                        className={`sm:w-6 sm:h-6 ${
+                                            isProductInWishlist ? 'fill-red-500' : ''
+                                        }`}
+                                    />
+                                    <span className="hidden sm:inline">
+                                        {isProductInWishlist ? 'Wishlisted' : 'Wishlist'}
+                                    </span>
+                                </button>
+                            </div>
 
-                            {/* Buy Now Button */}
-                            <button
-                                onClick={handleBuyNow}
-                                disabled={product.stock === 0}
-                                className="mt-3 w-full py-3 sm:py-3.5 bg-white/80 text-[#0D7C53] border-2 border-[#0D7C53] rounded-full font-semibold hover:bg-[#0D7C53] hover:text-white transition-all duration-300 text-base sm:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                Buy Now
-                            </button>
+                            {/* Trust Badges */}
+                            <div className="mt-6 flex items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-500">
+                                <div className="flex items-center gap-1.5">
+                                    <Shield size={16} className="text-[#0D7C53]" />
+                                    <span>Quality Guaranteed</span>
+                                </div>
+                                <div className="w-px h-4 bg-gray-300"></div>
+                                <div className="flex items-center gap-1.5">
+                                    <Truck size={16} className="text-[#0D7C53]" />
+                                    <span>Free Delivery</span>
+                                </div>
+                                <div className="w-px h-4 bg-gray-300"></div>
+                                <div className="flex items-center gap-1.5">
+                                    <RotateCcw size={16} className="text-[#0D7C53]" />
+                                    <span>Easy Returns</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
