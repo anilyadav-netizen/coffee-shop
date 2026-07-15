@@ -21,11 +21,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 
 import {
-    getAssignedOrders,
-    // riderAcceptOrder,
-    // riderPickedUpOrder,
-    // riderStartDelivery,
-    // riderDeliveredOrder
+    assignRiderToOrder, getRiderOrders
 } from "../../redux/Slicer/riderAssignmentSlice";
 
 const RiderAssignedOrder = () => {
@@ -43,7 +39,8 @@ const RiderAssignedOrder = () => {
     const [selectedOrder, setSelectedOrder] = useState(null);
 
     useEffect(() => {
-        dispatch(getAssignedOrders());
+        dispatch(assignRiderToOrder());
+        dispatch(getRiderOrders())
     }, [dispatch]);
 
 
