@@ -227,7 +227,7 @@ exports.updateDeliveryStatus = async (req, res) => {
       status,
       message: `Delivery status updated to ${status}`,
     });
-    
+
 
     res.status(200).json({
       success: true,
@@ -338,6 +338,7 @@ exports.unassignRiderFromOrder = async (req, res) => {
     if (rider) {
       rider.riderDetails.isBusy = false;
       rider.riderDetails.currentOrder = null;
+      rider.isAvailable = true;
       await rider.save();
     }
 
