@@ -127,6 +127,7 @@ function App() {
             }
           />
 
+          <Route path="orders" element={<Orders />} />
           <Route path="products" element={<Products />} />
           <Route path="add-product" element={<AddProduct />} />
           <Route path="update-product/:id" element={<AddProduct />} />
@@ -135,7 +136,6 @@ function App() {
           <Route path="add-category" element={<AddCategory />} />
           <Route path="update-category/:id" element={<AddCategory />} />
 
-          <Route path="orders" element={<Orders />} />
 
           <Route path="profile" element={<AdminProfile />} />
 
