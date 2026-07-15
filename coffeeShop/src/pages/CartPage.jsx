@@ -225,20 +225,20 @@ const CartPage = () => {
 
     // ✅ Clear cart
     const handleClearCart = async () => {
-            setError(null);
-            try {
-                for (const item of cartItems) {
-                    const coffeeId = item.coffee?._id;
-                    if (coffeeId) {
-                        await dispatch(removeCartItem(coffeeId)).unwrap();
-                    }
+        setError(null);
+        try {
+            for (const item of cartItems) {
+                const coffeeId = item.coffee?._id;
+                if (coffeeId) {
+                    await dispatch(removeCartItem(coffeeId)).unwrap();
                 }
-                await dispatch(getCart()).unwrap();
-            } catch (error) {
-                console.error("❌ Failed to clear cart:", error);
-                setError("Failed to clear cart. Please try again.");
             }
-        
+            await dispatch(getCart()).unwrap();
+        } catch (error) {
+            console.error("❌ Failed to clear cart:", error);
+            setError("Failed to clear cart. Please try again.");
+        }
+
     };
 
     const handleContinueShopping = () => {
@@ -751,10 +751,25 @@ const CartPage = () => {
 
                                                 {/* Price & Quantity */}
                                                 <div className="flex flex-row items-center justify-between mt-2 sm:mt-3 gap-2">
-                                                    <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        {/* Discounted Total */}
                                                         <span className="font-bold text-[#0D7C53] text-sm sm:text-base md:text-lg">
-                                                            ₹{(item.coffee?.price * item.quantity).toFixed(2)}
+                                                            ₹{(Number(item.amount) * item.quantity).toFixed(2)}
                                                         </span>
+
+                                                        {/* Original Total */}
+                                                        {item.coffee?.discountPrice && (
+                                                            <span className="text-xs sm:text-sm text-gray-400 line-through">
+                                                                ₹{(item.coffee.price * item.quantity).toFixed(2)}
+                                                            </span>
+                                                        )}
+
+                                                        {/* Discount Badge */}
+                                                        {item.coffee?.discountPercentage > 0 && (
+                                                            <span className="bg-red-100 text-red-600 text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-full">
+                                                                {item.coffee.discountPercentage}% OFF
+                                                            </span>
+                                                        )}
                                                     </div>
 
                                                     {/* Quantity Controls */}
@@ -1065,18 +1080,7 @@ const CartPage = () => {
                                     </div>
                                 </div>
 
-                                <div className="mt-3 sm:mt-4">
-                                    <div className="flex gap-1 sm:gap-2">
-                                        <input
-                                            type="text"
-                                            placeholder="Coupon code"
-                                            className="flex-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-white/40 border border-white/30 rounded-full text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#0D7C53] focus:border-transparent placeholder:text-xs sm:placeholder:text-sm"
-                                        />
-                                        <button className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#0D7C53]/10 text-[#0D7C53] rounded-full text-[12px] sm:text-sm font-semibold hover:bg-[#0D7C53] hover:text-white transition-all duration-300 whitespace-nowrap">
-                                            Apply
-                                        </button>
-                                    </div>
-                                </div>
+                                
 
                                 {/* ✅ Proceed to Checkout Button */}
                                 <button

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FaPlus, FaSearch, FaEye, FaTrash, FaEdit } from "react-icons/fa";
+import { FaPlus, FaSearch, FaEdit, FaTrash } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from 'react-toastify';
@@ -18,12 +18,13 @@ const Category = () => {
     );
     const [search, setSearch] = useState("");
     const [deleteLoading, setDeleteLoading] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     useEffect(() => {
         dispatch(getCategories());
     }, [dispatch]);
 
-    // Handle errors
     useEffect(() => {
         if (error) {
             toast.error(error);
@@ -35,131 +36,128 @@ const Category = () => {
         category.name.toLowerCase().includes(search.toLowerCase())
     );
 
+    const totalPages = Math.ceil(filteredCategories.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentCategories = filteredCategories.slice(startIndex, endIndex);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [search]);
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
+
     const handleDelete = async (id, name) => {
         try {
             setDeleteLoading(true);
-            const result = await dispatch(deleteCategory(id)).unwrap();
+            await dispatch(deleteCategory(id)).unwrap();
             toast.success(`Category "${name}" deleted successfully!`);
-            // Refresh the list after deletion
             await dispatch(getCategories());
         } catch (error) {
             toast.error(error || "Failed to delete category");
         } finally {
             setDeleteLoading(false);
         }
-
     };
 
     const handleEdit = (id) => {
         navigate(`/admin/update-category/${id}`);
     };
 
-    // Loading state
     if (loading && categories.length === 0) {
         return (
-            <div className="flex justify-center items-center h-64">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-[#4F46E5] dark:border-dark-primary mx-auto"></div>
-                    <p className="mt-4 text-[#64748B] dark:text-dark-text text-base sm:text-lg">Loading categories...</p>
-                </div>
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="w-10 h-10 border-4 border-[#3B82F6] dark:border-[#60A5FA] border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
     }
 
     return (
-        <div className=" rounded-xl p-3 sm:p-4 md:p-6 shadow-sm dark:shadow-xl">
-            {/* Header - Responsive */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
-                <div>
-                    <h1 className="text-xl sm:text-2xl md:text-2xl font-semibold text-[#0F172A] dark:text-dark-heading">
+        <div>
+            {/* ✨ New Header Design */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#E2E8F0] dark:border-dark-border mb-6">
+                <div className="flex items-center gap-3">
+                    <h1 className="text-2xl md:text-3xl font-bold text-[#0F172A] dark:text-dark-heading">
                         Categories
                     </h1>
-                    <p className="text-xs sm:text-sm text-[#64748B] dark:text-dark-text">
-                        Total {categories.length} Categories
-                    </p>
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#F1F5F9] dark:bg-dark-bg/50 text-[#64748B] dark:text-dark-text border border-[#E2E8F0] dark:border-dark-border">
+                        {categories.length}
+                    </span>
                 </div>
 
-                <Link
-                    to="/admin/add-category"
-                    className="flex items-center justify-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-[#4F46E5] dark:bg-dark-primary text-white rounded-lg hover:bg-[#4338CA] dark:hover:bg-[#6366F1] transition text-sm sm:text-base"
-                >
-                    <FaPlus className="text-base sm:text-xl" />
-                    <span className="">Add Category</span>
-                </Link>
-            </div>
-
-            {/* Search - Responsive */}
-            <div className="flex flex-col sm:flex-row justify-end mb-4 sm:mb-6">
-                <div className="w-full sm:w-auto">
-                    <div className="relative w-full sm:w-auto">
-                        <FaSearch className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-[#64748B] dark:text-dark-text text-sm sm:text-base" />
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+                    {/* Search */}
+                    <div className="relative flex-1 sm:flex-none">
+                        <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-[#64748B] dark:text-dark-text w-4 h-4" />
                         <input
                             type="text"
-                            placeholder="Search Category"
+                            placeholder="Search categories..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full sm:w-[200px] md:w-[250px] pl-7 sm:pl-9 pr-3 sm:pr-4 py-1.5 sm:py-2 border border-[#E2E8F0] dark:border-dark-border rounded-md outline-none text-[#0F172A] dark:text-dark-heading placeholder-[#64748B] dark:placeholder-dark-text text-xs sm:text-sm bg-white dark:bg-dark-bg"
+                            className="w-full sm:w-[220px] pl-9 pr-4 py-2 border border-[#E2E8F0] dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg text-[#0F172A] dark:text-dark-heading placeholder-[#64748B] dark:placeholder-dark-text text-sm outline-none focus:ring-2 focus:ring-[#3B82F6] dark:focus:ring-[#60A5FA] focus:border-transparent transition-all shadow-sm"
                         />
                     </div>
+
+                    {/* Add Button */}
+                    <Link
+                        to="/admin/add-category"
+                        className="inline-flex items-center justify-center gap-2 px-5 py-2 bg-[#3B82F6] text-white rounded-lg hover:bg-[#2563EB] transition-colors duration-200 text-sm font-medium shadow-md shadow-[#3B82F6]/20 dark:shadow-[#3B82F6]/10 whitespace-nowrap"
+                    >
+                        <FaPlus className="w-4 h-4" />
+                        Add Category
+                    </Link>
                 </div>
             </div>
 
-            {/* Table with Horizontal Scroll */}
-            <div className="overflow-x-auto border border-[#E2E8F0] dark:border-dark-border rounded-lg">
-                <table className="w-full min-w-[600px] sm:min-w-full">
+            {/* Table */}
+            <div className="overflow-x-auto border border-[#E2E8F0] dark:border-dark-border rounded-xl bg-white dark:bg-dark-card shadow-sm">
+                <table className="w-full min-w-[700px]">
                     <thead>
                         <tr className="border-b border-[#E2E8F0] dark:border-dark-border bg-[#F8FAFC] dark:bg-dark-bg/50">
-                            <th className="p-2 sm:p-3 md:p-4 text-left text-[#64748B] dark:text-dark-text text-sm sm:text-base whitespace-nowrap">Icon</th>
-                            <th className="p-2 sm:p-3 md:p-4 text-left text-[#64748B] dark:text-dark-text text-sm sm:text-base whitespace-nowrap">Category Name</th>
-                            <th className="hidden md:table-cell p-2 sm:p-3 md:p-4 text-left text-[#64748B] dark:text-dark-text text-sm sm:text-base whitespace-nowrap">Created At</th>
-                            <th className="p-2 sm:p-3 md:p-4 text-left text-[#64748B] dark:text-dark-text text-sm sm:text-base whitespace-nowrap">Actions</th>
+                            <th className="p-4 text-left text-sm font-medium text-[#64748B] dark:text-dark-text">Icon</th>
+                            <th className="p-4 text-left text-sm font-medium text-[#64748B] dark:text-dark-text">Category Name</th>
+                            <th className="hidden md:table-cell p-4 text-left text-sm font-medium text-[#64748B] dark:text-dark-text">Created At</th>
+                            <th className="p-4 text-left text-sm font-medium text-[#64748B] dark:text-dark-text">Actions</th>
                         </tr>
                     </thead>
-
                     <tbody>
-                        {filteredCategories.length > 0 ? (
-                            filteredCategories.map((category) => (
+                        {currentCategories.length > 0 ? (
+                            currentCategories.map((category) => (
                                 <tr
                                     key={category._id}
                                     className="border-b border-[#E2E8F0] dark:border-dark-border hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-colors duration-150"
                                 >
-                                    <td className="p-1.5 sm:p-2 md:p-4">
+                                    <td className="p-3">
                                         <img
                                             src={category.icon}
                                             alt={category.name}
-                                            className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg object-cover"
+                                            className="w-12 h-12 rounded-lg object-cover border border-[#E2E8F0] dark:border-dark-border"
                                         />
                                     </td>
-
-                                    <td className="p-1.5 sm:p-2 md:p-4 font-medium text-[#0F172A] dark:text-dark-heading text-sm sm:text-base md:text-lg max-w-[100px] sm:max-w-[150px] md:max-w-none truncate">
+                                    <td className="p-3 font-medium text-[#0F172A] dark:text-dark-heading">
                                         {category.name}
                                     </td>
-
-                                    <td className="hidden md:table-cell p-1.5 sm:p-2 md:p-4 text-[#64748B] dark:text-dark-text text-base sm:text-lg whitespace-nowrap">
-                                        {new Date(
-                                            category.createdAt
-                                        ).toLocaleDateString()}
+                                    <td className="hidden md:table-cell p-3 text-[#64748B] dark:text-dark-text whitespace-nowrap">
+                                        {new Date(category.createdAt).toLocaleDateString()}
                                     </td>
-
-                                    <td className="p-1.5 sm:p-2 md:p-4">
-                                        <div className="flex items-center gap-0.5 sm:gap-1 md:gap-2">
-                                            {/* Edit Button */}
+                                    <td className="p-3">
+                                        <div className="flex items-center gap-2">
                                             <button
                                                 onClick={() => handleEdit(category._id)}
-                                                className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 flex items-center justify-center border border-[#E2E8F0] dark:border-dark-border rounded-md hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-colors duration-200"
-                                                title="Edit category"
+                                                className="w-9 h-9 flex items-center justify-center border border-[#E2E8F0] dark:border-dark-border rounded-lg hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-colors duration-200 group"
+                                                title="Edit Category"
                                             >
-                                                <FaEdit className="text-[#4F46E5] dark:text-dark-primary text-[10px] sm:text-xs md:text-sm" />
+                                                <FaEdit className="text-[#3B82F6] dark:text-[#60A5FA] group-hover:scale-110 transition-transform" />
                                             </button>
-
-                                            {/* Delete Button */}
                                             <button
                                                 onClick={() => handleDelete(category._id, category.name)}
                                                 disabled={deleteLoading}
-                                                className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 flex items-center justify-center border border-[#E2E8F0] dark:border-dark-border rounded-md text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-                                                title="Delete category"
+                                                className="w-9 h-9 flex items-center justify-center border border-[#E2E8F0] dark:border-dark-border rounded-lg text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 group"
+                                                title="Delete Category"
                                             >
-                                                <FaTrash className="text-[10px] sm:text-sm md:text-base" />
+                                                <FaTrash className="group-hover:scale-110 transition-transform" />
                                             </button>
                                         </div>
                                     </td>
@@ -167,10 +165,7 @@ const Category = () => {
                             ))
                         ) : (
                             <tr>
-                                <td
-                                    colSpan="4"
-                                    className="text-center py-6 sm:py-8 text-[#64748B] dark:text-dark-text text-xs sm:text-sm"
-                                >
+                                <td colSpan="4" className="text-center py-10 text-[#64748B] dark:text-dark-text">
                                     {search ? "No categories found matching your search" : "No Categories Found"}
                                 </td>
                             </tr>
@@ -178,6 +173,51 @@ const Category = () => {
                     </tbody>
                 </table>
             </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <div className="flex flex-wrap items-center justify-center gap-2 mt-6">
+                    <button
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className={`px-4 py-2 rounded-lg border border-[#E2E8F0] dark:border-dark-border text-sm font-medium transition-colors duration-200 ${
+                            currentPage === 1
+                                ? "opacity-50 cursor-not-allowed text-[#94A3B8] dark:text-dark-text"
+                                : "hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 text-[#0F172A] dark:text-dark-heading"
+                        }`}
+                    >
+                        Previous
+                    </button>
+
+                    <div className="flex flex-wrap gap-1">
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                            <button
+                                key={page}
+                                onClick={() => handlePageChange(page)}
+                                className={`w-10 h-10 rounded-lg border border-[#E2E8F0] dark:border-dark-border transition-colors duration-200 text-sm font-medium ${
+                                    currentPage === page
+                                        ? "bg-[#3B82F6] text-white border-[#3B82F6] dark:border-[#3B82F6] shadow-md shadow-[#3B82F6]/20 dark:shadow-[#3B82F6]/10"
+                                        : "text-[#0F172A] dark:text-dark-heading hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50"
+                                }`}
+                            >
+                                {page}
+                            </button>
+                        ))}
+                    </div>
+
+                    <button
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                        className={`px-4 py-2 rounded-lg border border-[#E2E8F0] dark:border-dark-border text-sm font-medium transition-colors duration-200 ${
+                            currentPage === totalPages
+                                ? "opacity-50 cursor-not-allowed text-[#94A3B8] dark:text-dark-text"
+                                : "hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 text-[#0F172A] dark:text-dark-heading"
+                        }`}
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

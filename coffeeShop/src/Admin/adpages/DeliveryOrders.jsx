@@ -889,40 +889,29 @@ const DeliveryOrders = () => {
                               <FaBan className="text-sm" />
                             </button>
                           )}
-                          {order.rider ? (
-                            <div className="mt-3 p-3 rounded-lg bg-gray-100 dark:bg-[#0F172A]">
-                              <p className="font-semibold">
-                                🚴 {order.rider.name}
-                              </p>
+                          {order.assignedRider ? (
+                            <>
+                              <button
+                                onClick={() => handleChangeRider(order)}
+                                className="bg-blue-600 text-white px-3 py-1 rounded"
+                              >
+                                Change Rider
+                              </button>
 
-                              <p className="text-sm text-gray-500">
-                                {order.rider.phone}
-                              </p>
-
-                              <div className="flex gap-2 mt-3">
-                                <button
-                                  onClick={() => handleChangeRider(order)}
-                                  className="px-3 py-1 rounded bg-blue-600 text-white"
-                                >
-                                  Change Rider
-                                </button>
-
-                                <button
-                                  onClick={() => handleUnassign(order._id)}
-                                  className="px-3 py-1 rounded bg-red-600 text-white"
-                                >
-                                  Unassign
-                                </button>
-                              </div>
-                            </div>
+                              <button
+                                onClick={() => handleUnassign(order._id)}
+                                className="bg-red-600 text-white px-3 py-1 rounded"
+                              >
+                                Unassign
+                              </button>
+                            </>
                           ) : (
                             <button
                               onClick={() => {
                                 setSelectedOrder(order);
-                                setSelectedRider("");
                                 setShowAssignModal(true);
                               }}
-                              className="px-3 py-2 bg-orange-500 text-white rounded-lg"
+                              className="bg-orange-500 text-white px-3 py-1 rounded"
                             >
                               Assign Rider
                             </button>

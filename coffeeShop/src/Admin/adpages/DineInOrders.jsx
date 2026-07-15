@@ -8,17 +8,12 @@ import {
   FaUtensils,
   FaUser,
   FaRupeeSign,
-  FaCheckCircle,
   FaSpinner,
-  FaHourglassHalf,
   FaTimesCircle,
   FaClock,
   FaSearch,
   FaPrint,
-  FaBan,
   FaFilter,
-  FaChevronDown,
-  FaChevronUp,
   FaSort,
   FaSortUp,
   FaSortDown,
@@ -26,17 +21,17 @@ import {
   FaShoppingBag,
   FaWallet,
   FaCreditCard,
-  FaMobileAlt
+  FaMobileAlt,
+  FaChevronDown,
+  FaChevronUp,
 } from 'react-icons/fa';
 import {
   MdTableRestaurant,
   MdPayment,
   MdOutlinePending,
   MdOutlineReceipt,
-  MdOutlineCancel
+  MdOutlineCancel,
 } from 'react-icons/md';
-import { BsThreeDotsVertical } from 'react-icons/bs';
-import { HiOutlineDotsVertical } from 'react-icons/hi';
 
 const DineInOrders = () => {
   const dispatch = useDispatch();
@@ -44,17 +39,17 @@ const DineInOrders = () => {
 
   const { orders, loading, error } = useSelector((state) => state.adminOrder);
 
-  // State Management
+  // State
   const [dineInOrders, setDineInOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [sortConfig, setSortConfig] = useState({ key: 'createdAt', direction: 'desc' });
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(9);
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  const [showActionMenu, setShowActionMenu] = useState(null);
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
 
-  // Fetch orders on mount
+  // Fetch orders
   useEffect(() => {
     dispatch(getAllOrders());
   }, [dispatch]);
@@ -70,7 +65,7 @@ const DineInOrders = () => {
     }
   }, [orders]);
 
-  // Search and Filter logic
+  // Search, filter, sort
   useEffect(() => {
     let result = [...dineInOrders];
 
@@ -78,7 +73,6 @@ const DineInOrders = () => {
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       result = result.filter(order => {
-        // Get table number from the table object
         const tableNumber = order.table?.tableNumber || 'N/A';
         return (
           order._id?.toLowerCase().includes(term) ||
@@ -89,11 +83,15 @@ const DineInOrders = () => {
       });
     }
 
+    // Status filter
+    if (statusFilter !== 'all') {
+      result = result.filter(order => order.orderStatus === statusFilter);
+    }
+
     // Sorting
     if (sortConfig.key) {
       result.sort((a, b) => {
         let aVal, bVal;
-
         if (sortConfig.key === 'user') {
           aVal = a.user?.name || '';
           bVal = b.user?.name || '';
@@ -110,11 +108,8 @@ const DineInOrders = () => {
           aVal = a[sortConfig.key] || '';
           bVal = b[sortConfig.key] || '';
         }
-
         if (typeof aVal === 'string') {
-          return sortConfig.direction === 'asc'
-            ? aVal.localeCompare(bVal)
-            : bVal.localeCompare(aVal);
+          return sortConfig.direction === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
         }
         return sortConfig.direction === 'asc' ? aVal - bVal : bVal - aVal;
       });
@@ -122,7 +117,7 @@ const DineInOrders = () => {
 
     setFilteredOrders(result);
     setCurrentPage(1);
-  }, [dineInOrders, searchTerm, sortConfig]);
+  }, [dineInOrders, searchTerm, statusFilter, sortConfig]);
 
   // Pagination
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -130,73 +125,78 @@ const DineInOrders = () => {
   const currentOrders = filteredOrders.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
 
-  // Payment method icons
+  // Payment icon
   const getPaymentIcon = (method) => {
     const icons = {
-      card: <FaCreditCard />,
-      upi: <FaMobileAlt />,
-      cash: <FaWallet />,
-      online: <FaCreditCard />
+      card: <FaCreditCard className="text-[#64748B] dark:text-dark-text" />,
+      upi: <FaMobileAlt className="text-[#64748B] dark:text-dark-text" />,
+      cash: <FaWallet className="text-[#64748B] dark:text-dark-text" />,
+      online: <FaCreditCard className="text-[#64748B] dark:text-dark-text" />,
     };
-    return icons[method?.toLowerCase()] || <FaWallet />;
+    return icons[method?.toLowerCase()] || <FaWallet className="text-[#64748B] dark:text-dark-text" />;
+  };
+
+  // Table status color
+  const getTableStatusColor = (status) => {
+    const colors = {
+      occupied: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+      available: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+      reserved: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+      cleaning: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+    };
+    return colors[status?.toLowerCase()] || 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400';
+  };
+
+  // Order status badge
+  const getOrderStatusBadge = (status) => {
+    const styles = {
+      preparing: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+      packed: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+      shipped: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+      delivered: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+      cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+    };
+    return styles[status?.toLowerCase()] || 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400';
   };
 
   // Handle sort
   const handleSort = (key) => {
     setSortConfig(prev => ({
       key,
-      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
+      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc',
     }));
   };
 
   // Get sort icon
   const getSortIcon = (key) => {
-    if (sortConfig.key !== key) return <FaSort className="text-[#94A3B8]" />;
+    if (sortConfig.key !== key) return <FaSort className="text-[#94A3B8] dark:text-dark-text" />;
     return sortConfig.direction === 'asc'
-      ? <FaSortUp className="text-[#4F46E5]" />
-      : <FaSortDown className="text-[#4F46E5]" />;
+      ? <FaSortUp className="text-[#3B82F6] dark:text-[#60A5FA]" />
+      : <FaSortDown className="text-[#3B82F6] dark:text-[#60A5FA]" />;
   };
 
-  // Get table status color
-  const getTableStatusColor = (status) => {
-    const colors = {
-      occupied: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-      available: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-      reserved: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-      cleaning: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
-    };
-    return colors[status?.toLowerCase()] || 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400';
-  };
-
-  // Loading Skeleton
+  // Loading
   if (loading) {
     return (
-      <div className="p-6 bg-gray-50 dark:bg-[#0F172A] min-h-screen">
-        <div className="animate-pulse">
-          <div className="h-8 w-48 bg-gray-200 dark:bg-[#1E293B] rounded-lg mb-6"></div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-64 bg-gray-200 dark:bg-[#1E293B] rounded-xl"></div>
-            ))}
-          </div>
-        </div>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="w-10 h-10 border-4 border-[#3B82F6] dark:border-[#60A5FA] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
-  // Error state
+  // Error
   if (error) {
     return (
-      <div className="p-6 bg-gray-50 dark:bg-[#0F172A] min-h-screen flex items-center justify-center">
-        <div className="bg-white dark:bg-[#1E293B] rounded-xl p-8 text-center max-w-md border border-[#E2E8F0] dark:border-[#1E293B]">
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="bg-white dark:bg-dark-card rounded-xl border border-[#E2E8F0] dark:border-dark-border shadow-sm p-8 text-center max-w-md">
           <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <FaTimesCircle className="text-3xl text-red-500" />
           </div>
-          <h3 className="text-lg font-semibold text-[#0F172A] dark:text-white mb-2">Failed to Load Orders</h3>
-          <p className="text-[#64748B] dark:text-[#94A3B8] text-sm mb-4">{error}</p>
+          <h3 className="text-lg font-semibold text-[#0F172A] dark:text-dark-heading mb-2">Failed to Load Orders</h3>
+          <p className="text-[#64748B] dark:text-dark-text text-sm mb-4">{error}</p>
           <button
             onClick={() => dispatch(getAllOrders())}
-            className="px-6 py-2 bg-[#4F46E5] text-white rounded-lg hover:bg-[#4338CA] transition-colors"
+            className="px-5 py-2 bg-[#3B82F6] text-white rounded-lg hover:bg-[#2563EB] transition-colors text-sm font-medium"
           >
             Try Again
           </button>
@@ -206,69 +206,93 @@ const DineInOrders = () => {
   }
 
   return (
-    <div className="p-4 md:p-6 bg-gray-50 dark:bg-[#0F172A] min-h-screen">
-      {/* Page Header */}
-      <div className="mb-8">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <div className="p-2.5 bg-gradient-to-br from-[#4F46E5] to-[#7C3AED] rounded-xl shadow-lg shadow-[#4F46E5]/20">
-                <FaUtensils className="text-white text-xl" />
-              </div>
-              <h1 className="text-2xl md:text-3xl font-bold text-[#0F172A] dark:text-white">
-                Dine In Orders
-              </h1>
-              <span className="px-3 py-1 bg-[#4F46E5]/10 dark:bg-[#4F46E5]/20 text-[#4F46E5] rounded-full text-sm font-medium">
-                {dineInOrders.length} Total
-              </span>
-            </div>
-            <p className="text-[#64748B] dark:text-[#94A3B8] ml-12">
-              Manage and track all dine-in orders
-            </p>
-          </div>
+    // ❌ No extra background — pure content
+    <div>
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#E2E8F0] dark:border-dark-border mb-6">
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl md:text-3xl font-bold text-[#0F172A] dark:text-dark-heading flex items-center gap-2">
+            <FaUtensils className="text-[#3B82F6] dark:text-[#60A5FA]" />
+            Dine In Orders
+          </h1>
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#F1F5F9] dark:bg-dark-bg/50 text-[#64748B] dark:text-dark-text border border-[#E2E8F0] dark:border-dark-border">
+            {dineInOrders.length}
+          </span>
         </div>
-      </div>
 
-      {/* Search */}
-      <div className="bg-white dark:bg-[#1E293B] rounded-xl p-4 border border-[#E2E8F0] dark:border-[#1E293B] mb-6">
-        <div className="relative">
-          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
-          <input
-            type="text"
-            placeholder="Search by Order ID, Customer, or Table..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E2E8F0] dark:border-[#1E293B] rounded-lg text-[#0F172A] dark:text-white placeholder-[#94A3B8] focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent outline-none transition-all"
-          />
-        </div>
-      </div>
-
-      {/* Orders Grid */}
-      {currentOrders.length === 0 ? (
-        <div className="bg-white dark:bg-[#1E293B] rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] p-12 text-center">
-          <div className="w-20 h-20 bg-[#F1F5F9] dark:bg-[#0F172A] rounded-full flex items-center justify-center mx-auto mb-4">
-            <FaUtensils className="text-3xl text-[#94A3B8]" />
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+          {/* Search */}
+          <div className="relative flex-1 sm:flex-none">
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-[#64748B] dark:text-dark-text w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Search by ID, Customer, Table..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full sm:w-[240px] pl-9 pr-4 py-2 border border-[#E2E8F0] dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg text-[#0F172A] dark:text-dark-heading placeholder-[#64748B] dark:placeholder-dark-text text-sm outline-none focus:ring-2 focus:ring-[#3B82F6] dark:focus:ring-[#60A5FA] focus:border-transparent transition-all shadow-sm"
+            />
           </div>
-          <h3 className="text-lg font-semibold text-[#0F172A] dark:text-white mb-2">No Dine-In Orders</h3>
-          <p className="text-[#64748B] dark:text-[#94A3B8] text-sm">
-            {searchTerm
-              ? 'No orders match your search criteria'
-              : 'New dine-in orders will appear here'}
-          </p>
-          {searchTerm && (
+
+          {/* Filter Dropdown */}
+          <div className="relative">
             <button
-              onClick={() => setSearchTerm('')}
-              className="mt-4 px-4 py-2 text-[#4F46E5] hover:bg-[#4F46E5]/10 rounded-lg text-sm font-medium transition-colors"
+              onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+              className="inline-flex items-center gap-2 px-4 py-2 border border-[#E2E8F0] dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg text-[#64748B] dark:text-dark-text text-sm font-medium hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-colors shadow-sm"
             >
-              Clear Search
+              <FaFilter className="w-4 h-4" />
+              {statusFilter === 'all' ? 'All Status' : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
+              <FaChevronDown className="w-3 h-3" />
             </button>
-          )}
+            {showFilterDropdown && (
+              <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-dark-card border border-[#E2E8F0] dark:border-dark-border rounded-lg shadow-lg z-10 py-1">
+                {['all', 'pending', 'preparing', 'packed', 'shipped', 'delivered', 'cancelled'].map((status) => (
+                  <button
+                    key={status}
+                    onClick={() => {
+                      setStatusFilter(status);
+                      setShowFilterDropdown(false);
+                    }}
+                    className={`w-full px-4 py-2 text-left text-sm hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-colors ${
+                      statusFilter === status
+                        ? 'text-[#3B82F6] dark:text-[#60A5FA] font-medium'
+                        : 'text-[#0F172A] dark:text-dark-heading'
+                    }`}
+                  >
+                    {status === 'all' ? 'All Status' : status.charAt(0).toUpperCase() + status.slice(1)}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* No orders */}
+      {currentOrders.length === 0 ? (
+        <div className="bg-white dark:bg-dark-card rounded-xl border border-[#E2E8F0] dark:border-dark-border shadow-sm p-12 text-center">
+          <div className="flex flex-col items-center gap-4">
+            <FaUtensils className="text-6xl text-[#94A3B8] dark:text-dark-text" />
+            <h3 className="text-xl font-semibold text-[#0F172A] dark:text-dark-heading">No Dine-In Orders</h3>
+            <p className="text-[#64748B] dark:text-dark-text">
+              {searchTerm || statusFilter !== 'all'
+                ? 'No orders match your current filters'
+                : 'New dine-in orders will appear here'}
+            </p>
+            {(searchTerm || statusFilter !== 'all') && (
+              <button
+                onClick={() => { setSearchTerm(''); setStatusFilter('all'); }}
+                className="px-4 py-2 text-[#3B82F6] dark:text-[#60A5FA] hover:bg-[#3B82F6]/10 rounded-lg text-sm font-medium transition-colors"
+              >
+                Clear Filters
+              </button>
+            )}
+          </div>
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+          {/* Orders Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {currentOrders.map((order) => {
-              // Get table details safely
               const tableNumber = order.table?.tableNumber || 'N/A';
               const tableStatus = order.table?.status || 'N/A';
               const tableSeats = order.table?.seats || 'N/A';
@@ -276,61 +300,58 @@ const DineInOrders = () => {
               return (
                 <div
                   key={order._id}
-                  className="bg-white dark:bg-[#1E293B] rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] overflow-hidden hover:shadow-xl transition-all duration-300 group"
+                  className="bg-white dark:bg-dark-card rounded-xl border border-[#E2E8F0] dark:border-dark-border shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 group"
                 >
                   {/* Card Header */}
-                  <div className="p-4 border-b border-[#E2E8F0] dark:border-[#1E293B] bg-gradient-to-r from-[#F8FAFC] to-[#F1F5F9] dark:from-[#1E293B] dark:to-[#0F172A]">
+                  <div className="p-4 border-b border-[#E2E8F0] dark:border-dark-border bg-[#F8FAFC] dark:bg-dark-bg/50">
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <MdTableRestaurant className="text-[#4F46E5] text-lg flex-shrink-0" />
-                          <h3 className="font-bold text-[#0F172A] dark:text-white truncate">
+                          <MdTableRestaurant className="text-[#3B82F6] dark:text-[#60A5FA] text-lg flex-shrink-0" />
+                          <h3 className="font-bold text-[#0F172A] dark:text-dark-heading truncate">
                             Table #{tableNumber}
                           </h3>
-                          {/* Table status badge */}
                           <span className={`px-2 py-0.5 text-[10px] font-medium rounded-full ${getTableStatusColor(tableStatus)}`}>
                             {tableStatus}
                           </span>
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <p className="text-xs text-[#64748B] dark:text-[#94A3B8]">
+                          <p className="text-xs text-[#64748B] dark:text-dark-text">
                             #{order._id?.slice(-8)}
                           </p>
                           {tableSeats !== 'N/A' && (
-                            <span className="text-xs text-[#64748B] dark:text-[#94A3B8]">
+                            <span className="text-xs text-[#64748B] dark:text-dark-text">
                               • {tableSeats} seats
                             </span>
                           )}
                         </div>
                       </div>
-                      {/* Order status badge */}
-                      
                     </div>
                   </div>
 
                   {/* Card Body */}
                   <div className="p-4 space-y-3">
-                    {/* Customer Info */}
-                    <div className="flex items-center gap-2 text-sm bg-[#F8FAFC] dark:bg-[#0F172A] p-2.5 rounded-lg">
-                      <FaUser className="text-[#4F46E5] text-sm flex-shrink-0" />
-                      <span className="font-medium text-[#0F172A] dark:text-white truncate">
+                    {/* Customer */}
+                    <div className="flex items-center gap-2 text-sm bg-[#F8FAFC] dark:bg-dark-bg/50 p-2.5 rounded-lg">
+                      <FaUser className="text-[#3B82F6] dark:text-[#60A5FA] text-sm flex-shrink-0" />
+                      <span className="font-medium text-[#0F172A] dark:text-dark-heading truncate">
                         {order.user?.name || 'Guest'}
                       </span>
                       {order.user?.email && (
-                        <span className="text-xs text-[#64748B] dark:text-[#94A3B8] truncate max-w-[120px]">
+                        <span className="text-xs text-[#64748B] dark:text-dark-text truncate max-w-[120px]">
                           {order.user.email}
                         </span>
                       )}
                     </div>
 
-                    {/* Items Preview */}
+                    {/* Items */}
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
-                        <p className="text-xs font-semibold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">
+                        <p className="text-xs font-semibold text-[#64748B] dark:text-dark-text uppercase tracking-wider">
                           Items ({order.products?.length || 0})
                         </p>
-                        <span className="text-xs text-[#64748B] dark:text-[#94A3B8]">
-                          <FaClock className="inline mr-1 text-[10px]" />
+                        <span className="text-xs text-[#64748B] dark:text-dark-text flex items-center gap-1">
+                          <FaClock className="text-[10px]" />
                           {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
@@ -340,20 +361,20 @@ const DineInOrders = () => {
                             {item.coffee?.image ? (
                               <img src={item.coffee.image} alt="" className="w-6 h-6 rounded object-cover flex-shrink-0" />
                             ) : (
-                              <div className="w-6 h-6 bg-[#E2E8F0] dark:bg-[#1E293B] rounded flex items-center justify-center flex-shrink-0">
-                                <FaUtensils className="text-[10px] text-[#94A3B8]" />
+                              <div className="w-6 h-6 bg-[#E2E8F0] dark:bg-dark-border rounded flex items-center justify-center flex-shrink-0">
+                                <FaUtensils className="text-[10px] text-[#64748B] dark:text-dark-text" />
                               </div>
                             )}
-                            <span className="text-[#0F172A] dark:text-white truncate flex-1">
+                            <span className="text-[#0F172A] dark:text-dark-heading truncate flex-1">
                               {item.coffee?.name || 'Product'}
                             </span>
-                            <span className="text-[#64748B] dark:text-[#94A3B8] flex-shrink-0">
+                            <span className="text-[#64748B] dark:text-dark-text flex-shrink-0">
                               x{item.quantity || 1}
                             </span>
                           </div>
                         ))}
                         {order.products?.length > 3 && (
-                          <p className="text-xs text-[#64748B] dark:text-[#94A3B8] text-center">
+                          <p className="text-xs text-[#64748B] dark:text-dark-text text-center">
                             +{order.products.length - 3} more items
                           </p>
                         )}
@@ -361,20 +382,20 @@ const DineInOrders = () => {
                     </div>
 
                     {/* Footer */}
-                    <div className="pt-3 border-t border-[#E2E8F0] dark:border-[#1E293B]">
+                    <div className="pt-3 border-t border-[#E2E8F0] dark:border-dark-border">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-lg font-bold text-[#4F46E5] flex items-center gap-0.5">
+                          <p className="text-lg font-bold text-[#3B82F6] dark:text-[#60A5FA] flex items-center gap-0.5">
                             <FaRupeeSign className="text-sm" />
                             {order.amount || 0}
                           </p>
-                          <div className="flex items-center gap-2 text-xs text-[#64748B] dark:text-[#94A3B8]">
+                          <div className="flex items-center gap-2 text-xs text-[#64748B] dark:text-dark-text">
                             <span className="flex items-center gap-0.5">
                               {getPaymentIcon(order.payment?.method)}
                               {order.payment?.method || 'N/A'}
                             </span>
-                            <span className="w-1 h-1 rounded-full bg-[#E2E8F0] dark:bg-[#1E293B]"></span>
-                            <span className={order.payment?.status === 'paid' ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'}>
+                            <span className="w-1 h-1 rounded-full bg-[#E2E8F0] dark:border-dark-border"></span>
+                            <span className={order.payment?.status === 'paid' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}>
                               {order.payment?.status || 'Pending'}
                             </span>
                           </div>
@@ -383,13 +404,13 @@ const DineInOrders = () => {
                         <div className="flex items-center gap-1.5">
                           <button
                             onClick={() => navigate(`/admin/orders/dine-in/${order._id}`)}
-                            className="p-2 bg-[#4F46E5] text-white rounded-lg hover:bg-[#4338CA] transition-all hover:scale-105"
+                            className="p-2 bg-[#3B82F6] text-white rounded-lg hover:bg-[#2563EB] transition-all hover:scale-105 shadow-md shadow-[#3B82F6]/20 dark:shadow-[#3B82F6]/10"
                             title="View Details"
                           >
                             <FaEye className="text-sm" />
                           </button>
                           <button
-                            className="p-2 bg-[#F1F5F9] dark:bg-[#0F172A] text-[#64748B] dark:text-[#94A3B8] rounded-lg hover:bg-[#E2E8F0] dark:hover:bg-[#1E293B] transition-colors"
+                            className="p-2 bg-[#F1F5F9] dark:bg-dark-bg/50 text-[#64748B] dark:text-dark-text rounded-lg hover:bg-[#E2E8F0] dark:hover:bg-dark-border transition-colors"
                             title="Print Bill"
                           >
                             <FaPrint className="text-sm" />
@@ -405,34 +426,35 @@ const DineInOrders = () => {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="mt-6 flex items-center justify-between flex-wrap gap-4">
-              <p className="text-sm text-[#64748B] dark:text-[#94A3B8]">
+            <div className="flex flex-wrap items-center justify-between gap-4 mt-6 px-4 py-3 bg-white dark:bg-dark-card rounded-xl border border-[#E2E8F0] dark:border-dark-border shadow-sm">
+              <p className="text-sm text-[#64748B] dark:text-dark-text">
                 Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredOrders.length)} of {filteredOrders.length} orders
               </p>
-              <div className="flex items-center gap-1.5">
+              <div className="flex gap-1">
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-2 bg-white dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#1E293B] rounded-lg text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#2D3748] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-4 py-2 rounded-lg border border-[#E2E8F0] dark:border-dark-border text-sm font-medium hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-[#64748B] dark:text-dark-text"
                 >
                   Previous
                 </button>
-                {[...Array(totalPages)].map((_, i) => (
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                   <button
-                    key={i}
-                    onClick={() => setCurrentPage(i + 1)}
-                    className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${currentPage === i + 1
-                        ? 'bg-[#4F46E5] text-white'
-                        : 'bg-white dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#1E293B] text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#2D3748]'
-                      }`}
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-10 h-10 rounded-lg border border-[#E2E8F0] dark:border-dark-border text-sm font-medium transition-colors ${
+                      currentPage === page
+                        ? 'bg-[#3B82F6] text-white border-[#3B82F6] dark:border-[#3B82F6] shadow-md shadow-[#3B82F6]/20 dark:shadow-[#3B82F6]/10'
+                        : 'text-[#0F172A] dark:text-dark-heading hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50'
+                    }`}
                   >
-                    {i + 1}
+                    {page}
                   </button>
                 ))}
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-2 bg-white dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#1E293B] rounded-lg text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#2D3748] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-4 py-2 rounded-lg border border-[#E2E8F0] dark:border-dark-border text-sm font-medium hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-[#64748B] dark:text-dark-text"
                 >
                   Next
                 </button>

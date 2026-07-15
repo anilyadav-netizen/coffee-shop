@@ -4,6 +4,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllOrders } from '../../redux/Slicer/adminOrder';
 import { updateOrderStatus } from '../../redux/Slicer/orderSlice';
+import { getAvailableRiders, assignRiderToOrder, unassignRiderFromOrder, } from "../../redux/Slicer/riderAssignmentSlice";
+  
 import io from 'socket.io-client';
 import {
   FaArrowLeft,
@@ -93,51 +95,11 @@ const DeliveryDetailsPage = () => {
   const [connectionError, setConnectionError] = useState(null);
   const notesRef = useRef(null);
 
-  // Mock riders data
-  const availableRiders = [
-    {
-      id: '1',
-      name: 'Rahul Sharma',
-      phone: '+91 98765 43210',
-      email: 'rahul@delivery.com',
-      photo: 'https://i.pravatar.cc/150?img=1',
-      vehicleType: 'Bike',
-      vehicleNumber: 'DL-01-AB-1234',
-      status: 'available',
-      currentDeliveries: 0,
-      rating: 4.8,
-      totalDeliveries: 1250,
-      experience: '2 years'
-    },
-    {
-      id: '2',
-      name: 'Priya Patel',
-      phone: '+91 98765 43211',
-      email: 'priya@delivery.com',
-      photo: 'https://i.pravatar.cc/150?img=2',
-      vehicleType: 'Scooter',
-      vehicleNumber: 'DL-02-CD-5678',
-      status: 'available',
-      currentDeliveries: 1,
-      rating: 4.9,
-      totalDeliveries: 980,
-      experience: '1.5 years'
-    },
-    {
-      id: '3',
-      name: 'Amit Kumar',
-      phone: '+91 98765 43212',
-      email: 'amit@delivery.com',
-      photo: 'https://i.pravatar.cc/150?img=3',
-      vehicleType: 'Bike',
-      vehicleNumber: 'DL-03-EF-9012',
-      status: 'busy',
-      currentDeliveries: 2,
-      rating: 4.7,
-      totalDeliveries: 750,
-      experience: '1 year'
-    },
-  ];
+  // Available Rider
+  const {
+    availableRiders,
+    loading: riderLoading
+} = useSelector((state) => state.riderAssignment);
 
   // ==================== SOCKET CONNECTION ====================
   useEffect(() => {
@@ -296,6 +258,10 @@ const DeliveryDetailsPage = () => {
     }
   }, [dispatch, orders.length]);
 
+  useEffect(() => {
+    dispatch(getAvailableRiders());
+}, [dispatch]);
+
   // ==================== SET ORDER DATA ====================
   useEffect(() => {
     if (orders.length > 0) {
@@ -406,40 +372,24 @@ const DeliveryDetailsPage = () => {
   };
 
   // ==================== HANDLE RIDER ASSIGNMENT ====================
-  const handleAssignRider = async (rider) => {
-    try {
-      setSelectedRider(rider);
-      setShowRiderDropdown(false);
-      
-      // Emit socket event for rider assignment
-      if (socketRef.current && socketConnected) {
-        socketRef.current.emit('assign-rider', {
-          orderId: id,
-          riderId: rider.id,
-          rider: rider,
-          assignedBy: 'admin'
-        });
-        console.log('Emitting rider assignment');
-      }
-      
-      // await API.put(`/orders/${id}/assign-rider`, { riderId: rider.id });
-      
-      // Update order status to out_for_delivery if not already
-      if (order?.orderStatus !== 'out_for_delivery') {
-        await handleUpdateStatus('out_for_delivery');
-      }
-      
-      // Update local state
-      setOrder(prev => ({
-        ...prev,
-        assignedRider: rider
-      }));
-      
-    } catch (error) {
-      console.error('Error assigning rider:', error);
-      alert('Failed to assign rider. Please try again.');
-    }
-  };
+ const handleAssignRider = async (rider) => {
+  try {
+
+    await dispatch(
+      assignRiderToOrder({
+        orderId: id,
+        riderId: rider._id,
+      })
+    ).unwrap();
+
+    dispatch(getAllOrders());
+
+    setShowRiderDropdown(false);
+
+  } catch (err) {
+    console.log(err);
+  }
+};
 
   // ==================== SEND MESSAGE TO RIDER ====================
   const handleContactRider = () => {
@@ -461,6 +411,20 @@ const DeliveryDetailsPage = () => {
       alert('No rider assigned to this order.');
     }
   };
+
+  const handleUnassignRider = async () => {
+  try {
+
+    await dispatch(
+      unassignRiderFromOrder(id)
+    ).unwrap();
+
+    dispatch(getAllOrders());
+
+  } catch (err) {
+    console.log(err);
+  }
+};
 
   // ==================== STATUS CONFIGURATION ====================
   const statusConfig = {
@@ -535,22 +499,22 @@ const DeliveryDetailsPage = () => {
           action: () => handleUpdateStatus('preparing')
         }
       ],
-      preparing: [
-        {
-          label: 'Out for Delivery',
-          icon: <FaMotorcycle />,
-          color: 'bg-orange-500 hover:bg-orange-600',
-          action: () => handleUpdateStatus('out_for_delivery')
-        }
-      ],
-      out_for_delivery: [
-        {
-          label: 'Mark Delivered',
-          icon: <FaCheckCircle />,
-          color: 'bg-green-500 hover:bg-green-600',
-          action: () => handleUpdateStatus('delivered')
-        }
-      ]
+      // preparing: [
+      //   {
+      //     label: 'Out for Delivery',
+      //     icon: <FaMotorcycle />,
+      //     color: 'bg-orange-500 hover:bg-orange-600',
+      //     action: () => handleUpdateStatus('out_for_delivery')
+      //   }
+      // ],
+      // out_for_delivery: [
+      //   {
+      //     label: 'Mark Delivered',
+      //     icon: <FaCheckCircle />,
+      //     color: 'bg-green-500 hover:bg-green-600',
+      //     action: () => handleUpdateStatus('delivered')
+      //   }
+      // ]
     };
 
     return actionsMap[status] || [];
@@ -1043,6 +1007,64 @@ const DeliveryDetailsPage = () => {
               </div>
             </div>
           )}
+
+          {/* KITCHEN NOTES */}
+          <div className="bg-white dark:bg-[#1E293B] rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] overflow-hidden">
+            <div className="p-4 border-b border-[#E2E8F0] dark:border-[#1E293B] bg-gradient-to-r from-[#F8FAFC] to-[#F1F5F9] dark:from-[#1E293B] dark:to-[#0F172A]">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-[#0F172A] dark:text-white flex items-center gap-2">
+                  <MdNotes className="text-[#4F46E5]" />
+                  Kitchen Notes
+                </h3>
+                {isEditingNotes ? (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setIsEditingNotes(false)}
+                      className="px-3 py-1 text-sm text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#0F172A] rounded-lg transition-colors"
+                    >
+                      <FaTimes />
+                    </button>
+                    <button
+                      onClick={handleSaveNotes}
+                      className="px-3 py-1 bg-[#4F46E5] text-white text-sm rounded-lg hover:bg-[#4338CA] transition-colors flex items-center gap-1.5"
+                    >
+                      <FaSave />
+                      Save
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setIsEditingNotes(true)}
+                    className="px-3 py-1 text-sm text-[#4F46E5] hover:bg-[#4F46E5]/10 rounded-lg transition-colors flex items-center gap-1.5"
+                  >
+                    <FaEdit />
+                    Edit
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="p-4">
+              {isEditingNotes ? (
+                <textarea
+                  ref={notesRef}
+                  value={kitchenNotes}
+                  onChange={(e) => setKitchenNotes(e.target.value)}
+                  placeholder="Add internal notes for kitchen staff..."
+                  className="w-full p-3 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E2E8F0] dark:border-[#1E293B] rounded-lg text-[#0F172A] dark:text-white placeholder-[#94A3B8] focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent outline-none transition-all min-h-[100px]"
+                />
+              ) : (
+                <div className="p-3 bg-[#F8FAFC] dark:bg-[#0F172A] rounded-lg min-h-[60px]">
+                  {kitchenNotes ? (
+                    <p className="text-[#0F172A] dark:text-white text-sm whitespace-pre-wrap">
+                      {kitchenNotes}
+                    </p>
+                  ) : (
+                    <p className="text-[#94A3B8] text-sm italic">No kitchen notes added</p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* RIGHT COLUMN - SIDEBAR */}

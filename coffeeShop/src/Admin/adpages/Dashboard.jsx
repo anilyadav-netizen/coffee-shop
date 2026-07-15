@@ -490,13 +490,13 @@ const Dashboard = () => {
                     Quick Actions
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <button onClick={() => navigate('/admin/products/add')} className="flex items-center gap-3 p-3 rounded-lg border border-[#E2E8F0] dark:border-dark-border hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-all hover:border-[#3B82F6] group">
+                    <button onClick={() => navigate('/admin/add-product')} className="flex items-center gap-3 p-3 rounded-lg border border-[#E2E8F0] dark:border-dark-border hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-all hover:border-[#3B82F6] group">
                         <div className="p-2 rounded-lg bg-[#3B82F6]/10 dark:bg-[#3B82F6]/20 group-hover:bg-[#3B82F6]/20 transition-colors">
                             <FiCoffee className="w-4 h-4 text-[#3B82F6] dark:text-[#60A5FA]" />
                         </div>
                         <span className="text-sm font-medium text-[#0F172A] dark:text-dark-heading">Add Product</span>
                     </button>
-                    <button onClick={() => navigate('/admin/category/add')} className="flex items-center gap-3 p-3 rounded-lg border border-[#E2E8F0] dark:border-dark-border hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-all hover:border-[#8B5CF6] group">
+                    <button onClick={() => navigate('/admin/add-category')} className="flex items-center gap-3 p-3 rounded-lg border border-[#E2E8F0] dark:border-dark-border hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-all hover:border-[#8B5CF6] group">
                         <div className="p-2 rounded-lg bg-[#8B5CF6]/10 dark:bg-[#8B5CF6]/20 group-hover:bg-[#8B5CF6]/20 transition-colors">
                             <FiGrid className="w-4 h-4 text-[#8B5CF6] dark:text-[#A78BFA]" />
                         </div>

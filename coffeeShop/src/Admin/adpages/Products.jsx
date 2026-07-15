@@ -34,18 +34,15 @@ const Products = () => {
         navigate(`/admin/update-product/${id}`);
     };
 
-    // Filter products based on search
     const filteredProducts = products.filter((product) =>
         product.name?.toLowerCase().includes(search.toLowerCase())
     );
 
-    // Pagination logic
     const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const currentProducts = filteredProducts.slice(startIndex, endIndex);
 
-    // Reset to first page when search changes
     useEffect(() => {
         setCurrentPage(1);
     }, [search]);
@@ -56,68 +53,62 @@ const Products = () => {
 
     if (loading) {
         return (
-            <div className="bg-white dark:bg-dark-card rounded-xl p-6 border border-[#E2E8F0] dark:border-dark-border shadow-sm dark:shadow-xl flex items-center justify-center min-h-[400px]">
-                <div className="w-10 h-10 border-4 border-[#4F46E5] dark:border-dark-primary border-t-transparent rounded-full animate-spin"></div>
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="w-10 h-10 border-4 border-[#3B82F6] dark:border-[#60A5FA] border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
     }
 
     return (
-        <div className="rounded-xl p-4 md:p-6 shadow-sm dark:shadow-xl">
-            {/* Header - Responsive */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                <div>
-                    <h1 className="text-2xl md:text-3xl font-semibold text-[#0F172A] dark:text-dark-heading">
+        <div>
+            {/* ✨ New Header Design */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#E2E8F0] dark:border-dark-border mb-6">
+                <div className="flex items-center gap-3">
+                    <h1 className="text-2xl md:text-3xl font-bold text-[#0F172A] dark:text-dark-heading">
                         Products
                     </h1>
-                    <p className="text-base text-[#64748B] dark:text-dark-text">
-                        Total {totalProducts} products
-                    </p>
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#F1F5F9] dark:bg-dark-bg/50 text-[#64748B] dark:text-dark-text border border-[#E2E8F0] dark:border-dark-border">
+                        {totalProducts}
+                    </span>
                 </div>
 
-                <Link
-                    to="/admin/add-product"
-                    className="flex items-center justify-center gap-2 px-4 py-2 bg-[#4F46E5] dark:bg-dark-primary text-white rounded-xl hover:bg-[#4338CA] dark:hover:bg-[#6366F1] transition-colors duration-200 text-base md:text-lg"
-                >
-                    <FaPlus />
-                    Add Product
-                </Link>
-            </div>
-
-            {/* Filters - Responsive */}
-            <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
-                <div className="flex flex-wrap gap-2 md:gap-4 text-base md:text-lg text-[#64748B] dark:text-dark-text">
-                    <span className="bg-[#F8FAFC] dark:bg-dark-bg/50 px-3 py-1 rounded-full border border-[#E2E8F0] dark:border-dark-border">All ({products.length})</span>
-                </div>
-
-                <div className="w-full sm:w-auto">
-                    <div className="relative w-full sm:w-auto">
-                        <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-[#64748B] dark:text-dark-text" />
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+                    {/* Search */}
+                    <div className="relative flex-1 sm:flex-none">
+                        <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-[#64748B] dark:text-dark-text w-4 h-4" />
                         <input
                             type="text"
-                            placeholder="Search Product"
+                            placeholder="Search products..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full sm:w-[200px] md:w-[250px] pl-9 pr-4 py-2 border border-[#E2E8F0] dark:border-dark-border rounded-md outline-none text-[#0F172A] dark:text-dark-heading placeholder-[#64748B] dark:placeholder-dark-text text-base bg-white dark:bg-dark-bg"
+                            className="w-full sm:w-[220px] pl-9 pr-4 py-2 border border-[#E2E8F0] dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg text-[#0F172A] dark:text-dark-heading placeholder-[#64748B] dark:placeholder-dark-text text-sm outline-none focus:ring-2 focus:ring-[#3B82F6] dark:focus:ring-[#60A5FA] focus:border-transparent transition-all shadow-sm"
                         />
                     </div>
+
+                    {/* Add Button */}
+                    <Link
+                        to="/admin/add-product"
+                        className="inline-flex items-center justify-center gap-2 px-5 py-2 bg-[#3B82F6] text-white rounded-lg hover:bg-[#2563EB] transition-colors duration-200 text-sm font-medium shadow-md shadow-[#3B82F6]/20 dark:shadow-[#3B82F6]/10 whitespace-nowrap"
+                    >
+                        <FaPlus className="w-4 h-4" />
+                        Add Product
+                    </Link>
                 </div>
             </div>
 
-            {/* Table with Horizontal Scroll */}
-            <div className="overflow-x-auto border border-[#E2E8F0] dark:border-dark-border rounded-lg">
+            {/* Table */}
+            <div className="overflow-x-auto border border-[#E2E8F0] dark:border-dark-border rounded-xl bg-white dark:bg-dark-card shadow-sm">
                 <table className="w-full min-w-[900px]">
                     <thead>
                         <tr className="border-b border-[#E2E8F0] dark:border-dark-border bg-[#F8FAFC] dark:bg-dark-bg/50">
-                            <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Image</th>
-                            <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Name</th>
-                            <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Original Price</th>
-                            <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Discount</th>
-                            <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Final Price</th>
-                            <th className="p-3 md:p-4 text-left text-sm md:text-lg text-[#64748B] dark:text-dark-text">Actions</th>
+                            <th className="p-4 text-left text-sm font-medium text-[#64748B] dark:text-dark-text">Image</th>
+                            <th className="p-4 text-left text-sm font-medium text-[#64748B] dark:text-dark-text">Name</th>
+                            <th className="p-4 text-left text-sm font-medium text-[#64748B] dark:text-dark-text">Original Price</th>
+                            <th className="p-4 text-left text-sm font-medium text-[#64748B] dark:text-dark-text">Discount</th>
+                            <th className="p-4 text-left text-sm font-medium text-[#64748B] dark:text-dark-text">Final Price</th>
+                            <th className="p-4 text-left text-sm font-medium text-[#64748B] dark:text-dark-text">Actions</th>
                         </tr>
                     </thead>
-
                     <tbody>
                         {currentProducts.length > 0 ? (
                             currentProducts.map((product) => (
@@ -125,65 +116,59 @@ const Products = () => {
                                     key={product._id}
                                     className="border-b border-[#E2E8F0] dark:border-dark-border hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-colors duration-150"
                                 >
-                                    <td className="p-2 md:p-4">
+                                    <td className="p-3">
                                         <img
                                             src={product.image}
                                             alt={product.name}
-                                            className="w-10 h-10 md:w-12 md:h-12 rounded-md object-cover"
+                                            className="w-12 h-12 rounded-lg object-cover border border-[#E2E8F0] dark:border-dark-border"
                                         />
                                     </td>
-
-                                    <td className="p-2 md:p-4 font-medium text-[#0F172A] dark:text-dark-heading text-base md:text-lg">
+                                    <td className="p-3 font-medium text-[#0F172A] dark:text-dark-heading">
                                         {product.name}
                                     </td>
-
-                                    <td className="p-2 md:p-4 text-[#0F172A] dark:text-dark-heading text-base md:text-lg whitespace-nowrap">
+                                    <td className="p-3 text-[#0F172A] dark:text-dark-heading whitespace-nowrap">
                                         ₹{product.price}
                                     </td>
-
-                                    <td className="p-2 md:p-4">
+                                    <td className="p-3">
                                         {product.discountPercentage ? (
-                                            <span className="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
                                                 -{product.discountPercentage}%
                                             </span>
                                         ) : (
                                             <span className="text-[#94A3B8] dark:text-dark-text text-sm">No discount</span>
                                         )}
                                     </td>
-
-                                    <td className="p-2 md:p-4">
+                                    <td className="p-3">
                                         {product.discountPrice ? (
                                             <div className="flex flex-col">
-                                                <span className="text-[#0F172A] dark:text-dark-heading text-base md:text-lg font-medium">
+                                                <span className="text-[#0F172A] dark:text-dark-heading font-medium">
                                                     ₹{product.discountPrice}
                                                 </span>
-                                                <span className="text-xs text-green-600 dark:text-green-400">
+                                                <span className="text-xs text-emerald-600 dark:text-emerald-400">
                                                     Save ₹{product.price - product.discountPrice}
                                                 </span>
                                             </div>
                                         ) : (
-                                            <span className="text-[#0F172A] dark:text-dark-heading text-base md:text-lg">
+                                            <span className="text-[#0F172A] dark:text-dark-heading">
                                                 ₹{product.price}
                                             </span>
                                         )}
                                     </td>
-
-                                    <td className="p-2 md:p-4">
-                                        <div className="flex items-center gap-1 md:gap-2">
+                                    <td className="p-3">
+                                        <div className="flex items-center gap-2">
                                             <button
                                                 onClick={() => handleEdit(product._id)}
-                                                className="w-8 h-8 md:w-9 md:h-9 flex items-center justify-center border border-[#E2E8F0] dark:border-dark-border rounded-md hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-colors duration-200"
+                                                className="w-9 h-9 flex items-center justify-center border border-[#E2E8F0] dark:border-dark-border rounded-lg hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-colors duration-200 group"
                                                 title="Edit Product"
                                             >
-                                                <FaEye className="text-[#4F46E5] dark:text-dark-primary text-sm md:text-base" />
+                                                <FaEye className="text-[#3B82F6] dark:text-[#60A5FA] group-hover:scale-110 transition-transform" />
                                             </button>
-
                                             <button
                                                 onClick={() => handleDelete(product._id)}
-                                                className="w-8 h-8 md:w-9 md:h-9 flex items-center justify-center border border-[#E2E8F0] dark:border-dark-border rounded-md text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors duration-200"
+                                                className="w-9 h-9 flex items-center justify-center border border-[#E2E8F0] dark:border-dark-border rounded-lg text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors duration-200 group"
                                                 title="Delete Product"
                                             >
-                                                <FaTrash className="text-sm md:text-base" />
+                                                <FaTrash className="group-hover:scale-110 transition-transform" />
                                             </button>
                                         </div>
                                     </td>
@@ -191,8 +176,8 @@ const Products = () => {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="6" className="text-center py-8 text-[#64748B] dark:text-dark-text text-base">
-                                    No Products Found
+                                <td colSpan="6" className="text-center py-10 text-[#64748B] dark:text-dark-text">
+                                    {search ? "No products found matching your search" : "No Products Found"}
                                 </td>
                             </tr>
                         )}
@@ -206,7 +191,7 @@ const Products = () => {
                     <button
                         onClick={() => handlePageChange(currentPage - 1)}
                         disabled={currentPage === 1}
-                        className={`px-4 py-2 rounded-md border border-[#E2E8F0] dark:border-dark-border text-base transition-colors duration-200 ${
+                        className={`px-4 py-2 rounded-lg border border-[#E2E8F0] dark:border-dark-border text-sm font-medium transition-colors duration-200 ${
                             currentPage === 1
                                 ? "opacity-50 cursor-not-allowed text-[#94A3B8] dark:text-dark-text"
                                 : "hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 text-[#0F172A] dark:text-dark-heading"
@@ -220,9 +205,9 @@ const Products = () => {
                             <button
                                 key={page}
                                 onClick={() => handlePageChange(page)}
-                                className={`w-10 h-10 rounded-md border border-[#E2E8F0] dark:border-dark-border transition-colors duration-200 text-base ${
+                                className={`w-10 h-10 rounded-lg border border-[#E2E8F0] dark:border-dark-border transition-colors duration-200 text-sm font-medium ${
                                     currentPage === page
-                                        ? "bg-[#4F46E5] dark:bg-dark-primary text-white border-[#4F46E5] dark:border-dark-primary"
+                                        ? "bg-[#3B82F6] text-white border-[#3B82F6] dark:border-[#3B82F6] shadow-md shadow-[#3B82F6]/20 dark:shadow-[#3B82F6]/10"
                                         : "text-[#0F172A] dark:text-dark-heading hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50"
                                 }`}
                             >
@@ -234,7 +219,7 @@ const Products = () => {
                     <button
                         onClick={() => handlePageChange(currentPage + 1)}
                         disabled={currentPage === totalPages}
-                        className={`px-4 py-2 rounded-md border border-[#E2E8F0] dark:border-dark-border text-base transition-colors duration-200 ${
+                        className={`px-4 py-2 rounded-lg border border-[#E2E8F0] dark:border-dark-border text-sm font-medium transition-colors duration-200 ${
                             currentPage === totalPages
                                 ? "opacity-50 cursor-not-allowed text-[#94A3B8] dark:text-dark-text"
                                 : "hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 text-[#0F172A] dark:text-dark-heading"

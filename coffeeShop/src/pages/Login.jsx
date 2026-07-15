@@ -18,7 +18,6 @@ import { loginUser } from '../redux/Slicer/authSlice';
 const Login = () => {
 
     const location = useLocation();
-
     const from = location.state?.from || "/";
 
     const dispatch = useDispatch();
@@ -41,16 +40,18 @@ const Login = () => {
         password: ''
     });
 
-    // ✅ Check if already logged in
+    // ✅ Check if already logged in – redirect based on role
     useEffect(() => {
         if (isAuthenticated && user) {
             if (user.role === "admin") {
                 navigate("/admin", { replace: true });
+            } else if (user.role === "rider") {
+                navigate("/rider", { replace: true });
             } else {
                 navigate(from === "/" ? "/" : from, { replace: true });
             }
         }
-    }, [isAuthenticated, navigate, from]);
+    }, [isAuthenticated, user, navigate, from]);
 
     const validateField = (name, value) => {
         let error = '';
@@ -75,9 +76,11 @@ const Login = () => {
             setPassword(value);
             setErrors(prev => ({ ...prev, password: validateField('password', value) }));
         }
+        // Clear server error when user types
+        if (localError) setLocalError('');
     };
 
-    // ✅ Fixed: Redux dispatch with userData
+    // ✅ Updated submit handler with try/catch and unwrap()
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -92,36 +95,34 @@ const Login = () => {
             return;
         }
 
+        // Clear any previous error before new attempt
         setLocalError("");
 
-        // Login API
-        const result = await dispatch(loginUser({ email, password }));
+        try {
+            // Attempt login – unwrap() will throw on failure
+            await dispatch(loginUser({ email, password })).unwrap();
 
-        console.log("LOGIN RESULT =", result);
-
-        if (loginUser.fulfilled.match(result)) {
-
+            // ✅ Login successful – fetch profile and redirect
             const profile = await dispatch(getProfile()).unwrap();
 
             if (profile.role === "admin") {
                 navigate("/admin", { replace: true });
-
             } else if (profile.role === "rider") {
-                navigate("/admin", { replace: true });   // ✅ Change yahi hai
-
+                navigate("/rider", { replace: true });
             } else {
                 navigate("/", { replace: true });
             }
 
-        } else {
-            console.log("Login Failed");
+        } catch (err) {
+            // ✅ Display the exact error message from backend
+            // err may be the payload from the rejected action or an error object
+            const errorMsg = err?.message || err || "Your credentials are wrong";
+            setLocalError(errorMsg);
         }
-
-
     };
 
-    // ✅ Display error from Redux or local
-    const displayError = localError || Error;
+    // ✅ Display error from local state (backend error)
+    const displayError = localError || error;
 
     return (
         <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
@@ -252,7 +253,13 @@ const Login = () => {
                             </Link>
                         </div>
 
-                        {/* Error/Success Messages */}
+                        {/* ✅ Error Alert Box (modern red alert) */}
+                        {displayError && (
+                            <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex items-start gap-3 text-sm text-red-700">
+                                <AlertCircle size={18} className="shrink-0 mt-0.5" />
+                                <span>{displayError}</span>
+                            </div>
+                        )}
 
                         {isAuthenticated && (
                             <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-3 text-sm text-green-600">
