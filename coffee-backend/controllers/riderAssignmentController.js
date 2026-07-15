@@ -29,7 +29,18 @@ exports.getAvailableRiders = async (req, res) => {
 // Assign rider to delivery order
 exports.assignRiderToOrder = async (req, res) => {
   try {
-    const { orderId, riderId, notes } = req.body;
+    console.log("Body:", req.body);
+    console.log("Headers:", req.headers["content-type"]);
+
+    const { orderId, riderId, notes } = req.body || {};
+
+    if (!orderId || !riderId) {
+      return res.status(400).json({
+        success: false,
+        message: "orderId and riderId are required",
+        body: req.body,
+      });
+    }
     const adminId = req.user.id; // Assuming admin is authenticated
 
     // Validate order
