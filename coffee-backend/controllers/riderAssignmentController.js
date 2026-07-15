@@ -410,3 +410,37 @@ exports.unassignRiderFromOrder = async (req, res) => {
     });
   }
 };
+
+exports.getRiderOrderById = async (req, res) => {
+  try {
+    const riderId = req.user.id;
+    const { orderId } = req.params;
+
+    const order = await Order.findOne({
+      _id: orderId,
+      assignedRider: riderId,
+    })
+      .populate("user", "name email mobile")
+      .populate("assignedRider", "name mobile");
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found or not assigned to you",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      order,
+    });
+  } catch (error) {
+    console.error("Error fetching rider order:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Error fetching rider order",
+      error: error.message,
+    });
+  }
+};
