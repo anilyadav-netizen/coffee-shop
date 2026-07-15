@@ -8,7 +8,6 @@ exports.getAvailableRiders = async (req, res) => {
     const riders = await User.find({
       role: "rider",
       isAvailable: true,
-      "riderDetails.isBusy": false,
     }).select("-password");
 
     res.status(200).json({

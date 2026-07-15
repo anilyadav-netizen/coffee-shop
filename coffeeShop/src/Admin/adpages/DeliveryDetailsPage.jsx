@@ -1043,64 +1043,6 @@ const DeliveryDetailsPage = () => {
               </div>
             </div>
           )}
-
-          {/* KITCHEN NOTES */}
-          <div className="bg-white dark:bg-[#1E293B] rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] overflow-hidden">
-            <div className="p-4 border-b border-[#E2E8F0] dark:border-[#1E293B] bg-gradient-to-r from-[#F8FAFC] to-[#F1F5F9] dark:from-[#1E293B] dark:to-[#0F172A]">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-[#0F172A] dark:text-white flex items-center gap-2">
-                  <MdNotes className="text-[#4F46E5]" />
-                  Kitchen Notes
-                </h3>
-                {isEditingNotes ? (
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setIsEditingNotes(false)}
-                      className="px-3 py-1 text-sm text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#0F172A] rounded-lg transition-colors"
-                    >
-                      <FaTimes />
-                    </button>
-                    <button
-                      onClick={handleSaveNotes}
-                      className="px-3 py-1 bg-[#4F46E5] text-white text-sm rounded-lg hover:bg-[#4338CA] transition-colors flex items-center gap-1.5"
-                    >
-                      <FaSave />
-                      Save
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => setIsEditingNotes(true)}
-                    className="px-3 py-1 text-sm text-[#4F46E5] hover:bg-[#4F46E5]/10 rounded-lg transition-colors flex items-center gap-1.5"
-                  >
-                    <FaEdit />
-                    Edit
-                  </button>
-                )}
-              </div>
-            </div>
-            <div className="p-4">
-              {isEditingNotes ? (
-                <textarea
-                  ref={notesRef}
-                  value={kitchenNotes}
-                  onChange={(e) => setKitchenNotes(e.target.value)}
-                  placeholder="Add internal notes for kitchen staff..."
-                  className="w-full p-3 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E2E8F0] dark:border-[#1E293B] rounded-lg text-[#0F172A] dark:text-white placeholder-[#94A3B8] focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent outline-none transition-all min-h-[100px]"
-                />
-              ) : (
-                <div className="p-3 bg-[#F8FAFC] dark:bg-[#0F172A] rounded-lg min-h-[60px]">
-                  {kitchenNotes ? (
-                    <p className="text-[#0F172A] dark:text-white text-sm whitespace-pre-wrap">
-                      {kitchenNotes}
-                    </p>
-                  ) : (
-                    <p className="text-[#94A3B8] text-sm italic">No kitchen notes added</p>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
         </div>
 
         {/* RIGHT COLUMN - SIDEBAR */}

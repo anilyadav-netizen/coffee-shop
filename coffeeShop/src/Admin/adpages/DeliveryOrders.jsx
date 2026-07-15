@@ -482,17 +482,17 @@ const DeliveryOrders = () => {
       {notification && (
         <div className="fixed top-6 right-6 z-50 max-w-md w-full animate-slideIn">
           <div className={`rounded-xl shadow-2xl p-4 border-l-4 ${notification.type === 'new-order' ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-[#1E293B] dark:to-[#0F172A] border-green-500' :
-              notification.type === 'status-update' ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-[#1E293B] dark:to-[#0F172A] border-blue-500' :
-                notification.type === 'cancelled' ? 'bg-gradient-to-r from-red-50 to-rose-50 dark:from-[#1E293B] dark:to-[#0F172A] border-red-500' :
-                  notification.type === 'rider-assigned' ? 'bg-gradient-to-r from-orange-50 to-amber-50 dark:from-[#1E293B] dark:to-[#0F172A] border-orange-500' :
-                    'bg-white dark:bg-[#1E293B] border-[#4F46E5]'
+            notification.type === 'status-update' ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-[#1E293B] dark:to-[#0F172A] border-blue-500' :
+              notification.type === 'cancelled' ? 'bg-gradient-to-r from-red-50 to-rose-50 dark:from-[#1E293B] dark:to-[#0F172A] border-red-500' :
+                notification.type === 'rider-assigned' ? 'bg-gradient-to-r from-orange-50 to-amber-50 dark:from-[#1E293B] dark:to-[#0F172A] border-orange-500' :
+                  'bg-white dark:bg-[#1E293B] border-[#4F46E5]'
             }`}>
             <div className="flex items-start gap-3">
               <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${notification.type === 'new-order' ? 'bg-green-100 dark:bg-green-900/30' :
-                  notification.type === 'status-update' ? 'bg-blue-100 dark:bg-blue-900/30' :
-                    notification.type === 'cancelled' ? 'bg-red-100 dark:bg-red-900/30' :
-                      notification.type === 'rider-assigned' ? 'bg-orange-100 dark:bg-orange-900/30' :
-                        'bg-[#4F46E5]/10'
+                notification.type === 'status-update' ? 'bg-blue-100 dark:bg-blue-900/30' :
+                  notification.type === 'cancelled' ? 'bg-red-100 dark:bg-red-900/30' :
+                    notification.type === 'rider-assigned' ? 'bg-orange-100 dark:bg-orange-900/30' :
+                      'bg-[#4F46E5]/10'
                 }`}>
                 {notification.type === 'new-order' && <FaBell className="text-green-500 text-lg" />}
                 {notification.type === 'status-update' && <FaCheckCircle className="text-blue-500 text-lg" />}
@@ -545,8 +545,8 @@ const DeliveryOrders = () => {
               <button
                 onClick={() => setIsSoundEnabled(!isSoundEnabled)}
                 className={`ml-2 p-2 rounded-lg transition-colors ${isSoundEnabled
-                    ? 'bg-[#4F46E5]/10 text-[#4F46E5] hover:bg-[#4F46E5]/20'
-                    : 'bg-gray-100 dark:bg-[#1E293B] text-[#94A3B8] hover:bg-gray-200 dark:hover:bg-[#2D3748]'
+                  ? 'bg-[#4F46E5]/10 text-[#4F46E5] hover:bg-[#4F46E5]/20'
+                  : 'bg-gray-100 dark:bg-[#1E293B] text-[#94A3B8] hover:bg-gray-200 dark:hover:bg-[#2D3748]'
                   }`}
                 title={isSoundEnabled ? 'Mute notifications' : 'Unmute notifications'}
               >
@@ -576,8 +576,8 @@ const DeliveryOrders = () => {
             key={stat.key}
             onClick={() => setFilterStatus(stat.key)}
             className={`bg-white dark:bg-[#1E293B] rounded-xl p-3 border transition-all cursor-pointer hover:shadow-md ${filterStatus === stat.key
-                ? 'border-[#4F46E5] ring-2 ring-[#4F46E5]/20 dark:ring-[#4F46E5]/10'
-                : 'border-[#E2E8F0] dark:border-[#1E293B] hover:border-[#4F46E5]/30'
+              ? 'border-[#4F46E5] ring-2 ring-[#4F46E5]/20 dark:ring-[#4F46E5]/10'
+              : 'border-[#E2E8F0] dark:border-[#1E293B] hover:border-[#4F46E5]/30'
               }`}
           >
             <p className="text-[10px] font-medium text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">
@@ -874,8 +874,8 @@ const DeliveryOrders = () => {
                     key={i}
                     onClick={() => setCurrentPage(i + 1)}
                     className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${currentPage === i + 1
-                        ? 'bg-[#4F46E5] text-white'
-                        : 'bg-white dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#1E293B] text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#2D3748]'
+                      ? 'bg-[#4F46E5] text-white'
+                      : 'bg-white dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#1E293B] text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#2D3748]'
                       }`}
                   >
                     {i + 1}
