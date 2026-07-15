@@ -1,5 +1,6 @@
+// src/pages/admin/Orders.jsx
 import React, { useEffect, useState } from "react";
-import { FaEye, FaSearch, FaClipboardList } from "react-icons/fa";
+import { FaEye, FaSearch, FaClipboardList, FaSync } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { getAllOrders } from "../../redux/Slicer/adminOrder";
@@ -15,7 +16,11 @@ const Orders = () => {
     dispatch(getAllOrders());
   }, [dispatch]);
 
-  // Badge styles – using blue primary and consistent colors
+  const handleRefresh = () => {
+    dispatch(getAllOrders());
+  };
+
+  // Badge styles – consistent with your theme
   const paymentBadge = {
     paid: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
     pending: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
@@ -60,7 +65,7 @@ const Orders = () => {
     return matchesSearch && matchesStatus;
   });
 
-  // Unique statuses for filter tabs
+  // Unique statuses for filter tabs (with counts)
   const statusOptions = [
     "All",
     ...new Set(mappedOrders.map((o) => o.orderStatus).filter(Boolean)),
@@ -80,9 +85,8 @@ const Orders = () => {
   }
 
   return (
-    // ❌ No extra background – pure content
     <div>
-      {/* Header */}
+      {/* Header with refresh */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#E2E8F0] dark:border-dark-border mb-6">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl md:text-3xl font-bold text-[#0F172A] dark:text-dark-heading flex items-center gap-2">
@@ -93,36 +97,48 @@ const Orders = () => {
           </span>
         </div>
 
-        <div className="relative w-full md:w-auto">
-          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-[#64748B] dark:text-dark-text w-4 h-4" />
-          <input
-            type="text"
-            placeholder="Search by ID or Customer..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full md:w-[220px] pl-9 pr-4 py-2 border border-[#E2E8F0] dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg text-[#0F172A] dark:text-dark-heading placeholder-[#64748B] dark:placeholder-dark-text text-sm outline-none focus:ring-2 focus:ring-[#3B82F6] dark:focus:ring-[#60A5FA] focus:border-transparent transition-all shadow-sm"
-          />
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <div className="relative flex-1 md:w-[220px]">
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-[#64748B] dark:text-dark-text w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Search by ID or Customer..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 border border-[#E2E8F0] dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg text-[#0F172A] dark:text-dark-heading placeholder-[#64748B] dark:placeholder-dark-text text-sm outline-none focus:ring-2 focus:ring-[#3B82F6] dark:focus:ring-[#60A5FA] focus:border-transparent transition-all shadow-sm"
+            />
+          </div>
+          <button
+            onClick={handleRefresh}
+            className="p-2 bg-white dark:bg-dark-bg border border-[#E2E8F0] dark:border-dark-border rounded-lg hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-colors"
+            title="Refresh orders"
+          >
+            <FaSync className="text-[#64748B] dark:text-dark-text w-4 h-4" />
+          </button>
         </div>
       </div>
 
       {/* Filter Tabs */}
       <div className="flex flex-wrap gap-2 mb-6">
-        {statusOptions.map((status) => (
-          <button
-            key={status}
-            onClick={() => setFilterStatus(status)}
-            className={`px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-200 ${
-              filterStatus === status
-                ? "bg-[#3B82F6] text-white shadow-md shadow-[#3B82F6]/20 dark:shadow-[#3B82F6]/10"
-                : "bg-white dark:bg-dark-card text-[#64748B] dark:text-dark-text hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 border border-[#E2E8F0] dark:border-dark-border"
-            }`}
-          >
-            {status === "All" ? "All" : status.charAt(0).toUpperCase() + status.slice(1)}
-            <span className="ml-1.5 text-xs opacity-70">
-              ({status === "All" ? mappedOrders.length : mappedOrders.filter(o => o.orderStatus === status).length})
-            </span>
-          </button>
-        ))}
+        {statusOptions.map((status) => {
+          const count = status === "All"
+            ? mappedOrders.length
+            : mappedOrders.filter((o) => o.orderStatus === status).length;
+          return (
+            <button
+              key={status}
+              onClick={() => setFilterStatus(status)}
+              className={`px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-200 ${
+                filterStatus === status
+                  ? "bg-[#3B82F6] text-white shadow-md shadow-[#3B82F6]/20 dark:shadow-[#3B82F6]/10"
+                  : "bg-white dark:bg-dark-card text-[#64748B] dark:text-dark-text hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 border border-[#E2E8F0] dark:border-dark-border"
+              }`}
+            >
+              {status === "All" ? "All" : status.charAt(0).toUpperCase() + status.slice(1)}
+              <span className="ml-1.5 text-xs opacity-70">({count})</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Empty State */}
@@ -147,7 +163,7 @@ const Orders = () => {
           </div>
         </div>
       ) : (
-        /* Table */
+        /* Table – responsive wrapper */
         <div className="overflow-x-auto border border-[#E2E8F0] dark:border-dark-border rounded-xl bg-white dark:bg-dark-card shadow-sm">
           <table className="w-full min-w-[900px]">
             <thead>
