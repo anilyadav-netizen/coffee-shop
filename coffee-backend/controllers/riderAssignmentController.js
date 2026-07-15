@@ -73,7 +73,7 @@ exports.assignRiderToOrder = async (req, res) => {
       });
     }
 
-    if (!rider.isAvailable ) {
+    if (!rider.isAvailable) {
       return res.status(400).json({
         success: false,
         message: "Rider is not available or busy with another delivery",
@@ -112,27 +112,24 @@ exports.assignRiderToOrder = async (req, res) => {
     const io = req.app.get("io");
 
     // Send to rider
-    io.to(`rider_${riderId}`).emit("new_order_assigned", {
+    io.to(`rider-${riderId}`).emit("new_order_assigned", {
       order: populatedOrder,
       message: "New order assigned to you",
     });
 
-    // Send to admin
-    io.to(`admin_${adminId}`).emit("rider_assigned", {
+    io.to(`admin-${adminId}`).emit("rider_assigned", {
       order: populatedOrder,
-      message: `Rider ${rider.name} assigned to order #${order._id}`,
+      message: `Rider ${rider.name} assigned`,
     });
 
-    // Send to user (customer)
-    io.to(`user_${order.user._id}`).emit("order_rider_assigned", {
+    io.to(`user-${order.user._id}`).emit("order_rider_assigned", {
       orderId: order._id,
       rider: {
         name: rider.name,
         mobile: rider.mobile,
       },
-      message: "Rider has been assigned to your order",
     });
-
+    
     res.status(200).json({
       success: true,
       message: "Rider assigned successfully",
