@@ -28,7 +28,7 @@ export const addToCart = createAsyncThunk(
                 quantity,
                 amount,
             });
-             console.log("✅ API RESPONSE:", data);
+            console.log("✅ API RESPONSE:", data);
 
             return data;
         } catch (error) {
@@ -195,7 +195,7 @@ const cartSlice = createSlice({
 
                 state.totalPrice = state.cartItems.reduce(
                     (sum, item) =>
-                        sum + item.quantity * (item.coffee?.price || 0),
+                        sum + item.quantity * Number(item.amount || item.coffee?.discountPrice || item.coffee?.price || 0),
                     0
                 );
             })
