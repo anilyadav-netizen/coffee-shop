@@ -8,6 +8,7 @@ const {
   getRiderOrders,
   getDeliveryOrders,
   unassignRiderFromOrder,
+  getRiderOrderById,
 } = require("../controllers/riderAssignmentController");
 const { protect } = require("../middleware/authMiddleware");
 
@@ -20,5 +21,10 @@ router.delete("/admin/unassign-rider/:orderId", protect, unassignRiderFromOrder)
 // Rider routes
 router.get("/rider/my-orders", protect, getRiderOrders);
 router.put("/rider/update-delivery-status", protect, updateDeliveryStatus);
+router.get(
+  "/orders/:orderId",
+  protect,
+  getRiderOrderById
+);
 
 module.exports = router;

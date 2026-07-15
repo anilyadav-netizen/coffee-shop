@@ -29,7 +29,18 @@ exports.getAvailableRiders = async (req, res) => {
 // Assign rider to delivery order
 exports.assignRiderToOrder = async (req, res) => {
   try {
-    const { orderId, riderId, notes } = req.body;
+    console.log("Body:", req.body);
+    console.log("Headers:", req.headers["content-type"]);
+
+    const { orderId, riderId, notes } = req.body || {};
+
+    if (!orderId || !riderId) {
+      return res.status(400).json({
+        success: false,
+        message: "orderId and riderId are required",
+        body: req.body,
+      });
+    }
     const adminId = req.user.id; // Assuming admin is authenticated
 
     // Validate order
@@ -395,6 +406,40 @@ exports.unassignRiderFromOrder = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error unassigning rider",
+      error: error.message,
+    });
+  }
+};
+
+exports.getRiderOrderById = async (req, res) => {
+  try {
+    const riderId = req.user.id;
+    const { orderId } = req.params;
+
+    const order = await Order.findOne({
+      _id: orderId,
+      assignedRider: riderId,
+    })
+      .populate("user", "name email mobile")
+      .populate("assignedRider", "name mobile");
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found or not assigned to you",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      order,
+    });
+  } catch (error) {
+    console.error("Error fetching rider order:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Error fetching rider order",
       error: error.message,
     });
   }

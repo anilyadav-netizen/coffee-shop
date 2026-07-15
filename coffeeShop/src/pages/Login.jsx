@@ -42,13 +42,13 @@ const Login = () => {
 
     // ✅ Check if already logged in – redirect based on role
     useEffect(() => {
-       if (isAuthenticated && user) {
-    if (user.role === "admin" || user.role === "rider") {
-        navigate("/admin", { replace: true });
-    } else {
-        navigate(from === "/" ? "/" : from, { replace: true });
-    }
-}
+        if (isAuthenticated && user) {
+            if (user.role === "admin" || user.role === "rider") {
+                navigate("/admin", { replace: true });
+            } else {
+                navigate(from === "/" ? "/" : from, { replace: true });
+            }
+        }
     }, [isAuthenticated, user, navigate, from]);
 
     const validateField = (name, value) => {
@@ -100,9 +100,13 @@ const Login = () => {
 
             const profile = await dispatch(getProfile()).unwrap();
 
-            if (profile.role === "admin" || profile.role === "rider") {
+            if (profile.role === "admin") {
                 navigate("/admin", { replace: true });
-            } else {
+            }
+            else if (profile.role === "rider") {
+                navigate("/admin/orders/delivery", { replace: true });
+            }
+            else {
                 navigate("/", { replace: true });
             }
 
