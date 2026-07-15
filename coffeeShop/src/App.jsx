@@ -52,6 +52,7 @@ import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 import DetailsPage from "./pages/DetailsPage";
 import JourneyDetailsPage from "./pages/JourneyDetailsPage";
+import RiderAssignedOrder from "./Admin/adpages/RiderAssignedOrder";
 
 function App() {
 
@@ -154,6 +155,8 @@ function App() {
             path="orders/delivery/:id"
             element={<DeliveryDetailsPage />}
           />
+          <Route path="riderassigned" element={<RiderAssignedOrder />} />
+
 
           <Route path="tables" element={<TablePage />} />
         </Route>

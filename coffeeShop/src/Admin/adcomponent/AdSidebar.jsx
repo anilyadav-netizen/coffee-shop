@@ -90,6 +90,12 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
         icon: <FaUsers size={20} />,
         roles: ["admin"],
       },
+      {
+        name: "RiderOrder",
+        path: "/admin/riderassigned",
+        icon: <FaUsers size={20} />,
+        roles: ["admin","rider"],
+      },
     ];
     return allMenus.filter((item) => item.roles.includes(user?.role));
   }, [user]);
