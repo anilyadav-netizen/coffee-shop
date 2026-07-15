@@ -42,15 +42,13 @@ const Login = () => {
 
     // ✅ Check if already logged in – redirect based on role
     useEffect(() => {
-        if (isAuthenticated && user) {
-            if (user.role === "admin") {
-                navigate("/admin", { replace: true });
-            } else if (user.role === "rider") {
-                navigate("/rider", { replace: true });
-            } else {
-                navigate(from === "/" ? "/" : from, { replace: true });
-            }
-        }
+       if (isAuthenticated && user) {
+    if (user.role === "admin" || user.role === "rider") {
+        navigate("/admin", { replace: true });
+    } else {
+        navigate(from === "/" ? "/" : from, { replace: true });
+    }
+}
     }, [isAuthenticated, user, navigate, from]);
 
     const validateField = (name, value) => {
@@ -95,32 +93,24 @@ const Login = () => {
             return;
         }
 
-        // Clear any previous error before new attempt
         setLocalError("");
 
         try {
-            // Attempt login – unwrap() will throw on failure
             await dispatch(loginUser({ email, password })).unwrap();
 
-            // ✅ Login successful – fetch profile and redirect
             const profile = await dispatch(getProfile()).unwrap();
 
-            if (profile.role === "admin") {
+            if (profile.role === "admin" || profile.role === "rider") {
                 navigate("/admin", { replace: true });
-            } else if (profile.role === "rider") {
-                navigate("/rider", { replace: true });
             } else {
                 navigate("/", { replace: true });
             }
 
         } catch (err) {
-            // ✅ Display the exact error message from backend
-            // err may be the payload from the rejected action or an error object
             const errorMsg = err?.message || err || "Your credentials are wrong";
             setLocalError(errorMsg);
         }
     };
-
     // ✅ Display error from local state (backend error)
     const displayError = localError || error;
 
