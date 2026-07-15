@@ -229,7 +229,7 @@ const Riders = () => {
                     <td className="px-4 py-3 text-gray-600 dark:text-dark-text hidden md:table-cell text-base">{rider.email || "N/A"}</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-dark-text hidden lg:table-cell text-base">{rider.phone || "N/A"}</td>
                     <td className="px-4 py-3">
-                      <StatusBadge status={rider.currentStatus || "offline"} />
+                      <StatusBadge status={rider.currentStatus || "available"} />
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-center gap-2">
