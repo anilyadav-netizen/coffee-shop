@@ -874,21 +874,7 @@ const DeliveryOrders = () => {
                           >
                             <FaEye className="text-sm" />
                           </button>
-                          <button
-                            className="p-2 bg-[#F1F5F9] dark:bg-[#0F172A] text-[#64748B] dark:text-[#94A3B8] rounded-lg hover:bg-[#E2E8F0] dark:hover:bg-[#1E293B] transition-colors"
-                            title="Contact Customer"
-                          >
-                            <FaHeadset className="text-sm" />
-                          </button>
-                          {status !== 'cancelled' && status !== 'delivered' && (
-                            <button
-                              onClick={() => cancelOrder(order._id)}
-                              className="p-2 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
-                              title="Cancel Order"
-                            >
-                              <FaBan className="text-sm" />
-                            </button>
-                          )}
+                        
                           {order.assignedRider ? (
                             <>
                               <button

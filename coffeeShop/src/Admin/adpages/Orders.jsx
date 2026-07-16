@@ -241,7 +241,7 @@ const Orders = () => {
                         {order.orderStatus?.charAt(0).toUpperCase() + order.orderStatus?.slice(1) || "N/A"}
                       </span>
                     </td>
-                    <td className="p-4 text-center">
+                    {/* <td className="p-4 text-center">
                       <button
                         onClick={() => handleViewOrder(order._id)}
                         className="p-2 bg-[#3B82F6] text-white rounded-lg hover:bg-[#2563EB] transition-all hover:scale-105 shadow-md shadow-[#3B82F6]/20 dark:shadow-[#3B82F6]/10"
@@ -249,7 +249,7 @@ const Orders = () => {
                       >
                         <FaEye className="w-4 h-4" />
                       </button>
-                    </td>
+                    </td> */}
                   </tr>
                 );
               })}
