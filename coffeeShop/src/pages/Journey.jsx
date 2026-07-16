@@ -4,10 +4,14 @@ import {
     JOURNEY_SECTION_DATA,
     getJourneyStepById
 } from '../Data/journeyData';
+import { useNavigate } from 'react-router-dom';
 
 const Journey = () => {
     const [activeStep, setActiveStep] = useState(1);
     const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+
+    const navigate = useNavigate();
+
 
     const currentStep = getJourneyStepById(activeStep);
     const sectionData = JOURNEY_SECTION_DATA;
@@ -29,6 +33,8 @@ const Journey = () => {
         setTimeout(() => {
             setIsAutoPlaying(true);
         }, 5000);
+         navigate('/coffee-journey', { state: { stepId } });
+        
     };
 
     return (
@@ -139,22 +145,6 @@ const Journey = () => {
                                     );
                                 })}
                             </div>
-                            
-                            {/* Mobile line indicator - shows progress on small screens */}
-                            {/* <div className="md:hidden mt-6 w-full">
-                                <div className="flex justify-between items-center mb-2">
-                                    <span className="text-xs text-[#6B6B6B]">Progress</span>
-                                    <span className="text-xs font-bold text-[#C8742C]">
-                                        {activeStep}/{allSteps.length}
-                                    </span>
-                                </div>
-                                <div className="w-full h-1.5 bg-[#E8D8C8] rounded-full overflow-hidden">
-                                    <div 
-                                        className="h-full bg-[#C8742C] rounded-full transition-all duration-500"
-                                        style={{ width: `${(activeStep / allSteps.length) * 100}%` }}
-                                    ></div>
-                                </div>
-                            </div> */}
                         </div>
 
                     </div>

@@ -96,14 +96,14 @@ const Category = () => {
                             placeholder="Search categories..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full sm:w-[220px] pl-9 pr-4 py-2 border border-[#E2E8F0] dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg text-[#0F172A] dark:text-dark-heading placeholder-[#64748B] dark:placeholder-dark-text text-sm outline-none focus:ring-2 focus:ring-[#3B82F6] dark:focus:ring-[#60A5FA] focus:border-transparent transition-all shadow-sm"
+                            className="w-full sm:w-[220px] pl-9 pr-4 py-3 border border-[#E2E8F0] dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg text-[#0F172A] dark:text-dark-heading placeholder-[#64748B] dark:placeholder-dark-text text-sm outline-none focus:ring-2 focus:ring-[#3B82F6] dark:focus:ring-[#60A5FA] focus:border-transparent transition-all shadow-sm"
                         />
                     </div>
 
                     {/* Add Button */}
                     <Link
                         to="/admin/add-category"
-                        className="inline-flex items-center justify-center gap-2 px-5 py-2 bg-[#3B82F6] text-white rounded-lg hover:bg-[#2563EB] transition-colors duration-200 text-sm font-medium shadow-md shadow-[#3B82F6]/20 dark:shadow-[#3B82F6]/10 whitespace-nowrap"
+                        className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#3B82F6] text-white rounded-lg hover:bg-[#2563EB] transition-colors duration-200 text-sm font-medium shadow-md shadow-[#3B82F6]/20 dark:shadow-[#3B82F6]/10 whitespace-nowrap"
                     >
                         <FaPlus className="w-4 h-4" />
                         Add Category

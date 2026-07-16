@@ -398,13 +398,3 @@ export const heroContent = {
         secondary: 'Watch Journey',
     },
 };
-
-export const ctaContent = {
-    heading: 'Ready to Taste the Journey?',
-    description:
-        'Every cup tells a story. Experience handcrafted coffee made with passion and precision.',
-    buttons: {
-        primary: 'Explore Menu',
-        secondary: 'Visit Our Café',
-    },
-};
