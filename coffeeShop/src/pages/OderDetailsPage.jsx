@@ -42,30 +42,25 @@ const OrderDetailsPage = () => {
 
     // Get orders from Redux
     const { orders, loading } = useSelector((state) => state.payment);
-    // Get products from Redux
     const { products } = useSelector((state) => state.adminProducts);
 
-    // ==================== SOCKET SETUP ====================
+    // ==================== STATE ====================
     const [socket, setSocket] = useState(null);
     const socketRef = useRef(null);
     const [socketConnected, setSocketConnected] = useState(false);
     const [connectionError, setConnectionError] = useState(null);
     const [reconnecting, setReconnecting] = useState(false);
     const [notifications, setNotifications] = useState([]);
-
-    // State for expanded orders
     const [expandedOrders, setExpandedOrders] = useState({});
-    // State for filter
     const [filterType, setFilterType] = useState('all');
-    // State for real-time order updates
     const [liveOrders, setLiveOrders] = useState([]);
-    // Sound enabled state
     const [soundEnabled, setSoundEnabled] = useState(true);
+    const [lastFetchTime, setLastFetchTime] = useState(Date.now());
+    const [updatedOrderIds, setUpdatedOrderIds] = useState([]);
 
     // ==================== SOUND NOTIFICATION SYSTEM ====================
     const audioContextRef = useRef(null);
 
-    // Initialize Audio Context
     const getAudioContext = () => {
         if (!audioContextRef.current) {
             audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
@@ -73,74 +68,58 @@ const OrderDetailsPage = () => {
         return audioContextRef.current;
     };
 
-    // Play notification sound for different statuses
     const playNotificationSound = (status, orderId) => {
         if (!soundEnabled) return;
-
         try {
             const audioCtx = getAudioContext();
-
-            // Resume context if suspended (needed for Chrome autoplay policy)
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
 
-            // Create oscillator and gain node
             const oscillator = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
-
             oscillator.connect(gainNode);
             gainNode.connect(audioCtx.destination);
 
-            // Different sounds for different statuses
             switch (status) {
                 case 'confirmed':
-                    // Pleasant two-tone chime - Order confirmed
                     oscillator.type = 'sine';
-                    oscillator.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    oscillator.frequency.setValueAtTime(523.25, audioCtx.currentTime);
                     gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
                     oscillator.start(audioCtx.currentTime);
                     oscillator.stop(audioCtx.currentTime + 0.2);
-
-                    // Second note after a short delay
                     setTimeout(() => {
                         const osc2 = audioCtx.createOscillator();
                         const gain2 = audioCtx.createGain();
                         osc2.connect(gain2);
                         gain2.connect(audioCtx.destination);
                         osc2.type = 'sine';
-                        osc2.frequency.setValueAtTime(659.25, audioCtx.currentTime); // E5
+                        osc2.frequency.setValueAtTime(659.25, audioCtx.currentTime);
                         gain2.gain.setValueAtTime(0.25, audioCtx.currentTime);
                         osc2.start(audioCtx.currentTime);
                         osc2.stop(audioCtx.currentTime + 0.25);
                     }, 150);
                     break;
-
                 case 'preparing':
-                    // Short upbeat sound - Preparing
                     oscillator.type = 'sine';
-                    oscillator.frequency.setValueAtTime(698.46, audioCtx.currentTime); // F5
+                    oscillator.frequency.setValueAtTime(698.46, audioCtx.currentTime);
                     gainNode.gain.setValueAtTime(0.25, audioCtx.currentTime);
                     oscillator.start(audioCtx.currentTime);
                     oscillator.stop(audioCtx.currentTime + 0.15);
-
-                    // Quick second note
                     setTimeout(() => {
                         const osc2 = audioCtx.createOscillator();
                         const gain2 = audioCtx.createGain();
                         osc2.connect(gain2);
                         gain2.connect(audioCtx.destination);
                         osc2.type = 'sine';
-                        osc2.frequency.setValueAtTime(880, audioCtx.currentTime); // A5
+                        osc2.frequency.setValueAtTime(880, audioCtx.currentTime);
                         gain2.gain.setValueAtTime(0.2, audioCtx.currentTime);
                         osc2.start(audioCtx.currentTime);
                         osc2.stop(audioCtx.currentTime + 0.15);
                     }, 100);
                     break;
-
                 case 'out_for_delivery':
-                    // Ascending happy sound - Out for delivery
-                    const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
+                    const notes = [523.25, 659.25, 783.99];
                     notes.forEach((freq, index) => {
                         setTimeout(() => {
                             const osc = audioCtx.createOscillator();
@@ -152,14 +131,11 @@ const OrderDetailsPage = () => {
                             gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
                             osc.start(audioCtx.currentTime);
                             osc.stop(audioCtx.currentTime + 0.15);
-                            // Fade out
                             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
                         }, index * 150);
                     });
                     break;
-
                 case 'delivered':
-                    // Happy jingle - Delivered
                     const deliveredNotes = [523.25, 659.25, 783.99, 1046.5];
                     deliveredNotes.forEach((freq, index) => {
                         setTimeout(() => {
@@ -175,9 +151,7 @@ const OrderDetailsPage = () => {
                         }, index * 120);
                     });
                     break;
-
                 case 'cancelled':
-                    // Descending sad sound - Cancelled
                     const cancelNotes = [523.25, 493.88, 440, 392];
                     cancelNotes.forEach((freq, index) => {
                         setTimeout(() => {
@@ -193,9 +167,7 @@ const OrderDetailsPage = () => {
                         }, index * 150);
                     });
                     break;
-
                 default:
-                    // Default single beep
                     oscillator.type = 'sine';
                     oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
                     gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
@@ -203,7 +175,6 @@ const OrderDetailsPage = () => {
                     oscillator.stop(audioCtx.currentTime + 0.15);
                     break;
             }
-
         } catch (error) {
             console.error('Error playing notification sound:', error);
         }
@@ -225,7 +196,7 @@ const OrderDetailsPage = () => {
         setSocket(socketInstance);
 
         socketInstance.on('connect', () => {
-            console.log('Socket connected successfully');
+            console.log('✅ Socket connected successfully');
             setSocketConnected(true);
             setConnectionError(null);
             setReconnecting(false);
@@ -233,34 +204,35 @@ const OrderDetailsPage = () => {
             const userId = localStorage.getItem('userId');
             if (userId) {
                 socketInstance.emit('join-user', userId);
-                console.log(`Joined user room: ${userId}`);
+                console.log(`📡 Joined user room: ${userId}`);
             }
         });
 
         socketInstance.on('connect_error', (error) => {
-            console.error('Socket connection error:', error);
+            console.error('❌ Socket connection error:', error);
             setConnectionError(error.message);
             setSocketConnected(false);
         });
 
         socketInstance.on('disconnect', () => {
-            console.log('Socket disconnected');
+            console.log('🔌 Socket disconnected');
             setSocketConnected(false);
         });
 
         socketInstance.on('reconnecting', (attemptNumber) => {
-            console.log(`Reconnecting attempt ${attemptNumber}`);
+            console.log(`🔄 Reconnecting attempt ${attemptNumber}`);
             setReconnecting(true);
         });
 
         socketInstance.on('reconnect', () => {
-            console.log('Socket reconnected');
+            console.log('✅ Socket reconnected');
             setSocketConnected(true);
             setReconnecting(false);
             const userId = localStorage.getItem('userId');
             if (userId) {
                 socketInstance.emit('join-user', userId);
             }
+            // Fetch orders on reconnect
             dispatch(getMyOrders());
         });
 
@@ -276,148 +248,183 @@ const OrderDetailsPage = () => {
         };
     }, [dispatch]);
 
-    // ==================== SOCKET EVENT LISTENERS ====================
+    // ==================== SOCKET EVENT LISTENERS - REAL-TIME UPDATES ====================
     useEffect(() => {
         if (!socketRef.current) return;
 
         const socketInstance = socketRef.current;
 
-        // Listen for order status updates - FIXED to handle both order room and broadcast
+        // ✅ Handle order status update - REAL TIME
         const handleOrderStatusUpdate = (data) => {
-            console.log('Order status updated via socket:', data);
+            console.log('📡 Real-time order status update:', data);
+            console.log(`🔄 Order ${data.orderId} status changed to: ${data.newStatus}`);
 
-            // Play sound notification for status update
+            // Play sound notification
             if (data.newStatus) {
                 playNotificationSound(data.newStatus, data.orderId);
             }
 
-            // Check if this update is for our orders
-            const orderExists = liveOrders.some(o => o._id === data.orderId);
-            if (!orderExists) return;
-
+            // ✅ Update liveOrders immediately - NO REFRESH
             setLiveOrders(prevOrders => {
+                const orderExists = prevOrders.some(o => o._id === data.orderId);
+                if (!orderExists) {
+                    // If order not in list, fetch fresh data
+                    dispatch(getMyOrders());
+                    return prevOrders;
+                }
+
                 const updatedOrders = prevOrders.map(order => {
                     if (order._id === data.orderId) {
                         return {
                             ...order,
                             orderStatus: data.newStatus,
-                            tracking: data.tracking || order.tracking,
-                            updatedAt: data.timestamp || new Date().toISOString()
+                            tracking: data.tracking || order.tracking || [],
+                            updatedAt: data.timestamp || new Date().toISOString(),
+                            // Add a flag to show highlight
+                            _justUpdated: true
                         };
                     }
                     return order;
                 });
+
+                // Add to updated order IDs for highlight animation
+                setUpdatedOrderIds(prev => [...prev, data.orderId]);
+                setTimeout(() => {
+                    setUpdatedOrderIds(prev => prev.filter(id => id !== data.orderId));
+                }, 3000);
+
                 return updatedOrders;
             });
 
-            const order = orders.find(o => o._id === data.orderId);
+            // Show notification
+            const order = liveOrders.find(o => o._id === data.orderId) || 
+                         orders.find(o => o._id === data.orderId);
             if (order) {
                 const statusLabels = {
                     'pending': 'Pending',
                     'confirmed': 'Confirmed',
                     'preparing': 'Preparing',
-                    'out_for_delivery': 'Out for Delivery',
-                    'delivered': 'Delivered',
-                    'cancelled': 'Cancelled'
+                    'out_for_delivery': 'Out for Delivery 🚚',
+                    'delivered': 'Delivered ✅',
+                    'cancelled': 'Cancelled ❌'
                 };
                 addNotification({
                     id: Date.now(),
                     orderId: data.orderId,
-                    message: `Order #${order._id.slice(-8)} status updated to ${statusLabels[data.newStatus] || data.newStatus}`,
+                    message: `Order #${order._id.slice(-8)} ${statusLabels[data.newStatus] || data.newStatus}`,
                     type: 'status_update',
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date().toISOString(),
+                    status: data.newStatus
                 });
             }
 
-            dispatch(getMyOrders());
+            // ✅ Update expanded status - keep it expanded if it was
+            setExpandedOrders(prev => {
+                if (prev[data.orderId]) {
+                    return prev; // Keep expanded
+                }
+                return prev;
+            });
+
+            // ✅ DO NOT call dispatch(getMyOrders()) - Socket handles everything
         };
 
-        // Listen for order cancellation - FIXED
-        const handleOrderCancelled = (data) => {
-            console.log('Order cancelled via socket:', data);
-
-            // Play sound for cancellation
-            playNotificationSound('cancelled', data.orderId);
-
-            const orderExists = liveOrders.some(o => o._id === data.orderId);
-            if (!orderExists) return;
+        // ✅ Handle rider assignment
+        const handleRiderAssigned = (data) => {
+            console.log('📡 Rider assigned in real-time:', data);
+            playNotificationSound('out_for_delivery', data.orderId);
 
             setLiveOrders(prevOrders => {
-                const updatedOrders = prevOrders.map(order => {
+                const orderExists = prevOrders.some(o => o._id === data.orderId);
+                if (!orderExists) {
+                    dispatch(getMyOrders());
+                    return prevOrders;
+                }
+
+                return prevOrders.map(order => {
+                    if (order._id === data.orderId) {
+                        return {
+                            ...order,
+                            assignedRider: data.rider,
+                            orderStatus: 'out_for_delivery',
+                            _justUpdated: true
+                        };
+                    }
+                    return order;
+                });
+            });
+
+            setUpdatedOrderIds(prev => [...prev, data.orderId]);
+            setTimeout(() => {
+                setUpdatedOrderIds(prev => prev.filter(id => id !== data.orderId));
+            }, 3000);
+
+            const order = liveOrders.find(o => o._id === data.orderId) || 
+                         orders.find(o => o._id === data.orderId);
+            if (order) {
+                addNotification({
+                    id: Date.now(),
+                    orderId: data.orderId,
+                    message: `🚚 Order #${order._id.slice(-8)} out for delivery with ${data.rider?.name || 'a rider'}`,
+                    type: 'rider_assigned',
+                    timestamp: new Date().toISOString()
+                });
+            }
+        };
+
+        // ✅ Handle order cancellation
+        const handleOrderCancelled = (data) => {
+            console.log('📡 Order cancelled in real-time:', data);
+            playNotificationSound('cancelled', data.orderId);
+
+            setLiveOrders(prevOrders => {
+                const orderExists = prevOrders.some(o => o._id === data.orderId);
+                if (!orderExists) {
+                    dispatch(getMyOrders());
+                    return prevOrders;
+                }
+
+                return prevOrders.map(order => {
                     if (order._id === data.orderId) {
                         return {
                             ...order,
                             orderStatus: 'cancelled',
                             cancelledAt: data.timestamp || new Date().toISOString(),
-                            cancelReason: data.reason
+                            cancelReason: data.reason,
+                            _justUpdated: true
                         };
                     }
                     return order;
                 });
-                return updatedOrders;
             });
 
-            const order = orders.find(o => o._id === data.orderId);
+            setUpdatedOrderIds(prev => [...prev, data.orderId]);
+            setTimeout(() => {
+                setUpdatedOrderIds(prev => prev.filter(id => id !== data.orderId));
+            }, 3000);
+
+            const order = liveOrders.find(o => o._id === data.orderId) || 
+                         orders.find(o => o._id === data.orderId);
             if (order) {
                 addNotification({
                     id: Date.now(),
                     orderId: data.orderId,
-                    message: `Order #${order._id.slice(-8)} has been cancelled`,
+                    message: `❌ Order #${order._id.slice(-8)} has been cancelled`,
                     type: 'cancellation',
                     timestamp: new Date().toISOString()
                 });
             }
-
-            dispatch(getMyOrders());
         };
 
-        // Listen for rider assignment - FIXED
-        const handleRiderAssigned = (data) => {
-            console.log('Rider assigned via socket:', data);
-
-            // Play sound for rider assigned (out for delivery)
-            playNotificationSound('out_for_delivery', data.orderId);
-
-            const orderExists = liveOrders.some(o => o._id === data.orderId);
-            if (!orderExists) return;
-
-            setLiveOrders(prevOrders => {
-                const updatedOrders = prevOrders.map(order => {
-                    if (order._id === data.orderId) {
-                        return {
-                            ...order,
-                            assignedRider: data.rider,
-                            orderStatus: 'out_for_delivery'
-                        };
-                    }
-                    return order;
-                });
-                return updatedOrders;
-            });
-
-            const order = orders.find(o => o._id === data.orderId);
-            if (order) {
-                addNotification({
-                    id: Date.now(),
-                    orderId: data.orderId,
-                    message: `Order #${order._id.slice(-8)} is out for delivery with ${data.rider?.name || 'a rider'}`,
-                    type: 'rider_assigned',
-                    timestamp: new Date().toISOString()
-                });
-            }
-
-            dispatch(getMyOrders());
-        };
-
-        // Listen for kitchen notes updates - FIXED
+        // ✅ Handle kitchen notes update
         const handleKitchenNotesUpdated = (data) => {
-            console.log('Kitchen notes updated via socket:', data);
-
-            const orderExists = liveOrders.some(o => o._id === data.orderId);
-            if (!orderExists) return;
+            console.log('📡 Kitchen notes updated in real-time:', data);
 
             setLiveOrders(prevOrders => {
-                const updatedOrders = prevOrders.map(order => {
+                const orderExists = prevOrders.some(o => o._id === data.orderId);
+                if (!orderExists) return prevOrders;
+
+                return prevOrders.map(order => {
                     if (order._id === data.orderId) {
                         return {
                             ...order,
@@ -427,14 +434,12 @@ const OrderDetailsPage = () => {
                     }
                     return order;
                 });
-                return updatedOrders;
             });
         };
 
-        // Listen for new messages - FIXED
+        // ✅ Handle new messages from rider/admin
         const handleNewMessage = (data) => {
-            console.log('New message:', data);
-            // Play a simple notification sound for messages
+            console.log('📡 New message received:', data);
             playNotificationSound('message', data.orderId);
 
             addNotification({
@@ -446,28 +451,6 @@ const OrderDetailsPage = () => {
             });
         };
 
-        // Listen for broadcast updates (for users who might not be in the order room)
-        const handleOrderUpdateBroadcast = (data) => {
-            console.log('Order update broadcast received:', data);
-            // Process the update similar to handleOrderStatusUpdate
-            handleOrderStatusUpdate(data);
-        };
-
-        const handleOrderCancelledBroadcast = (data) => {
-            console.log('Order cancellation broadcast received:', data);
-            handleOrderCancelled(data);
-        };
-
-        const handleRiderAssignedBroadcast = (data) => {
-            console.log('Rider assignment broadcast received:', data);
-            handleRiderAssigned(data);
-        };
-
-        const handleKitchenNotesUpdatedBroadcast = (data) => {
-            console.log('Kitchen notes broadcast received:', data);
-            handleKitchenNotesUpdated(data);
-        };
-
         // Register all event listeners
         socketInstance.on('order-status-updated', handleOrderStatusUpdate);
         socketInstance.on('order-cancelled', handleOrderCancelled);
@@ -476,11 +459,11 @@ const OrderDetailsPage = () => {
         socketInstance.on('new-message', handleNewMessage);
         socketInstance.on('rider-message', handleNewMessage);
 
-        // Register broadcast listeners
-        socketInstance.on('order-update-broadcast', handleOrderUpdateBroadcast);
-        socketInstance.on('order-cancelled-broadcast', handleOrderCancelledBroadcast);
-        socketInstance.on('rider-assigned-broadcast', handleRiderAssignedBroadcast);
-        socketInstance.on('kitchen-notes-updated-broadcast', handleKitchenNotesUpdatedBroadcast);
+        // Broadcast listeners (for events from other sources)
+        socketInstance.on('order-update-broadcast', handleOrderStatusUpdate);
+        socketInstance.on('order-cancelled-broadcast', handleOrderCancelled);
+        socketInstance.on('rider-assigned-broadcast', handleRiderAssigned);
+        socketInstance.on('kitchen-notes-updated-broadcast', handleKitchenNotesUpdated);
 
         // Cleanup
         return () => {
@@ -490,10 +473,10 @@ const OrderDetailsPage = () => {
             socketInstance.off('kitchen-notes-updated', handleKitchenNotesUpdated);
             socketInstance.off('new-message', handleNewMessage);
             socketInstance.off('rider-message', handleNewMessage);
-            socketInstance.off('order-update-broadcast', handleOrderUpdateBroadcast);
-            socketInstance.off('order-cancelled-broadcast', handleOrderCancelledBroadcast);
-            socketInstance.off('rider-assigned-broadcast', handleRiderAssignedBroadcast);
-            socketInstance.off('kitchen-notes-updated-broadcast', handleKitchenNotesUpdatedBroadcast);
+            socketInstance.off('order-update-broadcast', handleOrderStatusUpdate);
+            socketInstance.off('order-cancelled-broadcast', handleOrderCancelled);
+            socketInstance.off('rider-assigned-broadcast', handleRiderAssigned);
+            socketInstance.off('kitchen-notes-updated-broadcast', handleKitchenNotesUpdated);
         };
     }, [orders, liveOrders, dispatch]);
 
@@ -515,14 +498,47 @@ const OrderDetailsPage = () => {
         dispatch(getMyOrders());
         dispatch(getProducts());
     }, [dispatch]);
-    console.log(orders)
 
     // ==================== SYNC ORDERS FROM REDUX ====================
     useEffect(() => {
         if (orders && orders.length > 0) {
-            setLiveOrders(orders);
+            // Preserve any real-time updates
+            setLiveOrders(prev => {
+                if (prev.length === 0) return orders;
+                // Merge orders, preserving real-time updates
+                const merged = orders.map(order => {
+                    const existing = prev.find(o => o._id === order._id);
+                    if (existing) {
+                        // Keep the real-time status if it's different
+                        return {
+                            ...order,
+                            orderStatus: existing.orderStatus || order.orderStatus,
+                            tracking: existing.tracking || order.tracking || [],
+                            _justUpdated: existing._justUpdated || false
+                        };
+                    }
+                    return order;
+                });
+                return merged;
+            });
+            setLastFetchTime(Date.now());
         }
     }, [orders]);
+
+    // ==================== PERIODIC SYNC (BACKUP) ====================
+    useEffect(() => {
+        // Sync every 30 seconds as backup if socket fails
+        const interval = setInterval(() => {
+            const now = Date.now();
+            if (now - lastFetchTime > 30000) { // 30 seconds
+                console.log('🔄 Periodic sync: fetching orders from server');
+                dispatch(getMyOrders());
+                setLastFetchTime(now);
+            }
+        }, 30000);
+
+        return () => clearInterval(interval);
+    }, [dispatch, lastFetchTime]);
 
     // ==================== EXPAND ORDERS ON NAVIGATION ====================
     useEffect(() => {
@@ -578,7 +594,6 @@ const OrderDetailsPage = () => {
         const status = order.orderStatus?.toLowerCase() || 'pending';
         const isDelivery = order.orderType?.toLowerCase() === 'delivery';
 
-        // For dine-in orders, always show as pending or a custom status
         if (!isDelivery) {
             return {
                 label: 'Dine In 🍽️',
@@ -655,10 +670,7 @@ const OrderDetailsPage = () => {
         const status = order.orderStatus?.toLowerCase() || 'pending';
         const isDelivery = order.orderType?.toLowerCase() === 'delivery';
 
-        // Return null for dine-in orders
-        if (!isDelivery) {
-            return null;
-        }
+        if (!isDelivery) return null;
 
         const deliverySteps = [
             { id: 'pending', label: 'Order Placed', icon: Clock, color: 'text-yellow-500' },
@@ -748,6 +760,7 @@ const OrderDetailsPage = () => {
     // ==================== MANUAL REFRESH ====================
     const handleRefresh = () => {
         dispatch(getMyOrders());
+        setLastFetchTime(Date.now());
         if (socketRef.current && socketConnected) {
             socketRef.current.emit('request-order-update', {
                 userId: localStorage.getItem('userId')
@@ -760,15 +773,19 @@ const OrderDetailsPage = () => {
         setSoundEnabled(prev => !prev);
     };
 
+    // ==================== CHECK IF ORDER IS UPDATED ====================
+    const isOrderUpdated = (orderId) => {
+        return updatedOrderIds.includes(orderId);
+    };
+
     // ==================== LOADING STATE ====================
-    if (loading) {
+    if (loading && !liveOrders.length) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="w-10 h-10 border-4 border-[#0D7C53] border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
     }
-    console.log(orders)
 
     // ==================== NO ORDERS STATE ====================
     if (!liveOrders || liveOrders.length === 0) {
@@ -809,7 +826,12 @@ const OrderDetailsPage = () => {
                     {notifications.map((notification) => (
                         <div
                             key={notification.id}
-                            className={`backdrop-blur-xl bg-white/95 border border-white/60 rounded-xl shadow-2xl p-3 sm:p-4 animate-slideInRight`}
+                            className={`backdrop-blur-xl bg-white/95 border border-white/60 rounded-xl shadow-2xl p-3 sm:p-4 animate-slideInRight ${
+                                notification.status === 'delivered' ? 'border-green-500 bg-green-50/95' :
+                                notification.status === 'out_for_delivery' ? 'border-purple-500 bg-purple-50/95' :
+                                notification.status === 'cancelled' ? 'border-red-500 bg-red-50/95' :
+                                'border-blue-500 bg-blue-50/95'
+                            }`}
                         >
                             <div className="flex items-start gap-3">
                                 <div className="flex-1 min-w-0">
@@ -861,8 +883,14 @@ const OrderDetailsPage = () => {
                                 <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 truncate">
                                     My <span className="text-[#0D7C53]">Orders</span>
                                 </h1>
-                                <p className="text-sm text-gray-500">
-                                    {liveOrders.length} order{liveOrders.length > 1 ? 's' : ''} found
+                                <p className="text-sm text-gray-500 flex items-center gap-2">
+                                    <span>{liveOrders.length} order{liveOrders.length > 1 ? 's' : ''} found</span>
+                                    {socketConnected && (
+                                        <span className="inline-flex items-center gap-1 text-xs text-green-600">
+                                            <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                                            Live
+                                        </span>
+                                    )}
                                 </p>
                             </div>
                         </div>
@@ -1020,14 +1048,13 @@ const OrderDetailsPage = () => {
                                 const trackingSteps = getTrackingSteps(order);
                                 const isCancelled = order.orderStatus?.toLowerCase() === 'cancelled';
                                 const status = order.orderStatus?.toLowerCase() || 'pending';
-
-                                const hasLiveUpdate = notifications.some(n => n.orderId === order._id);
+                                const hasLiveUpdate = isOrderUpdated(order._id);
 
                                 return (
                                     <div
                                         key={order._id}
                                         className={`backdrop-blur-xl bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 ${isCancelled ? 'opacity-75' : ''
-                                            } ${hasLiveUpdate ? 'ring-2 ring-[#0D7C53] ring-opacity-50' : ''}`}
+                                            } ${hasLiveUpdate ? 'ring-2 ring-[#0D7C53] ring-opacity-50 animate-pulse-ring' : ''}`}
                                     >
                                         {/* Order Header - Always Visible */}
                                         <div className="p-4 sm:p-6">
@@ -1041,11 +1068,11 @@ const OrderDetailsPage = () => {
                                                         {hasLiveUpdate && (
                                                             <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-500/20 border border-green-500/30 rounded-full text-[10px] text-green-600 animate-pulse">
                                                                 <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-                                                                Live
+                                                                Updated!
                                                             </span>
                                                         )}
 
-                                                        {/* ============ TABLE NUMBER DISPLAY - HEADER ============ */}
+                                                        {/* Table Number Display */}
                                                         {order.table && order.table.tableNumber && (
                                                             <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 backdrop-blur-sm border-2 rounded-full text-xs font-bold shadow-lg bg-indigo-500/90 border-indigo-600 text-white`}>
                                                                 <Store size={14} />
@@ -1120,9 +1147,12 @@ const OrderDetailsPage = () => {
                                             <div className="border-t border-white/30 p-4 sm:p-6 bg-white/10 animate-fadeIn">
                                                 {/* Order Status Timeline */}
                                                 {isDeliveryOrder && !isCancelled && (
-                                                    <div className={`backdrop-blur-xl border rounded-xl p-4 mb-4 bg-blue-50/40 border-blue-200/50`}>
+                                                    <div className={`backdrop-blur-xl border rounded-xl p-4 mb-4 ${status === 'delivered' ? 'bg-green-50/40 border-green-200/50' :
+                                                        status === 'out_for_delivery' ? 'bg-purple-50/40 border-purple-200/50 animate-pulse' :
+                                                        'bg-blue-50/40 border-blue-200/50'
+                                                        }`}>
                                                         <h4 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                                                            <TruckIcon size={18} className="text-blue-600" />
+                                                            <TruckIcon size={18} className={status === 'delivered' ? 'text-green-600' : 'text-blue-600'} />
                                                             Delivery Tracking
                                                             <span className="ml-auto text-xs font-normal text-gray-500">
                                                                 Updated: {formatDate(order.updatedAt)}
@@ -1173,11 +1203,6 @@ const OrderDetailsPage = () => {
                                                                     <p className="text-xs text-gray-400 ml-6">
                                                                         {formatDate(order.tracking[order.tracking.length - 1]?.time)}
                                                                     </p>
-                                                                    {order.tracking.length > 1 && (
-                                                                        <button className="text-xs text-blue-600 hover:text-blue-800 transition-colors ml-6">
-                                                                            View all updates ({order.tracking.length})
-                                                                        </button>
-                                                                    )}
                                                                 </div>
                                                             </div>
                                                         )}
@@ -1243,7 +1268,7 @@ const OrderDetailsPage = () => {
                                                             </div>
                                                         )}
 
-                                                        {/* ============ DINE IN INFO CARD WITH TABLE NUMBER ============ */}
+                                                        {/* Dine In Info Card */}
                                                         {!isDeliveryOrder && (
                                                             <div className="backdrop-blur-xl bg-purple-50/40 border border-purple-200/50 rounded-xl p-3 sm:p-4">
                                                                 <div className="flex items-center gap-2">
@@ -1257,7 +1282,6 @@ const OrderDetailsPage = () => {
                                                                 <p className="text-xs sm:text-sm text-gray-600 mt-1 ml-7">
                                                                     This order is for dine-in at our cafe.
                                                                 </p>
-                                                                {/* Table Number in Dine In Card */}
                                                                 {order.table && order.table.tableNumber && (
                                                                     <p className="text-xs sm:text-sm font-semibold text-indigo-600 mt-1 ml-7 flex items-center gap-1">
                                                                         <Store size={14} />
@@ -1334,7 +1358,6 @@ const OrderDetailsPage = () => {
                                                                     </span>
                                                                 </div>
 
-                                                                {/* ============ TABLE NUMBER IN ORDER SUMMARY ============ */}
                                                                 {!isDeliveryOrder && order.table && order.table.tableNumber && (
                                                                     <div className="flex justify-between">
                                                                         <span className="text-gray-500">Table Number</span>
@@ -1443,6 +1466,11 @@ const OrderDetailsPage = () => {
                     from { opacity: 0; transform: translateX(100px); }
                     to { opacity: 1; transform: translateX(0); }
                 }
+                @keyframes pulse-ring {
+                    0% { transform: scale(1); }
+                    50% { transform: scale(1.02); }
+                    100% { transform: scale(1); }
+                }
                 .animate-pulse-slow { animation: pulse-slow 8s ease-in-out infinite; }
                 .animate-pulse-slow-delay { animation: pulse-slow-delay 10s ease-in-out infinite; }
                 .animate-float { animation: float 6s ease-in-out infinite; }
@@ -1452,6 +1480,7 @@ const OrderDetailsPage = () => {
                 .animate-bounce-slow { animation: bounce-slow 2s ease-in-out infinite; }
                 .animate-spin { animation: spin 2s linear infinite; }
                 .animate-slideInRight { animation: slideInRight 0.5s ease-out; }
+                .animate-pulse-ring { animation: pulse-ring 1.5s ease-in-out 2; }
             `}</style>
         </>
     );
