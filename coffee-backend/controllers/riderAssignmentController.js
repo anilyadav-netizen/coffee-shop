@@ -141,6 +141,15 @@ exports.assignRiderToOrder = async (req, res) => {
       },
     });
 
+    // Broadcast to all admins
+    io.to("admin").emit("rider-assigned", {
+      orderId: order._id,
+      order: populatedOrder,
+      rider: rider,
+      riderId: riderId,
+      message: `Rider ${rider.name} assigned to order #${order._id}`,
+    });
+
     res.status(200).json({
       success: true,
       message: "Rider assigned successfully",
@@ -214,31 +223,62 @@ exports.updateDeliveryStatus = async (req, res) => {
       .populate("assignedRider", "name mobile")
       .populate("user", "name email mobile");
 
-    // Emit socket events
-    // Emit socket events
+    // Get io instance
     const io = req.app.get("io");
 
-    // Send to admin
-    io.to(`admin-${riderId}`).emit("delivery_status_updated", {
+    // Emit to admin room with populated data
+    io.to("admin").emit("delivery_status_updated", {
+      orderId: order._id,
       order: populatedOrder,
-      status,
+      status: status,
       message: `Order #${order._id} status updated to ${status}`,
+      newStatus: status,
+      tracking: order.tracking,
+      timestamp: new Date(),
     });
 
-    // Send to customer
+    // Emit to specific admin
+    io.to(`admin-${riderId}`).emit("delivery_status_updated", {
+      orderId: order._id,
+      order: populatedOrder,
+      status: status,
+      message: `Order #${order._id} status updated to ${status}`,
+      newStatus: status,
+      tracking: order.tracking,
+      timestamp: new Date(),
+    });
+
+    // Emit to customer
     io.to(`user-${order.user._id}`).emit("delivery_status_updated", {
       orderId: order._id,
-      status,
+      order: populatedOrder,
+      status: status,
       message: message || `Your order is ${status}`,
+      newStatus: status,
+      tracking: order.tracking,
+      timestamp: new Date(),
     });
 
-    // Send to rider
+    // Emit to rider
     io.to(`rider-${riderId}`).emit("delivery_status_confirmed", {
       orderId: order._id,
-      status,
+      order: populatedOrder,
+      status: status,
       message: `Delivery status updated to ${status}`,
+      newStatus: status,
+      tracking: order.tracking,
+      timestamp: new Date(),
     });
 
+    // Broadcast to all connected clients
+    io.emit("order-status-updated", {
+      orderId: order._id,
+      order: populatedOrder,
+      newStatus: status,
+      status: status,
+      tracking: order.tracking,
+      timestamp: new Date(),
+    });
 
     res.status(200).json({
       success: true,
@@ -250,6 +290,145 @@ exports.updateDeliveryStatus = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error updating delivery status",
+      error: error.message,
+    });
+  }
+};
+
+// Admin: Update order status
+exports.adminUpdateOrderStatus = async (req, res) => {
+  try {
+    const { orderId, status, notes } = req.body;
+    const adminId = req.user.id;
+
+    const validStatuses = ["pending", "confirmed", "preparing", "ready", "out_for_delivery", "delivered", "cancelled"];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid status",
+      });
+    }
+
+    const order = await Order.findById(orderId).populate("user", "name email mobile");
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    // Update order status
+    order.orderStatus = status;
+    order.tracking.push({
+      status: status,
+      message: notes || `Order status updated to ${status} by admin`,
+      time: new Date(),
+    });
+
+    // If status is delivered, set deliveredAt
+    if (status === "delivered") {
+      order.deliveredAt = new Date();
+      
+      // If rider assigned, free up the rider
+      if (order.assignedRider) {
+        const rider = await User.findById(order.assignedRider);
+        if (rider) {
+          rider.riderDetails.isBusy = false;
+          rider.riderDetails.currentOrder = null;
+          rider.isAvailable = true;
+          await rider.save();
+        }
+      }
+    }
+
+    // If status is cancelled, free up the rider
+    if (status === "cancelled" && order.assignedRider) {
+      const rider = await User.findById(order.assignedRider);
+      if (rider) {
+        rider.riderDetails.isBusy = false;
+        rider.riderDetails.currentOrder = null;
+        rider.isAvailable = true;
+        await rider.save();
+      }
+    }
+
+    await order.save();
+
+    // Populate order for response
+    const populatedOrder = await Order.findById(orderId)
+      .populate("assignedRider", "name mobile")
+      .populate("user", "name email mobile");
+
+    // Get io instance
+    const io = req.app.get("io");
+
+    // Broadcast to admin
+    io.to("admin").emit("order-status-updated", {
+      orderId: order._id,
+      order: populatedOrder,
+      newStatus: status,
+      status: status,
+      tracking: order.tracking,
+      timestamp: new Date(),
+      updatedBy: "admin",
+    });
+
+    // Specific admin
+    io.to(`admin-${adminId}`).emit("order-status-updated", {
+      orderId: order._id,
+      order: populatedOrder,
+      newStatus: status,
+      status: status,
+      tracking: order.tracking,
+      timestamp: new Date(),
+      updatedBy: "admin",
+    });
+
+    // If rider assigned, notify rider
+    if (order.assignedRider) {
+      io.to(`rider-${order.assignedRider}`).emit("order-status-updated", {
+        orderId: order._id,
+        order: populatedOrder,
+        newStatus: status,
+        status: status,
+        tracking: order.tracking,
+        timestamp: new Date(),
+        updatedBy: "admin",
+      });
+    }
+
+    // Notify customer
+    io.to(`user-${order.user._id}`).emit("order-status-updated", {
+      orderId: order._id,
+      order: populatedOrder,
+      newStatus: status,
+      status: status,
+      tracking: order.tracking,
+      timestamp: new Date(),
+      updatedBy: "admin",
+    });
+
+    // Broadcast to all
+    io.emit("order-status-updated", {
+      orderId: order._id,
+      order: populatedOrder,
+      newStatus: status,
+      status: status,
+      tracking: order.tracking,
+      timestamp: new Date(),
+      updatedBy: "admin",
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Order status updated successfully",
+      order: populatedOrder,
+    });
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error updating order status",
       error: error.message,
     });
   }
@@ -329,7 +508,7 @@ exports.unassignRiderFromOrder = async (req, res) => {
     const { orderId } = req.params;
     const adminId = req.user.id;
 
-    const order = await Order.findById(orderId);
+    const order = await Order.findById(orderId).populate("user", "name email mobile");
     if (!order) {
       return res.status(404).json({
         success: false,
@@ -375,7 +554,6 @@ exports.unassignRiderFromOrder = async (req, res) => {
       .populate("user", "name email mobile");
 
     // Emit socket events
-    // Emit socket events
     const io = req.app.get("io");
 
     // Send to rider
@@ -396,6 +574,13 @@ exports.unassignRiderFromOrder = async (req, res) => {
       message: "Your rider has been unassigned. A new rider will be assigned soon.",
     });
 
+    // Broadcast to all admins
+    io.to("admin").emit("rider-unassigned", {
+      orderId: order._id,
+      order: populatedOrder,
+      message: `Rider unassigned from order #${order._id}`,
+    });
+
     res.status(200).json({
       success: true,
       message: "Rider unassigned successfully",
@@ -411,6 +596,7 @@ exports.unassignRiderFromOrder = async (req, res) => {
   }
 };
 
+// Get rider order by ID
 exports.getRiderOrderById = async (req, res) => {
   try {
     const riderId = req.user.id;
