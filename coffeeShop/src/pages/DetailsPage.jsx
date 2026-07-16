@@ -290,7 +290,7 @@ const DetailsPage = () => {
                     p.category?._id === product.category._id &&
                     p._id !== product._id
             )
-            .slice(0, 4);
+            .slice(0, 8);
     };
 
     const relatedProducts = getRelatedProducts();

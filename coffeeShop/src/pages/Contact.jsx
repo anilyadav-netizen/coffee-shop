@@ -69,7 +69,7 @@ const Contact = () => {
 
     return (
         <>
-            <div className="min-h-screen">
+            <div className="min-h-screen bg-[#FCF2E9]">
                 {/* ========== HERO SECTION - UNCHANGED ========== */}
                 <div className="relative  h-[50vh] md:h-[80vh] min-h-[400px] md:min-h-[500px] overflow-hidden">
                     {/* Background Image with Parallax */}
@@ -198,7 +198,7 @@ const Contact = () => {
                                             return (
                                                 <div
                                                     key={info.id}
-                                                    className="flex items-start gap-4 p-3 rounded-xl  bg-white/40 border border-white/20 hover:bg-white/60 transition-all duration-300 group shadow-sm hover:shadow-md"
+                                                    className="flex items-start gap-4 p-3 rounded-xl  bg-white/40 border border-white/20 hover:bg-white/60 transition-all duration-300 group shadow-md hover:shadow-lg"
                                                 >
                                                     <div className={`p-3 rounded-xl bg-gradient-to-br ${info.color} text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                                                         <IconComponent className="w-6 h-6" />
