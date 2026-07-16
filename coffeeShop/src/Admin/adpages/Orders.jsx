@@ -11,6 +11,8 @@ const Orders = () => {
   const { orders, loading } = useSelector((state) => state.adminOrder);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
 
   useEffect(() => {
     dispatch(getAllOrders());
@@ -65,6 +67,17 @@ const Orders = () => {
     return matchesSearch && matchesStatus;
   });
 
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterStatus]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentOrders = filteredOrders.slice(startIndex, endIndex);
+
   // Unique statuses for filter tabs (with counts)
   const statusOptions = [
     "All",
@@ -73,6 +86,13 @@ const Orders = () => {
 
   const handleViewOrder = (orderId) => {
     navigate(`/admin/order/${orderId}`);
+  };
+
+  // Pagination navigation
+  const goToPage = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
   };
 
   // Loading
@@ -128,11 +148,10 @@ const Orders = () => {
             <button
               key={status}
               onClick={() => setFilterStatus(status)}
-              className={`px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-200 ${
-                filterStatus === status
-                  ? "bg-[#3B82F6] text-white shadow-md shadow-[#3B82F6]/20 dark:shadow-[#3B82F6]/10"
-                  : "bg-white dark:bg-dark-card text-[#64748B] dark:text-dark-text hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 border border-[#E2E8F0] dark:border-dark-border"
-              }`}
+              className={`px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-200 ${filterStatus === status
+                ? "bg-[#3B82F6] text-white shadow-md shadow-[#3B82F6]/20 dark:shadow-[#3B82F6]/10"
+                : "bg-white dark:bg-dark-card text-[#64748B] dark:text-dark-text hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 border border-[#E2E8F0] dark:border-dark-border"
+                }`}
             >
               {status === "All" ? "All" : status.charAt(0).toUpperCase() + status.slice(1)}
               <span className="ml-1.5 text-xs opacity-70">({count})</span>
@@ -163,99 +182,148 @@ const Orders = () => {
           </div>
         </div>
       ) : (
-        /* Table – responsive wrapper */
-        <div className="overflow-x-auto border border-[#E2E8F0] dark:border-dark-border rounded-xl bg-white dark:bg-dark-card shadow-sm">
-          <table className="w-full min-w-[900px]">
-            <thead>
-              <tr className="border-b border-[#E2E8F0] dark:border-dark-border bg-[#F8FAFC] dark:bg-dark-bg/50">
-                <th className="p-4 text-left text-sm font-medium text-[#64748B] dark:text-dark-text">Order ID</th>
-                <th className="p-4 text-left text-sm font-medium text-[#64748B] dark:text-dark-text">Customer</th>
-                <th className="p-4 text-left text-sm font-medium text-[#64748B] dark:text-dark-text">Items</th>
-                <th className="p-4 text-left text-sm font-medium text-[#64748B] dark:text-dark-text">Type</th>
-                <th className="p-4 text-left text-sm font-medium text-[#64748B] dark:text-dark-text">Amount</th>
-                <th className="p-4 text-left text-sm font-medium text-[#64748B] dark:text-dark-text">Payment</th>
-                <th className="p-4 text-left text-sm font-medium text-[#64748B] dark:text-dark-text">Status</th>
-                <th className="p-4 text-center text-sm font-medium text-[#64748B] dark:text-dark-text">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredOrders.map((order) => {
-                const firstProduct = order.orderItems?.[0]?.coffee || order.orderItems?.[0]?.product;
-                const productImage = firstProduct?.image || "";
-                const productName = firstProduct?.name || "Product";
+        <>
+          {/* Table – responsive wrapper */}
+          <div className="overflow-x-auto border border-[#E2E8F0] dark:border-dark-border rounded-xl bg-white dark:bg-dark-card shadow-sm">
+            <table className="w-full min-w-[900px]">
+              <thead>
+                <tr className="border-b border-[#E2E8F0] dark:border-dark-border bg-[#F8FAFC] dark:bg-dark-bg/50">
+                  <th className="p-4 text-left text-sm font-medium text-[#64748B] dark:text-dark-text">Order ID</th>
+                  <th className="p-4 text-left text-sm font-medium text-[#64748B] dark:text-dark-text">Customer</th>
+                  <th className="p-4 text-left text-sm font-medium text-[#64748B] dark:text-dark-text">Items</th>
+                  <th className="p-4 text-left text-sm font-medium text-[#64748B] dark:text-dark-text">Type</th>
+                  <th className="p-4 text-left text-sm font-medium text-[#64748B] dark:text-dark-text">Amount</th>
+                  <th className="p-4 text-left text-sm font-medium text-[#64748B] dark:text-dark-text">Payment</th>
+                  <th className="p-4 text-left text-sm font-medium text-[#64748B] dark:text-dark-text">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentOrders.map((order) => {
+                  const firstProduct = order.orderItems?.[0]?.coffee || order.orderItems?.[0]?.product;
+                  const productImage = firstProduct?.image || "";
+                  const productName = firstProduct?.name || "Product";
 
-                return (
-                  <tr
-                    key={order._id}
-                    className="border-b border-[#E2E8F0] dark:border-dark-border hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-colors duration-150"
-                  >
-                    <td className="p-4 font-medium text-[#0F172A] dark:text-dark-heading whitespace-nowrap">
-                      #{order._id.slice(-6)}
-                    </td>
-                    <td className="p-4 text-[#0F172A] dark:text-dark-heading whitespace-nowrap">
-                      {order.customerName}
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-2">
-                        {productImage && (
-                          <img
-                            src={productImage}
-                            alt={productName}
-                            className="w-8 h-8 rounded object-cover border border-[#E2E8F0] dark:border-dark-border"
-                          />
-                        )}
-                        <span className="text-[#64748B] dark:text-dark-text">
-                          {order.orderItems?.length || 0} items
+                  return (
+                    <tr
+                      key={order._id}
+                      className="border-b border-[#E2E8F0] dark:border-dark-border hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-colors duration-150"
+                    >
+                      <td className="p-4 font-medium text-[#0F172A] dark:text-dark-heading whitespace-nowrap">
+                        #{order._id.slice(-6)}
+                      </td>
+                      <td className="p-4 text-[#0F172A] dark:text-dark-heading whitespace-nowrap">
+                        {order.customerName}
+                      </td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-2">
+                          {productImage && (
+                            <img
+                              src={productImage}
+                              alt={productName}
+                              className="w-8 h-8 rounded object-cover border border-[#E2E8F0] dark:border-dark-border"
+                            />
+                          )}
+                          <span className="text-[#64748B] dark:text-dark-text">
+                            {order.orderItems?.length || 0} items
+                          </span>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <span
+                          className={`px-2.5 py-1 rounded-full text-xs font-medium ${orderTypeBadge[order.orderType] || "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400"
+                            }`}
+                        >
+                          {order.orderType === "dine_in" ? "Dine-in" :
+                            order.orderType === "takeaway" ? "Takeaway" :
+                              order.orderType === "delivery" ? "Delivery" : order.orderType}
                         </span>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <span
-                        className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                          orderTypeBadge[order.orderType] || "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400"
+                      </td>
+                      <td className="p-4 font-semibold text-[#0F172A] dark:text-dark-heading whitespace-nowrap">
+                        ₹{order.totalPrice}
+                      </td>
+                      <td className="p-4">
+                        <span
+                          className={`px-2.5 py-1 rounded-full text-xs font-medium ${paymentBadge[order.paymentStatus] || "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400"
+                            }`}
+                        >
+                          {order.paymentStatus?.charAt(0).toUpperCase() + order.paymentStatus?.slice(1) || "N/A"}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <span
+                          className={`px-2.5 py-1 rounded-full text-xs font-medium ${orderBadge[order.orderStatus] || "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400"
+                            }`}
+                        >
+                          {order.orderStatus?.charAt(0).toUpperCase() + order.orderStatus?.slice(1) || "N/A"}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination Controls */}
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6">
+
+
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`px-3 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-dark-border text-sm font-medium transition-colors ${currentPage === 1
+                  ? "bg-[#F1F5F9] dark:bg-dark-bg/50 text-[#94A3B8] dark:text-dark-text cursor-not-allowed opacity-50"
+                  : "bg-white dark:bg-dark-card text-[#0F172A] dark:text-dark-heading hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50"
+                  }`}
+              >
+                Previous
+              </button>
+
+              {/* Page numbers */}
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                  // Show a limited range (e.g., current page ±2)
+                  const isNear = Math.abs(page - currentPage) <= 2;
+                  const isFirstOrLast = page === 1 || page === totalPages;
+                  if (!isNear && !isFirstOrLast) {
+                    if (page === currentPage - 3 || page === currentPage + 3) {
+                      return (
+                        <span key={page} className="px-1.5 text-[#64748B] dark:text-dark-text">
+                          …
+                        </span>
+                      );
+                    }
+                    return null;
+                  }
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => goToPage(page)}
+                      className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${currentPage === page
+                        ? "bg-[#3B82F6] text-white shadow-md shadow-[#3B82F6]/20 dark:shadow-[#3B82F6]/10"
+                        : "bg-white dark:bg-dark-card text-[#0F172A] dark:text-dark-heading hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 border border-[#E2E8F0] dark:border-dark-border"
                         }`}
-                      >
-                        {order.orderType === "dine_in" ? "Dine-in" :
-                         order.orderType === "takeaway" ? "Takeaway" :
-                         order.orderType === "delivery" ? "Delivery" : order.orderType}
-                      </span>
-                    </td>
-                    <td className="p-4 font-semibold text-[#0F172A] dark:text-dark-heading whitespace-nowrap">
-                      ₹{order.totalPrice}
-                    </td>
-                    <td className="p-4">
-                      <span
-                        className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                          paymentBadge[order.paymentStatus] || "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400"
-                        }`}
-                      >
-                        {order.paymentStatus?.charAt(0).toUpperCase() + order.paymentStatus?.slice(1) || "N/A"}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      <span
-                        className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                          orderBadge[order.orderStatus] || "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400"
-                        }`}
-                      >
-                        {order.orderStatus?.charAt(0).toUpperCase() + order.orderStatus?.slice(1) || "N/A"}
-                      </span>
-                    </td>
-                    {/* <td className="p-4 text-center">
-                      <button
-                        onClick={() => handleViewOrder(order._id)}
-                        className="p-2 bg-[#3B82F6] text-white rounded-lg hover:bg-[#2563EB] transition-all hover:scale-105 shadow-md shadow-[#3B82F6]/20 dark:shadow-[#3B82F6]/10"
-                        title="View Details"
-                      >
-                        <FaEye className="w-4 h-4" />
-                      </button>
-                    </td> */}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={`px-3 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-dark-border text-sm font-medium transition-colors ${currentPage === totalPages
+                  ? "bg-[#F1F5F9] dark:bg-dark-bg/50 text-[#94A3B8] dark:text-dark-text cursor-not-allowed opacity-50"
+                  : "bg-white dark:bg-dark-card text-[#0F172A] dark:text-dark-heading hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50"
+                  }`}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

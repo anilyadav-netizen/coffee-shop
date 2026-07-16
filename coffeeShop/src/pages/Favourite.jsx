@@ -73,7 +73,7 @@ const Favourite = () => {
                     amount: amount
                 })
             ).unwrap();
-            toast.success("Added to cart! 🍔");
+            toast.success("Added to cart!");
 
             setAddedItems((prev) => ({
                 ...prev,

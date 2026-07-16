@@ -1,30 +1,21 @@
 // routes/riderAssignmentRoutes.js
 const express = require("express");
 const router = express.Router();
-const {
-  getAvailableRiders,
-  assignRiderToOrder,
-  updateDeliveryStatus,
-  getRiderOrders,
-  getDeliveryOrders,
-  unassignRiderFromOrder,
-  getRiderOrderById,
-} = require("../controllers/riderAssignmentController");
+const riderAssignmentController = require("../controllers/riderAssignmentController");
 const { protect } = require("../middleware/authMiddleware");
 
+// Public routes
+router.get("/admin/available-riders", protect, riderAssignmentController.getAvailableRiders);
+
 // Admin routes
-router.get("/admin/available-riders", protect, getAvailableRiders);
-router.post("/admin/assign-rider", protect, assignRiderToOrder);
-router.get("/admin/delivery-orders", protect, getDeliveryOrders);
-router.delete("/admin/unassign-rider/:orderId", protect, unassignRiderFromOrder);
+router.post("/admin/assign-rider", protect, riderAssignmentController.assignRiderToOrder);
+router.put("/admin/unassign-rider/:orderId", protect, riderAssignmentController.unassignRiderFromOrder);
+router.get("/delivery-orders", protect, riderAssignmentController.getDeliveryOrders);
+router.put("/admin/update-order-status", protect, riderAssignmentController.adminUpdateOrderStatus);
 
 // Rider routes
-router.get("/rider/my-orders", protect, getRiderOrders);
-router.put("/rider/update-delivery-status", protect, updateDeliveryStatus);
-router.get(
-  "/orders/:orderId",
-  protect,
-  getRiderOrderById
-);
+router.get("/rider/my-orders", protect, riderAssignmentController.getRiderOrders);
+router.put("/rider/update-delivery-status", protect, riderAssignmentController.updateDeliveryStatus);
+router.get("/rider/my-order/:orderId", protect, riderAssignmentController.getRiderOrderById);
 
 module.exports = router;

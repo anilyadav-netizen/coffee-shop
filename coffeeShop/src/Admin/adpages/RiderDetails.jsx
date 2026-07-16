@@ -598,5 +598,5 @@ const RiderDetails = () => {
         </div>
     );
 };
-
+7
 export default RiderDetails;
