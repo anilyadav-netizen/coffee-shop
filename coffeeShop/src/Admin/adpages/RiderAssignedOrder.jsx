@@ -1,3 +1,4 @@
+// pages/Rider/RiderAssignedOrder.jsx
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -13,7 +14,6 @@ import {
   FaTimes,
   FaRupeeSign,
   FaTruck,
-  FaHeadset,
   FaBell,
   FaExclamationTriangle,
   FaInfoCircle,
@@ -27,7 +27,6 @@ import {
   clearError,
 } from '../../redux/Slicer/riderAssignmentSlice';
 import io from 'socket.io-client';
-import Beep from '../../assets/Sounds/beep.wav';
 
 const RiderAssignedOrder = () => {
   const dispatch = useDispatch();
@@ -51,18 +50,12 @@ const RiderAssignedOrder = () => {
   const [updatingOrderId, setUpdatingOrderId] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // ─── Debug: Log orders ────────────────────────────────────
-  useEffect(() => {
-    console.log('📦 Active Orders:', activeOrders);
-    console.log('📦 Completed Orders:', completedOrders);
-  }, [activeOrders, completedOrders]);
-
   // ─── Sound ────────────────────────────────────────────────
   const playNotificationSound = () => {
     if (!isSoundEnabled) return;
     try {
-      const audio = new Audio(Beep);
-      audio.volume = 0.5;
+      const audio = new Audio('/notification.mp3');
+      audio.volume = 0.3;
       audio.play().catch(() => console.log('Sound play blocked'));
     } catch (error) {
       console.log('Sound error:', error);
@@ -71,57 +64,115 @@ const RiderAssignedOrder = () => {
 
   // ─── Socket ───────────────────────────────────────────────
   useEffect(() => {
-    socketRef.current = io('http://localhost:5003', {
+    const socket = io('http://localhost:5003', {
       transports: ['websocket'],
       reconnection: true,
       reconnectionAttempts: 5,
     });
+    socketRef.current = socket;
 
-    const socket = socketRef.current;
     const user = JSON.parse(localStorage.getItem('user'));
     const riderId = user?._id;
-    
+
     if (riderId) {
       socket.emit('rider-join', riderId);
       console.log('🔌 Rider joined socket:', riderId);
     }
 
+    // Listen for order status updates
+    socket.on('order-status-updated', (data) => {
+      console.log('📡 Order status updated (rider view):', data);
+
+      // Refresh orders
+      setRefreshKey(prev => prev + 1);
+      dispatch(getRiderOrders());
+
+      // Update selected order if modal is open
+      if (selectedOrder && selectedOrder._id === data.orderId) {
+        setSelectedOrder(prev => ({
+          ...prev,
+          orderStatus: data.newStatus || data.status,
+          tracking: data.tracking || prev.tracking
+        }));
+      }
+
+      setNotification({
+        type: 'status-update',
+        orderId: data.orderId,
+        message: `🔄 Order #${data.orderId.slice(-8)} status updated to ${(data.newStatus || data.status).replace(/_/g, ' ')}`,
+      });
+      setTimeout(() => setNotification(null), 4000);
+    });
+
+    // Listen for delivery status confirmation
+    socket.on('delivery_status_confirmed', (data) => {
+      console.log('📡 Delivery status confirmed:', data);
+
+      // Refresh orders
+      setRefreshKey(prev => prev + 1);
+      dispatch(getRiderOrders());
+
+      if (selectedOrder && selectedOrder._id === data.orderId) {
+        setSelectedOrder(prev => ({
+          ...prev,
+          orderStatus: data.status,
+          tracking: data.tracking || prev.tracking
+        }));
+      }
+    });
+
+    // Listen for new order assignment
     socket.on('new_order_assigned', (data) => {
       console.log('📢 New order assigned:', data);
       playNotificationSound();
       setNotification({
         type: 'new-order',
-        orderId: data.order?._id,
-        message: `New order #${data.order?._id?.slice(-8)} assigned to you`,
+        orderId: data.order?._id || data.orderId,
+        message: `📦 New order #${(data.order?._id || data.orderId).slice(-8)} assigned to you`,
       });
-      // Force refresh when new order is assigned
       setRefreshKey(prev => prev + 1);
       dispatch(getRiderOrders());
       setTimeout(() => setNotification(null), 5000);
     });
 
-    socket.on('delivery_status_updated', (data) => {
-      console.log('📢 Status updated:', data);
-      if (data.orderId) {
-        // Force refresh when status is updated
-        setRefreshKey(prev => prev + 1);
-        dispatch(getRiderOrders());
-        
-        // Update selected order if modal is open
-        if (selectedOrder && selectedOrder._id === data.orderId) {
-          setSelectedOrder(prev => ({
-            ...prev,
-            orderStatus: data.status
-          }));
-        }
-        
-        setNotification({
-          type: 'status-update',
-          orderId: data.orderId,
-          message: `Order #${data.orderId.slice(-8)} status updated to ${data.status}`,
-        });
-        setTimeout(() => setNotification(null), 4000);
+    // Listen for order cancellations
+    socket.on('order-cancelled', (data) => {
+      console.log('❌ Order cancelled (rider view):', data);
+      setRefreshKey(prev => prev + 1);
+      dispatch(getRiderOrders());
+
+      if (selectedOrder && selectedOrder._id === data.orderId) {
+        setSelectedOrder(prev => ({
+          ...prev,
+          orderStatus: 'cancelled'
+        }));
       }
+
+      setNotification({
+        type: 'cancelled',
+        orderId: data.orderId,
+        message: `❌ Order #${data.orderId.slice(-8)} has been cancelled`,
+      });
+      setTimeout(() => setNotification(null), 4000);
+    });
+
+    // Listen for rider unassignment
+    socket.on('order_unassigned', (data) => {
+      console.log('📢 Order unassigned from rider:', data);
+      setRefreshKey(prev => prev + 1);
+      dispatch(getRiderOrders());
+
+      if (selectedOrder && selectedOrder._id === data.orderId) {
+        setSelectedOrder(null);
+        setShowDetailModal(false);
+      }
+
+      setNotification({
+        type: 'unassigned',
+        orderId: data.orderId,
+        message: `📢 Order #${data.orderId.slice(-8)} has been unassigned from you`,
+      });
+      setTimeout(() => setNotification(null), 4000);
     });
 
     return () => {
@@ -137,12 +188,10 @@ const RiderAssignedOrder = () => {
     setIsRefreshing(true);
     dispatch(getRiderOrders())
       .unwrap()
-      .then((result) => {
-        console.log('✅ Orders fetched successfully:', result);
+      .then(() => {
         setIsRefreshing(false);
       })
-      .catch((err) => {
-        console.error('❌ Error fetching orders:', err);
+      .catch(() => {
         setIsRefreshing(false);
       });
   }, [dispatch, refreshKey]);
@@ -167,10 +216,9 @@ const RiderAssignedOrder = () => {
   // ─── Status update handler ───────────────────────────────
   const handleUpdateStatus = async (orderId, newStatus) => {
     console.log(`🔄 Updating order ${orderId} to status: ${newStatus}`);
-    
-    // Set loading state for this specific order
+
     setUpdatingOrderId(orderId);
-    
+
     try {
       const result = await dispatch(
         updateDeliveryStatus({
@@ -179,9 +227,9 @@ const RiderAssignedOrder = () => {
           message: `Order ${newStatus.replace(/_/g, ' ')}`,
         })
       ).unwrap();
-      
+
       console.log('✅ Status updated successfully:', result);
-      
+
       // Update the selected order immediately in the modal
       if (selectedOrder && selectedOrder._id === orderId) {
         setSelectedOrder(prev => ({
@@ -189,28 +237,24 @@ const RiderAssignedOrder = () => {
           orderStatus: newStatus
         }));
       }
-      
+
       // Force refresh after successful update
       setRefreshKey(prev => prev + 1);
-      
+
       // Fetch fresh data
       await dispatch(getRiderOrders());
-      
+
       // Show success notification
       setNotification({
         type: 'status-update',
         orderId: orderId,
         message: `✅ Order #${orderId.slice(-8)} ${newStatus.replace(/_/g, ' ')} successfully!`,
       });
-      
+
       setTimeout(() => setNotification(null), 4000);
-      
-      // DO NOT close modal - keep it open to show updated status
-      // The modal will update automatically because selectedOrder state is updated
-      
+
     } catch (error) {
       console.error('❌ Error updating status:', error);
-      // Show error notification
       setNotification({
         type: 'error',
         orderId: orderId,
@@ -218,7 +262,6 @@ const RiderAssignedOrder = () => {
       });
       setTimeout(() => setNotification(null), 5000);
     } finally {
-      // Clear loading state
       setUpdatingOrderId(null);
     }
   };
@@ -333,6 +376,8 @@ const RiderAssignedOrder = () => {
               ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-[#1E293B] dark:to-[#0F172A] border-green-500'
               : notification.type === 'error'
               ? 'bg-gradient-to-r from-red-50 to-rose-50 dark:from-[#1E293B] dark:to-[#0F172A] border-red-500'
+              : notification.type === 'cancelled' || notification.type === 'unassigned'
+              ? 'bg-gradient-to-r from-red-50 to-rose-50 dark:from-[#1E293B] dark:to-[#0F172A] border-red-500'
               : 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-[#1E293B] dark:to-[#0F172A] border-blue-500'
           }`}>
             <div className="flex items-start gap-3">
@@ -341,20 +386,26 @@ const RiderAssignedOrder = () => {
                   ? 'bg-green-100 dark:bg-green-900/30'
                   : notification.type === 'error'
                   ? 'bg-red-100 dark:bg-red-900/30'
+                  : notification.type === 'cancelled' || notification.type === 'unassigned'
+                  ? 'bg-red-100 dark:bg-red-900/30'
                   : 'bg-blue-100 dark:bg-blue-900/30'
               }`}>
                 {notification.type === 'new-order' ? (
                   <FaBell className="text-green-500 text-lg" />
                 ) : notification.type === 'error' ? (
                   <FaExclamationTriangle className="text-red-500 text-lg" />
+                ) : notification.type === 'cancelled' || notification.type === 'unassigned' ? (
+                  <FaTimes className="text-red-500 text-lg" />
                 ) : (
                   <FaCheckCircle className="text-blue-500 text-lg" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-[#0F172A] dark:text-white">
-                  {notification.type === 'new-order' ? '📦 New Order Assigned' : 
-                   notification.type === 'error' ? '❌ Error' : 
+                  {notification.type === 'new-order' ? '📦 New Order Assigned' :
+                   notification.type === 'error' ? '❌ Error' :
+                   notification.type === 'cancelled' ? '❌ Order Cancelled' :
+                   notification.type === 'unassigned' ? '📢 Order Unassigned' :
                    '🔄 Status Updated'}
                 </p>
                 <p className="text-sm text-[#64748B] dark:text-[#94A3B8] truncate">
@@ -626,7 +677,7 @@ const RiderAssignedOrder = () => {
                     </div>
                   </div>
 
-                  {/* Footer - NO ACTION BUTTONS HERE */}
+                  {/* Footer */}
                   <div className="pt-3 border-t border-[#E2E8F0] dark:border-[#1E293B]">
                     <div className="flex items-center justify-between">
                       <div>
@@ -638,19 +689,16 @@ const RiderAssignedOrder = () => {
                           {order.payment?.method || 'N/A'}
                         </p>
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          onClick={() => {
-                            setSelectedOrder(order);
-                            setShowDetailModal(true);
-                          }}
-                          className="p-2 bg-[#F1F5F9] dark:bg-[#0F172A] text-[#64748B] dark:text-[#94A3B8] rounded-lg hover:bg-[#E2E8F0] dark:hover:bg-[#1E293B] transition-colors"
-                          title="View Details"
-                        >
-                          <FaEye className="text-sm" />
-                        </button>
-                        
-                      </div>
+                      <button
+                        onClick={() => {
+                          setSelectedOrder(order);
+                          setShowDetailModal(true);
+                        }}
+                        className="p-2 bg-[#F1F5F9] dark:bg-[#0F172A] text-[#64748B] dark:text-[#94A3B8] rounded-lg hover:bg-[#E2E8F0] dark:hover:bg-[#1E293B] transition-colors"
+                        title="View Details"
+                      >
+                        <FaEye className="text-sm" />
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -661,7 +709,7 @@ const RiderAssignedOrder = () => {
       )}
 
       {/* ============================================================ */}
-      {/* MODAL WITH ACTION BUTTONS - ONLY HERE */}
+      {/* MODAL WITH ACTION BUTTONS */}
       {/* ============================================================ */}
       {showDetailModal && selectedOrder && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 animate-fadeIn">
@@ -689,7 +737,7 @@ const RiderAssignedOrder = () => {
 
             {/* Modal Body */}
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)] space-y-6">
-              {/* Order Status Badge - This will update automatically */}
+              {/* Order Status Badge */}
               <div className="flex items-center justify-between p-3 bg-[#F8FAFC] dark:bg-[#0F172A] rounded-xl">
                 <span className="text-sm font-medium text-[#64748B] dark:text-[#94A3B8]">Current Status</span>
                 <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
@@ -773,12 +821,11 @@ const RiderAssignedOrder = () => {
               </div>
             </div>
 
-            {/* Modal Footer - Action Buttons ONLY HERE */}
+            {/* Modal Footer - Action Buttons */}
             <div className="border-t border-[#E2E8F0] dark:border-[#1E293B] p-4 bg-[#F8FAFC] dark:bg-[#0F172A]">
               <div className="flex flex-col sm:flex-row gap-3">
                 {/* Check if order is already delivered or cancelled */}
                 {selectedOrder.orderStatus === 'delivered' || selectedOrder.orderStatus === 'cancelled' ? (
-                  // Show only close button for completed orders
                   <button
                     onClick={() => {
                       setShowDetailModal(false);
@@ -789,7 +836,6 @@ const RiderAssignedOrder = () => {
                     Close
                   </button>
                 ) : (
-                  // Show action buttons for active orders
                   <>
                     {/* Show appropriate button based on current status */}
                     {selectedOrder.orderStatus === 'assigned_to_rider' && (
@@ -875,7 +921,7 @@ const RiderAssignedOrder = () => {
                       </>
                     )}
 
-                    {/* Cancel button - always show for active orders */}
+                    {/* Close button */}
                     <button
                       onClick={() => {
                         setShowDetailModal(false);

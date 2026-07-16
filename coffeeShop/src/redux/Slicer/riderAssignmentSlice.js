@@ -65,7 +65,7 @@ export const unassignRiderFromOrder = createAsyncThunk(
   "rider/unassignRiderFromOrder",
   async (orderId, { rejectWithValue }) => {
     try {
-      const { data } = await API.delete(
+      const { data } = await API.put(
         `/rider-assignment/admin/unassign-rider/${orderId}`
       );
       return data;
