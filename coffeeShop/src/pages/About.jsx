@@ -77,7 +77,7 @@ const About = () => {
 
     return (
         <>
-            <div className="min-h-screen">
+            <div className="min-h-screen bg-[#FCF2E9]">
                 {/* ========== HERO SECTION - UNCHANGED ========== */}
                 <div className="relative h-[50vh] md:h-[80vh] min-h-[400px] md:min-h-[500px] overflow-hidden">
                     <div

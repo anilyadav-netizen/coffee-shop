@@ -5,7 +5,6 @@ import {
   FaMotorcycle,
   FaCheckCircle,
   FaClock,
-  FaBoxOpen,
   FaUser,
   FaPhone,
   FaMapMarkerAlt,
@@ -16,6 +15,8 @@ import {
   FaTruck,
   FaHeadset,
   FaBell,
+  FaExclamationTriangle,
+  FaInfoCircle,
 } from 'react-icons/fa';
 import { MdDeliveryDining } from 'react-icons/md';
 import {
@@ -45,6 +46,13 @@ const RiderAssignedOrder = () => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [notification, setNotification] = useState(null);
   const [isSoundEnabled, setIsSoundEnabled] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  // ─── Debug: Log orders ────────────────────────────────────
+  useEffect(() => {
+    console.log('📦 Active Orders:', activeOrders);
+    console.log('📦 Completed Orders:', completedOrders);
+  }, [activeOrders, completedOrders]);
 
   // ─── Sound ────────────────────────────────────────────────
   const playNotificationSound = () => {
@@ -67,12 +75,16 @@ const RiderAssignedOrder = () => {
     });
 
     const socket = socketRef.current;
-    const riderId = JSON.parse(localStorage.getItem('user'))?._id;
+    const user = JSON.parse(localStorage.getItem('user'));
+    const riderId = user?._id;
+    
     if (riderId) {
       socket.emit('rider-join', riderId);
+      console.log('🔌 Rider joined socket:', riderId);
     }
 
     socket.on('new_order_assigned', (data) => {
+      console.log('📢 New order assigned:', data);
       playNotificationSound();
       setNotification({
         type: 'new-order',
@@ -84,6 +96,7 @@ const RiderAssignedOrder = () => {
     });
 
     socket.on('delivery_status_updated', (data) => {
+      console.log('📢 Status updated:', data);
       if (data.orderId) {
         dispatch(getRiderOrders());
         setNotification({
@@ -104,8 +117,21 @@ const RiderAssignedOrder = () => {
 
   // ─── Data fetching ────────────────────────────────────────
   useEffect(() => {
-    dispatch(getRiderOrders());
-  }, [dispatch]);
+    console.log('🔄 Fetching rider orders...');
+    dispatch(getRiderOrders())
+      .unwrap()
+      .then((result) => {
+        console.log('✅ Orders fetched successfully:', result);
+      })
+      .catch((err) => {
+        console.error('❌ Error fetching orders:', err);
+      });
+  }, [dispatch, refreshKey]);
+
+  // ─── Manual refresh ───────────────────────────────────────
+  const handleRefresh = () => {
+    setRefreshKey(prev => prev + 1);
+  };
 
   // ─── Clear messages ───────────────────────────────────────
   useEffect(() => {
@@ -121,6 +147,7 @@ const RiderAssignedOrder = () => {
 
   // ─── Status update handler ───────────────────────────────
   const handleUpdateStatus = (orderId, newStatus) => {
+    console.log(`🔄 Updating order ${orderId} to status: ${newStatus}`);
     dispatch(
       updateDeliveryStatus({
         orderId,
@@ -129,6 +156,8 @@ const RiderAssignedOrder = () => {
       })
     ).then(() => {
       dispatch(getRiderOrders());
+      // Close modal after update
+      setShowDetailModal(false);
     });
   };
 
@@ -153,28 +182,30 @@ const RiderAssignedOrder = () => {
       color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
       dotColor: 'bg-blue-500',
       icon: <FaClock className="text-blue-500" />,
-      nextStatus: 'out_for_delivery',
-      nextLabel: 'Out for Delivery',
     },
     out_for_delivery: {
       label: 'Out for Delivery',
       color: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
       dotColor: 'bg-orange-500',
       icon: <FaMotorcycle className="text-orange-500 animate-pulse" />,
-      nextStatus: 'delivered',
-      nextLabel: 'Mark Delivered',
     },
     delivered: {
-      label: 'Delivered',
+      label: 'Delivered ✅',
       color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
       dotColor: 'bg-green-500',
       icon: <FaCheckCircle className="text-green-500" />,
     },
     cancelled: {
-      label: 'Cancelled',
+      label: 'Cancelled ❌',
       color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
       dotColor: 'bg-red-500',
       icon: <FaTimes className="text-red-500" />,
+    },
+    preparing: {
+      label: 'Preparing',
+      color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+      dotColor: 'bg-yellow-500',
+      icon: <FaClock className="text-yellow-500" />,
     },
   };
 
@@ -182,29 +213,12 @@ const RiderAssignedOrder = () => {
   const counts = {
     active: activeOrders.length,
     out_for_delivery: activeOrders.filter((o) => o.orderStatus === 'out_for_delivery').length,
+    assigned: activeOrders.filter((o) => o.orderStatus === 'assigned_to_rider').length,
     delivered: completedOrders.filter((o) => o.orderStatus === 'delivered').length,
     total: activeOrders.length + completedOrders.length,
   };
 
-  // ─── Action button ────────────────────────────────────────
-  const renderActionButton = (order) => {
-    const status = order.orderStatus;
-    if (status === 'delivered' || status === 'cancelled') return null;
-
-    const config = statusConfig[status];
-    if (!config || !config.nextStatus) return null;
-
-    return (
-      <button
-        onClick={() => handleUpdateStatus(order._id, config.nextStatus)}
-        className="px-5 py-2.5 bg-[#4F46E5] text-white rounded-lg font-semibold hover:bg-[#4338CA] transition-all hover:shadow-lg hover:scale-105 flex items-center gap-2"
-      >
-        {config.nextLabel}
-      </button>
-    );
-  };
-
-  // ─── Loading / Error ──────────────────────────────────────
+  // ─── Loading ──────────────────────────────────────────────
   if (loading) {
     return (
       <div className="p-6 bg-gray-50 dark:bg-[#0F172A] min-h-screen">
@@ -225,17 +239,18 @@ const RiderAssignedOrder = () => {
     );
   }
 
+  // ─── Error ────────────────────────────────────────────────
   if (error) {
     return (
       <div className="p-6 bg-gray-50 dark:bg-[#0F172A] min-h-screen flex items-center justify-center">
         <div className="bg-white dark:bg-[#1E293B] rounded-xl p-8 text-center max-w-md border border-[#E2E8F0] dark:border-[#1E293B]">
           <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <FaTimes className="text-3xl text-red-500" />
+            <FaExclamationTriangle className="text-3xl text-red-500" />
           </div>
           <h3 className="text-lg font-semibold text-[#0F172A] dark:text-white mb-2">Failed to Load Orders</h3>
           <p className="text-[#64748B] dark:text-[#94A3B8] text-sm mb-4">{error}</p>
           <button
-            onClick={() => dispatch(getRiderOrders())}
+            onClick={handleRefresh}
             className="px-6 py-2 bg-[#4F46E5] text-white rounded-lg hover:bg-[#4338CA] transition-colors"
           >
             Try Again
@@ -312,6 +327,13 @@ const RiderAssignedOrder = () => {
               >
                 {isSoundEnabled ? '🔊' : '🔇'}
               </button>
+              <button
+                onClick={handleRefresh}
+                className="p-2 rounded-lg bg-[#4F46E5]/10 text-[#4F46E5] hover:bg-[#4F46E5]/20 transition-colors"
+                title="Refresh orders"
+              >
+                🔄
+              </button>
             </div>
             <p className="text-[#64748B] dark:text-[#94A3B8] ml-12">
               Track and update your assigned delivery orders
@@ -324,9 +346,9 @@ const RiderAssignedOrder = () => {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         {[
           { key: 'active', label: 'Active', count: counts.active, color: 'text-blue-500' },
+          { key: 'assigned', label: 'Assigned', count: counts.assigned, color: 'text-indigo-500' },
           { key: 'out_for_delivery', label: 'Out for Delivery', count: counts.out_for_delivery, color: 'text-orange-500' },
           { key: 'delivered', label: 'Delivered', count: counts.delivered, color: 'text-emerald-500' },
-          { key: 'total', label: 'Total Orders', count: counts.total, color: 'text-[#4F46E5]' },
         ].map((stat) => (
           <div
             key={stat.key}
@@ -339,6 +361,29 @@ const RiderAssignedOrder = () => {
           </div>
         ))}
       </div>
+
+      {/* Info Banner - No Active Orders */}
+      {activeOrders.length === 0 && completedOrders.length > 0 && (
+        <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+          <div className="flex items-center gap-3">
+            <FaInfoCircle className="text-blue-500 text-lg flex-shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                No Active Orders Right Now
+              </p>
+              <p className="text-xs text-blue-600 dark:text-blue-400">
+                You have {completedOrders.length} completed order{completedOrders.length > 1 ? 's' : ''}. Switch to "Completed" tab to view them.
+              </p>
+            </div>
+            <button
+              onClick={() => setActiveTab('completed')}
+              className="ml-auto px-4 py-1.5 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors whitespace-nowrap"
+            >
+              View Completed
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Search & Tabs */}
       <div className="bg-white dark:bg-[#1E293B] rounded-xl p-4 border border-[#E2E8F0] dark:border-[#1E293B] mb-6">
@@ -353,7 +398,7 @@ const RiderAssignedOrder = () => {
               className="w-full pl-10 pr-4 py-2.5 bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E2E8F0] dark:border-[#1E293B] rounded-lg text-[#0F172A] dark:text-white placeholder-[#94A3B8] focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent outline-none transition-all"
             />
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <button
               onClick={() => setActiveTab('active')}
               className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
@@ -362,7 +407,7 @@ const RiderAssignedOrder = () => {
                   : 'bg-[#F8FAFC] dark:bg-[#0F172A] text-[#64748B] dark:text-[#94A3B8] hover:bg-[#E2E8F0] dark:hover:bg-[#1E293B]'
               }`}
             >
-              Active ({activeOrders.length})
+              🟢 Active ({activeOrders.length})
             </button>
             <button
               onClick={() => setActiveTab('completed')}
@@ -372,7 +417,7 @@ const RiderAssignedOrder = () => {
                   : 'bg-[#F8FAFC] dark:bg-[#0F172A] text-[#64748B] dark:text-[#94A3B8] hover:bg-[#E2E8F0] dark:hover:bg-[#1E293B]'
               }`}
             >
-              Completed ({completedOrders.length})
+              ✅ Completed ({completedOrders.length})
             </button>
             {searchTerm && (
               <button
@@ -402,6 +447,14 @@ const RiderAssignedOrder = () => {
               ? 'You have no active orders at the moment'
               : "You haven't completed any deliveries yet"}
           </p>
+          {activeTab === 'active' && completedOrders.length > 0 && (
+            <button
+              onClick={() => setActiveTab('completed')}
+              className="mt-4 px-6 py-2 bg-[#4F46E5] text-white rounded-lg hover:bg-[#4338CA] transition-colors"
+            >
+              View {completedOrders.length} Completed Order{completedOrders.length > 1 ? 's' : ''}
+            </button>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -475,7 +528,7 @@ const RiderAssignedOrder = () => {
                     </div>
                   )}
 
-                  {/* Items Preview - CORRECT FIELD: products */}
+                  {/* Items Preview */}
                   <div>
                     <p className="text-xs font-semibold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider mb-1.5">
                       Items ({order.products?.length || 0})
@@ -502,7 +555,7 @@ const RiderAssignedOrder = () => {
                     </div>
                   </div>
 
-                  {/* Footer - CORRECT FIELD: amount */}
+                  {/* Footer - NO ACTION BUTTONS HERE */}
                   <div className="pt-3 border-t border-[#E2E8F0] dark:border-[#1E293B]">
                     <div className="flex items-center justify-between">
                       <div>
@@ -515,8 +568,7 @@ const RiderAssignedOrder = () => {
                         </p>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        {renderActionButton(order)}
-
+                        {/* Only Eye Icon and Contact Button - NO Action Buttons */}
                         <button
                           onClick={() => {
                             setSelectedOrder(order);
@@ -543,7 +595,9 @@ const RiderAssignedOrder = () => {
         </div>
       )}
 
-      {/* Order Details Modal - CORRECT FIELDS */}
+      {/* ============================================================ */}
+      {/* MODAL WITH ACTION BUTTONS - ONLY HERE */}
+      {/* ============================================================ */}
       {showDetailModal && selectedOrder && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 animate-fadeIn">
           <div className="bg-white dark:bg-[#1E293B] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl">
@@ -566,7 +620,17 @@ const RiderAssignedOrder = () => {
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)] space-y-6">
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)] space-y-6">
+              {/* Order Status Badge */}
+              <div className="flex items-center justify-between p-3 bg-[#F8FAFC] dark:bg-[#0F172A] rounded-xl">
+                <span className="text-sm font-medium text-[#64748B] dark:text-[#94A3B8]">Current Status</span>
+                <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                  statusConfig[selectedOrder.orderStatus]?.color || 'bg-gray-100'
+                }`}>
+                  {statusConfig[selectedOrder.orderStatus]?.label || selectedOrder.orderStatus}
+                </span>
+              </div>
+
               {/* Products */}
               <div>
                 <h3 className="font-semibold text-[#0F172A] dark:text-white mb-3 flex items-center gap-2">
@@ -621,7 +685,7 @@ const RiderAssignedOrder = () => {
                 )}
               </div>
 
-              {/* Payment & Total - CORRECT: amount */}
+              {/* Payment & Total */}
               <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-[#1E293B] dark:to-[#0F172A] rounded-xl p-4">
                 <div className="flex justify-between items-center">
                   <div>
@@ -632,25 +696,80 @@ const RiderAssignedOrder = () => {
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-[#64748B] dark:text-[#94A3B8]">Status</p>
-                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                      statusConfig[selectedOrder.orderStatus]?.color || 'bg-gray-100'
-                    }`}>
-                      {statusConfig[selectedOrder.orderStatus]?.label || selectedOrder.orderStatus}
-                    </span>
+                    <p className="text-sm text-[#64748B] dark:text-[#94A3B8]">Payment</p>
+                    <p className="text-sm font-semibold text-[#0F172A] dark:text-white">
+                      {selectedOrder.paymentStatus === 'paid' ? '✅ Paid' : '❌ Pending'}
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Modal Footer */}
+            {/* Modal Footer - Action Buttons ONLY HERE */}
             <div className="border-t border-[#E2E8F0] dark:border-[#1E293B] p-4 bg-[#F8FAFC] dark:bg-[#0F172A]">
-              <button
-                onClick={() => setShowDetailModal(false)}
-                className="w-full py-3 bg-[#4F46E5] text-white rounded-xl font-semibold hover:bg-[#4338CA] transition-colors"
-              >
-                Close
-              </button>
+              <div className="flex flex-col sm:flex-row gap-3">
+                {/* Show action buttons only for active orders */}
+                {selectedOrder.orderStatus !== 'delivered' && selectedOrder.orderStatus !== 'cancelled' ? (
+                  <>
+                    {selectedOrder.orderStatus === 'assigned_to_rider' && (
+                      <button
+                        onClick={() => handleUpdateStatus(selectedOrder._id, 'out_for_delivery')}
+                        className="flex-1 py-3 bg-orange-500 text-white rounded-xl font-semibold hover:bg-orange-600 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <FaMotorcycle className="text-lg" />
+                        Out for Delivery
+                      </button>
+                    )}
+                    
+                    {selectedOrder.orderStatus === 'out_for_delivery' && (
+                      <button
+                        onClick={() => handleUpdateStatus(selectedOrder._id, 'delivered')}
+                        className="flex-1 py-3 bg-green-500 text-white rounded-xl font-semibold hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <FaCheckCircle className="text-lg" />
+                        Mark Delivered
+                      </button>
+                    )}
+
+                    {/* Show both buttons if status is something else (fallback) */}
+                    {selectedOrder.orderStatus !== 'assigned_to_rider' && 
+                     selectedOrder.orderStatus !== 'out_for_delivery' && (
+                      <>
+                        <button
+                          onClick={() => handleUpdateStatus(selectedOrder._id, 'out_for_delivery')}
+                          className="flex-1 py-3 bg-orange-500 text-white rounded-xl font-semibold hover:bg-orange-600 transition-colors flex items-center justify-center gap-2"
+                        >
+                          <FaMotorcycle className="text-lg" />
+                          Out for Delivery
+                        </button>
+                        <button
+                          onClick={() => handleUpdateStatus(selectedOrder._id, 'delivered')}
+                          className="flex-1 py-3 bg-green-500 text-white rounded-xl font-semibold hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+                        >
+                          <FaCheckCircle className="text-lg" />
+                          Mark Delivered
+                        </button>
+                      </>
+                    )}
+
+                    {/* Cancel button for active orders */}
+                    <button
+                      onClick={() => setShowDetailModal(false)}
+                      className="py-3 px-6 bg-gray-200 dark:bg-[#1E293B] text-[#64748B] dark:text-[#94A3B8] rounded-xl font-semibold hover:bg-gray-300 dark:hover:bg-[#2D3748] transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  /* Only Close button for completed orders */
+                  <button
+                    onClick={() => setShowDetailModal(false)}
+                    className="flex-1 py-3 bg-[#4F46E5] text-white rounded-xl font-semibold hover:bg-[#4338CA] transition-colors"
+                  >
+                    Close
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>

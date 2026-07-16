@@ -150,7 +150,7 @@ const Gallery = () => {
     return (
         <>
             {/* ========== HERO SECTION WITH OVERLAP ========== */}
-            <section className="relative h-[50vh] md:h-[80vh] min-h-[400px] md:min-h-[500px] overflow-hidden">
+            <section className="relative h-[50vh] md:h-[80vh] min-h-[400px] md:min-h-[500px] bg-[#FCF2E9] overflow-hidden">
                 {/* Background Image */}
                 <div className="absolute inset-0 w-full h-full">
                     <img
