@@ -409,12 +409,7 @@ const DineInOrders = () => {
                           >
                             <FaEye className="text-sm" />
                           </button>
-                          <button
-                            className="p-2 bg-[#F1F5F9] dark:bg-dark-bg/50 text-[#64748B] dark:text-dark-text rounded-lg hover:bg-[#E2E8F0] dark:hover:bg-dark-border transition-colors"
-                            title="Print Bill"
-                          >
-                            <FaPrint className="text-sm" />
-                          </button>
+                         
                         </div>
                       </div>
                     </div>

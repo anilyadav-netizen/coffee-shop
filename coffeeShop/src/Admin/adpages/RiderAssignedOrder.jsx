@@ -579,12 +579,7 @@ const RiderAssignedOrder = () => {
                         >
                           <FaEye className="text-sm" />
                         </button>
-                        <button
-                          className="p-2 bg-[#F1F5F9] dark:bg-[#0F172A] text-[#64748B] dark:text-[#94A3B8] rounded-lg hover:bg-[#E2E8F0] dark:hover:bg-[#1E293B] transition-colors"
-                          title="Contact Customer"
-                        >
-                          <FaHeadset className="text-sm" />
-                        </button>
+                        
                       </div>
                     </div>
                   </div>

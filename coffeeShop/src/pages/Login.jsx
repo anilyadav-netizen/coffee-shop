@@ -120,26 +120,10 @@ const Login = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
-            {/* Background */}
-            <div className="absolute inset-0 -z-10">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />
-                <div className="absolute inset-0 bg-gradient-to-tr from-[#EDE0D4]/20 via-transparent to-[#D4B896]/10" />
-
-                <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-amber-400/15 rounded-full blur-[120px] animate-pulse-slow" />
-                <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-amber-700/10 rounded-full blur-[100px] animate-pulse-slow-delay" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[150px] animate-pulse-slow" />
-
-                <div className="absolute inset-0 pointer-events-none opacity-10">
-                    <div className="absolute top-20 left-10 text-6xl rotate-12 animate-float">🫘</div>
-                    <div className="absolute bottom-32 right-20 text-6xl -rotate-12 animate-float-delay">🫘</div>
-                    <div className="absolute top-1/3 right-1/4 text-4xl rotate-45 animate-float-slow">☕</div>
-                    <div className="absolute bottom-1/4 left-1/3 text-5xl -rotate-45 animate-float-delay">🫘</div>
-                </div>
-            </div>
 
             <div className="w-full max-w-md">
                 <div className="text-center mb-4">
-                    <h2 className="text-3xl md:text-4xl font-bold text-[#0D7C53] tracking-tight">
+                    <h2 className="text-3xl md:text-4xl font-bold text-[#E85D3A] tracking-tight">
                         Sign In
                     </h2>
                     <p className="text-gray-500 mt-1">
@@ -147,7 +131,7 @@ const Login = () => {
                     </p>
                 </div>
 
-                <div className="bg-white/40 backdrop-blur-md rounded-3xl p-7 shadow-md hover:shadow-lg transition-all duration-500 border border-white/30">
+                <div className="bg-white/40 backdrop-blur-md rounded-3xl p-7 shadow-md hover:shadow-lg transition-all duration-500 border border-[#E86A33]/20">
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Email Field */}
                         <div>
@@ -156,7 +140,7 @@ const Login = () => {
                             </label>
                             <div className={`relative group transition-all duration-300 ${focusedField === 'email' ? 'scale-[1.01]' : ''
                                 }`}>
-                                <Mail className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-300 ${focusedField === 'email' ? 'text-[#0D7C53]' : 'text-gray-400'
+                                <Mail className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-300 ${focusedField === 'email' ? 'text-[#E85D3A]' : 'text-gray-400'
                                     }`} size={20} />
                                 <input
                                     type="email"
@@ -166,11 +150,12 @@ const Login = () => {
                                     onFocus={() => setFocusedField('email')}
                                     onBlur={() => setFocusedField(null)}
                                     placeholder="Enter your email"
-                                    className={`w-full bg-white/60 border rounded-xl py-3.5 pl-12 pr-4 text-gray-800 placeholder-gray-400 outline-none transition-all duration-300 ${errors.email
+                                    className={`w-full bg-white/60 border rounded-xl py-3.5 pl-12 pr-4 text-gray-800 placeholder-gray-400 outline-none transition-all duration-300 
+                                        ${errors.email
                                         ? 'border-red-500/50 focus:border-red-500'
                                         : focusedField === 'email'
-                                            ? 'border-[#0D7C53] shadow-[0_0_30px_rgba(13,124,83,0.1)]'
-                                            : 'border-white/30 focus:border-[#0D7C53]'
+                                            ? 'border-[#E85D3A] shadow-[0_0_30px_rgba(232,93,58,0.15)]'
+                                            : 'border-gray-200 hover:border-gray-300 focus:border-[#E85D3A]'
                                         }`}
                                 />
                                 {email && !errors.email && (
@@ -192,7 +177,7 @@ const Login = () => {
                             </label>
                             <div className={`relative group transition-all duration-300 ${focusedField === 'password' ? 'scale-[1.01]' : ''
                                 }`}>
-                                <Lock className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-300 ${focusedField === 'password' ? 'text-[#0D7C53]' : 'text-gray-400'
+                                <Lock className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-300 ${focusedField === 'password' ? 'text-[#E85D3A]' : 'text-gray-400'
                                     }`} size={20} />
                                 <input
                                     type={showPassword ? 'text' : 'password'}
@@ -202,11 +187,12 @@ const Login = () => {
                                     onFocus={() => setFocusedField('password')}
                                     onBlur={() => setFocusedField(null)}
                                     placeholder="Enter your password"
-                                    className={`w-full bg-white/60 border rounded-xl py-3.5 pl-12 pr-12 text-gray-800 placeholder-gray-400 outline-none transition-all duration-300 ${errors.password
+                                    className={`w-full bg-white/60 border rounded-xl py-3.5 pl-12 pr-12 text-gray-800 placeholder-gray-400 outline-none transition-all duration-300 
+                                        ${errors.password
                                         ? 'border-red-500/50 focus:border-red-500'
                                         : focusedField === 'password'
-                                            ? 'border-[#0D7C53] shadow-[0_0_30px_rgba(13,124,83,0.1)]'
-                                            : 'border-white/30 focus:border-[#0D7C53]'
+                                            ? 'border-[#E85D3A] shadow-[0_0_30px_rgba(232,93,58,0.15)]'
+                                            : 'border-gray-200 hover:border-gray-300 focus:border-[#E85D3A]'
                                         }`}
                                 />
                                 <button
@@ -226,8 +212,8 @@ const Login = () => {
                         <div className="flex items-center justify-between">
                             <label className="flex items-center gap-2 text-base text-gray-600 cursor-pointer group">
                                 <div className={`w-5 h-5 rounded-md border-2 transition-all duration-300 flex items-center justify-center ${rememberMe
-                                    ? 'bg-[#0D7C53] border-[#0D7C53]'
-                                    : 'border-gray-300 group-hover:border-[#0D7C53]'
+                                    ? 'bg-[#E85D3A] border-[#E85D3A]'
+                                    : 'border-gray-300 group-hover:border-[#E85D3A]'
                                     }`}>
                                     <input
                                         type="checkbox"
@@ -237,11 +223,11 @@ const Login = () => {
                                     />
                                     {rememberMe && <CheckCircle size={14} className="text-white" />}
                                 </div>
-                                <span className={rememberMe ? 'text-[#0D7C53]' : ''}>Remember me</span>
+                                <span className={rememberMe ? 'text-[#E85D3A]' : ''}>Remember me</span>
                             </label>
                             <Link
                                 to="/forgot-password"
-                                className="text-base text-[#0D7C53] hover:text-green-600 transition-colors hover:underline"
+                                className="text-base text-[#E85D3A] hover:text-[#d45230] transition-colors hover:underline"
                             >
                                 Forgot Password?
                             </Link>
@@ -261,11 +247,11 @@ const Login = () => {
                             </div>
                         )}
 
-                        {/* Login Button */}
+                        {/* Login Button - now using the brand gradient */}
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full text-base bg-gradient-to-r from-[#0D7C53] to-green-600 hover:from-green-600 hover:to-[#0D7C53] text-white py-3.5 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                            className="w-full text-base bg-gradient-to-r from-[#E85D3A] to-amber-500 hover:from-amber-500 hover:to-[#E85D3A] text-white py-3.5 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                         >
                             {loading ? (
                                 <>
@@ -282,7 +268,7 @@ const Login = () => {
 
                         <p className="text-center text-base text-gray-500">
                             Don't have an account?{' '}
-                            <Link to="/signup" className="text-[#0D7C53] hover:text-green-600 font-semibold transition-colors hover:underline">
+                            <Link to="/signup" className="text-[#E85D3A] hover:text-[#d45230] font-semibold transition-colors hover:underline">
                                 Sign Up
                             </Link>
                         </p>

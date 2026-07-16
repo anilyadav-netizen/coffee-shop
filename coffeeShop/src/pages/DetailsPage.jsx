@@ -29,7 +29,7 @@ import {
     RotateCcw
 } from 'lucide-react';
 
-// Define HeartIcon component
+// Define HeartIcon component (unchanged)
 const HeartIcon = ({ isWishlisted = false, className = "" }) => (
     <svg
         className={`w-5 h-5 transition-colors ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-400 group-hover:text-red-500'} ${className}`}
@@ -111,7 +111,7 @@ const DetailsPage = () => {
         }
     }, [dispatch, id, isAuthenticated]);
 
-    // Navbar styling
+    // Navbar styling (unchanged)
     useEffect(() => {
         const navbar = document.querySelector('nav');
         if (navbar) {
@@ -299,7 +299,7 @@ const DetailsPage = () => {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]">
-                <div className="w-10 h-10 border-4 border-[#0D7C53] border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-10 h-10 border-4 border-[#E86A33] border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
     }
@@ -311,7 +311,7 @@ const DetailsPage = () => {
                 <p className="text-xl mb-4 text-red-500">{error}</p>
                 <button
                     onClick={() => dispatch(getSingleProduct(id))}
-                    className="bg-[#0D7C53] text-white px-6 py-2 rounded-full hover:bg-green-700 transition-all"
+                    className="bg-[#E86A33] text-white px-6 py-2 rounded-full hover:bg-[#D55B25] transition-all"
                 >
                     Try Again
                 </button>
@@ -330,7 +330,7 @@ const DetailsPage = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3] pt-20 sm:pt-28 px-2 sm:px-4 pb-10 overflow-hidden">
-            {/* Background Effects */}
+            {/* Background Effects (unchanged) */}
             <div className="absolute inset-0 -z-10 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />
                 <div className="absolute inset-0 bg-gradient-to-tr from-[#EDE0D4]/20 via-transparent to-[#D4B896]/10" />
@@ -375,17 +375,19 @@ const DetailsPage = () => {
                             {/* Category - Dynamically from Redux */}
                             <div className="flex items-center gap-2 flex-wrap">
                                 <span
-                                    className={`font-semibold text-sm uppercase tracking-wide px-3 py-1 rounded-full border ${isNonVegCategory
-                                        ? 'bg-red-100 text-red-600 border-red-300'
-                                        : 'bg-green-100 text-[#0D7C53] border-green-300'
-                                        }`}
+                                    className={`font-semibold text-sm uppercase tracking-wide px-3 py-1 rounded-full border ${
+                                        isNonVegCategory
+                                            ? 'bg-red-100 text-red-600 border-red-300'
+                                            : 'bg-[#FFE8DA] text-[#E86A33] border-[#E86A33]/30'
+                                    }`}
                                 >
                                     {product.category?.name || "Uncategorized"}
                                 </span>
 
                                 {product.category?.type && (
-                                    <span className={`text-sm font-medium flex items-center gap-1 ${isNonVegCategory ? 'text-red-500' : 'text-[#0D7C53]'
-                                        }`}>
+                                    <span className={`text-sm font-medium flex items-center gap-1 ${
+                                        isNonVegCategory ? 'text-red-500' : 'text-[#E86A33]'
+                                    }`}>
                                         {isNonVegCategory ? (
                                             <svg className="w-4 h-4" viewBox="0 0 24 24">
                                                 <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" strokeWidth="2" fill="none" />
@@ -411,18 +413,18 @@ const DetailsPage = () => {
                             <div className="flex items-center gap-3 mt-3">
                                 {product.discountPrice ? (
                                     <>
-                                        <span className="text-3xl sm:text-4xl font-bold text-[#0D7C53]">
+                                        <span className="text-3xl sm:text-4xl font-bold text-[#E86A33]">
                                             ₹{product.discountPrice}
                                         </span>
                                         <span className="text-lg sm:text-xl line-through text-gray-400">
                                             ₹{product.price}
                                         </span>
-                                        <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                                        <span className="bg-gradient-to-r from-[#E86A33] to-[#F59E6B] text-white px-3 py-1 rounded-full text-sm font-semibold">
                                             {product.discountPercentage || 0}% OFF
                                         </span>
                                     </>
                                 ) : (
-                                    <span className="text-3xl sm:text-4xl font-bold text-[#0D7C53]">
+                                    <span className="text-3xl sm:text-4xl font-bold text-[#E86A33]">
                                         ₹{product.price}
                                     </span>
                                 )}
@@ -457,7 +459,7 @@ const DetailsPage = () => {
                             <div className="mt-4 border-t border-gray-200/50 pt-4">
                                 <button
                                     onClick={() => setShowMoreDetails(!showMoreDetails)}
-                                    className="flex items-center gap-2 text-[#0D7C53] font-medium hover:text-green-700 transition-colors"
+                                    className="flex items-center gap-2 text-[#E86A33] font-medium hover:text-[#D55B25] transition-colors"
                                 >
                                     <Info size={18} />
                                     <span>More Details</span>
@@ -512,7 +514,7 @@ const DetailsPage = () => {
                                 <button
                                     onClick={handleAddToCart}
                                     disabled={product.stock === 0}
-                                    className="flex-1 py-3.5 sm:py-4 bg-gradient-to-r from-[#0D7C53] to-green-600 text-white rounded-full font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 text-base sm:text-lg"
+                                    className="flex-1 py-3.5 sm:py-4 bg-gradient-to-r from-[#E86A33] to-[#F59E6B] text-white rounded-full font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 text-base sm:text-lg"
                                 >
                                     <ShoppingBag size={20} className="sm:w-6 sm:h-6" />
                                     <span>Add to Cart</span>
@@ -524,7 +526,7 @@ const DetailsPage = () => {
                                     className={`px-5 sm:px-6 py-3.5 sm:py-4 rounded-full font-semibold transition-all duration-300 flex items-center justify-center gap-2 border-2 ${
                                         isProductInWishlist
                                             ? 'bg-red-50 border-red-500 text-red-500 hover:bg-red-100'
-                                            : 'bg-white/80 border-gray-300 text-gray-700 hover:border-[#0D7C53] hover:text-[#0D7C53]'
+                                            : 'bg-white/80 border-gray-300 text-gray-700 hover:border-[#E86A33] hover:text-[#E86A33]'
                                     } disabled:opacity-50 disabled:cursor-not-allowed`}
                                 >
                                     <Heart 
@@ -542,17 +544,17 @@ const DetailsPage = () => {
                             {/* Trust Badges */}
                             <div className="mt-6 flex items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-500">
                                 <div className="flex items-center gap-1.5">
-                                    <Shield size={16} className="text-[#0D7C53]" />
+                                    <Shield size={16} className="text-[#E86A33]" />
                                     <span>Quality Guaranteed</span>
                                 </div>
                                 <div className="w-px h-4 bg-gray-300"></div>
                                 <div className="flex items-center gap-1.5">
-                                    <Truck size={16} className="text-[#0D7C53]" />
+                                    <Truck size={16} className="text-[#E86A33]" />
                                     <span>Free Delivery</span>
                                 </div>
                                 <div className="w-px h-4 bg-gray-300"></div>
                                 <div className="flex items-center gap-1.5">
-                                    <RotateCcw size={16} className="text-[#0D7C53]" />
+                                    <RotateCcw size={16} className="text-[#E86A33]" />
                                     <span>Easy Returns</span>
                                 </div>
                             </div>
@@ -564,7 +566,7 @@ const DetailsPage = () => {
                 {relatedProducts.length > 0 && (
                     <div className="mt-10 sm:mt-16">
                         <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-4 sm:mb-6">
-                            Related <span className="text-[#0D7C53]">Products</span>
+                            Related <span className="text-[#E86A33]">Products</span>
                         </h2>
                         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                             {relatedProducts.map((relatedProduct) => {
@@ -579,7 +581,7 @@ const DetailsPage = () => {
                                     <div
                                         key={relatedProduct._id}
                                         onClick={() => navigate(`/product/${relatedProduct._id}`)}
-                                        className="group backdrop-blur-xl bg-white/30 border border-white/40 rounded-3xl overflow-hidden shadow-2xl shadow-black/10 hover:shadow-[#0D7C53]/20 transition-all duration-500 hover:-translate-y-2 hover:bg-white/40 relative cursor-pointer flex flex-col"
+                                        className="group backdrop-blur-xl bg-white/30 border border-white/40 rounded-3xl overflow-hidden shadow-2xl shadow-black/10 hover:shadow-[#E86A33]/20 transition-all duration-500 hover:-translate-y-2 hover:bg-white/40 relative cursor-pointer flex flex-col"
                                     >
                                         <div className="relative overflow-hidden aspect-[4/3] bg-white/50">
                                             <img
@@ -591,7 +593,7 @@ const DetailsPage = () => {
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                                             {relatedProduct.discountPrice && (
-                                                <span className="absolute top-3 left-3 z-10 bg-gradient-to-r from-green-600 to-[#0D7C53] text-white text-xs px-3.5 py-1.5 rounded-full font-bold shadow-lg flex items-center gap-1">
+                                                <span className="absolute top-3 left-3 z-10 bg-gradient-to-r from-[#E86A33] to-[#F59E6B] text-white text-xs px-3.5 py-1.5 rounded-full font-bold shadow-lg flex items-center gap-1">
                                                     <span className="relative flex h-2 w-2">
                                                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                                                         <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
@@ -625,25 +627,25 @@ const DetailsPage = () => {
                                             <div className="flex items-center gap-2 mt-2">
                                                 {relatedProduct.discountPrice ? (
                                                     <>
-                                                        <span className="font-bold text-[#0D7C53] text-sm sm:text-base">
+                                                        <span className="font-bold text-[#E86A33] text-sm sm:text-base">
                                                             ₹{relatedProduct.discountPrice}
                                                         </span>
                                                         <span className="text-xs line-through text-gray-400">
                                                             ₹{relatedProduct.price}
                                                         </span>
-                                                        <span className="ml-auto text-xs bg-green-100 text-[#0D7C53] px-2 py-0.5 rounded-full font-semibold">
+                                                        <span className="ml-auto text-xs bg-[#FFE8DA] text-[#E86A33] px-2 py-0.5 rounded-full font-semibold">
                                                             Save ₹{relatedProduct.price - relatedProduct.discountPrice}
                                                         </span>
                                                     </>
                                                 ) : (
-                                                    <span className="font-bold text-[#0D7C53] text-sm sm:text-base">
+                                                    <span className="font-bold text-[#E86A33] text-sm sm:text-base">
                                                         ₹{relatedProduct.price}
                                                     </span>
                                                 )}
                                             </div>
 
                                             <button
-                                                className="mt-2 w-full bg-gradient-to-r bg-emerald-500 hover:bg-emerald-600 text-white from-[#0D7C53] to-[#169466] py-2.5 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 group/btn text-sm"
+                                                className="mt-2 w-full bg-gradient-to-r from-[#E86A33] to-[#F59E6B] text-white hover:shadow-lg py-2.5 rounded-xl font-semibold transition-all duration-300 shadow-md flex items-center justify-center gap-2 group/btn text-sm"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     handleRelatedAddToCart(relatedProduct, e);
