@@ -2,24 +2,30 @@ import { Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 const RoleRoute = ({ children, allowedRoles }) => {
-    const { user, loading, isAuthenticated } = useSelector(
-        (state) => state.auth
-    );
+  const { user, loading, isAuthenticated } = useSelector(
+    (state) => state.auth
+  );
 
-    // Profile load hone ka wait karo
-    if (loading) {
-        return <div>Loading...</div>;
+  if (loading) return <div>Loading...</div>;
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!allowedRoles.includes(user?.role)) {
+    // Rider accessing admin-only page → redirect to rider dashboard
+    if (user?.role === "rider") {
+      return <Navigate to="/admin" replace />;
     }
-
-    if (!isAuthenticated) {
-        return <Navigate to="/login" replace />;
+    // Admin accessing rider-only page → redirect to admin dashboard
+    if (user?.role === "admin") {
+      return <Navigate to="/admin" replace />;
     }
+    // Any other role (e.g., "user") → home
+    return <Navigate to="/" replace />;
+  }
 
-    if (!allowedRoles.includes(user?.role)) {
-        return <Navigate to="/" replace />;
-    }
-
-    return children;
+  return children;
 };
 
 export default RoleRoute;

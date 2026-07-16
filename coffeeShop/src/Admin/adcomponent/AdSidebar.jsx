@@ -32,14 +32,15 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
   const buttonRef = useRef(null);
 
   // Role-based menu configuration
+  // Inside AdSidebar component, the useMemo for menuItems:
   const menuItems = useMemo(() => {
     const allMenus = [
       {
         name: "Dashboard",
         path: "/admin",
         icon: <MdDashboard size={20} />,
-        roles: ["admin"],
-        exact: true, // for end prop
+        roles: ["admin", "rider"],
+        exact: true,
       },
       {
         name: "Products",
@@ -69,14 +70,14 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
         name: "Delivery Orders",
         path: "/admin/orders/delivery",
         icon: <FaTruck size={20} />,
-        roles: ["admin", "rider"],
+        roles: ["admin"],   // ✅ rider added here
       },
       {
         name: "All Orders",
         path: "/admin/orders",
         icon: <FiPackage size={20} />,
         roles: ["admin"],
-        exact: true, // so it only matches exactly /admin/orders
+        exact: true,
       },
       {
         name: "Rider",
@@ -94,7 +95,7 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
         name: "RiderOrder",
         path: "/admin/riderassigned",
         icon: <FaUsers size={20} />,
-        roles: ["admin","rider"],
+        roles: ["rider"],
       },
     ];
     return allMenus.filter((item) => item.roles.includes(user?.role));
@@ -144,7 +145,7 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
 
   const handleLogout = async () => {
     await dispatch(logout());
-    navigate("/", { replace: true });
+    navigate("/login", { replace: true });
   };
 
   return (
@@ -189,10 +190,9 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
             end={item.exact || false} // ✅ exact match only for Dashboard and All Orders
             onClick={onClose}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                isActive
-                  ? "bg-[#3B82F6] text-white shadow-md shadow-[#3B82F6]/20 dark:shadow-[#3B82F6]/10"
-                  : "text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] hover:text-[#0F172A] dark:hover:text-white"
+              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${isActive
+                ? "bg-[#3B82F6] text-white shadow-md shadow-[#3B82F6]/20 dark:shadow-[#3B82F6]/10"
+                : "text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] hover:text-[#0F172A] dark:hover:text-white"
               }`
             }
           >
@@ -210,11 +210,10 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
                 <span className="flex-1 text-lg font-medium">{item.name}</span>
                 {item.badge && (
                   <span
-                    className={`px-2 py-0.5 text-base font-bold rounded-full ${
-                      isActive
+                    className={`px-2 py-0.5 text-base font-bold rounded-full ${isActive
                         ? "bg-white/20 text-white"
                         : "bg-[#3B82F6]/10 dark:bg-[#3B82F6]/20 text-[#3B82F6] dark:text-[#60A5FA]"
-                    }`}
+                      }`}
                   >
                     {item.badge}
                   </span>
@@ -250,9 +249,8 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
               </div>
             </div>
             <FaChevronUp
-              className={`text-[#64748B] dark:text-[#94A3B8] transition-transform duration-200 ${
-                profileOpen ? "rotate-180" : ""
-              }`}
+              className={`text-[#64748B] dark:text-[#94A3B8] transition-transform duration-200 ${profileOpen ? "rotate-180" : ""
+                }`}
               size={14}
             />
           </button>

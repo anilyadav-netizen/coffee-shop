@@ -54,9 +54,7 @@ import DetailsPage from "./pages/DetailsPage";
 import JourneyDetailsPage from "./pages/JourneyDetailsPage";
 import RiderAssignedOrder from "./Admin/adpages/RiderAssignedOrder";
 
-
 function App() {
-
   const dispatch = useDispatch();
   const { token, authChecked, user } = useSelector((state) => state.auth);
 
@@ -65,13 +63,13 @@ function App() {
       dispatch(getProfile());
     }
   }, [dispatch, token, authChecked]);
+
   return (
     <BrowserRouter>
       <ScrollToTop />
       <ToastContainer />
 
       <Routes>
-
         {/* ================= USER ================= */}
         <Route element={<UserLayouts />}>
           <Route index element={<Home />} />
@@ -113,59 +111,183 @@ function App() {
         <Route
           path="/admin"
           element={
-            <RoleRoute allowedRoles={["admin", "rider"]}>
+            <PrivateRoute>
               <AdminLayout />
-            </RoleRoute>
+            </PrivateRoute>
           }
         >
+          {/* Dashboard – shared between admin & rider */}
           <Route
             index
             element={
-              user?.role === "rider" ? (
-                <Navigate to="/admin/orders/delivery" replace />
-              ) : (
+              <RoleRoute allowedRoles={["admin", "rider"]}>
                 <Dashboard />
-              )
+              </RoleRoute>
             }
           />
 
-          <Route path="orders" element={<Orders />} />
-          <Route path="products" element={<Products />} />
-          <Route path="add-product" element={<AddProduct />} />
-          <Route path="update-product/:id" element={<AddProduct />} />
+          {/* Admin-only routes */}
+          <Route
+            path="orders"
+            element={
+              <RoleRoute allowedRoles={["admin"]}>
+                <Orders />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="products"
+            element={
+              <RoleRoute allowedRoles={["admin"]}>
+                <Products />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="add-product"
+            element={
+              <RoleRoute allowedRoles={["admin"]}>
+                <AddProduct />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="update-product/:id"
+            element={
+              <RoleRoute allowedRoles={["admin"]}>
+                <AddProduct />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="category"
+            element={
+              <RoleRoute allowedRoles={["admin"]}>
+                <Category />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="add-category"
+            element={
+              <RoleRoute allowedRoles={["admin"]}>
+                <AddCategory />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="update-category/:id"
+            element={
+              <RoleRoute allowedRoles={["admin"]}>
+                <AddCategory />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="users"
+            element={
+              <RoleRoute allowedRoles={["admin"]}>
+                <Users />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="user/:id"
+            element={
+              <RoleRoute allowedRoles={["admin"]}>
+                <UserDetails />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="update-user/:id"
+            element={
+              <RoleRoute allowedRoles={["admin"]}>
+                <UserDetails />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="riders"
+            element={
+              <RoleRoute allowedRoles={["admin"]}>
+                <Riders />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="rider/:id"
+            element={
+              <RoleRoute allowedRoles={["admin"]}>
+                <RiderDetails />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="orders/dine-in"
+            element={
+              <RoleRoute allowedRoles={["admin"]}>
+                <DineInOrders />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="orders/dine-in/:id"
+            element={
+              <RoleRoute allowedRoles={["admin"]}>
+                <DineInDetails />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="tables"
+            element={
+              <RoleRoute allowedRoles={["admin"]}>
+                <TablePage />
+              </RoleRoute>
+            }
+          />
 
-          <Route path="category" element={<Category />} />
-          <Route path="add-category" element={<AddCategory />} />
-          <Route path="update-category/:id" element={<AddCategory />} />
-
-
-          <Route path="profile" element={<AdminProfile />} />
-
-          <Route path="users" element={<Users />} />
-          <Route path="user/:id" element={<UserDetails />} />
-          <Route path="update-user/:id" element={<UserDetails />} />
-
-          <Route path="riders" element={<Riders />} />
-          <Route path="rider/:id" element={<RiderDetails />} />
-
-          <Route path="orders/dine-in" element={<DineInOrders />} />
-          <Route path="orders/dine-in/:id" element={<DineInDetails />} />
-
-          <Route path="orders/delivery" element={<DeliveryOrders />} />
+          {/* Shared routes: Profile, Delivery Orders (admin + rider) */}
+          <Route
+            path="profile"
+            element={
+              <RoleRoute allowedRoles={["admin", "rider"]}>
+                <AdminProfile />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="orders/delivery"
+            element={
+              <RoleRoute allowedRoles={["admin"]}>
+                <DeliveryOrders />
+              </RoleRoute>
+            }
+          />
           <Route
             path="orders/delivery/:id"
-            element={<DeliveryDetailsPage />}
+            element={
+              <RoleRoute allowedRoles={["admin", "rider"]}>
+                <DeliveryDetailsPage />
+              </RoleRoute>
+            }
           />
-          <Route path="riderassigned" element={<RiderAssignedOrder />} />
 
-
-          <Route path="tables" element={<TablePage />} />
+          {/* Rider-only route */}
+          <Route
+            path="riderassigned"
+            element={
+              <RoleRoute allowedRoles={["rider"]}>
+                <RiderAssignedOrder />
+              </RoleRoute>
+            }
+          />
         </Route>
 
         {/* ================= AUTH ================= */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
-
       </Routes>
     </BrowserRouter>
   );
