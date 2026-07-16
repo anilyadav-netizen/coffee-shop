@@ -103,7 +103,7 @@ const Review = () => {
         <section className="py-4 px-4 bg-white">
             <div className="max-w-[102rem] mx-auto">
                 {/* Header */}
-                <div className="text-center mb-12">
+                <div className="text-center mb-8">
                     <h2 className="text-4xl font-bold text-[#1F2937]">
                         What Our <span className="text-[#DC8D64]">Food Lovers</span> Say
                     </h2>

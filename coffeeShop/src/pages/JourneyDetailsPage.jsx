@@ -206,7 +206,7 @@ const TimelineItem = ({ item, index }) => {
                     transition={{ duration: 0.8, delay: 0.2 }}
                     className={`w-full md:w-5/12 ${isLeft ? 'md:text-right' : 'md:text-left'}`}
                 >
-                    <Card className="p-8 hover:-translate-y-1 transition-transform duration-300">
+                    <Card className="p-8 transition-transform duration-300">
                         <div className={`flex items-center gap-4 mb-4 ${isLeft ? 'md:flex-row-reverse' : ''}`}>
                             <div className="w-14 h-14 rounded-full bg-[#0D7C53]/10 flex items-center justify-center text-[#0D7C53] flex-shrink-0">
                                 {getIcon(item.icon)}
@@ -252,13 +252,12 @@ const TimelineItem = ({ item, index }) => {
                     transition={{ duration: 0.8, delay: 0.4 }}
                     className="w-full md:w-5/12"
                 >
-                    <div className="rounded-2xl overflow-hidden shadow-lg shadow-[#0D7C53]/10 group">
+                    <div className="rounded-2xl overflow-hidden shadow-lg shadow-[#0D7C53]/10">
                         <img
                             src={item.image}
                             alt={item.title}
-                            className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-700"
+                            className="w-full h-56 object-cover"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </div>
                 </motion.div>
             </div>
@@ -337,7 +336,7 @@ const BrewingMethodsSection = () => {
                 <h2 className="text-4xl md:text-5xl font-bold text-gray-800 text-center">
                     Brewing Methods
                 </h2>
-                <p className="text-gray-600 text-center max-w-2xl mx-auto mb-8">
+                <p className="text-gray-600 text-center max-w-2xl mx-auto mb-8 mt-1">
                     Discover the perfect brewing method for your taste
                 </p>
             </AnimatedSection>
@@ -584,15 +583,15 @@ const FAQSection = () => {
     return (
         <Section>
             <AnimatedSection>
-                <h2 className="text-4xl md:text-5xl font-bold text-gray-800 text-center mb-4">
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-800 text-center mb-3">
                     FAQ
                 </h2>
-                <p className="text-gray-600 text-center max-w-2xl mx-auto mb-12">
+                <p className="text-gray-600 text-center max-w-2xl mx-auto mb-7">
                     Common questions about our coffee
                 </p>
             </AnimatedSection>
 
-            <div className="max-w-3xl mx-auto space-y-4">
+            <div className="max-w-6xl mx-auto space-y-4">
                 {faqData.map((faq) => (
                     <FAQItem key={faq.id} faq={faq} />
                 ))}

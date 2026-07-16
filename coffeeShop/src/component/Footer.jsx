@@ -30,7 +30,7 @@ const Footer = () => {
             <div className="relative w-full h-32 md:h-48 overflow-hidden px-4">
                 {/* Background */}
                 <div className="absolute inset-0 bg-gradient-to-b from-[#1a0f0a] to-[#0a0604]"></div>
-                
+
                 {/* Coffee Background Image */}
                 <div className="absolute inset-0 opacity-20">
                     <img
@@ -39,10 +39,10 @@ const Footer = () => {
                         className="w-full h-full object-cover"
                     />
                 </div>
-                
+
                 {/* Gradient Overlay for Smooth Transition */}
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#1a0f0a]/50 to-[#1a0f0a]"></div>
-                
+
                 {/* Floating Coffee Beans with Animation */}
                 <div className="absolute inset-0 flex items-center justify-around opacity-30 pointer-events-none">
                     {['☕', '🫘', '☕', '🫘', '☕'].map((emoji, index) => (
@@ -58,7 +58,7 @@ const Footer = () => {
                         </span>
                     ))}
                 </div>
-                
+
                 {/* Center Content */}
                 <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4">
                     <span className="text-3xl md:text-5xl mb-2">☕</span>
@@ -85,25 +85,27 @@ const Footer = () => {
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8">
                     {/* Main Footer Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
-                        
+
                         {/* Brand Section */}
                         <div className="space-y-4">
-                            <div className="flex items-center gap-3">
-                                <div className="relative group">
-                                    <img
-                                        src="https://cdn-icons-png.flaticon.com/512/924/924514.png"
-                                        alt="Coffee Logo"
-                                        className="w-12 h-12 transition-transform duration-300 hover:scale-110 hover:rotate-12"
-                                    />
-                                    <div className="absolute -inset-1 bg-[#0D7C53]/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            <Link to="/">
+                                <div className="flex items-center gap-3">
+                                    <div className="relative group">
+                                        <img
+                                            src="https://cdn-icons-png.flaticon.com/512/924/924514.png"
+                                            alt="Coffee Logo"
+                                            className="w-12 h-12 transition-transform duration-300 hover:scale-110 hover:rotate-12"
+                                        />
+                                        <div className="absolute -inset-1 bg-[#0D7C53]/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    </div>
+                                    <div>
+                                        <h2 className="text-2xl font-bold">
+                                            Coffee<span className="text-[#0D7C53]">Hub</span>
+                                        </h2>
+                                        <p className="text-xs text-gray-400">Premium Coffee Since 2020</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h2 className="text-2xl font-bold">
-                                        Coffee<span className="text-[#0D7C53]">Hub</span>
-                                    </h2>
-                                    <p className="text-xs text-gray-400">Premium Coffee Since 2020</p>
-                                </div>
-                            </div>
+                            </Link>
 
                             <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
                                 Discover your perfect cup with our carefully crafted blends,
@@ -143,6 +145,7 @@ const Footer = () => {
                             </div>
                         </div>
 
+
                         {/* Quick Links */}
                         <div>
                             <h3 className="text-lg font-semibold mb-4 relative inline-block">
@@ -150,7 +153,7 @@ const Footer = () => {
                                 <span className="absolute -bottom-1 left-0 w-8 h-0.5 bg-[#0D7C53]"></span>
                             </h3>
                             <ul className="space-y-3">
-                                {['Home', 'Menu', 'About Us', 'Gallery', 'Contact'].map((item) => (
+                                {['Home', 'Menu', 'About', 'Gallery', 'Contact'].map((item) => (
                                     <li key={item}>
                                         <Link
                                             to={item === 'Home' ? '/' : `/${item.toLowerCase().replace(' ', '')}`}

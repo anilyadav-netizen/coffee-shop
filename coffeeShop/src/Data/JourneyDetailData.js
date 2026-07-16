@@ -190,28 +190,6 @@ export const brewingMethods = [
         flavor: 'Clean, bright, complex',
         difficulty: 'Intermediate',
     },
-    {
-        id: 4,
-        name: 'Cold Brew',
-        image:
-            'https://images.unsplash.com/photo-1551329247-8ed9413e34e6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1472&q=80',
-        description:
-            'Coffee steeped in cold water for an extended period to produce a smooth, less acidic brew.',
-        brewTime: '12-24 hours',
-        flavor: 'Smooth, low-acid',
-        difficulty: 'Easy',
-    },
-    {
-        id: 5,
-        name: 'AeroPress',
-        image:
-            'https://images.unsplash.com/photo-1570968915860-54d5c92fa9fc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
-        description:
-            'A versatile brewer that uses air pressure to produce a smooth, clean cup of coffee quickly.',
-        brewTime: '1-2 minutes',
-        flavor: 'Clean, smooth, versatile',
-        difficulty: 'Beginner',
-    },
 ];
 
 export const roastLevels = [

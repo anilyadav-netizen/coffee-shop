@@ -80,7 +80,7 @@ const OurStore = () => {
     return (
         <section
             ref={sectionRef}
-            className="py-10 px-4 md:px-8 lg:px-12 bg-[#FBF6F0] "
+            className="py-4 md:py-10 px-4 md:px-8 lg:px-12 bg-[#FBF6F0] "
         >
             <div className="max-w-[104rem] mx-auto">
 
@@ -130,7 +130,7 @@ const OurStore = () => {
 
                     {/* RIGHT COLUMN - Details (2 columns) */}
                     <div className="lg:col-span-2 flex flex-col justify-between">
-                        <div className="rounded-2xl p-6 md:p-8 bg-[#FBF6F0] ">
+                        <div className="rounded-2xl p-5 md:p-8 bg-[#FBF6F0] ">
                             {/* Discover Near You Badge */}
                             <div className="mb-4">
                                 <span className="inline-block text-[#C56E2D] text-xs font-semibold uppercase bg-[#C56E2D]/10 px-4 py-1.5 rounded-full">
