@@ -19,7 +19,6 @@ import {
     galleryImages,
     faqData,
     heroContent,
-    ctaContent,
 } from '../data/JourneyDetailData';
 import { Link } from 'react-router-dom';
 
