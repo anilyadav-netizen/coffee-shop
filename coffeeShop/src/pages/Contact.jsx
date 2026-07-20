@@ -276,7 +276,7 @@ const Contact = () => {
                                                             {field.label}
                                                         </label>
                                                         <div className="relative">
-                                                            <div className={`absolute inset-0 rounded-xl transition-all duration-300 ${isActive ? 'ring-2 ring-[#0D7C53] ring-offset-2' : ''
+                                                            <div className={`absolute inset-0 rounded-xl transition-all pointer-events-none duration-300 ${isActive ? 'ring-2 ring-[#0D7C53] ring-offset-2' : ''
                                                                 }`}></div>
                                                             <IconComponent className={`absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300 ${isActive ? 'text-[#0D7C53]' : 'text-gray-400'
                                                                 }`} />
