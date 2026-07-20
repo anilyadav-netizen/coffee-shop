@@ -22,7 +22,7 @@ export const getWishlist = createAsyncThunk(
 export const addToWishlist = createAsyncThunk(
     "wishlist/addToWishlist",
     async ({ coffeeId }, { rejectWithValue }) => {
-        console.log(coffeeId,"qwerty")
+        console.log(coffeeId, "qwerty")
         try {
             const { data } = await API.post("/wishlist", { coffeeId });
             return data.data;
@@ -130,9 +130,9 @@ const wishlistSlice = createSlice({
                 state.items.splice(existingIndex, 1);
                 state.wishlistCount -= 1;
             } else {
-                state.items.push({ 
-                    _id: `temp-${Date.now()}`, 
-                    coffee: { _id: coffeeId } 
+                state.items.push({
+                    _id: `temp-${Date.now()}`,
+                    coffee: { _id: coffeeId }
                 });
                 state.wishlistCount += 1;
             }
@@ -179,7 +179,7 @@ const wishlistSlice = createSlice({
                     (item) => item._id !== action.payload
                 );
                 state.wishlistCount -= 1;
-                
+
             })
             .addCase(removeFromWishlist.rejected, (state, action) => {
                 state.loading = false;
