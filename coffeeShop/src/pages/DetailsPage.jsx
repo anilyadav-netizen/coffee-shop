@@ -569,7 +569,7 @@ const DetailsPage = () => {
                             Related <span className="text-[#E86A33]">Products</span>
                         </h2>
                         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-                            {relatedProducts.map((relatedProduct) => {
+                            {relatedProducts?.map((relatedProduct) => {
                                 // Calculate discount if needed
                                 const discount = relatedProduct.discountPrice
                                     ? Math.round(((relatedProduct.price - relatedProduct.discountPrice) / relatedProduct.price) * 100)

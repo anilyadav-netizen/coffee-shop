@@ -333,7 +333,7 @@ const AddProduct = () => {
                                 required
                             >
                                 <option value="" className="dark:bg-dark-bg">Select a category</option>
-                                {categories && categories.map((category) => (
+                                {categories && categories?.map((category) => (
                                     <option key={category._id} value={category._id} className="dark:bg-dark-bg">
                                         {category.name}
                                     </option>

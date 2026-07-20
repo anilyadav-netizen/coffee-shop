@@ -221,7 +221,7 @@ const Favourite = () => {
                 {uniqueCategoryItems.length > 0 ? (
                     <>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 md:gap-8">
-                            {displayItems.slice(0, 10).map((item) => {
+                            {displayItems.slice(0, 10)?.map((item) => {
                                 const isAdded = addedItems[item._id];
                                 const isWishlisted = wishlistItems.some(
                                     (wish) => {

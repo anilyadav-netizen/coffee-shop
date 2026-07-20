@@ -245,7 +245,7 @@ const DineInOrders = () => {
             </button>
             {showFilterDropdown && (
               <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-dark-card border border-[#E2E8F0] dark:border-dark-border rounded-lg shadow-lg z-10 py-1">
-                {['all', 'pending', 'preparing', 'packed', 'shipped', 'delivered', 'cancelled'].map((status) => (
+                {['all', 'pending', 'preparing', 'packed', 'shipped', 'delivered', 'cancelled']?.map((status) => (
                   <button
                     key={status}
                     onClick={() => {
@@ -292,7 +292,7 @@ const DineInOrders = () => {
         <>
           {/* Orders Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {currentOrders.map((order) => {
+            {currentOrders?.map((order) => {
               const tableNumber = order.table?.tableNumber || 'N/A';
               const tableStatus = order.table?.status || 'N/A';
               const tableSeats = order.table?.seats || 'N/A';
@@ -356,7 +356,7 @@ const DineInOrders = () => {
                         </span>
                       </div>
                       <div className="space-y-1.5">
-                        {order.products?.slice(0, 3).map((item, idx) => (
+                        {order.products?.slice(0, 3)?.map((item, idx) => (
                           <div key={idx} className="flex items-center gap-2 text-xs">
                             {item.coffee?.image ? (
                               <img src={item.coffee.image} alt="" className="w-6 h-6 rounded object-cover flex-shrink-0" />
@@ -433,7 +433,7 @@ const DineInOrders = () => {
                 >
                   Previous
                 </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                {Array.from({ length: totalPages }, (_, i) => i + 1)?.map((page) => (
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}

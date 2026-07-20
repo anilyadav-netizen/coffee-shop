@@ -807,7 +807,7 @@ const DeliveryDetailsPage = () => {
             <div className="p-4">
               {/* STATUS PROGRESS - E) Source: Redux state */}
               <div className="flex items-center justify-between mb-6">
-                {['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered'].map((s, index) => {
+                {['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered']?.map((s, index) => {
                   const steps = ['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered'];
                   const currentIndex = steps.indexOf(status);
                   const isActive = status === s;
@@ -846,7 +846,7 @@ const DeliveryDetailsPage = () => {
 
               {/* ACTION BUTTONS - C) getActionButtons call + D) dispatch */}
               <div className="flex flex-wrap gap-3">
-                {getActionButtons().map((btn, index) => (
+                {getActionButtons()?.map((btn, index) => (
                   <button
                     key={index}
                     onClick={btn.action}
@@ -966,7 +966,7 @@ const DeliveryDetailsPage = () => {
                       {showRiderDropdown && (
                         <div className="absolute z-10 w-full mt-1 bg-white dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#1E293B] rounded-lg shadow-xl max-h-60 overflow-y-auto">
                           {filteredRiders.length > 0 ? (
-                            filteredRiders.map((rider) => (
+                            filteredRiders?.map((rider) => (
                               <button
                                 key={rider.id}
                                 onClick={() => handleAssignRider(rider)}
@@ -1174,7 +1174,7 @@ const DeliveryDetailsPage = () => {
             </div>
             <div className="p-4 max-h-[400px] overflow-y-auto">
               <div className="space-y-4">
-                {timeline.map((item, index) => (
+                {timeline?.map((item, index) => (
                   <div key={index} className="flex gap-3">
                     <div className="flex flex-col items-center">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center ${item.color} bg-opacity-10`}>

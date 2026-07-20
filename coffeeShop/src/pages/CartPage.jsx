@@ -708,7 +708,7 @@ const CartPage = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                         {/* Cart Items */}
                         <div className="lg:col-span-2 space-y-3 sm:space-y-4">
-                            {cartItems.map((item) => {
+                            {cartItems?.map((item) => {
                                 const coffeeId = item.coffee?._id;
                                 if (!coffeeId) {
                                     return null;
@@ -990,7 +990,7 @@ const CartPage = () => {
                                             </div>
                                         ) : (
                                             <div className="space-y-3">
-                                                {addresses.map((address, index) => {
+                                                {addresses?.map((address, index) => {
                                                     const isSelected = selectedAddress?._id === address._id;
                                                     return (
                                                         <label
@@ -1203,7 +1203,7 @@ const CartPage = () => {
                                 </div>
                             ) : (
                                 <div className="space-y-3">
-                                    {addresses.map((address, index) => {
+                                    {addresses?.map((address, index) => {
                                         const isSelected = selectedAddress?._id === address._id;
                                         return (
                                             <div
@@ -1338,7 +1338,7 @@ const CartPage = () => {
                         {/* Status Filter Tabs */}
                         <div className="px-4 sm:px-6 pt-4 pb-2 border-b border-gray-100 dark:border-dark-border">
                             <div className="flex flex-wrap gap-2">
-                                {['all', 'available', 'occupied', 'reserved'].map((status) => {
+                                {['all', 'available', 'occupied', 'reserved']?.map((status) => {
                                     const count = status === 'all'
                                         ? tableList.length
                                         : tableList.filter(t => t.status === status).length;
@@ -1414,7 +1414,7 @@ const CartPage = () => {
                             ) : (
                                 <>
                                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-                                        {filteredTables.map((table) => {
+                                        {filteredTables?.map((table) => {
                                             const statusColors = {
                                                 available: {
                                                     bg: 'border-green-200 hover:border-green-500 dark:border-green-900/30',

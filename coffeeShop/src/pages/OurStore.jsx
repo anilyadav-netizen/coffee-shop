@@ -115,7 +115,7 @@ const OurStore = () => {
 
                             {/* Feature Pills - Bottom */}
                             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-wrap items-center justify-center gap-2 px-4 w-[90%] max-w-full">
-                                {currentLocation.features.map((feature, index) => (
+                                {currentLocation.features?.map((feature, index) => (
                                     <div
                                         key={index}
                                         className="bg-white/95 backdrop-blur-sm rounded-full px-3 py-1.5 md:px-4 md:py-2 shadow-md flex items-center gap-1.5 md:gap-2 transition-all duration-300 hover:scale-105 hover:bg-white flex-shrink-0"
@@ -231,7 +231,7 @@ const OurStore = () => {
 
                     {/* Product Cards - Horizontal layout with image left, text right */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-                        {featuredProducts.map((product) => (
+                        {featuredProducts?.map((product) => (
                             <div
                                 key={product.id}
                                 onClick={() => navigate("/menu")} 

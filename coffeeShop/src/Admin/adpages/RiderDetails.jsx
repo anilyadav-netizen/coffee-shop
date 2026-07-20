@@ -206,11 +206,11 @@ const RatingStars = ({ rating }) => {
 
     return (
         <div className="flex items-center gap-1">
-            {[...Array(fullStars)].map((_, i) => (
+            {[...Array(fullStars)]?.map((_, i) => (
                 <FaStar key={`full-${i}`} className="text-yellow-400 text-sm" />
             ))}
             {hasHalfStar && <FaStarHalfAlt className="text-yellow-400 text-sm" />}
-            {[...Array(emptyStars)].map((_, i) => (
+            {[...Array(emptyStars)]?.map((_, i) => (
                 <FaRegStar key={`empty-${i}`} className="text-yellow-400 text-sm" />
             ))}
             <span className="text-sm font-medium text-gray-700 dark:text-dark-text ml-1">
@@ -495,7 +495,7 @@ const RiderDetails = () => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 dark:divide-dark-border">
-                                {rider.recentDeliveries.map((delivery) => (
+                                {rider.recentDeliveries?.map((delivery) => (
                                     <tr key={delivery.id} className="hover:bg-gray-50 dark:hover:bg-dark-bg transition-colors">
                                         <td className="px-4 py-3 font-medium text-gray-800 dark:text-dark-heading">{delivery.id}</td>
                                         <td className="px-4 py-3 text-gray-600 dark:text-dark-text">{delivery.customer}</td>

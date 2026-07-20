@@ -183,7 +183,7 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto scrollbar-thin">
-        {menuItems.map((item) => (
+        {menuItems?.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
@@ -261,7 +261,7 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
               className="absolute bottom-full left-0 right-0 mb-2 rounded-xl shadow-xl border border-[#E2E8F0] dark:border-[#1E293B] bg-white dark:bg-[#0F172A] overflow-hidden animate-slideUp"
             >
               <div className="p-1.5 space-y-0.5">
-                {profileItems.map((item) => (
+                {profileItems?.map((item) => (
                   <button
                     key={item.path}
                     onClick={() => {

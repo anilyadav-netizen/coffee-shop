@@ -296,7 +296,7 @@ const OrderDetailsPage = () => {
             if (!orderExists) return;
 
             setLiveOrders(prevOrders => {
-                const updatedOrders = prevOrders.map(order => {
+                const updatedOrders = prevOrders?.map(order => {
                     if (order._id === data.orderId) {
                         return {
                             ...order,
@@ -343,7 +343,7 @@ const OrderDetailsPage = () => {
             if (!orderExists) return;
 
             setLiveOrders(prevOrders => {
-                const updatedOrders = prevOrders.map(order => {
+                const updatedOrders = prevOrders?.map(order => {
                     if (order._id === data.orderId) {
                         return {
                             ...order,
@@ -382,7 +382,7 @@ const OrderDetailsPage = () => {
             if (!orderExists) return;
 
             setLiveOrders(prevOrders => {
-                const updatedOrders = prevOrders.map(order => {
+                const updatedOrders = prevOrders?.map(order => {
                     if (order._id === data.orderId) {
                         return {
                             ...order,
@@ -417,7 +417,7 @@ const OrderDetailsPage = () => {
             if (!orderExists) return;
 
             setLiveOrders(prevOrders => {
-                const updatedOrders = prevOrders.map(order => {
+                const updatedOrders = prevOrders?.map(order => {
                     if (order._id === data.orderId) {
                         return {
                             ...order,
@@ -671,7 +671,7 @@ const OrderDetailsPage = () => {
         const currentStepIndex = deliverySteps.findIndex(s => s.id === status);
 
         if (status === 'cancelled') {
-            return deliverySteps.map((step, index) => ({
+            return deliverySteps?.map((step, index) => ({
                 ...step,
                 isCompleted: false,
                 isCurrent: index === 0,
@@ -679,7 +679,7 @@ const OrderDetailsPage = () => {
             }));
         }
 
-        return deliverySteps.map((step, index) => ({
+        return deliverySteps?.map((step, index) => ({
             ...step,
             isCompleted: index <= currentStepIndex,
             isCurrent: index === currentStepIndex,
@@ -699,7 +699,7 @@ const OrderDetailsPage = () => {
     const getOrderItems = (order) => {
         if (!order || !products || products.length === 0) return [];
 
-        return order.products.map((item) => {
+        return order.products?.map((item) => {
             const productDetails = item.coffee || {};
             return {
                 ...item,
@@ -806,7 +806,7 @@ const OrderDetailsPage = () => {
             {/* ==================== NOTIFICATIONS ==================== */}
             {notifications.length > 0 && (
                 <div className="fixed top-20 right-4 z-50 space-y-2 max-w-sm w-full">
-                    {notifications.map((notification) => (
+                    {notifications?.map((notification) => (
                         <div
                             key={notification.id}
                             className={`backdrop-blur-xl bg-white/95 border border-white/60 rounded-xl shadow-2xl p-3 sm:p-4 animate-slideInRight`}
@@ -1009,7 +1009,7 @@ const OrderDetailsPage = () => {
                                 <p className="text-gray-500">No {filterType === 'delivery' ? 'Delivery' : filterType === 'dine_in' ? 'Dine In' : ''} orders found</p>
                             </div>
                         ) : (
-                            filteredOrders.map((order) => {
+                            filteredOrders?.map((order) => {
                                 const orderItems = getOrderItems(order);
                                 const totalItems = orderItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
                                 const isDeliveryOrder = order.orderType?.toLowerCase() === 'delivery';
@@ -1131,7 +1131,7 @@ const OrderDetailsPage = () => {
 
                                                         <div className="relative">
                                                             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-0">
-                                                                {trackingSteps.map((step, index) => (
+                                                                {trackingSteps?.map((step, index) => (
                                                                     <React.Fragment key={step.id}>
                                                                         <div className="flex items-center gap-2 sm:gap-3">
                                                                             <div className="flex flex-col items-center">
@@ -1287,7 +1287,7 @@ const OrderDetailsPage = () => {
                                                             </div>
 
                                                             <div className="space-y-2">
-                                                                {orderItems.map((item, index) => (
+                                                                {orderItems?.map((item, index) => (
                                                                     <div
                                                                         key={item._id || index}
                                                                         className="flex gap-3 bg-white/20 rounded-lg p-2 sm:p-3 hover:bg-white/30 transition-all"

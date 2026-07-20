@@ -133,7 +133,7 @@ const HeroSection = () => {
                     transition={{ duration: 0.8, delay: 0.2 }}
                     className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight"
                 >
-                    {heroContent.heading.split(' ').map((word, index) => (
+                    {heroContent.heading.split(' ')?.map((word, index) => (
                         <span key={index} className={word === heroContent.highlightedWord ? 'text-[#0D7C53]' : ''}>
                             {word}{' '}
                         </span>
@@ -183,7 +183,7 @@ const TimelineSection = () => {
             <div className="relative">
                 <div className="absolute left-1/2 transform -translate-x-1/2 w-0.5 h-full bg-gradient-to-b from-[#0D7C53] via-[#0A5F3E] to-transparent" />
 
-                {timelineData.map((item, index) => (
+                {timelineData?.map((item, index) => (
                     <TimelineItem key={item.id} item={item} index={index} />
                 ))}
             </div>
@@ -268,7 +268,7 @@ const TimelineItem = ({ item, index }) => {
 const DetailedStepsSection = () => {
     return (
         <Section>
-            {detailedSteps.map((step, index) => (
+            {detailedSteps?.map((step, index) => (
                 <DetailedStep key={step.id} step={step} index={index} />
             ))}
         </Section>
@@ -297,7 +297,7 @@ const DetailedStep = ({ step, index }) => {
                         <h3 className="text-3xl font-bold text-gray-800 mt-2 mb-4">{step.title}</h3>
 
                         <div className="space-y-3 mb-6">
-                            {step.content.map((paragraph, i) => (
+                            {step.content?.map((paragraph, i) => (
                                 <p key={i} className="text-gray-600 text-sm leading-relaxed">
                                     {paragraph}
                                 </p>
@@ -305,7 +305,7 @@ const DetailedStep = ({ step, index }) => {
                         </div>
 
                         <div className="flex flex-wrap gap-2 mb-6">
-                            {step.features.map((feature, i) => (
+                            {step.features?.map((feature, i) => (
                                 <span
                                     key={i}
                                     className="px-4 py-1 bg-[#0D7C53]/10 border border-[#0D7C53]/20 rounded-full text-[#0D7C53] text-sm flex items-center gap-1"
@@ -341,7 +341,7 @@ const BrewingMethodsSection = () => {
             </AnimatedSection>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {brewingMethods.map((method) => (
+                {brewingMethods?.map((method) => (
                     <BrewingCard key={method.id} method={method} />
                 ))}
             </div>
@@ -445,7 +445,7 @@ const CoffeeFactsSection = () => {
             </AnimatedSection>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {coffeeFacts.map((fact) => (
+                {coffeeFacts?.map((fact) => (
                     <FactCard key={fact.id} fact={fact} />
                 ))}
             </div>
@@ -512,7 +512,7 @@ const SustainabilitySection = () => {
             </AnimatedSection>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
-                {sustainabilityData.map((item) => (
+                {sustainabilityData?.map((item) => (
                     <SustainabilityCard key={item.id} item={item} />
                 ))}
             </div>
@@ -550,7 +550,7 @@ const GallerySection = () => {
             </AnimatedSection>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {galleryImages.map((image) => (
+                {galleryImages?.map((image) => (
                     <GalleryItem key={image.id} image={image} />
                 ))}
             </div>
@@ -591,7 +591,7 @@ const FAQSection = () => {
             </AnimatedSection>
 
             <div className="max-w-6xl mx-auto space-y-4">
-                {faqData.map((faq) => (
+                {faqData?.map((faq) => (
                     <FAQItem key={faq.id} faq={faq} />
                 ))}
             </div>

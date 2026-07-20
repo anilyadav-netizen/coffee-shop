@@ -237,7 +237,7 @@
 //                             </tr>
 //                         </thead>
 //                         <tbody>
-//                             {items.map((item, index) => {
+//                             {items?.map((item, index) => {
 //                                 const product = item.coffee || item.product || {};
 //                                 const name = product.name || item.name || "Unknown Item";
 //                                 const image = product.image || "";

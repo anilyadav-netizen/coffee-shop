@@ -236,7 +236,7 @@ const WishlistPage = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                         {/* Wishlist Items */}
                         <div className="lg:col-span-2 space-y-3 sm:space-y-4">
-                            {wishlistItems.map((item) => {
+                            {wishlistItems?.map((item) => {
                                 // ✅ Backend se item ka structure
                                 const coffeeData = item.coffee || item;
                                 const itemId = item._id;

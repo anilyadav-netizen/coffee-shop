@@ -251,7 +251,7 @@ const DineInDetails = () => {
             }
         };
 
-        return config.nextActions.map(actionKey => actions[actionKey]);
+        return config.nextActions?.map(actionKey => actions[actionKey]);
     };
 
     // Get timeline data

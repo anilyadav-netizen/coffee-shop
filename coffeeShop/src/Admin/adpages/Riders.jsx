@@ -239,7 +239,7 @@ const Riders = () => {
                 </td>
               </tr>
             ) : (
-              currentRiders.map((rider, index) => (
+              currentRiders?.map((rider, index) => (
                 <tr key={rider._id} className="hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-colors duration-150">
                   <td className="p-4 text-[#64748B] dark:text-dark-text">{indexOfFirstItem + index + 1}</td>
                   <td className="p-4 font-medium text-[#0F172A] dark:text-dark-heading">{rider.name || "N/A"}</td>
@@ -287,7 +287,7 @@ const Riders = () => {
             >
               Previous
             </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            {Array.from({ length: totalPages }, (_, i) => i + 1)?.map((page) => (
               <button
                 key={page}
                 onClick={() => setCurrentPage(page)}

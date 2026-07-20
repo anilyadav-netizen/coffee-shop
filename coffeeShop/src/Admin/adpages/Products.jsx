@@ -111,7 +111,7 @@ const Products = () => {
                     </thead>
                     <tbody>
                         {currentProducts.length > 0 ? (
-                            currentProducts.map((product) => (
+                            currentProducts?.map((product) => (
                                 <tr
                                     key={product._id}
                                     className="border-b border-[#E2E8F0] dark:border-dark-border hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-colors duration-150"
@@ -201,7 +201,7 @@ const Products = () => {
                     </button>
 
                     <div className="flex flex-wrap gap-1">
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                        {Array.from({ length: totalPages }, (_, i) => i + 1)?.map((page) => (
                             <button
                                 key={page}
                                 onClick={() => handlePageChange(page)}

@@ -188,7 +188,7 @@ const About = () => {
                                 </p>
 
                                 <div className="grid grid-cols-2 gap-4">
-                                    {story.highlights.map((highlight, index) => (
+                                    {story.highlights?.map((highlight, index) => (
                                         <div key={index} className="flex items-center gap-2  bg-white/20 border border-white/30 p-3 rounded-xl shadow-xl shadow-black/5">
                                             {getIcon(highlight.icon, "w-5 h-5 text-[#0D7C53]")}
                                             <span className="text-base font-medium text-gray-700">{highlight.label}</span>
@@ -228,7 +228,7 @@ const About = () => {
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {values.map((value, index) => (
+                            {values?.map((value, index) => (
                                 <div
                                     key={index}
                                     className="group  bg-white/20 border border-white/30 rounded-2xl p-6 shadow-md shadow-black/5 hover:shadow-lg transition-all duration-500 hover:-translate-y-2 text-center"
@@ -271,7 +271,7 @@ const About = () => {
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {team.map((member) => (
+                            {team?.map((member) => (
                                 <div
                                     key={member.id}
                                     className="group  bg-white/20 border border-white/30 rounded-2xl overflow-hidden shadow-md shadow-black/5 hover:shadow-lg transition-all duration-500 hover:-translate-y-1"

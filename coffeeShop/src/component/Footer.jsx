@@ -45,7 +45,7 @@ const Footer = () => {
 
                 {/* Floating Coffee Beans with Animation */}
                 <div className="absolute inset-0 flex items-center justify-around opacity-30 pointer-events-none">
-                    {['☕', '🫘', '☕', '🫘', '☕'].map((emoji, index) => (
+                    {['☕', '🫘', '☕', '🫘', '☕']?.map((emoji, index) => (
                         <span
                             key={index}
                             className="text-4xl md:text-7xl"
@@ -153,7 +153,7 @@ const Footer = () => {
                                 <span className="absolute -bottom-1 left-0 w-8 h-0.5 bg-[#0D7C53]"></span>
                             </h3>
                             <ul className="space-y-3">
-                                {['Home', 'Menu', 'About', 'Gallery', 'Contact'].map((item) => (
+                                {['Home', 'Menu', 'About', 'Gallery', 'Contact']?.map((item) => (
                                     <li key={item}>
                                         <Link
                                             to={item === 'Home' ? '/' : `/${item.toLowerCase().replace(' ', '')}`}

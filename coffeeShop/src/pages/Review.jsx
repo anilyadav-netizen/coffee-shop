@@ -63,7 +63,7 @@ const Review = () => {
     };
 
     const renderStars = (rating) => {
-        return [...Array(5)].map((_, i) => (
+        return [...Array(5)]?.map((_, i) => (
             <Star
                 key={i}
                 size={16}
@@ -133,7 +133,7 @@ const Review = () => {
                     {/* Cards Grid */}
                     <div className="overflow-hidden px-6">
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {visibleReviews.map((review) => (
+                            {visibleReviews?.map((review) => (
                                 <div
                                     key={review.id}
                                     className="bg-[#FEF5EC] rounded-2xl p-3 border border-[#F5E6D8] hover:border-[#E8D5C4] transition-all duration-300 hover:shadow-lg"
@@ -186,7 +186,7 @@ const Review = () => {
 
                 {/* Dots Indicator */}
                 <div className="flex justify-center gap-2 mt-8">
-                    {[...Array(totalSlides)].map((_, index) => (
+                    {[...Array(totalSlides)]?.map((_, index) => (
                         <button
                             key={index}
                             onClick={() => goToSlide(index)}

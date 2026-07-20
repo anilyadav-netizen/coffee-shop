@@ -119,7 +119,7 @@ const DeliveryOrders = () => {
           return prev;
         }
 
-        return prev.map(order =>
+        return prev?.map(order =>
           order._id === data.orderId
             ? {
                 ...order,
@@ -159,7 +159,7 @@ const DeliveryOrders = () => {
           return prev;
         }
 
-        return prev.map(order =>
+        return prev?.map(order =>
           order._id === data.orderId
             ? {
                 ...order,
@@ -184,7 +184,7 @@ const DeliveryOrders = () => {
     socket.on('rider-assigned', (data) => {
       console.log('🚚 Rider assigned:', data);
 
-      setDeliveryOrders(prev => prev.map(order =>
+      setDeliveryOrders(prev => prev?.map(order =>
         order._id === data.orderId
           ? {
               ...order,
@@ -210,7 +210,7 @@ const DeliveryOrders = () => {
     socket.on('order-cancelled', (data) => {
       console.log('❌ Order cancelled:', data);
 
-      setDeliveryOrders(prev => prev.map(order =>
+      setDeliveryOrders(prev => prev?.map(order =>
         order._id === data.orderId
           ? { ...order, orderStatus: 'cancelled' }
           : order
@@ -347,7 +347,7 @@ const DeliveryOrders = () => {
       console.log('✅ Order status updated:', data);
 
       // Update local state immediately
-      setDeliveryOrders(prev => prev.map(order =>
+      setDeliveryOrders(prev => prev?.map(order =>
         order._id === orderId
           ? { ...order, orderStatus: newStatus }
           : order
@@ -525,12 +525,12 @@ const DeliveryOrders = () => {
         <div className="animate-pulse">
           <div className="h-8 w-48 bg-gray-200 dark:bg-[#1E293B] rounded-lg mb-6"></div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-6">
-            {[...Array(8)].map((_, i) => (
+            {[...Array(8)]?.map((_, i) => (
               <div key={i} className="h-20 bg-gray-200 dark:bg-[#1E293B] rounded-xl"></div>
             ))}
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-            {[...Array(6)].map((_, i) => (
+            {[...Array(6)]?.map((_, i) => (
               <div key={i} className="h-80 bg-gray-200 dark:bg-[#1E293B] rounded-xl"></div>
             ))}
           </div>
@@ -659,7 +659,7 @@ const DeliveryOrders = () => {
           { key: 'out_for_delivery', label: 'Out for Delivery', count: statusCounts.out_for_delivery, color: 'text-orange-500' },
           { key: 'delivered', label: 'Delivered', count: statusCounts.delivered, color: 'text-emerald-500' },
           { key: 'cancelled', label: 'Cancelled', count: statusCounts.cancelled, color: 'text-red-500' },
-        ].map((stat) => (
+        ]?.map((stat) => (
           <div
             key={stat.key}
             onClick={() => setFilterStatus(stat.key)}
@@ -763,7 +763,7 @@ const DeliveryOrders = () => {
       ) : (
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-            {currentOrders.map((order) => {
+            {currentOrders?.map((order) => {
               const status = order.orderStatus || 'pending';
               const statusInfo = statusConfig[status] || statusConfig.pending;
               const paymentStatus = order.payment?.status || 'pending';
@@ -803,7 +803,7 @@ const DeliveryOrders = () => {
                           </button>
                           {showActionMenu === order._id && !isUpdating && (
                             <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#1E293B] rounded-lg shadow-xl z-10 py-1">
-                              {['pending', 'confirmed', 'preparing', 'ready', 'out_for_delivery', 'delivered'].map((s) => (
+                              {['pending', 'confirmed', 'preparing', 'ready', 'out_for_delivery', 'delivered']?.map((s) => (
                                 <button
                                   key={s}
                                   onClick={() => updateOrderStatus(order._id, s)}
@@ -874,7 +874,7 @@ const DeliveryOrders = () => {
                         </span>
                       </div>
                       <div className="space-y-1.5">
-                        {order.products?.slice(0, 3).map((item, idx) => (
+                        {order.products?.slice(0, 3)?.map((item, idx) => (
                           <div key={idx} className="flex items-center gap-2 text-xs">
                             {item.coffee?.image ? (
                               <img src={item.coffee.image} alt="" className="w-6 h-6 rounded object-cover flex-shrink-0" />
@@ -970,7 +970,7 @@ const DeliveryOrders = () => {
                 >
                   Previous
                 </button>
-                {[...Array(totalPages)].map((_, i) => (
+                {[...Array(totalPages)]?.map((_, i) => (
                   <button
                     key={i}
                     onClick={() => setCurrentPage(i + 1)}
@@ -1008,7 +1008,7 @@ const DeliveryOrders = () => {
                   disabled={riderLoading}
                 >
                   <option value="">Select Rider</option>
-                  {availableRiders.map((rider) => (
+                  {availableRiders?.map((rider) => (
                     <option key={rider._id} value={rider._id}>
                       {rider.name} {rider.isAvailable ? '✅' : '❌'}
                     </option>

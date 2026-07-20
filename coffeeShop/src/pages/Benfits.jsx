@@ -70,7 +70,7 @@ const Benefits = () => {
 
                         {/* Benefits Grid - Updated with Food Colors */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            {benefits.map((benefit) => (
+                            {benefits?.map((benefit) => (
                                 <div
                                     key={benefit.id}
                                     className="group bg-white border  rounded-2xl p-5  transition-all duration-500 hover:-translate-y-1 hover:border-[#FEE7DD] border-[#E85D3A]/30 shadow-[#E85D3A]/10"
@@ -81,7 +81,7 @@ const Benefits = () => {
                                         </div>
                                         <div>
                                             <h3 className="font-bold text-[#1F2937] text-lg group-hover:text-[#E85D3A] transition-colors duration-300">
-                                                {benefit.title.split('\n').map((line, i) => (
+                                                {benefit.title.split('\n')?.map((line, i) => (
                                                     <React.Fragment key={i}>
                                                         {line}
                                                         {i < benefit.title.split('\n').length - 1 && <br />}

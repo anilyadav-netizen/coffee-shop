@@ -66,7 +66,7 @@ const Journey = () => {
                         <div className="mt-6 md:mt-8 w-full relative">
                             {/* Steps container - now with flex-wrap for smaller screens */}
                             <div className="flex flex-wrap justify-center md:justify-between items-center gap-4 sm:gap-2 relative">
-                                {allSteps.map((step, index) => {
+                                {allSteps?.map((step, index) => {
                                     const isActive = activeStep === step.id;
                                     const isPast = step.id < activeStep;
                                     const isLast = index === allSteps.length - 1;

@@ -81,7 +81,7 @@ const Orders = () => {
   // Unique statuses for filter tabs (with counts)
   const statusOptions = [
     "All",
-    ...new Set(mappedOrders.map((o) => o.orderStatus).filter(Boolean)),
+    ...new Set(mappedOrders?.map((o) => o.orderStatus).filter(Boolean)),
   ];
 
   const handleViewOrder = (orderId) => {
@@ -140,7 +140,7 @@ const Orders = () => {
 
       {/* Filter Tabs */}
       <div className="flex flex-wrap gap-2 mb-6">
-        {statusOptions.map((status) => {
+        {statusOptions?.map((status) => {
           const count = status === "All"
             ? mappedOrders.length
             : mappedOrders.filter((o) => o.orderStatus === status).length;
@@ -198,7 +198,7 @@ const Orders = () => {
                 </tr>
               </thead>
               <tbody>
-                {currentOrders.map((order) => {
+                {currentOrders?.map((order) => {
                   const firstProduct = order.orderItems?.[0]?.coffee || order.orderItems?.[0]?.product;
                   const productImage = firstProduct?.image || "";
                   const productName = firstProduct?.name || "Product";
@@ -282,7 +282,7 @@ const Orders = () => {
 
               {/* Page numbers */}
               <div className="flex items-center gap-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                {Array.from({ length: totalPages }, (_, i) => i + 1)?.map((page) => {
                   // Show a limited range (e.g., current page ±2)
                   const isNear = Math.abs(page - currentPage) <= 2;
                   const isFirstOrLast = page === 1 || page === totalPages;

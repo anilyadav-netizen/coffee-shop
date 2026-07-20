@@ -18,7 +18,7 @@ const SkeletonLoader = () => {
 
       {/* Content Grid Skeleton */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mt-5">
-        {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
+        {[1, 2, 3, 4, 5, 6, 7, 8]?.map((item) => (
           <div key={item} className="bg-gray-100 rounded-lg p-4 h-72">
             <div className="w-full h-40 bg-gray-200 rounded mb-3 animate-pulse"></div>
             <div className="w-3/4 h-5 bg-gray-200 rounded mb-2 animate-pulse"></div>
@@ -31,7 +31,7 @@ const SkeletonLoader = () => {
       {/* Footer Skeleton */}
       <div className="mt-10 pt-10 border-t border-gray-200">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-          {[1, 2, 3, 4].map((item) => (
+          {[1, 2, 3, 4]?.map((item) => (
             <div key={item} className="space-y-3">
               <div className="w-28 h-6 bg-gray-200 rounded animate-pulse"></div>
               <div className="w-full h-3 bg-gray-200 rounded animate-pulse"></div>

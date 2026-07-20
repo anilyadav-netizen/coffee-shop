@@ -185,7 +185,7 @@ const Profile = () => {
     const getInitials = (name) => {
         return name
             .split(' ')
-            .map(word => word[0])
+            ?.map(word => word[0])
             .join('')
             .toUpperCase()
             .slice(0, 2);
@@ -457,7 +457,7 @@ const Profile = () => {
 
                             {addresses && addresses.length > 0 ? (
                                 <div className="space-y-4">
-                                    {addresses.map((address) => (
+                                    {addresses?.map((address) => (
                                         <div
                                             key={address._id || address.id}
                                             className={`bg-white/40 backdrop-blur-sm rounded-xl p-2 border transition-all hover:shadow-md ${
@@ -572,7 +572,7 @@ const Profile = () => {
 
                             {ordersLoading ? (
                                 <div className="space-y-3">
-                                    {[1, 2, 3].map((i) => (
+                                    {[1, 2, 3]?.map((i) => (
                                         <div key={i} className="animate-pulse flex items-center justify-between p-3 bg-white/40 rounded-xl">
                                             <div className="space-y-2">
                                                 <div className="h-4 w-24 bg-gray-300/60 rounded"></div>
@@ -587,7 +587,7 @@ const Profile = () => {
                                 </div>
                             ) : orders && orders.length > 0 ? (
                                 <div className="space-y-4">
-                                    {orders.slice(0, 2).map((order) => {
+                                    {orders.slice(0, 2)?.map((order) => {
                                         const isDineIn = order.orderType === 'dine_in';
                                         const tableNumber = order.table?.tableNumber;
 
@@ -638,7 +638,7 @@ const Profile = () => {
                                                         {order.products?.length || 0} item{order.products?.length !== 1 ? 's' : ''}
                                                     </p>
                                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                        {order.products?.slice(0, 4).map((product, index) => {
+                                                        {order.products?.slice(0, 4)?.map((product, index) => {
                                                             const imageUrl = getProductImage(product);
                                                             const productName = getProductName(product);
                                                             const productPrice = getProductPrice(product);
@@ -725,7 +725,7 @@ const Profile = () => {
 
                             {wishlistLoading ? (
                                 <div className="space-y-3">
-                                    {[1, 2].map((i) => (
+                                    {[1, 2]?.map((i) => (
                                         <div key={i} className="animate-pulse flex items-center gap-3 p-3 bg-white/40 rounded-xl">
                                             <div className="w-16 h-16 bg-gray-300/60 rounded-lg"></div>
                                             <div className="flex-1 space-y-2">
@@ -737,7 +737,7 @@ const Profile = () => {
                                 </div>
                             ) : wishlistItems && wishlistItems.length > 0 ? (
                                 <div className="space-y-3">
-                                    {wishlistItems.slice(0, 3).map((item) => {
+                                    {wishlistItems.slice(0, 3)?.map((item) => {
                                         const itemData = getWishlistItemData(item);
 
                                         return (

@@ -51,7 +51,7 @@ const orderSlice = createSlice({
                 const updatedOrder = action.payload;
 
                 // update order in list
-                state.orderList = state.orderList.map((order) =>
+                state.orderList = state.orderList?.map((order) =>
                     order._id === updatedOrder._id
                         ? updatedOrder
                         : order

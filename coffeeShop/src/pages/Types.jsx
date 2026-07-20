@@ -91,7 +91,7 @@ const Types = () => {
                     }}
                     className="pb-2"
                 >
-                    {categories.map((category) => (
+                    {categories?.map((category) => (
                         <SwiperSlide key={category._id}>
                             <div
                                 onClick={() => handleCategoryClick(category)}

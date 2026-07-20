@@ -342,7 +342,7 @@ const TablePage = () => {
 
       {/* Filter Chips */}
       <div className="flex flex-wrap gap-2 mb-6">
-        {['all', 'available', 'occupied', 'reserved'].map((chip) => (
+        {['all', 'available', 'occupied', 'reserved']?.map((chip) => (
           <button
             key={chip}
             onClick={() => setFilter(chip)}
@@ -378,8 +378,8 @@ const TablePage = () => {
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {loading
-              ? Array.from({ length: 6 }).map((_, idx) => <SkeletonCard key={idx} />)
-              : currentTables.map((table) => {
+              ? Array.from({ length: 6 })?.map((_, idx) => <SkeletonCard key={idx} />)
+              : currentTables?.map((table) => {
                   const tableId = getTableId(table);
                   return (
                     <div

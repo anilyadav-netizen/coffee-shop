@@ -310,7 +310,7 @@ const UserDetails = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-dark-border">
-                {user.recentOrders.map((order) => (
+                {user.recentOrders?.map((order) => (
                   <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-dark-bg transition-colors">
                     <td className="px-4 py-3 font-medium text-gray-800 dark:text-dark-heading">{order.id}</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-dark-text">{order.date}</td>

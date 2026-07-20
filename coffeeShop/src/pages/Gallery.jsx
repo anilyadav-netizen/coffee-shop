@@ -250,7 +250,7 @@ const Gallery = () => {
 
                     {/* Gallery Grid - Glass Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {currentItems.map((item) => (
+                        {currentItems?.map((item) => (
                             <div
                                 key={item.id}
                                 onClick={() => handleImageClick(item)}
@@ -319,7 +319,7 @@ const Gallery = () => {
                                 <ChevronLeft size={18} className="text-gray-600" />
                             </button>
 
-                            {[...Array(totalPages)].map((_, i) => (
+                            {[...Array(totalPages)]?.map((_, i) => (
                                 <button
                                     key={i}
                                     onClick={() => setCurrentPage(i + 1)}

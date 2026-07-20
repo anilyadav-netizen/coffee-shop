@@ -192,7 +192,7 @@ const Users = () => {
 
       {/* Filter Chips - Removed "blocked" filter */}
       <div className="flex flex-wrap gap-2">
-        {["all", "active", "new"].map((chip) => (
+        {["all", "active", "new"]?.map((chip) => (
           <FilterChip
             key={chip}
             label={chip.charAt(0).toUpperCase() + chip.slice(1)}
@@ -230,7 +230,7 @@ const Users = () => {
                   </td>
                 </tr>
               ) : (
-                currentUsers.map((user, index) => (
+                currentUsers?.map((user, index) => (
                   <tr key={user._id} className="hover:bg-gray-50 dark:hover:bg-dark-bg transition-colors">
                     <td className="px-4 py-3 text-gray-500 dark:text-dark-text">
                       {indexOfFirstUser + index + 1}

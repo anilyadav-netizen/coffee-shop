@@ -330,12 +330,12 @@ const RiderAssignedOrder = () => {
         <div className="animate-pulse">
           <div className="h-8 w-48 bg-gray-200 dark:bg-[#1E293B] rounded-lg mb-6"></div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            {[...Array(4)].map((_, i) => (
+            {[...Array(4)]?.map((_, i) => (
               <div key={i} className="h-20 bg-gray-200 dark:bg-[#1E293B] rounded-xl"></div>
             ))}
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-            {[...Array(3)].map((_, i) => (
+            {[...Array(3)]?.map((_, i) => (
               <div key={i} className="h-80 bg-gray-200 dark:bg-[#1E293B] rounded-xl"></div>
             ))}
           </div>
@@ -471,7 +471,7 @@ const RiderAssignedOrder = () => {
           { key: 'assigned', label: 'Assigned', count: counts.assigned, color: 'text-indigo-500' },
           { key: 'out_for_delivery', label: 'Out for Delivery', count: counts.out_for_delivery, color: 'text-orange-500' },
           { key: 'delivered', label: 'Delivered', count: counts.delivered, color: 'text-emerald-500' },
-        ].map((stat) => (
+        ]?.map((stat) => (
           <div
             key={stat.key}
             className="bg-white dark:bg-[#1E293B] rounded-xl p-3 border border-[#E2E8F0] dark:border-[#1E293B] transition-all hover:shadow-md"
@@ -580,7 +580,7 @@ const RiderAssignedOrder = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-          {displayedOrders.map((order) => {
+          {displayedOrders?.map((order) => {
             const status = order.orderStatus || 'assigned_to_rider';
             const statusInfo = statusConfig[status] || statusConfig.assigned_to_rider;
 
@@ -656,7 +656,7 @@ const RiderAssignedOrder = () => {
                       Items ({order.products?.length || 0})
                     </p>
                     <div className="space-y-1.5">
-                      {order.products?.slice(0, 3).map((item, idx) => (
+                      {order.products?.slice(0, 3)?.map((item, idx) => (
                         <div key={idx} className="flex items-center gap-2 text-xs">
                           <div className="w-6 h-6 bg-[#E2E8F0] dark:bg-[#1E293B] rounded flex items-center justify-center flex-shrink-0">
                             <FaCoffee className="text-[10px] text-[#94A3B8]" />
@@ -755,7 +755,7 @@ const RiderAssignedOrder = () => {
                 </h3>
                 <div className="space-y-2">
                   {selectedOrder.products?.length > 0 ? (
-                    selectedOrder.products.map((item, index) => (
+                    selectedOrder.products?.map((item, index) => (
                       <div
                         key={index}
                         className="flex justify-between items-center p-3 bg-[#F8FAFC] dark:bg-[#0F172A] rounded-xl"

@@ -82,7 +82,7 @@ const Dashboard = () => {
 
             const recentOrders = orders
                 .slice(0, 5)
-                .map(order => ({
+                ?.map(order => ({
                     id: order._id?.slice(-6) || 'N/A',
                     customer: order.deliveryAddress?.fullName || order.user?.name || 'Guest',
                     items: order.products?.length || 0,
@@ -100,7 +100,7 @@ const Dashboard = () => {
             });
 
             const popularItems = Object.entries(itemCounts)
-                .map(([name, count]) => ({ name, orders: count, growth: Math.floor(Math.random() * 20) - 5 }))
+                ?.map(([name, count]) => ({ name, orders: count, growth: Math.floor(Math.random() * 20) - 5 }))
                 .sort((a, b) => b.orders - a.orders)
                 .slice(0, 5);
 
@@ -323,7 +323,7 @@ const Dashboard = () => {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {statCards.map((stat, index) => {
+                {statCards?.map((stat, index) => {
                     const Icon = stat.icon;
                     return (
                         <div
@@ -424,7 +424,7 @@ const Dashboard = () => {
                         <span className="text-xs text-[#64748B] dark:text-dark-text">Best sellers</span>
                     </div>
                     <div className="space-y-2">
-                        {stats.popularItems.map((item, idx) => (
+                        {stats.popularItems?.map((item, idx) => (
                             <div key={idx} className="flex items-center justify-between p-3 rounded-lg hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-colors">
                                 <div className="flex items-center gap-3">
                                     <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${idx === 0 ? 'bg-[#3B82F6] text-white' :
@@ -463,7 +463,7 @@ const Dashboard = () => {
                         </button>
                     </div>
                     <div className="space-y-2">
-                        {stats.recentOrders.map((order, idx) => (
+                        {stats.recentOrders?.map((order, idx) => (
                             <div key={idx} className="flex items-center justify-between p-3 rounded-lg hover:bg-[#F8FAFC] dark:hover:bg-dark-bg/50 transition-colors">
                                 <div>
                                     <p className="font-medium text-[#0F172A] dark:text-dark-heading">#{order.id}</p>

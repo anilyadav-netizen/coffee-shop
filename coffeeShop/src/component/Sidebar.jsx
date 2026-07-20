@@ -109,7 +109,7 @@ const Sidebar = ({
                     {/* Main Navigation */}
                     <div className="space-y-1">
 
-                        {navItems.map((item) => {
+                        {navItems?.map((item) => {
                             const Icon = getNavIcon(item.name);
                             return (
                                 <Link

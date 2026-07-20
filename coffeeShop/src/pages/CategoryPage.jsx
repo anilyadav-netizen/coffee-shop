@@ -148,7 +148,7 @@ const CategoryPage = () => {
             1280: { slidesPerView: 5 },
           }}
         >
-          {products.map((product) => {
+          {products?.map((product) => {
             const id = getProductId(product);
             const hasDiscount = product.discountPrice && product.discountPrice < product.price;
             const discountPercent = product.discountPercentage ||

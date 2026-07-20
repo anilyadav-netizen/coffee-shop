@@ -284,7 +284,7 @@ const cartSlice = createSlice({
                 }
 
                 state.totalItems = new Set(
-                    state.cartItems.map(item => item.coffee?._id)
+                    state.cartItems?.map(item => item.coffee?._id)
                 ).size;
 
                 state.totalPrice = state.cartItems.reduce(

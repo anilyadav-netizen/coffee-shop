@@ -92,7 +92,7 @@ const Contact = () => {
 
                     {/* Decorative Patterns */}
                     <div className="absolute inset-0 opacity-10">
-                        {heroData.decorativeEmojis.map((emoji, index) => (
+                        {heroData.decorativeEmojis?.map((emoji, index) => (
                             <div
                                 key={index}
                                 className={`absolute text-8xl ${index === 0 ? 'top-20 left-10 rotate-12' :
@@ -107,7 +107,7 @@ const Contact = () => {
                     {/* Coffee Steam Effect */}
                     <div className="absolute inset-0 opacity-20 pointer-events-none">
                         <div className="absolute top-1/4 left-1/3 flex gap-4">
-                            {[...Array(5)].map((_, i) => (
+                            {[...Array(5)]?.map((_, i) => (
                                 <div
                                     key={i}
                                     className="w-1 bg-white/30 rounded-full animate-steam"
@@ -120,7 +120,7 @@ const Contact = () => {
                             ))}
                         </div>
                         <div className="absolute top-1/3 right-1/4 flex gap-3">
-                            {[...Array(4)].map((_, i) => (
+                            {[...Array(4)]?.map((_, i) => (
                                 <div
                                     key={i}
                                     className="w-0.5 bg-white/20 rounded-full animate-steam"
@@ -145,7 +145,7 @@ const Contact = () => {
                         </div>
 
                         <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-white mb-6 leading-tight animate-fade-in-up">
-                            {heroData.title.split(' ').map((word, index) => (
+                            {heroData.title.split(' ')?.map((word, index) => (
                                 word === heroData.titleHighlight ?
                                     <span key={index} className="text-transparent bg-clip-text bg-gradient-to-r from-[#0D7C53] to-green-400">
                                         {word}
@@ -193,7 +193,7 @@ const Contact = () => {
                                     </p>
 
                                     <div className="space-y-4">
-                                        {contactInfo.map((info) => {
+                                        {contactInfo?.map((info) => {
                                             const IconComponent = info.icon;
                                             return (
                                                 <div
@@ -205,7 +205,7 @@ const Contact = () => {
                                                     </div>
                                                     <div>
                                                         <h4 className="font-semibold text-gray-800 text-lg">{info.title}</h4>
-                                                        {info.details.map((detail, i) => (
+                                                        {info.details?.map((detail, i) => (
                                                             <p key={i} className="text-gray-600 text-sm">{detail}</p>
                                                         ))}
                                                     </div>
@@ -218,7 +218,7 @@ const Contact = () => {
                                     <div className="mt-6 pt-6 border-t border-white/20">
                                         <p className="text-sm font-medium text-gray-600 mb-4">Follow us on social media</p>
                                         <div className="flex gap-3">
-                                            {socialLinks.map((social) => {
+                                            {socialLinks?.map((social) => {
                                                 const IconComponent = social.icon;
                                                 return (
                                                     <a
@@ -241,7 +241,7 @@ const Contact = () => {
                                 <div className=" bg-white/20 border border-white/30 rounded-3xl p-10 shadow-2xl shadow-black/5">
                                     <div className="mb-7">
                                         <h3 className="text-2xl font-bold text-[#0D7C53]">
-                                            {formDataConfig.title.split(' ').map((word, index) => (
+                                            {formDataConfig.title.split(' ')?.map((word, index) => (
                                                 word === formDataConfig.titleHighlight ?
                                                     <span key={index} className="text-[#0D7C53]">{word} </span> :
                                                     <span key={index}>{word} </span>
@@ -267,7 +267,7 @@ const Contact = () => {
                                     ) : (
                                         <form onSubmit={handleSubmit} className="space-y-4">
                                             {/* Dynamic Form Fields */}
-                                            {formDataConfig.fields.map((field) => {
+                                            {formDataConfig.fields?.map((field) => {
                                                 const IconComponent = field.icon === 'User' ? User : Mail;
                                                 const isActive = activeField === field.id;
                                                 return (
@@ -360,7 +360,7 @@ const Contact = () => {
                     <div className="max-w-[100rem] mx-auto relative z-10">
                         <div className="text-center mb-8">
                             <h2 className="text-2xl md:text-3xl font-bold text-[#0D7C53]">
-                                {mapData.title.split(' ').map((word, index) => (
+                                {mapData.title.split(' ')?.map((word, index) => (
                                     word === mapData.titleHighlight ?
                                         <span key={index} className="text-[#0D7C53]">{word} </span> :
                                         <span key={index}>{word} </span>

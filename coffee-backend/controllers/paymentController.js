@@ -106,7 +106,7 @@ exports.createOrder = async (req, res) => {
     // ---------------- PREPARE PRODUCTS ----------------
     let serverTotal = 0;
 
-    const products = cart.items.map((item) => {
+    const products = cart.items?.map((item) => {
       const price = Number(item.amount || 0);
       const quantity = Number(item.quantity || 1);
 

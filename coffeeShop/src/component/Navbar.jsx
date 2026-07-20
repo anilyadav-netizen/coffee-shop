@@ -102,7 +102,7 @@ const Navbar = () => {
 
                 {/* Desktop Nav Items */}
                 <ul className="hidden lg:flex items-center gap-8">
-                    {navItems.map((item) => (
+                    {navItems?.map((item) => (
                         <li key={item.path}>
                             <Link
                                 to={item.path}

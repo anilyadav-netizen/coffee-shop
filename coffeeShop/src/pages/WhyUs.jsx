@@ -100,7 +100,7 @@ const WhyUs = () => {
 
                 {/* ===== FEATURES GRID - Exactly as image ===== */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                    {features.map((feature) => (
+                    {features?.map((feature) => (
                         <div
                             key={feature.id}
                             className="group bg-white border  rounded-2xl p-6 border-[#E85D3A]/30 transition-all duration-300 hover:-translate-y-1 shadow-lg shadow-[#E85D3A]/10"
@@ -124,7 +124,7 @@ const WhyUs = () => {
 
                 {/* ===== STATS SECTION - Exactly as image ===== */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    {stats.map((stat, index) => (
+                    {stats?.map((stat, index) => (
                         <div
                             key={index}
                             className="bg-white border  rounded-2xl p-6 text-center border-[#E85D3A]/30 transition-all duration-300 hover:-translate-y-1 shadow-md shadow-[#E85D3A]/10"

@@ -139,7 +139,7 @@ const AdminProfile = () => {
         <div className="pt-16 px-6 pb-6 md:px-8 md:pb-8">
           {/* Info Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {adminInfo.map((item, index) => {
+            {adminInfo?.map((item, index) => {
               const Icon = item.icon;
               const isEditable = item.editable && isEditing;
 

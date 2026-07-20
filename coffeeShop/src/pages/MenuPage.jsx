@@ -71,7 +71,7 @@ const MenuPage = () => {
             const startIdx = (currentPage - 1) * itemsPerPage;
             const endIdx = startIdx + itemsPerPage;
             const currentPageItems = filteredItems.slice(startIdx, endIdx);
-            const allIds = currentPageItems.map(item => item._id);
+            const allIds = currentPageItems?.map(item => item._id);
             setVisibleCards(new Set(allIds));
             setIsAnimating(false);
         }, 300);
@@ -504,7 +504,7 @@ const MenuPage = () => {
                     <div className="container mx-auto px-3 sm:px-4 relative z-10">
                         {/* Category Selector - Updated with Food Colors */}
                         <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-4 sm:mb-6 bg-[#FEFAF7] border border-[#FEE7DD] p-2 sm:p-3 rounded-xl sm:rounded-2xl shadow-lg shadow-[#E85D3A]/5">
-                            {allCategories.map((cat) => (
+                            {allCategories?.map((cat) => (
                                 <button
                                     key={cat._id}
                                     onClick={() => {
@@ -547,7 +547,7 @@ const MenuPage = () => {
                         {/* Items Grid with Auto Animation - Updated with Food Colors */}
                         {currentItems && currentItems.length > 0 ? (
                             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6 pb-12">
-                                {currentItems.map((item, index) => {
+                                {currentItems?.map((item, index) => {
                                     let itemCategoryName = 'Uncategorized';
                                     if (item.category && typeof item.category === 'object') {
                                         itemCategoryName = item.category.name;
@@ -712,7 +712,7 @@ const MenuPage = () => {
                                 </button>
 
                                 <div className="flex flex-wrap gap-1">
-                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                                    {Array.from({ length: totalPages }, (_, i) => i + 1)?.map((page) => (
                                         <button
                                             key={page}
                                             onClick={() => handlePageChange(page)}
