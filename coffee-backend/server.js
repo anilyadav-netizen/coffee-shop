@@ -5,27 +5,947 @@ const cors = require("cors");
 const http = require("http");
 const cookies = require("cookie-parser");
 const { Server } = require("socket.io");
+const path = require("path");
+const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken");
 
+
+// ============================================================
+// ENVIRONMENT VALIDATION
+// ============================================================
+const requiredEnvVars = ['PORT', 'MONGODB_URI', 'JWT_SECRET'];
+const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+if (missingEnvVars.length > 0) {
+  console.error(`❌ Missing required environment variables: ${missingEnvVars.join(', ')}`);
+  process.exit(1);
+}
+
+// ============================================================
+// CONSTANTS & CONFIGURATION
+// ============================================================
+const EVENTS = {
+  CONNECTION: 'connection',
+  DISCONNECT: 'disconnect',
+  ERROR: 'error',
+  
+  // Room Events
+  JOIN_ORDER: 'join-order',
+  JOIN_USER: 'join-user',
+  JOIN_RIDER: 'join-rider',
+  JOIN_ADMIN: 'join-admin',
+  JOIN_RIDER_LOCATION: 'join-rider-location',
+  
+  // Admin Events
+  ADMIN_JOIN: 'admin-join',
+  ORDER_STATUS_UPDATE: 'order-status-update',
+  CANCEL_ORDER: 'cancel-order',
+  ASSIGN_RIDER: 'assign-rider',
+  UNASSIGN_RIDER: 'unassign-rider',
+  
+  // Rider Events
+  RIDER_JOIN: 'rider-join',
+  RIDER_DELIVERY_UPDATE: 'rider-delivery-update',
+  RIDER_DELIVERY_CONFIRM: 'rider-delivery-confirm',
+  RIDER_ORDER_PICKUP: 'rider-order-pickup',
+  RIDER_LOCATION_UPDATE: 'rider-location-update',
+  RIDER_AVAILABILITY_TOGGLE: 'rider-availability-toggle',
+  
+  // Order Events
+  NEW_ORDER: 'new-order',
+  ORDER_UPDATE: 'order-update',
+  
+  // Message Events
+  RIDER_MESSAGE: 'rider-message',
+  USER_MESSAGE: 'user-message',
+  
+  // System Events
+  PING: 'ping',
+  PONG: 'pong',
+  RATE_LIMITED: 'rate-limited'
+};
+
+// ============================================================
+// LOGGER
+// ============================================================
+const logger = {
+  info: (message, data = null) => {
+    console.log(JSON.stringify({
+      level: 'info',
+      message,
+      data,
+      timestamp: new Date().toISOString()
+    }));
+  },
+  error: (message, error = null) => {
+    console.error(JSON.stringify({
+      level: 'error',
+      message,
+      error: error ? error.message : null,
+      stack: error ? error.stack : null,
+      timestamp: new Date().toISOString()
+    }));
+  },
+  socket: (event, data = null) => {
+    console.log(JSON.stringify({
+      level: 'socket',
+      event,
+      data,
+      timestamp: new Date().toISOString()
+    }));
+  },
+  warn: (message, data = null) => {
+    console.warn(JSON.stringify({
+      level: 'warn',
+      message,
+      data,
+      timestamp: new Date().toISOString()
+    }));
+  }
+};
+
+// ============================================================
+// EXPRESS APP SETUP
+// ============================================================
 const app = express();
-
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
+// Cookie Parser
 app.use(cookies());
 
-app.use(
-  cors({
-    origin: "http://localhost:5173", // frontend URL
-    credentials: true,
-  })
-);
+// CORS Configuration
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' 
+    ? process.env.FRONTEND_URL || 'https://yourdomain.com'
+    : ['http://localhost:5173', 'http://localhost:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range']
+};
+
+app.use(cors(corsOptions));
+
+// Body Parser
 app.use(express.json({ limit: "500mb" }));
 app.use(express.urlencoded({ limit: "500mb", extended: true }));
 
-const Port = process.env.PORT || 5000;
+// ============================================================
+// DATABASE CONNECTION
+// ============================================================
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      family: 4 // Use IPv4, skip trying IPv6
+    });
+    logger.info('✅ MongoDB connected successfully');
+  } catch (error) {
+    logger.error('❌ MongoDB connection error:', error);
+    setTimeout(connectDB, 5000);
+  }
+};
 
-// Database
-const connectDB = require("./config/connect.db");
+// ============================================================
+// CREATE HTTP SERVER
+// ============================================================
+const server = http.createServer(app);
 
+// ============================================================
+// SOCKET.IO SETUP
+// ============================================================
+const io = new Server(server, {
+  cors: corsOptions,
+  pingTimeout: 60000,
+  pingInterval: 25000,
+  transports: ['websocket', 'polling'],
+  allowEIO3: true
+});
+
+// Make io available everywhere
+app.set("io", io);
+
+// ============================================================
+// RATE LIMITING FOR SOCKET EVENTS
+// ============================================================
+const rateLimiter = new Map();
+const RATE_LIMIT_WINDOW = 60000; // 1 minute
+const MAX_EVENTS_PER_WINDOW = 60;
+
+const checkRateLimit = (socketId) => {
+  const now = Date.now();
+  if (!rateLimiter.has(socketId)) {
+    rateLimiter.set(socketId, [now]);
+    return true;
+  }
+  
+  const timestamps = rateLimiter.get(socketId)
+    .filter(t => now - t < RATE_LIMIT_WINDOW);
+  
+  if (timestamps.length >= MAX_EVENTS_PER_WINDOW) {
+    return false;
+  }
+  
+  timestamps.push(now);
+  rateLimiter.set(socketId, timestamps);
+  return true;
+};
+
+// Clean up rate limiter every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [socketId, timestamps] of rateLimiter.entries()) {
+    const validTimestamps = timestamps.filter(t => now - t < RATE_LIMIT_WINDOW);
+    if (validTimestamps.length === 0) {
+      rateLimiter.delete(socketId);
+    } else {
+      rateLimiter.set(socketId, validTimestamps);
+    }
+  }
+}, 300000);
+
+// ============================================================
+// SOCKET.IO AUTHENTICATION MIDDLEWARE
+// ============================================================
+io.use(async (socket, next) => {
+  try {
+    const token = socket.handshake.auth.token;
+    if (!token) {
+      logger.warn('Socket connection attempt without token', { socketId: socket.id });
+      return next(new Error("Authentication required"));
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    socket.userId = decoded.userId;
+    socket.userRole = decoded.role || 'user';
+    socket.userEmail = decoded.email;
+    
+    logger.info('Socket authenticated', { 
+      socketId: socket.id, 
+      userId: socket.userId, 
+      role: socket.userRole 
+    });
+    
+    next();
+  } catch (err) {
+    logger.error('Socket authentication failed', err);
+    next(new Error("Invalid token"));
+  }
+});
+
+// ============================================================
+// SOCKET CONNECTION HANDLER
+// ============================================================
+io.on(EVENTS.CONNECTION, (socket) => {
+  logger.socket(EVENTS.CONNECTION, { 
+    socketId: socket.id, 
+    userId: socket.userId,
+    role: socket.userRole 
+  });
+
+  // ==========================================================
+  // CONNECTION HEALTH
+  // ==========================================================
+  socket.on(EVENTS.PING, () => {
+    socket.emit(EVENTS.PONG);
+  });
+
+  // ==========================================================
+  // HELPER FUNCTIONS
+  // ==========================================================
+  const emitToAll = (event, data, rooms = []) => {
+    // Emit to specific rooms
+    rooms.forEach(room => {
+      io.to(room).emit(event, data);
+    });
+    
+    // Emit to general admin room if applicable
+    if (rooms.includes('admin') || rooms.some(r => r.startsWith('admin-'))) {
+      io.to('admin').emit(event, data);
+    }
+    
+    // Global broadcast
+    io.emit(`${event}-broadcast`, data);
+  };
+
+  const emitToUser = (userId, event, data) => {
+    if (userId) {
+      io.to(`user-${userId}`).emit(event, data);
+    }
+  };
+
+  const emitToRider = (riderId, event, data) => {
+    if (riderId) {
+      io.to(`rider-${riderId}`).emit(event, data);
+    }
+  };
+
+  const emitToAdmin = (adminId, event, data) => {
+    if (adminId) {
+      io.to(`admin-${adminId}`).emit(event, data);
+    }
+    io.to('admin').emit(event, data);
+  };
+
+  const emitToOrder = (orderId, event, data) => {
+    if (orderId) {
+      io.to(orderId).emit(event, data);
+    }
+  };
+
+  // ==========================================================
+  // 1. JOIN ROOMS
+  // ==========================================================
+  socket.on(EVENTS.JOIN_ORDER, (orderId) => {
+    if (!orderId) return;
+    socket.join(orderId);
+    logger.socket(EVENTS.JOIN_ORDER, { socketId: socket.id, orderId });
+  });
+
+  socket.on(EVENTS.JOIN_USER, (userId) => {
+    if (!userId) return;
+    socket.join(`user-${userId}`);
+    logger.socket(EVENTS.JOIN_USER, { socketId: socket.id, userId });
+  });
+
+  socket.on(EVENTS.JOIN_RIDER, (riderId) => {
+    if (!riderId) return;
+    socket.join(`rider-${riderId}`);
+    logger.socket(EVENTS.JOIN_RIDER, { socketId: socket.id, riderId });
+  });
+
+  socket.on(EVENTS.JOIN_ADMIN, (adminId) => {
+    if (adminId) {
+      socket.join(`admin-${adminId}`);
+      logger.socket(EVENTS.JOIN_ADMIN, { socketId: socket.id, adminId });
+    }
+    socket.join("admin");
+    logger.socket(EVENTS.JOIN_ADMIN, { socketId: socket.id, room: 'admin' });
+  });
+
+  socket.on(EVENTS.JOIN_RIDER_LOCATION, (riderId) => {
+    if (!riderId) return;
+    socket.join(`rider-location-${riderId}`);
+    logger.socket(EVENTS.JOIN_RIDER_LOCATION, { socketId: socket.id, riderId });
+  });
+
+  // ==========================================================
+  // 2. ADMIN EVENTS
+  // ==========================================================
+  socket.on(EVENTS.ADMIN_JOIN, (adminId) => {
+    if (!checkRateLimit(socket.id)) {
+      socket.emit(EVENTS.RATE_LIMITED, { message: 'Too many requests' });
+      return;
+    }
+    
+    if (adminId) {
+      socket.join(`admin-${adminId}`);
+      logger.socket(EVENTS.ADMIN_JOIN, { socketId: socket.id, adminId });
+    }
+    socket.join("admin");
+    logger.socket(EVENTS.ADMIN_JOIN, { socketId: socket.id, room: 'admin' });
+  });
+
+  socket.on(EVENTS.ORDER_STATUS_UPDATE, (data) => {
+    if (!checkRateLimit(socket.id)) {
+      socket.emit(EVENTS.RATE_LIMITED, { message: 'Too many requests' });
+      return;
+    }
+
+    const { orderId, newStatus, tracking, updatedBy, riderId, userId } = data;
+    
+    if (!orderId || !newStatus) {
+      socket.emit(EVENTS.ERROR, { message: 'Order ID and status are required' });
+      return;
+    }
+
+    logger.socket(EVENTS.ORDER_STATUS_UPDATE, { orderId, newStatus, updatedBy });
+
+    const eventData = {
+      orderId,
+      newStatus,
+      status: newStatus,
+      tracking: tracking || [],
+      timestamp: new Date().toISOString(),
+      updatedBy: updatedBy || 'admin'
+    };
+
+    // Broadcast to all relevant rooms
+    emitToAdmin(updatedBy, 'order-status-updated', eventData);
+    emitToRider(riderId, 'order-status-updated', eventData);
+    emitToUser(userId, 'order-status-updated', eventData);
+    emitToOrder(orderId, 'order-status-updated', eventData);
+    io.emit('order-update-broadcast', eventData);
+
+    logger.info(`✅ Order ${orderId} status updated to ${newStatus}`);
+  });
+
+  socket.on(EVENTS.CANCEL_ORDER, (data) => {
+    if (!checkRateLimit(socket.id)) {
+      socket.emit(EVENTS.RATE_LIMITED, { message: 'Too many requests' });
+      return;
+    }
+
+    const { orderId, reason, cancelledBy, riderId, userId } = data;
+    
+    if (!orderId) {
+      socket.emit(EVENTS.ERROR, { message: 'Order ID is required' });
+      return;
+    }
+
+    logger.socket(EVENTS.CANCEL_ORDER, { orderId, reason, cancelledBy });
+
+    const eventData = {
+      orderId,
+      reason: reason || 'Order cancelled by admin',
+      cancelledBy: cancelledBy || 'admin',
+      timestamp: new Date().toISOString()
+    };
+
+    emitToAdmin(cancelledBy, 'order-cancelled', eventData);
+    emitToRider(riderId, 'order-cancelled', eventData);
+    emitToUser(userId, 'order-cancelled', eventData);
+    emitToOrder(orderId, 'order-cancelled', eventData);
+    io.emit('order-cancelled-broadcast', eventData);
+
+    logger.info(`✅ Order ${orderId} cancelled`);
+  });
+
+  // ==========================================================
+  // 3. RIDER EVENTS
+  // ==========================================================
+  socket.on(EVENTS.RIDER_JOIN, (riderId) => {
+    if (!riderId) return;
+    socket.join(`rider-${riderId}`);
+    logger.socket(EVENTS.RIDER_JOIN, { socketId: socket.id, riderId });
+  });
+
+  socket.on(EVENTS.RIDER_DELIVERY_UPDATE, async (data) => {
+    if (!checkRateLimit(socket.id)) {
+      socket.emit(EVENTS.RATE_LIMITED, { message: 'Too many requests' });
+      return;
+    }
+
+    const { orderId, status, message, riderId, userId, order, tracking } = data;
+    
+    if (!orderId || !status || !riderId) {
+      socket.emit(EVENTS.ERROR, { message: 'Order ID, status, and rider ID are required' });
+      return;
+    }
+
+    logger.socket(EVENTS.RIDER_DELIVERY_UPDATE, { orderId, status, riderId });
+
+    const eventData = {
+      orderId,
+      status,
+      newStatus: status,
+      message: message || `Delivery status updated to ${status}`,
+      riderId,
+      order,
+      tracking: tracking || [],
+      timestamp: new Date().toISOString()
+    };
+
+    emitToAdmin(riderId, 'delivery_status_updated', eventData);
+    emitToRider(riderId, 'delivery_status_confirmed', {
+      orderId,
+      status,
+      newStatus: status,
+      message: `Delivery status updated to ${status}`,
+      tracking,
+      timestamp: new Date().toISOString()
+    });
+    emitToUser(userId, 'delivery_status_updated', {
+      orderId,
+      status,
+      newStatus: status,
+      message: message || `Your order is ${status}`,
+      tracking,
+      timestamp: new Date().toISOString()
+    });
+    emitToOrder(orderId, 'delivery-status-updated', eventData);
+    
+    io.emit('order-status-updated', {
+      orderId,
+      newStatus: status,
+      status: status,
+      tracking,
+      timestamp: new Date().toISOString(),
+      updatedBy: 'rider'
+    });
+    io.emit('delivery-update-broadcast', {
+      orderId,
+      status,
+      newStatus: status,
+      message,
+      riderId,
+      timestamp: new Date().toISOString()
+    });
+
+    logger.info(`✅ Rider ${riderId} updated order ${orderId} to ${status}`);
+  });
+
+  socket.on(EVENTS.RIDER_DELIVERY_CONFIRM, (data) => {
+    if (!checkRateLimit(socket.id)) {
+      socket.emit(EVENTS.RATE_LIMITED, { message: 'Too many requests' });
+      return;
+    }
+
+    const { orderId, riderId, deliveryTime, order, userId } = data;
+    
+    if (!orderId || !riderId) {
+      socket.emit(EVENTS.ERROR, { message: 'Order ID and rider ID are required' });
+      return;
+    }
+
+    logger.socket(EVENTS.RIDER_DELIVERY_CONFIRM, { orderId, riderId });
+
+    const eventData = {
+      orderId,
+      riderId,
+      deliveryTime: deliveryTime || new Date().toISOString(),
+      order,
+      timestamp: new Date().toISOString()
+    };
+
+    emitToAdmin(null, 'order-delivered-admin', eventData);
+    emitToRider(riderId, 'delivery-confirmed', {
+      orderId,
+      deliveryTime,
+      message: 'Delivery confirmed successfully!',
+      timestamp: new Date().toISOString()
+    });
+    emitToUser(userId, 'order-delivered-user', {
+      orderId,
+      riderId,
+      deliveryTime,
+      message: 'Your order has been delivered successfully! 🎉',
+      timestamp: new Date().toISOString()
+    });
+    emitToOrder(orderId, 'order-delivered', eventData);
+    
+    io.emit('order-status-updated', {
+      orderId,
+      newStatus: 'delivered',
+      status: 'delivered',
+      tracking: order?.tracking || [],
+      timestamp: new Date().toISOString(),
+      updatedBy: 'rider'
+    });
+
+    logger.info(`✅ Order ${orderId} delivered by rider ${riderId}`);
+  });
+
+  socket.on(EVENTS.RIDER_ORDER_PICKUP, (data) => {
+    if (!checkRateLimit(socket.id)) {
+      socket.emit(EVENTS.RATE_LIMITED, { message: 'Too many requests' });
+      return;
+    }
+
+    const { orderId, riderId, pickupTime, userId } = data;
+    
+    if (!orderId || !riderId) {
+      socket.emit(EVENTS.ERROR, { message: 'Order ID and rider ID are required' });
+      return;
+    }
+
+    logger.socket(EVENTS.RIDER_ORDER_PICKUP, { orderId, riderId });
+
+    const eventData = {
+      orderId,
+      riderId,
+      pickupTime: pickupTime || new Date().toISOString(),
+      timestamp: new Date().toISOString()
+    };
+
+    emitToAdmin(null, 'order-picked-up-admin', eventData);
+    emitToRider(riderId, 'pickup-confirmed', {
+      orderId,
+      pickupTime,
+      message: 'Order picked up successfully!',
+      timestamp: new Date().toISOString()
+    });
+    emitToUser(userId, 'order-picked-up-user', {
+      orderId,
+      riderId,
+      pickupTime,
+      message: 'Your order has been picked up by the rider 🚚',
+      timestamp: new Date().toISOString()
+    });
+    emitToOrder(orderId, 'order-picked-up', eventData);
+    
+    io.emit('order-status-updated', {
+      orderId,
+      newStatus: 'out_for_delivery',
+      status: 'out_for_delivery',
+      timestamp: new Date().toISOString(),
+      updatedBy: 'rider'
+    });
+
+    logger.info(`✅ Order ${orderId} picked up by rider ${riderId}`);
+  });
+
+  socket.on(EVENTS.RIDER_LOCATION_UPDATE, async (data) => {
+    if (!checkRateLimit(socket.id)) {
+      socket.emit(EVENTS.RATE_LIMITED, { message: 'Too many requests' });
+      return;
+    }
+
+    const { riderId, orderId, latitude, longitude } = data;
+    
+    if (!riderId) {
+      socket.emit(EVENTS.ERROR, { message: 'Rider ID is required' });
+      return;
+    }
+
+    if (!latitude || !longitude) {
+      socket.emit(EVENTS.ERROR, { message: 'Latitude and longitude are required' });
+      return;
+    }
+
+    logger.socket(EVENTS.RIDER_LOCATION_UPDATE, { riderId, orderId, latitude, longitude });
+
+    try {
+      const User = require("./models/User");
+      await User.findByIdAndUpdate(riderId, {
+        "currentLocation.latitude": latitude,
+        "currentLocation.longitude": longitude,
+        "currentLocation.updatedAt": new Date()
+      });
+
+      const locationData = {
+        riderId,
+        orderId,
+        latitude,
+        longitude,
+        timestamp: new Date().toISOString()
+      };
+
+      emitToAdmin(null, 'rider-location-updated', locationData);
+      
+      if (orderId) {
+        io.to(`order-${orderId}`).emit('rider-location', locationData);
+      }
+      
+      io.to(`rider-location-${riderId}`).emit('location-update-confirmed', {
+        riderId,
+        latitude,
+        longitude,
+        timestamp: new Date().toISOString()
+      });
+
+      logger.info(`✅ Rider ${riderId} location updated`);
+    } catch (error) {
+      logger.error(`Error updating rider location for ${riderId}`, error);
+      socket.emit(EVENTS.ERROR, { 
+        message: 'Failed to update location',
+        error: error.message 
+      });
+    }
+  });
+
+  socket.on(EVENTS.RIDER_AVAILABILITY_TOGGLE, (data) => {
+    if (!checkRateLimit(socket.id)) {
+      socket.emit(EVENTS.RATE_LIMITED, { message: 'Too many requests' });
+      return;
+    }
+
+    const { riderId, isAvailable } = data;
+    
+    if (!riderId) {
+      socket.emit(EVENTS.ERROR, { message: 'Rider ID is required' });
+      return;
+    }
+
+    logger.socket(EVENTS.RIDER_AVAILABILITY_TOGGLE, { riderId, isAvailable });
+
+    const eventData = {
+      riderId,
+      isAvailable,
+      timestamp: new Date().toISOString()
+    };
+
+    emitToAdmin(null, 'rider-availability-changed', eventData);
+    emitToRider(riderId, 'availability-updated', {
+      isAvailable,
+      message: `You are now ${isAvailable ? 'available' : 'unavailable'} for deliveries`,
+      timestamp: new Date().toISOString()
+    });
+
+    logger.info(`✅ Rider ${riderId} availability: ${isAvailable}`);
+  });
+
+  // ==========================================================
+  // 4. RIDER ASSIGNMENT EVENTS
+  // ==========================================================
+  socket.on(EVENTS.ASSIGN_RIDER, (data) => {
+    if (!checkRateLimit(socket.id)) {
+      socket.emit(EVENTS.RATE_LIMITED, { message: 'Too many requests' });
+      return;
+    }
+
+    const { orderId, riderId, rider, assignedBy, order, userId } = data;
+    
+    if (!orderId || !riderId || !rider) {
+      socket.emit(EVENTS.ERROR, { message: 'Order ID, rider ID, and rider data are required' });
+      return;
+    }
+
+    logger.socket(EVENTS.ASSIGN_RIDER, { orderId, riderId, assignedBy });
+
+    const eventData = {
+      orderId,
+      riderId,
+      rider,
+      assignedBy: assignedBy || 'admin',
+      order,
+      timestamp: new Date().toISOString()
+    };
+
+    emitToAdmin(assignedBy, 'rider-assigned', eventData);
+    emitToRider(riderId, 'new_order_assigned', {
+      orderId,
+      order,
+      rider,
+      assignedBy: assignedBy || 'admin',
+      message: 'New order assigned to you',
+      timestamp: new Date().toISOString()
+    });
+    emitToUser(userId, 'order_rider_assigned', {
+      orderId,
+      rider: {
+        name: rider.name,
+        mobile: rider.mobile
+      },
+      timestamp: new Date().toISOString()
+    });
+    emitToOrder(orderId, 'rider-assigned', eventData);
+    
+    io.emit('rider-assigned-broadcast', {
+      orderId,
+      riderId,
+      rider,
+      assignedBy: assignedBy || 'admin',
+      timestamp: new Date().toISOString()
+    });
+    io.emit('order-status-updated', {
+      orderId,
+      newStatus: 'assigned_to_rider',
+      status: 'assigned_to_rider',
+      timestamp: new Date().toISOString(),
+      updatedBy: 'admin'
+    });
+
+    logger.info(`✅ Rider ${riderId} (${rider.name}) assigned to order ${orderId}`);
+  });
+
+  socket.on(EVENTS.UNASSIGN_RIDER, (data) => {
+    if (!checkRateLimit(socket.id)) {
+      socket.emit(EVENTS.RATE_LIMITED, { message: 'Too many requests' });
+      return;
+    }
+
+    const { orderId, riderId, unassignedBy, reason, userId } = data;
+    
+    if (!orderId || !riderId) {
+      socket.emit(EVENTS.ERROR, { message: 'Order ID and rider ID are required' });
+      return;
+    }
+
+    logger.socket(EVENTS.UNASSIGN_RIDER, { orderId, riderId, unassignedBy });
+
+    const eventData = {
+      orderId,
+      riderId,
+      unassignedBy: unassignedBy || 'admin',
+      reason: reason || 'Order has been unassigned',
+      timestamp: new Date().toISOString()
+    };
+
+    emitToAdmin(unassignedBy, 'rider-unassigned', eventData);
+    emitToRider(riderId, 'order_unassigned', {
+      orderId,
+      reason: reason || 'Order has been unassigned from you',
+      unassignedBy: unassignedBy || 'admin',
+      timestamp: new Date().toISOString()
+    });
+    emitToUser(userId, 'order_rider_unassigned', {
+      orderId,
+      message: 'Your rider has been unassigned. A new rider will be assigned soon.',
+      timestamp: new Date().toISOString()
+    });
+    emitToOrder(orderId, 'rider-unassigned', eventData);
+    
+    io.emit('rider-unassigned-broadcast', {
+      orderId,
+      riderId,
+      unassignedBy: unassignedBy || 'admin',
+      timestamp: new Date().toISOString()
+    });
+
+    logger.info(`✅ Rider ${riderId} unassigned from order ${orderId}`);
+  });
+
+  // ==========================================================
+  // 5. ORDER EVENTS
+  // ==========================================================
+  socket.on(EVENTS.NEW_ORDER, (data) => {
+    if (!checkRateLimit(socket.id)) {
+      socket.emit(EVENTS.RATE_LIMITED, { message: 'Too many requests' });
+      return;
+    }
+
+    const { order, userId } = data;
+    
+    if (!order || !order._id) {
+      socket.emit(EVENTS.ERROR, { message: 'Valid order data is required' });
+      return;
+    }
+
+    logger.socket(EVENTS.NEW_ORDER, { orderId: order._id, userId });
+
+    const eventData = {
+      order,
+      timestamp: new Date().toISOString()
+    };
+
+    emitToAdmin(null, 'new-order-placed', eventData);
+    emitToUser(userId, 'order-placed', {
+      order,
+      message: 'Your order has been placed successfully!',
+      timestamp: new Date().toISOString()
+    });
+    io.emit('new-order-broadcast', eventData);
+
+    logger.info(`✅ New order ${order._id} broadcasted`);
+  });
+
+  socket.on(EVENTS.ORDER_UPDATE, (data) => {
+    if (!checkRateLimit(socket.id)) {
+      socket.emit(EVENTS.RATE_LIMITED, { message: 'Too many requests' });
+      return;
+    }
+
+    const { orderId, updates, userId, riderId } = data;
+    
+    if (!orderId || !updates) {
+      socket.emit(EVENTS.ERROR, { message: 'Order ID and updates are required' });
+      return;
+    }
+
+    logger.socket(EVENTS.ORDER_UPDATE, { orderId, userId, riderId });
+
+    const eventData = {
+      orderId,
+      updates,
+      timestamp: new Date().toISOString()
+    };
+
+    emitToUser(userId, 'order-updated', eventData);
+    emitToRider(riderId, 'order-updated', eventData);
+    emitToAdmin(null, 'order-updated', eventData);
+    emitToOrder(orderId, 'order-updated', eventData);
+
+    logger.info(`✅ Order ${orderId} updated`);
+  });
+
+  // ==========================================================
+  // 6. MESSAGE EVENTS
+  // ==========================================================
+  socket.on(EVENTS.RIDER_MESSAGE, (data) => {
+    if (!checkRateLimit(socket.id)) {
+      socket.emit(EVENTS.RATE_LIMITED, { message: 'Too many requests' });
+      return;
+    }
+
+    const { orderId, message, riderId, userId, sender } = data;
+    
+    if (!message || !riderId) {
+      socket.emit(EVENTS.ERROR, { message: 'Message and rider ID are required' });
+      return;
+    }
+
+    logger.socket(EVENTS.RIDER_MESSAGE, { orderId, riderId, userId });
+
+    const eventData = {
+      orderId,
+      message,
+      riderId,
+      sender: sender || 'Rider',
+      timestamp: new Date().toISOString()
+    };
+
+    emitToUser(userId, 'rider-message', eventData);
+    emitToRider(riderId, 'message-sent', {
+      orderId,
+      message,
+      timestamp: new Date().toISOString()
+    });
+    emitToAdmin(null, 'rider-user-message', {
+      ...eventData,
+      userId
+    });
+
+    logger.info(`✅ Message sent from rider ${riderId} to user ${userId}`);
+  });
+
+  socket.on(EVENTS.USER_MESSAGE, (data) => {
+    if (!checkRateLimit(socket.id)) {
+      socket.emit(EVENTS.RATE_LIMITED, { message: 'Too many requests' });
+      return;
+    }
+
+    const { orderId, message, userId, riderId, sender } = data;
+    
+    if (!message || !userId) {
+      socket.emit(EVENTS.ERROR, { message: 'Message and user ID are required' });
+      return;
+    }
+
+    logger.socket(EVENTS.USER_MESSAGE, { orderId, userId, riderId });
+
+    const eventData = {
+      orderId,
+      message,
+      userId,
+      sender: sender || 'Customer',
+      timestamp: new Date().toISOString()
+    };
+
+    emitToRider(riderId, 'user-message', eventData);
+    emitToUser(userId, 'message-sent', {
+      orderId,
+      message,
+      timestamp: new Date().toISOString()
+    });
+    emitToAdmin(null, 'user-rider-message', {
+      ...eventData,
+      riderId
+    });
+
+    logger.info(`✅ Message sent from user ${userId} to rider ${riderId}`);
+  });
+
+  // ==========================================================
+  // 7. DISCONNECT
+  // ==========================================================
+  socket.on(EVENTS.DISCONNECT, () => {
+    logger.info(`🔴 User Disconnected: ${socket.id} (User: ${socket.userId})`);
+    // Clean up rate limiter entry
+    rateLimiter.delete(socket.id);
+  });
+
+  socket.on(EVENTS.ERROR, (error) => {
+    logger.error(`❌ Socket Error for ${socket.id}:`, error);
+  });
+});
+
+// ============================================================
+// ROUTES
+// ============================================================
 // Routes
 const authRoutes = require("./routes/authRoutes");
 const coffeeRoutes = require("./routes/coffeeRoutes");
@@ -37,795 +957,6 @@ const updatedeliveryRoute = require("./routes/orderRoutes");
 const tableRoutes = require("./routes/tableRoutes");
 const riderAssignmentRoutes = require("./routes/riderAssignmentRoutes");
 
-// Create HTTP Server
-const server = http.createServer(app);
-
-// Socket.IO
-const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    credentials: true,
-  },
-});
-
-// Make io available everywhere
-app.set("io", io);
-
-// ============================================================
-// SOCKET CONNECTION HANDLER
-// ============================================================
-io.on("connection", (socket) => {
-  console.log("🟢 User Connected:", socket.id);
-
-  // ==========================================================
-  // 1. JOIN ROOMS
-  // ==========================================================
-
-  // Join order room
-  socket.on("join-order", (orderId) => {
-    socket.join(orderId);
-    console.log(`📦 Joined Order Room: ${orderId}`);
-  });
-
-  // Join user room
-  socket.on("join-user", (userId) => {
-    if (userId) {
-      socket.join(`user-${userId}`);
-      console.log(`👤 Joined User Room: user-${userId}`);
-    }
-  });
-
-  // Join rider room
-  socket.on("join-rider", (riderId) => {
-    if (riderId) {
-      socket.join(`rider-${riderId}`);
-      console.log(`🏍️ Joined Rider Room: rider-${riderId}`);
-    }
-  });
-
-  // Join admin room
-  socket.on("join-admin", (adminId) => {
-    if (adminId) {
-      socket.join(`admin-${adminId}`);
-      console.log(`👤 Joined Admin Room: admin-${adminId}`);
-    }
-    // Also join general admin room
-    socket.join("admin");
-    console.log(`👤 Joined General Admin Room: admin`);
-  });
-
-  // Join rider location room
-  socket.on("join-rider-location", (riderId) => {
-    if (riderId) {
-      socket.join(`rider-location-${riderId}`);
-      console.log(`📍 Joined Rider Location Room: rider-location-${riderId}`);
-    }
-  });
-
-  // ==========================================================
-  // 2. ADMIN EVENTS
-  // ==========================================================
-
-  // Admin join
-  socket.on("admin-join", (adminId) => {
-    if (adminId) {
-      socket.join(`admin-${adminId}`);
-      console.log(`👤 Admin ${adminId} joined room`);
-    }
-    socket.join("admin");
-    console.log("👤 Admin joined general admin room");
-  });
-
-  // Admin update order status
-  socket.on("order-status-update", (data) => {
-    const { orderId, newStatus, tracking, updatedBy, riderId, userId } = data;
-
-    console.log(`📡 Order status update requested: ${orderId} -> ${newStatus}`);
-
-    // Broadcast to admin room
-    io.to("admin").emit("order-status-updated", {
-      orderId,
-      newStatus,
-      status: newStatus,
-      tracking,
-      timestamp: new Date(),
-      updatedBy: updatedBy || "admin",
-    });
-
-    // Broadcast to specific admin
-    if (updatedBy) {
-      io.to(`admin-${updatedBy}`).emit("order-status-updated", {
-        orderId,
-        newStatus,
-        status: newStatus,
-        tracking,
-        timestamp: new Date(),
-        updatedBy: updatedBy || "admin",
-      });
-    }
-
-    // Broadcast to rider if assigned
-    if (riderId) {
-      io.to(`rider-${riderId}`).emit("order-status-updated", {
-        orderId,
-        newStatus,
-        status: newStatus,
-        tracking,
-        timestamp: new Date(),
-        updatedBy: updatedBy || "admin",
-      });
-    }
-
-    // Broadcast to user
-    if (userId) {
-      io.to(`user-${userId}`).emit("order-status-updated", {
-        orderId,
-        newStatus,
-        status: newStatus,
-        tracking,
-        timestamp: new Date(),
-        updatedBy: updatedBy || "admin",
-      });
-    }
-
-    // Broadcast to order room
-    io.to(orderId).emit("order-status-updated", {
-      orderId,
-      newStatus,
-      status: newStatus,
-      tracking,
-      timestamp: new Date(),
-      updatedBy: updatedBy || "admin",
-    });
-
-    // Global broadcast
-    io.emit("order-update-broadcast", {
-      orderId,
-      newStatus,
-      status: newStatus,
-      tracking,
-      timestamp: new Date(),
-      updatedBy: updatedBy || "admin",
-    });
-
-    console.log(`✅ Order ${orderId} status updated to ${newStatus}`);
-  });
-
-  // Admin cancel order
-  socket.on("cancel-order", (data) => {
-    const { orderId, reason, cancelledBy, riderId, userId } = data;
-
-    console.log(`❌ Order cancellation requested: ${orderId}`);
-
-    // Broadcast to admin
-    io.to("admin").emit("order-cancelled", {
-      orderId,
-      reason,
-      cancelledBy: cancelledBy || "admin",
-      timestamp: new Date(),
-    });
-
-    // Broadcast to specific admin
-    if (cancelledBy) {
-      io.to(`admin-${cancelledBy}`).emit("order-cancelled", {
-        orderId,
-        reason,
-        cancelledBy: cancelledBy || "admin",
-        timestamp: new Date(),
-      });
-    }
-
-    // Broadcast to rider
-    if (riderId) {
-      io.to(`rider-${riderId}`).emit("order-cancelled", {
-        orderId,
-        reason,
-        cancelledBy: cancelledBy || "admin",
-        timestamp: new Date(),
-      });
-    }
-
-    // Broadcast to user
-    if (userId) {
-      io.to(`user-${userId}`).emit("order-cancelled", {
-        orderId,
-        reason,
-        cancelledBy: cancelledBy || "admin",
-        timestamp: new Date(),
-      });
-    }
-
-    // Broadcast to order room
-    io.to(orderId).emit("order-cancelled", {
-      orderId,
-      reason,
-      cancelledBy: cancelledBy || "admin",
-      timestamp: new Date(),
-    });
-
-    // Global broadcast
-    io.emit("order-cancelled-broadcast", {
-      orderId,
-      reason,
-      cancelledBy: cancelledBy || "admin",
-      timestamp: new Date(),
-    });
-
-    console.log(`✅ Order ${orderId} cancelled`);
-  });
-
-  // ==========================================================
-  // 3. RIDER EVENTS
-  // ==========================================================
-
-  // Rider join
-  socket.on("rider-join", (riderId) => {
-    if (riderId) {
-      socket.join(`rider-${riderId}`);
-      console.log(`🏍️ Rider ${riderId} joined room`);
-    }
-  });
-
-  // Rider update delivery status
-  socket.on("rider-delivery-update", (data) => {
-    const { orderId, status, message, riderId, userId, order, tracking } = data;
-
-    console.log(`📡 Rider delivery update: ${orderId} -> ${status}`);
-
-    // Emit to admin room
-    io.to("admin").emit("delivery_status_updated", {
-      orderId,
-      status,
-      newStatus: status,
-      message,
-      riderId,
-      order,
-      tracking,
-      timestamp: new Date(),
-    });
-
-    // Emit to specific admin
-    io.to(`admin-${riderId}`).emit("delivery_status_updated", {
-      orderId,
-      status,
-      newStatus: status,
-      message,
-      riderId,
-      order,
-      tracking,
-      timestamp: new Date(),
-    });
-
-    // Emit to rider
-    io.to(`rider-${riderId}`).emit("delivery_status_confirmed", {
-      orderId,
-      status,
-      newStatus: status,
-      message: `Delivery status updated to ${status}`,
-      tracking,
-      timestamp: new Date(),
-    });
-
-    // Emit to user
-    if (userId) {
-      io.to(`user-${userId}`).emit("delivery_status_updated", {
-        orderId,
-        status,
-        newStatus: status,
-        message: message || `Your order is ${status}`,
-        tracking,
-        timestamp: new Date(),
-      });
-    }
-
-    // Emit to order room
-    io.to(orderId).emit("delivery-status-updated", {
-      orderId,
-      status,
-      newStatus: status,
-      message,
-      riderId,
-      order,
-      tracking,
-      timestamp: new Date(),
-    });
-
-    // Global broadcast
-    io.emit("order-status-updated", {
-      orderId,
-      newStatus: status,
-      status: status,
-      tracking,
-      timestamp: new Date(),
-      updatedBy: "rider",
-    });
-
-    io.emit("delivery-update-broadcast", {
-      orderId,
-      status,
-      newStatus: status,
-      message,
-      riderId,
-      timestamp: new Date(),
-    });
-
-    console.log(`✅ Rider ${riderId} updated order ${orderId} to ${status}`);
-  });
-
-  // Rider confirm delivery
-  socket.on("rider-delivery-confirm", (data) => {
-    const { orderId, riderId, deliveryTime, order, userId } = data;
-
-    console.log(`📦 Delivery confirmed: ${orderId}`);
-
-    io.to("admin").emit("order-delivered-admin", {
-      orderId,
-      riderId,
-      deliveryTime,
-      order,
-      timestamp: new Date(),
-    });
-
-    io.to(`rider-${riderId}`).emit("delivery-confirmed", {
-      orderId,
-      deliveryTime,
-      message: "Delivery confirmed successfully!",
-      timestamp: new Date(),
-    });
-
-    if (userId) {
-      io.to(`user-${userId}`).emit("order-delivered-user", {
-        orderId,
-        riderId,
-        deliveryTime,
-        message: "Your order has been delivered successfully! 🎉",
-        timestamp: new Date(),
-      });
-    }
-
-    io.to(orderId).emit("order-delivered", {
-      orderId,
-      riderId,
-      deliveryTime,
-      order,
-      timestamp: new Date(),
-    });
-
-    io.emit("order-status-updated", {
-      orderId,
-      newStatus: "delivered",
-      status: "delivered",
-      tracking: order?.tracking || [],
-      timestamp: new Date(),
-      updatedBy: "rider",
-    });
-
-    console.log(`✅ Order ${orderId} delivered by rider ${riderId}`);
-  });
-
-  // Rider order pickup
-  socket.on("rider-order-pickup", (data) => {
-    const { orderId, riderId, pickupTime, userId } = data;
-
-    console.log(`📦 Order pickup: ${orderId}`);
-
-    io.to("admin").emit("order-picked-up-admin", {
-      orderId,
-      riderId,
-      pickupTime,
-      timestamp: new Date(),
-    });
-
-    io.to(`rider-${riderId}`).emit("pickup-confirmed", {
-      orderId,
-      pickupTime,
-      message: "Order picked up successfully!",
-      timestamp: new Date(),
-    });
-
-    if (userId) {
-      io.to(`user-${userId}`).emit("order-picked-up-user", {
-        orderId,
-        riderId,
-        pickupTime,
-        message: "Your order has been picked up by the rider 🚚",
-        timestamp: new Date(),
-      });
-    }
-
-    io.to(orderId).emit("order-picked-up", {
-      orderId,
-      riderId,
-      pickupTime,
-      timestamp: new Date(),
-    });
-
-    io.emit("order-status-updated", {
-      orderId,
-      newStatus: "out_for_delivery",
-      status: "out_for_delivery",
-      timestamp: new Date(),
-      updatedBy: "rider",
-    });
-
-    console.log(`✅ Order ${orderId} picked up by rider ${riderId}`);
-  });
-
-  // Rider location update
-  socket.on("rider-location-update", async (data) => {
-    const { riderId, orderId, latitude, longitude } = data;
-
-    console.log(`📍 Rider location update: ${riderId}`);
-
-    try {
-      const User = require("./models/User");
-      await User.findByIdAndUpdate(riderId, {
-        "currentLocation.latitude": latitude,
-        "currentLocation.longitude": longitude,
-        "currentLocation.updatedAt": new Date(),
-      });
-
-      io.to("admin").emit("rider-location-updated", {
-        riderId,
-        orderId,
-        latitude,
-        longitude,
-        timestamp: new Date(),
-      });
-
-      if (orderId) {
-        io.to(`order-${orderId}`).emit("rider-location", {
-          riderId,
-          orderId,
-          latitude,
-          longitude,
-          timestamp: new Date(),
-        });
-      }
-
-      io.to(`rider-location-${riderId}`).emit("location-update-confirmed", {
-        riderId,
-        latitude,
-        longitude,
-        timestamp: new Date(),
-      });
-
-      console.log(`✅ Rider ${riderId} location updated`);
-    } catch (error) {
-      console.error("Error updating rider location:", error);
-    }
-  });
-
-  // Rider availability toggle
-  socket.on("rider-availability-toggle", (data) => {
-    const { riderId, isAvailable } = data;
-
-    console.log(`🔄 Rider availability: ${riderId} -> ${isAvailable}`);
-
-    io.to("admin").emit("rider-availability-changed", {
-      riderId,
-      isAvailable,
-      timestamp: new Date(),
-    });
-
-    io.to(`rider-${riderId}`).emit("availability-updated", {
-      isAvailable,
-      message: `You are now ${isAvailable ? 'available' : 'unavailable'} for deliveries`,
-      timestamp: new Date(),
-    });
-
-    console.log(`✅ Rider ${riderId} availability: ${isAvailable}`);
-  });
-
-  // ==========================================================
-  // 4. RIDER ASSIGNMENT EVENTS
-  // ==========================================================
-
-  // Assign rider to order
-  socket.on("assign-rider", (data) => {
-    const { orderId, riderId, rider, assignedBy, order, userId } = data;
-
-    console.log(`🚚 Assigning rider ${riderId} to order ${orderId}`);
-
-    // Emit to admin
-    io.to("admin").emit("rider-assigned", {
-      orderId,
-      riderId,
-      rider,
-      assignedBy,
-      order,
-      timestamp: new Date(),
-    });
-
-    // Emit to specific admin
-    if (assignedBy) {
-      io.to(`admin-${assignedBy}`).emit("rider-assigned", {
-        orderId,
-        riderId,
-        rider,
-        assignedBy,
-        order,
-        timestamp: new Date(),
-      });
-    }
-
-    // Emit to rider
-    io.to(`rider-${riderId}`).emit("new_order_assigned", {
-      orderId,
-      order,
-      rider,
-      assignedBy,
-      message: "New order assigned to you",
-      timestamp: new Date(),
-    });
-
-    // Emit to user
-    if (userId) {
-      io.to(`user-${userId}`).emit("order_rider_assigned", {
-        orderId,
-        rider: {
-          name: rider.name,
-          mobile: rider.mobile,
-        },
-        timestamp: new Date(),
-      });
-    }
-
-    // Emit to order room
-    io.to(orderId).emit("rider-assigned", {
-      orderId,
-      riderId,
-      rider,
-      assignedBy,
-      order,
-      timestamp: new Date(),
-    });
-
-    // Global broadcast
-    io.emit("rider-assigned-broadcast", {
-      orderId,
-      riderId,
-      rider,
-      assignedBy,
-      timestamp: new Date(),
-    });
-
-    io.emit("order-status-updated", {
-      orderId,
-      newStatus: "assigned_to_rider",
-      status: "assigned_to_rider",
-      timestamp: new Date(),
-      updatedBy: "admin",
-    });
-
-    console.log(`✅ Rider ${riderId} (${rider.name}) assigned to order ${orderId}`);
-  });
-
-  // Unassign rider from order
-  socket.on("unassign-rider", (data) => {
-    const { orderId, riderId, unassignedBy, reason, userId } = data;
-
-    console.log(`🚫 Unassigning rider ${riderId} from order ${orderId}`);
-
-    // Emit to admin
-    io.to("admin").emit("rider-unassigned", {
-      orderId,
-      riderId,
-      unassignedBy,
-      reason,
-      timestamp: new Date(),
-    });
-
-    // Emit to specific admin
-    if (unassignedBy) {
-      io.to(`admin-${unassignedBy}`).emit("rider-unassigned", {
-        orderId,
-        riderId,
-        unassignedBy,
-        reason,
-        timestamp: new Date(),
-      });
-    }
-
-    // Emit to rider
-    if (riderId) {
-      io.to(`rider-${riderId}`).emit("order_unassigned", {
-        orderId,
-        reason: reason || "Order has been unassigned from you",
-        unassignedBy,
-        timestamp: new Date(),
-      });
-    }
-
-    // Emit to user
-    if (userId) {
-      io.to(`user-${userId}`).emit("order_rider_unassigned", {
-        orderId,
-        message: "Your rider has been unassigned. A new rider will be assigned soon.",
-        timestamp: new Date(),
-      });
-    }
-
-    // Emit to order room
-    io.to(orderId).emit("rider-unassigned", {
-      orderId,
-      riderId,
-      unassignedBy,
-      reason,
-      timestamp: new Date(),
-    });
-
-    // Global broadcast
-    io.emit("rider-unassigned-broadcast", {
-      orderId,
-      riderId,
-      unassignedBy,
-      timestamp: new Date(),
-    });
-
-    console.log(`✅ Rider ${riderId} unassigned from order ${orderId}`);
-  });
-
-  // ==========================================================
-  // 5. ORDER EVENTS
-  // ==========================================================
-
-  // New order placed
-  socket.on("new-order", (data) => {
-    const { order, userId } = data;
-
-    console.log(`🆕 New order placed: ${order._id}`);
-
-    // Emit to admin
-    io.to("admin").emit("new-order-placed", {
-      order,
-      timestamp: new Date(),
-    });
-
-    // Emit to user
-    if (userId) {
-      io.to(`user-${userId}`).emit("order-placed", {
-        order,
-        message: "Your order has been placed successfully!",
-        timestamp: new Date(),
-      });
-    }
-
-    // Global broadcast
-    io.emit("new-order-broadcast", {
-      order,
-      timestamp: new Date(),
-    });
-
-    console.log(`✅ New order ${order._id} broadcasted`);
-  });
-
-  // Order status update (general)
-  socket.on("order-update", (data) => {
-    const { orderId, updates, userId, riderId } = data;
-
-    console.log(`📡 Order update: ${orderId}`);
-
-    if (userId) {
-      io.to(`user-${userId}`).emit("order-updated", {
-        orderId,
-        updates,
-        timestamp: new Date(),
-      });
-    }
-
-    if (riderId) {
-      io.to(`rider-${riderId}`).emit("order-updated", {
-        orderId,
-        updates,
-        timestamp: new Date(),
-      });
-    }
-
-    io.to("admin").emit("order-updated", {
-      orderId,
-      updates,
-      timestamp: new Date(),
-    });
-
-    io.to(orderId).emit("order-updated", {
-      orderId,
-      updates,
-      timestamp: new Date(),
-    });
-
-    console.log(`✅ Order ${orderId} updated`);
-  });
-
-  // ==========================================================
-  // 6. MESSAGE EVENTS
-  // ==========================================================
-
-  // Rider to user message
-  socket.on("rider-message", (data) => {
-    const { orderId, message, riderId, userId, sender } = data;
-
-    console.log(`💬 Message from rider ${riderId} to user ${userId}`);
-
-    if (userId) {
-      io.to(`user-${userId}`).emit("rider-message", {
-        orderId,
-        message,
-        riderId,
-        sender: sender || "Rider",
-        timestamp: new Date(),
-      });
-    }
-
-    io.to(`rider-${riderId}`).emit("message-sent", {
-      orderId,
-      message,
-      timestamp: new Date(),
-    });
-
-    io.to("admin").emit("rider-user-message", {
-      orderId,
-      message,
-      riderId,
-      userId,
-      timestamp: new Date(),
-    });
-
-    console.log(`✅ Message sent from rider ${riderId} to user ${userId}`);
-  });
-
-  // User to rider message
-  socket.on("user-message", (data) => {
-    const { orderId, message, userId, riderId, sender } = data;
-
-    console.log(`💬 Message from user ${userId} to rider ${riderId}`);
-
-    if (riderId) {
-      io.to(`rider-${riderId}`).emit("user-message", {
-        orderId,
-        message,
-        userId,
-        sender: sender || "Customer",
-        timestamp: new Date(),
-      });
-    }
-
-    io.to(`user-${userId}`).emit("message-sent", {
-      orderId,
-      message,
-      timestamp: new Date(),
-    });
-
-    io.to("admin").emit("user-rider-message", {
-      orderId,
-      message,
-      userId,
-      riderId,
-      timestamp: new Date(),
-    });
-
-    console.log(`✅ Message sent from user ${userId} to rider ${riderId}`);
-  });
-
-  // ==========================================================
-  // 7. DISCONNECT
-  // ==========================================================
-
-  socket.on("disconnect", () => {
-    console.log("🔴 User Disconnected:", socket.id);
-  });
-
-  socket.on("error", (error) => {
-    console.error("❌ Socket Error:", error);
-  });
-});
-
-// ============================================================
-// MIDDLEWARE & ROUTES
-// ============================================================
-
-// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/coffee", coffeeRoutes);
 app.use("/api/cart", cartRoutes);
@@ -836,27 +967,111 @@ app.use("/api/updatedelivery", updatedeliveryRoute);
 app.use("/api/tables", tableRoutes);
 app.use("/api/rider-assignment", riderAssignmentRoutes);
 
-// Database Connection
+// ============================================================
+// STATIC FILES & FRONTEND
+// ============================================================
+const clientPath = path.join(__dirname, "../coffeeShop/dist");
+
+// Check if frontend build exists
+const fs = require('fs');
+if (fs.existsSync(clientPath)) {
+  app.use(express.static(clientPath));
+  
+  app.get(/^(?!\/api).*/, (req, res) => {
+    res.sendFile(path.join(clientPath, "index.html"));
+  });
+} else {
+  logger.warn('Frontend build not found at:', clientPath);
+  app.get('/', (req, res) => {
+    res.json({ 
+      message: 'Server is running', 
+      status: 'healthy',
+      timestamp: new Date().toISOString()
+    });
+  });
+}
+
+// ============================================================
+// HEALTH CHECK
+// ============================================================
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+  });
+});
+
+// ============================================================
+// ERROR HANDLING MIDDLEWARE
+// ============================================================
+app.use((err, req, res, next) => {
+  logger.error('Unhandled error:', err);
+  res.status(err.status || 500).json({
+    message: err.message || 'Internal server error',
+    error: process.env.NODE_ENV === 'development' ? err : {}
+  });
+});
+
+// ============================================================
+// DATABASE CONNECTION
+// ============================================================
 connectDB();
 
 // ============================================================
-// START SERVER
+// GRACEFUL SHUTDOWN
 // ============================================================
+const gracefulShutdown = async (signal) => {
+  logger.info(`\n${signal} received, closing server...`);
+  
+  server.close(() => {
+    logger.info('HTTP server closed');
+  });
+  
+  // Close socket connections
+  io.close(() => {
+    logger.info('Socket.IO server closed');
+  });
+  
+  // Close database connection
+  try {
+    await mongoose.connection.close(false);
+    logger.info('MongoDB connection closed');
+  } catch (error) {
+    logger.error('Error closing MongoDB connection:', error);
+  }
+  
+  process.exit(0);
+};
 
-server.listen(Port, () => {
-  console.log(`🚀 Server running on port ${Port}`);
-  console.log(`📍 Socket.IO ready for connections`);
-  console.log(`📡 Admin panel available at http://localhost:${Port}`);
-});
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 // Handle unhandled promise rejections
 process.on("unhandledRejection", (err) => {
-  console.error("❌ Unhandled Rejection:", err);
+  logger.error("❌ Unhandled Rejection:", err);
+  gracefulShutdown('unhandledRejection');
 });
 
 // Handle uncaught exceptions
 process.on("uncaughtException", (err) => {
-  console.error("❌ Uncaught Exception:", err);
+  logger.error("❌ Uncaught Exception:", err);
+  gracefulShutdown('uncaughtException');
 });
 
-module.exports = { app, server, io };
+// ============================================================
+// START SERVER
+// ============================================================
+const Port = process.env.PORT || 5000;
+server.listen(Port, () => {
+  logger.info(`🚀 Server running on port ${Port}`);
+  logger.info(`📍 Socket.IO ready for connections`);
+  logger.info(`📡 Admin panel available at http://localhost:${Port}`);
+  logger.info(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
+});
+
+// ============================================================
+// EXPORTS
+// ============================================================
+module.exports = { app, server, io, logger };

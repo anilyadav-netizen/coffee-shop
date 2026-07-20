@@ -72,7 +72,7 @@ const DeliveryOrders = () => {
 
   // Socket Connection Setup
   useEffect(() => {
-    const socket = io('http://localhost:5003', {
+    const socket = io('http://food.go-drop.in', {
       transports: ['websocket'],
       reconnection: true,
       reconnectionAttempts: 5,
