@@ -132,23 +132,6 @@ app.use(express.urlencoded({ limit: "500mb", extended: true }));
 // ============================================================
 // DATABASE CONNECTION
 // ============================================================
-const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
-      family: 4 // Use IPv4, skip trying IPv6
-    });
-    logger.info('✅ MongoDB connected successfully');
-  } catch (error) {
-    logger.error('❌ MongoDB connection error:', error);
-    setTimeout(connectDB, 5000);
-  }
-};
-
 // ============================================================
 // CREATE HTTP SERVER
 // ============================================================
@@ -974,6 +957,7 @@ const clientPath = path.join(__dirname, "../coffeeShop/dist");
 
 // Check if frontend build exists
 const fs = require('fs');
+const connectDB = require("./config/connect.db");
 if (fs.existsSync(clientPath)) {
   app.use(express.static(clientPath));
   
