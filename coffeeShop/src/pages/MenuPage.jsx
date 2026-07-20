@@ -37,6 +37,7 @@ const MenuPage = () => {
     );
 
     const { items: wishlistItems } = useSelector((state) => state.wishlist);
+    console.log(items)
 
     // State
     const [searchTerm, setSearchTerm] = useState("");

@@ -8,6 +8,8 @@ export const getCart = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const { data } = await API.get("/cart");
+            console.log("GET CART RESPONSE =", data);
+
             return data;
         } catch (error) {
             console.error("❌ GET CART error:", error);
@@ -185,6 +187,7 @@ const cartSlice = createSlice({
                 state.error = null;
             })
             .addCase(getCart.fulfilled, (state, action) => {
+                 console.log("ACTION PAYLOAD =", action.payload);
                 state.loading = false;
 
                 const cart = action.payload;
