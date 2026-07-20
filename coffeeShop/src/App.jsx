@@ -120,9 +120,13 @@ function App() {
           <Route
             index
             element={
-              <RoleRoute allowedRoles={["admin", "rider"]}>
+              user?.role === "admin" ? (
                 <Dashboard />
-              </RoleRoute>
+              ) : user?.role === "rider" ? (
+                <Navigate to="riderassigned" replace />
+              ) : (
+                <Navigate to="/login" replace />
+              )
             }
           />
 

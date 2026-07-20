@@ -135,7 +135,7 @@ const CategoryPage = () => {
         <Swiper
           modules={[Autoplay]}
           autoplay={{
-            delay: 3000,
+            delay: 4000,
             disableOnInteraction: false,
           }}
           loop

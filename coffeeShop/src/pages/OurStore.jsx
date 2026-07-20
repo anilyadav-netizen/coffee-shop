@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import restro from '../assets/Images/restaurant.jpg';
+import { useNavigate } from "react-router-dom";
 import {
     MapPin,
     Clock,
@@ -26,6 +27,7 @@ const OurStore = () => {
     const [isVisible, setIsVisible] = useState(false);
     const [isLiked, setIsLiked] = useState(false);
     const sectionRef = useRef(null);
+    const navigate = useNavigate();
 
     const cafes = [
         {
@@ -232,6 +234,7 @@ const OurStore = () => {
                         {featuredProducts.map((product) => (
                             <div
                                 key={product.id}
+                                onClick={() => navigate("/menu")} 
                                 className="bg-white border border-[#F2E5D8] rounded-2xl p-4 shadow hover:shadow-lg transition-all duration-500 hover:-translate-y-1 group cursor-pointer flex items-center gap-4"
                             >
                                 {/* Left - Small Circular Image */}

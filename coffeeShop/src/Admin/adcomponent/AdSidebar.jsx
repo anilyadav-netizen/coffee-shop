@@ -39,7 +39,7 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
         name: "Dashboard",
         path: "/admin",
         icon: <MdDashboard size={20} />,
-        roles: ["admin", "rider"],
+        roles: ["admin"],
         exact: true,
       },
       {
@@ -112,13 +112,13 @@ const AdSidebar = ({ onClose, isDarkMode, toggleDarkMode }) => {
       },
       {
         name: "Settings",
-        path: "/admin/settings",
+        path: "",
         icon: <FaCog className="text-[#64748B] dark:text-[#94A3B8] group-hover:text-[#3B82F6] dark:group-hover:text-[#60A5FA]" />,
         roles: ["admin", "rider", "user"],
       },
       {
         name: "Notifications",
-        path: "/admin/notifications",
+        path: "",
         icon: <FaBell className="text-[#64748B] dark:text-[#94A3B8] group-hover:text-[#3B82F6] dark:group-hover:text-[#60A5FA]" />,
         roles: ["admin", "rider", "user"],
         badge: 3,
