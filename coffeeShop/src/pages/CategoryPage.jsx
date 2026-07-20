@@ -112,23 +112,21 @@ const CategoryPage = () => {
 
   // ===== MAIN RENDER =====
   return (
-    <section className="bg-white py-8 px-4">
+    <section className="bg-white py-1 md:py-8 px-4">
       <div className="max-w-[102rem] mx-auto">
         {/* ===== TOP BADGE ===== */}
-        <div className="flex justify-center mb-3">
-          <span className="bg-[#FFE8DA] text-[#B57863] text-[11px] font-bold uppercase tracking-wider px-4 py-1 rounded-full">
+        <div className="flex justify-center mb-2">
+          <span className="bg-[#FFE8DA] text-[#B57863] text-[11px] font-bold uppercase tracking-wider px-4 py-0.5 rounded-full">
             Handpicked Just For You
           </span>
         </div>
 
         {/* ===== HEADING ===== */}
-        <div className="text-center mb-10">
-          <h2 className="text-4xl lg:text-5xl font-bold leading-tight">
+        <div className="text-center mb-3 md:mb-10">
+          <h2 className="text-3xl lg:text-5xl font-bold leading-tight">
             Discover <span className="text-[#E86A33]">Delicious Dishes</span>
           </h2>
-          <p className="text-gray-500 mt-2">
-            Freshly prepared happiness on every plate
-          </p>
+         
         </div>
 
         {/* ===== PRODUCTS SLIDER ===== */}
@@ -169,11 +167,11 @@ const CategoryPage = () => {
                     hover:transition-all 
                     duration-500
                     cursor-pointer
-                    group
+                    group 
                   "
                 >
                   {/* ===== IMAGE ===== */}
-                  <div className="relative h-52 overflow-hidden rounded-t-2xl">
+                  <div className="relative h-44 md:h-52 overflow-hidden rounded-t-2xl">
                     <img
                       src={product.image}
                       alt={product.name}
@@ -182,7 +180,7 @@ const CategoryPage = () => {
                         h-full
                         object-fill
                         duration-500
-                        group-hover:scale-110
+                        group-hover:scale-105
                         transition-transform
                         ease-in-out
                       "
@@ -278,17 +276,17 @@ const CategoryPage = () => {
                   </div>
 
                   {/* ===== CONTENT ===== */}
-                  <div className="p-4">
-                    <h3 className="font-bold text-[18px] text-[#222] line-clamp-1 hover:text-[#E86A33] transition-colors">
+                  <div className="p-3">
+                    <h3 className="font-bold text-[16px] md:text-[18px] text-[#222] line-clamp-1 hover:text-[#E86A33] transition-colors -mt-2 md:mt-0">
                       {product.name}
                     </h3>
 
-                    <p className="text-md text-gray-600 mt-2 line-clamp-2 min-h-[42px] leading-relaxed">
+                    <p className="text-md text-gray-600 -mt-1 md:mt-2 line-clamp-1 md:line-clamp-2 min-h-[42px] leading-normal md:leading-relaxed">
                       {product.description}
                     </p>
 
                     {/* Price Section with Trusted Colors */}
-                    <div className="mt-4 flex items-center gap-3 flex-wrap">
+                    <div className="mt-2 md:mt-4 flex items-center gap-3 flex-wrap">
                       {hasDiscount ? (
                         <>
                           {/* Discounted Price - Trusted Orange */}
@@ -334,11 +332,12 @@ const CategoryPage = () => {
                       onClick={(e) => handleAddToCart(product, e)}
                       className="
                         w-full
-                        mt-4
+                        mt-2
+                        md:mt-4
                         bg-[#E86A33]
                         hover:bg-[#D55B25]
                         text-white
-                        py-3
+                        py-2
                         rounded-lg
                         font-semibold
                         transition-all

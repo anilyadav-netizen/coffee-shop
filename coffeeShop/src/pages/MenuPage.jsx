@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Banner from '../assets/Images/Banner.png';
 import imagebg from '../assets/Images/imagebg.jpg';
-
 import { getProducts } from "../redux/Slicer/adminProductSlice";
 import { getCategories } from "../redux/Slicer/categorySlice";
 import { toast } from "react-toastify";
@@ -37,7 +36,7 @@ const MenuPage = () => {
     );
 
     const { items: wishlistItems } = useSelector((state) => state.wishlist);
-    // console.log(items)
+    console.log(wishlistItems)
 
     // State
     const [searchTerm, setSearchTerm] = useState("");
@@ -556,17 +555,13 @@ const MenuPage = () => {
                                         const found = categories.find(c => String(c._id) === String(item.category));
                                         itemCategoryName = found?.name || 'Uncategorized';
                                     }
-
                                     const isVisible = visibleCards.has(item._id);
-
                                     // Alternate between left and right
                                     const isEven = index % 2 === 0;
                                     const direction = isEven ? 'left' : 'right';
-
                                     // Calculate display price
                                     const displayPrice = item.discountPrice || item.price;
                                     const originalPrice = item.price;
-
                                     return (
                                         <div
                                             key={item._id}
@@ -592,9 +587,7 @@ const MenuPage = () => {
                                                         e.target.src = "https://placehold.co/400x300/FAFAFA/6B7280?text=No+Image";
                                                     }}
                                                 />
-
                                                 <div className="absolute inset-0 bg-gradient-to-t from-[#1F2937]/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
                                                 {/* Discount Badge - Updated with Food Colors */}
                                                 {item.discountPrice && item.discountPrice < item.price && (
                                                     <div className="absolute top-2 sm:top-3 left-2 sm:left-3 z-10 bg-gradient-to-r from-[#E85D3A] to-[#F0744F] text-white text-[8px] sm:text-xs px-2 sm:px-3 py-0.5 sm:py-1.5 rounded-full font-bold shadow-lg shadow-[#E85D3A]/30 flex items-center gap-0.5 sm:gap-1">
@@ -612,7 +605,6 @@ const MenuPage = () => {
                                                         Featured
                                                     </div>
                                                 )}
-
                                                 {currentCategory?.isAll && (
                                                     <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm text-white text-[8px] sm:text-xs px-2 py-0.5 sm:py-1 rounded-full">
                                                         {itemCategoryName}
@@ -633,7 +625,6 @@ const MenuPage = () => {
                                                     />
                                                 </button>
                                             </div>
-
                                             {/* Content - Updated with Food Colors */}
                                             <div className="p-3 sm:p-4 md:p-5 flex flex-col flex-1 bg-[#FEFAF7]">
                                                 <h3 className="font-bold text-[#1F2937] text-sm sm:text-base md:text-lg group-hover:text-[#E85D3A] transition-colors mb-0.5 sm:mb-1 truncate">
@@ -697,7 +688,6 @@ const MenuPage = () => {
                                 </div>
                             </div>
                         )}
-
                         {/* Pagination - Updated with Food Colors */}
                         {totalPages > 1 && (
                             <div className="flex flex-wrap items-center justify-center gap-2 mt-4 sm:mt-6 pb-6">
@@ -711,7 +701,6 @@ const MenuPage = () => {
                                 >
                                     Previous
                                 </button>
-
                                 <div className="flex flex-wrap gap-1">
                                     {Array.from({ length: totalPages }, (_, i) => i + 1)?.map((page) => (
                                         <button
@@ -726,7 +715,6 @@ const MenuPage = () => {
                                         </button>
                                     ))}
                                 </div>
-
                                 <button
                                     onClick={() => handlePageChange(currentPage + 1)}
                                     disabled={currentPage === totalPages}
@@ -742,7 +730,6 @@ const MenuPage = () => {
                     </div>
                 </div>
             </div>
-
             <style>{`
                 @keyframes pulse-slow {
                     0%, 100% { transform: scale(1); opacity: 0.5; }
