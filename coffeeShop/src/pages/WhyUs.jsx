@@ -69,7 +69,7 @@ const WhyUs = () => {
     ];
 
     return (
-        <section className="relative py-4 px-4 overflow-hidden bg-gradient-to-br from-[#FFF8F2] to-white">
+        <section className="relative py-2 md:py-4 px-4 overflow-hidden bg-gradient-to-br from-[#FFF8F2] to-white">
             {/* Background Effects */}
             <div className="absolute inset-0 -z-10">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#E85D3A]/5 via-transparent to-[#F0744F]/5" />
@@ -80,37 +80,37 @@ const WhyUs = () => {
 
             <div className="max-w-[104rem] mx-auto relative z-10">
                 {/* ===== HEADER - Exactly as image ===== */}
-                <div className="text-center mb-6">
-                    <div className="inline-flex items-center gap-2 bg-[#FFF0EA] rounded-full px-4 py-1.5 border border-[#FEE7DD] mb-4">
+                <div className="text-center mb-3 md:mb-6">
+                    <div className="inline-flex items-center gap-2 bg-[#FFF0EA] rounded-full px-4 py-1.5 border border-[#FEE7DD] mb-0.5 md:mb-4">
                         <span className="text-[#E85D3A] text-xs font-bold uppercase tracking-wider px-3">
                             WHY CHOOSE US
                         </span>
                     </div>
 
-                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">
+                    <h2 className="text-2xl md:text-5xl font-bold text-gray-900 mb-1 md:mb-3">
                         Why Coffee Lovers <span className="text-[#E85D3A]">Choose Us</span>
                     </h2>
-                    
-                    <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+
+                    <p className="text-gray-600 text-sm md:text-lg max-w-2xl mx-auto">
                         Experience the perfect blend of quality, taste &amp; passion in every cup
                     </p>
-                    
-                    <div className="w-16 h-1 bg-[#E85D3A] rounded-full mx-auto mt-4" />
+
+                    <div className="w-16 h-1 bg-[#E85D3A] rounded-full mx-auto mt-2 md:mt-4" />
                 </div>
 
                 {/* ===== FEATURES GRID - Exactly as image ===== */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                    {features?.map((feature) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6 mb-3 md:mb-6">
+                    {features.map((feature) => (
                         <div
                             key={feature.id}
-                            className="group bg-white border  rounded-2xl p-6 border-[#E85D3A]/30 transition-all duration-300 hover:-translate-y-1 shadow-lg shadow-[#E85D3A]/10"
+                            className="group bg-white border  rounded-2xl p-2 md:p-6 border-[#E85D3A]/30 transition-all duration-300 hover:-translate-y-1 shadow-lg shadow-[#E85D3A]/10"
                         >
                             <div className="flex items-start gap-4">
                                 <div className={`w-12 h-12 ${feature.bgColor} rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}>
                                     <feature.icon className={`w-6 h-6 ${feature.iconColor}`} />
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-bold text-gray-900 mb-1">
+                                    <h3 className="text-lg font-bold text-gray-900 mb-0.5">
                                         {feature.title}
                                     </h3>
                                     <p className="text-gray-600 text-sm leading-relaxed">
@@ -122,12 +122,12 @@ const WhyUs = () => {
                     ))}
                 </div>
 
-                {/* ===== STATS SECTION - Exactly as image ===== */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    {stats?.map((stat, index) => (
+                {/* ===== STATS SECTION */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-2 md:mb-6">
+                    {stats.map((stat, index) => (
                         <div
                             key={index}
-                            className="bg-white border  rounded-2xl p-6 text-center border-[#E85D3A]/30 transition-all duration-300 hover:-translate-y-1 shadow-md shadow-[#E85D3A]/10"
+                            className="bg-white border  rounded-2xl p-2 md:p-6 text-center border-[#E85D3A]/30 transition-all duration-300 hover:-translate-y-1 shadow-md shadow-[#E85D3A]/10"
                         >
                             <div className="text-3xl md:text-4xl font-bold text-[#E85D3A]">
                                 {stat.value}
@@ -138,19 +138,6 @@ const WhyUs = () => {
                         </div>
                     ))}
                 </div>
-
-                {/* ===== BOTTOM CTA - Exactly as image ===== */}
-                {/* <div className="text-center">
-                    <div className="inline-flex items-center gap-4 bg-white border border-gray-200 rounded-full px-6 py-3 hover:shadow-lg hover:shadow-[#E85D3A]/10 transition-all duration-300">
-                        <Sparkles className="w-5 h-5 text-[#E85D3A]" />
-                        <span className="text-gray-700 text-sm font-medium">
-                            Join thousands of happy coffee lovers
-                        </span>
-                        <button className="px-6 py-2 bg-[#E85D3A] hover:bg-[#d45230] text-white text-sm font-semibold rounded-full transition-all duration-300 hover:scale-105">
-                            Get Started
-                        </button>
-                    </div>
-                </div> */}
             </div>
 
             {/* CSS Animations */}

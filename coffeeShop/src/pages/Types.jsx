@@ -4,14 +4,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { getCategories } from "../redux/Slicer/categorySlice";
 
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay } from "swiper/modules";
-
+import { Autoplay } from "swiper/modules";  // <-- import Autoplay
 import "swiper/css";
 
 const Types = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-
     const { categories } = useSelector((state) => state.category);
 
     useEffect(() => {
@@ -23,61 +21,58 @@ const Types = () => {
     };
 
     return (
-        <section className="relative bg-[#FCF2E9] py-8 overflow-hidden">
+        <section className="bg-white py-1.5 md:py-8 overflow-hidden">
+            <div className="max-w-[100rem] mx-auto px-3 sm:px-5">
 
-            {/* Decorative Images */}
-            <img
-                src="/images/leaf.png"
-                alt=""
-                className="absolute top-0 left-0 w-28 opacity-90"
-            />
-            <img
-                src="/images/beans.png"
-                alt=""
-                className="absolute top-4 right-5 w-24"
-            />
-
-            <div className="max-w-[100rem] mx-auto px-5">
-
-                {/* Heading */}
-                <div className="text-center mb-8">
-                    <h2 className="text-5xl font-bold font-serif text-[#222]">
-                        Categories
-                    </h2>
-                    <p className="text-gray-500 mt-2 text-lg">
-                        Explore our wide selection of flavors
-                    </p>
-                    <div className="w-14 h-[3px] bg-[#d97745] mx-auto rounded-full mt-4"></div>
+                {/* Heading – Desktop center, Mobile as per Zomato */}
+                <div className="flex items-center justify-between mb-3 md:mb-6">
+                    <div className="w-full md:text-center">   {/* Full width + center text on desktop */}
+                        {/* Mobile heading */}
+                        <h2 className="text-xl text-center font-bold text-gray-800 md:hidden">
+                            What's on your <span className="text-[#E86A33]"> mind?</span>
+                        </h2>
+                        {/* Desktop heading – center */}
+                        <h2 className="hidden md:block text-3xl md:text-5xl font-bold font-serif text-black">
+                            Categories
+                        </h2>
+                        <p className="hidden md:block text-gray-500 mt-1 text-lg">
+                            Explore our wide selection of flavors
+                        </p>
+                        <div className="hidden md:block w-14 h-[3px] bg-[#d97745] mx-auto rounded-full mt-2 md:mt-4"></div>
+                    </div>
+                    {/* Mobile "See all" – removed as requested */}
                 </div>
 
-                {/* Categories Swiper - Same gap as grid */}
+                {/* Categories Swiper with Autoplay */}
                 <Swiper
-                    modules={[Autoplay]}
-                    // autoplay={{
-                    //     delay: 2500,
-                    //     disableOnInteraction: false,
-                    // }}
-                    // loop={true}
-                    spaceBetween={16} // Same as grid gap-4
+                    modules={[Autoplay]}   // enable autoplay
+                    autoplay={{
+                        delay: 3000,
+                        disableOnInteraction: false,  // continues after user interaction
+                    }}
+                    loop={true}              // infinite loop for autoplay
+                    spaceBetween={12}
                     breakpoints={{
+                        // Mobile – Zomato style
                         0: {
-                            slidesPerView: 2,
-                            spaceBetween: 16,
+                            slidesPerView: 4,
+                            spaceBetween: 8,
                         },
                         480: {
-                            slidesPerView: 3,
-                            spaceBetween: 16,
+                            slidesPerView: 4.5,
+                            spaceBetween: 10,
                         },
                         640: {
-                            slidesPerView: 4,
-                            spaceBetween: 16,
+                            slidesPerView: 5,
+                            spaceBetween: 12,
                         },
+                        // Desktop – old design
                         768: {
                             slidesPerView: 5,
                             spaceBetween: 16,
                         },
                         1024: {
-                            slidesPerView: 5,
+                            slidesPerView: 6,
                             spaceBetween: 16,
                         },
                         1280: {
@@ -98,28 +93,30 @@ const Types = () => {
                                 className="
                                     bg-white
                                     rounded-xl
-                                    shandow-md
-                                    shadow-[#dbcec6]
-                                    hover:shadow-[#E85D3A]/25
                                     transition-all
-                                    duration-300
+                                    duration-200
                                     cursor-pointer
-                                    py-3
-                                    lg:px-3
-                                    sm:px-1
+                                    py-2
+                                    px-1
                                     flex
                                     flex-col
                                     items-center
                                     justify-center
                                     group
-                                    border border-[#E86A33]/30
+                                    border border-gray-200        
+                                    hover:border-[#E85D3A]/40    
+                                    md:shadow-md
+                                    md:shadow-[#dbcec6]
+                                    md:hover:shadow-[#E85D3A]/25
+                                    md:border-[#E86A33]/30
+                                    md:hover:border-[#E86A33]/50
                                 "
                             >
-                                {/* Image Container */}
                                 <div
                                     className="
-                                        w-24
-                                        h-24
+                                        w-14 h-14
+                                        sm:w-16 sm:h-16
+                                        md:w-24 md:h-24
                                         rounded-full
                                         bg-[#FFF4EC]
                                         flex
@@ -129,18 +126,16 @@ const Types = () => {
                                         relative
                                         transition-all
                                         duration-300
+                                        md:group-hover:scale-105
                                     "
                                 >
-                                    {/* Gradient overlay */}
-                                    <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#E85D3A]/10 to-transparent pointer-events-none"></div>
+                                    <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#E85D3A]/10 to-transparent pointer-events-none hidden md:block"></div>
 
-                                    {/* Image */}
                                     <img
                                         src={category.icon}
                                         alt={category.name}
                                         className="
-                                            w-full
-                                            h-full
+                                            w-full h-full
                                             object-cover
                                             group-hover:scale-110
                                             transition-transform
@@ -151,21 +146,26 @@ const Types = () => {
                                             e.target.src = "https://via.placeholder.com/96/FFE8D6/d97745?text=?";
                                         }}
                                     />
-
-                                    {/* Shine effect on hover */}
-                                    <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-transparent via-white/30 to-transparent rounded-full transform rotate-45"></div>
-                                    </div>
                                 </div>
 
-                                <h3 className="mt-3 text-[16px] font-bold text-gray-800 group-hover:text-[#E85D3A] transition-colors duration-300 text-center">
+                                <h3 className="
+                                    mt-1
+                                    text-[11px] sm:text-[13px] md:text-[16px]
+                                    font-semibold
+                                    text-gray-700
+                                    md:group-hover:text-[#E85D3A]
+                                    transition-colors
+                                    duration-300
+                                    text-center
+                                    truncate w-full
+                                    max-w-[80px] md:max-w-none
+                                ">
                                     {category.name}
                                 </h3>
                             </div>
                         </SwiperSlide>
                     ))}
                 </Swiper>
-
             </div>
         </section>
     );

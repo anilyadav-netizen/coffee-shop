@@ -225,7 +225,7 @@ const Hero = () => {
     const headingChars = headingText.split("");
 
     return (
-        <div className="relative h-[44vh] md:h-[80vh] min-h-[400px] md:min-h-[500px] lg:min-h-screen overflow-hidden">
+        <div className="relative h-[20vh] md:h-[80vh] min-h-[220px] md:min-h-[500px] lg:min-h-screen overflow-hidden">
             {/* ✅ Navbar Component */}
             <Navbar />
 
@@ -356,7 +356,7 @@ const Hero = () => {
                                 transition: { duration: 0.3 }
                             }}
                         >
-                            {headingChars?.map((char, index) => (
+                            {headingChars.map((char, index) => (
                                 <motion.span
                                     key={index}
                                     custom={index}
@@ -492,7 +492,7 @@ const Hero = () => {
                     animate="visible"
                 >
                     <div className="flex gap-8 bg-black/40 backdrop-blur-md px-8 py-4 rounded-2xl border border-white/10">
-                        {stats?.map((stat, index) => (
+                        {stats.map((stat, index) => (
                             <motion.div
                                 key={index}
                                 className="flex items-center gap-3 text-white"

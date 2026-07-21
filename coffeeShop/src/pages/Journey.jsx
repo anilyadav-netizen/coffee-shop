@@ -33,35 +33,36 @@ const Journey = () => {
         setTimeout(() => {
             setIsAutoPlaying(true);
         }, 5000);
-         navigate('/coffee-journey', { state: { stepId } });
-        
+        navigate('/coffee-journey', { state: { stepId } });
+
     };
 
     return (
-        <div className=" flex items-center justify-center font-serif py-5">
-            <div className="max-w-[104rem] w-full mx-auto overflow-hidden p-6 md:p-10 transition-all duration-500 bg-[#FBF6F0]">
+        <div className=" flex items-center justify-center font-serif py-2 md:py-5">
+            <div className="max-w-[104rem] w-full mx-auto overflow-hidden p-4 md:p-10 transition-all duration-500 bg-[#FBF6F0]">
 
                 {/* -------- LAYOUT: LEFT (text + timeline) + RIGHT (open image) -------- */}
-                <div className="flex flex-col lg:flex-row gap-8 lg:gap-10 xl:gap-12 items-start">
+                <div className="flex flex-col lg:flex-row gap-4 lg:gap-10 xl:gap-12 items-start">
 
                     {/* ---------- LEFT SIDE ---------- */}
-                    <div className="flex-1 w-full space-y-4 md:space-y-6 lg:pr-4">
+                    <div className="flex-1 w-full  space-y-1.5 md:space-y-6 lg:pr-4">
 
                         {/* Badge - OUR JOURNEY with highlight */}
-                        <div className="inline-block bg-[#FDE8D5] px-4 md:px-6 py-1.5 md:py-2 rounded-full text-[10px] md:text-xs tracking-[0.2em] uppercase text-[#99511a] font-sans font-semibold border-[#EAC4A3]">
-                            {sectionData.badge}
+                        <div className="flex justify-center md:justify-start">
+                            <div className="inline-block bg-[#FDE8D5] px-4 md:px-6 py-1.5 md:py-2 rounded-full text-[10px] md:text-xs tracking-[0.2em] uppercase text-[#99511a] font-sans font-semibold border border-[#EAC4A3]">
+                                {sectionData.badge}
+                            </div>
                         </div>
 
                         {/* Heading */}
-                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">
+                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-center lg:text-left">
                             From <span className="text-[#C56E2D]">Bean</span> to Cup
                         </h2>
 
                         {/* Subtitle */}
-                        <p className="text-[#6B6B6B] text-sm md:text-base lg:text-lg max-w-sm leading-relaxed">
+                        <p className="text-[#6B6B6B] text-sm md:text-base lg:text-lg max-w-sm leading-relaxed text-center lg:text-left mx-auto lg:mx-0">
                             {sectionData.subtitle}
                         </p>
-
                         {/* ---------- TIMELINE (horizontal with IMAGES in circles) ---------- */}
                         <div className="mt-6 md:mt-8 w-full relative">
                             {/* Steps container - now with flex-wrap for smaller screens */}
@@ -72,7 +73,7 @@ const Journey = () => {
                                     const isLast = index === allSteps.length - 1;
 
                                     return (
-                                        <div key={step.id} className="flex items-center flex-shrink-0">
+                                        <div key={step.id} className="flex items-center flex-shrink-0 mt-2">
                                             {/* Step Circle */}
                                             <div
                                                 className="flex flex-col items-center cursor-pointer group transition-all duration-500"
@@ -131,7 +132,7 @@ const Journey = () => {
                                                     <div className="absolute top-0 left-0 w-full h-full">
                                                         <div className="absolute top-0 -left-0.5 sm:-left-1 w-[calc(100%+4px)] sm:w-[calc(100%+8px)] h-full">
                                                             {/* Active line fill */}
-                                                            <div 
+                                                            <div
                                                                 className={`
                                                                     absolute top-0 left-0 h-full bg-[#C8742C] transition-all duration-500
                                                                     ${activeStep > step.id ? 'w-full' : 'w-0'}

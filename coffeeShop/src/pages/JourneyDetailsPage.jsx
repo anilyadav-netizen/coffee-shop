@@ -36,7 +36,7 @@ const getIcon = (iconName) => {
 // ========== Base Components ==========
 
 const Section = ({ children, className = '' }) => (
-    <section className={`relative py-4 px-4 md:px-8 ${className}`}>
+    <section className={`relative py-3 px-2 md:px-8 ${className}`}>
         <div className="max-w-[104rem] mx-auto">{children}</div>
     </section>
 );
@@ -76,7 +76,7 @@ const AnimatedSection = ({ children, className = '' }) => {
 // ========== HERO SECTION (unchanged, dark video) ==========
 const HeroSection = () => {
     return (
-        <section className="relative h-[28rem] md:h-[60rem] flex items-center justify-center overflow-hidden">
+        <section className="relative h-[16rem] md:h-[60rem] flex items-center justify-center overflow-hidden">
             <video
                 autoPlay
                 loop
@@ -115,54 +115,6 @@ const HeroSection = () => {
                     className="absolute top-1/3 right-1/4 w-64 h-64 bg-[#0D7C53]/10 rounded-full blur-3xl"
                 />
             </div>
-
-            <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
-                >
-                    <span className="inline-block px-6 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-white/80 text-sm tracking-wider mb-6">
-                        {heroContent.badge}
-                    </span>
-                </motion.div>
-
-                <motion.h1
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.2 }}
-                    className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight"
-                >
-                    {heroContent.heading.split(' ')?.map((word, index) => (
-                        <span key={index} className={word === heroContent.highlightedWord ? 'text-[#0D7C53]' : ''}>
-                            {word}{' '}
-                        </span>
-                    ))}
-                </motion.h1>
-
-                <motion.p
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.4 }}
-                    className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto mb-8"
-                >
-                    {heroContent.subtitle}
-                </motion.p>
-
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.6 }}
-                    className="flex flex-col sm:flex-row gap-4 justify-center"
-                >
-                    <Link
-                        to="/menu"
-                        className="px-8 py-3 bg-[#0D7C53] hover:bg-[#0A5F3E] text-white rounded-full font-medium transition-all duration-300 transform hover:scale-105"
-                    >
-                        {heroContent.buttons.primary}
-                    </Link>
-                </motion.div>
-            </div>
         </section>
     );
 };
@@ -172,10 +124,10 @@ const TimelineSection = () => {
     return (
         <Section>
             <AnimatedSection>
-                <h2 className="text-4xl md:text-5xl font-bold text-gray-800 text-center mb-4">
+                <h2 className="text-3xl md:text-5xl font-bold text-gray-800 text-center mb-2 md:mb-4">
                     Our Coffee Journey
                 </h2>
-                <p className="text-gray-600 text-center max-w-2xl mx-auto mb-8">
+                <p className="text-gray-600 text-center max-w-2xl mx-auto mb-4 md:mb-8">
                     From farm to cup, every step is crafted with precision and passion
                 </p>
             </AnimatedSection>
@@ -198,27 +150,27 @@ const TimelineItem = ({ item, index }) => {
 
     return (
         <div ref={ref} className="relative mb-10 last:mb-0">
-            <div className={`flex flex-col ${isLeft ? 'md:flex-row' : 'md:flex-row-reverse'} items-center gap-8`}>
+            <div className={`flex flex-col ${isLeft ? 'md:flex-row' : 'md:flex-row-reverse'} items-center gap-4 md:gap-8`}>
                 <motion.div
                     initial={{ opacity: 0, x: isLeft ? -80 : 80 }}
                     animate={isInView ? { opacity: 1, x: 0 } : {}}
                     transition={{ duration: 0.8, delay: 0.2 }}
                     className={`w-full md:w-5/12 ${isLeft ? 'md:text-right' : 'md:text-left'}`}
                 >
-                    <Card className="p-8 transition-transform duration-300">
+                    <Card className="p-5 md:p-8 transition-transform duration-300">
                         <div className={`flex items-center gap-4 mb-4 ${isLeft ? 'md:flex-row-reverse' : ''}`}>
                             <div className="w-14 h-14 rounded-full bg-[#0D7C53]/10 flex items-center justify-center text-[#0D7C53] flex-shrink-0">
                                 {getIcon(item.icon)}
                             </div>
                             <span className="text-3xl font-bold text-[#0D7C53]">{item.number}</span>
                         </div>
-                        <h3 className={`text-2xl font-bold text-gray-800 mb-3 ${isLeft ? 'md:text-right' : ''}`}>
+                        <h3 className={`text-2xl font-bold text-gray-800 mb-2 ${isLeft ? 'md:text-right' : ''}`}>
                             {item.title}
                         </h3>
                         <p className={`text-gray-600 text-sm leading-relaxed ${isLeft ? 'md:text-right' : ''}`}>
                             {item.description}
                         </p>
-                        <div className={`mt-4 flex gap-2 ${isLeft ? 'md:justify-end' : ''}`}>
+                        <div className={`mt-2 md:mt-4 flex gap-2 ${isLeft ? 'md:justify-end' : ''}`}>
                             <span className="px-3 py-1 bg-[#0D7C53]/10 border border-[#0D7C53]/20 rounded-full text-[#0D7C53] text-xs">
                                 Step {item.id}
                             </span>
@@ -280,7 +232,7 @@ const DetailedStep = ({ step, index }) => {
 
     return (
         <AnimatedSection className="mb-5 last:mb-0">
-            <div className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-8 items-center`}>
+            <div className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-4 md:gap-8 items-center`}>
                 <div className="w-full lg:w-1/2">
                     <div className="rounded-3xl overflow-hidden shadow-lg shadow-[#0D7C53]/10 group">
                         <img
@@ -292,11 +244,11 @@ const DetailedStep = ({ step, index }) => {
                 </div>
 
                 <div className="w-full lg:w-1/2">
-                    <Card className="p-8 hover:-translate-y-1 transition-transform duration-300">
+                    <Card className="p-5 md:p-8 hover:-translate-y-1 transition-transform duration-300">
                         <span className="text-[#0D7C53] font-semibold tracking-wider">{step.number}</span>
-                        <h3 className="text-3xl font-bold text-gray-800 mt-2 mb-4">{step.title}</h3>
+                        <h3 className="text-3xl font-bold text-gray-800 mt-0.5 mb-2 md:mb-4">{step.title}</h3>
 
-                        <div className="space-y-3 mb-6">
+                        <div className="space-y-3 mb-3 md:mb-6">
                             {step.content?.map((paragraph, i) => (
                                 <p key={i} className="text-gray-600 text-sm leading-relaxed">
                                     {paragraph}
@@ -304,7 +256,7 @@ const DetailedStep = ({ step, index }) => {
                             ))}
                         </div>
 
-                        <div className="flex flex-wrap gap-2 mb-6">
+                        <div className="flex flex-wrap gap-2 mb-4 md:mb-6">
                             {step.features?.map((feature, i) => (
                                 <span
                                     key={i}
@@ -332,10 +284,10 @@ const BrewingMethodsSection = () => {
     return (
         <Section>
             <AnimatedSection>
-                <h2 className="text-4xl md:text-5xl font-bold text-gray-800 text-center">
+                <h2 className="text-3xl md:text-5xl font-bold text-gray-800 text-center">
                     Brewing Methods
                 </h2>
-                <p className="text-gray-600 text-center max-w-2xl mx-auto mb-8 mt-1">
+                <p className="text-gray-600 text-center max-w-2xl mx-auto mb-4 md:mb-8 mt-1">
                     Discover the perfect brewing method for your taste
                 </p>
             </AnimatedSection>
@@ -436,15 +388,15 @@ const CoffeeFactsSection = () => {
     return (
         <Section>
             <AnimatedSection>
-                <h2 className="text-4xl md:text-5xl font-bold text-gray-800 text-center mb-4">
+                <h2 className="text-3xl md:text-5xl font-bold text-gray-800 text-center mb-1 md:mb-4">
                     Coffee Facts
                 </h2>
-                <p className="text-gray-600 text-center max-w-2xl mx-auto mb-6">
+                <p className="text-gray-600 text-center max-w-2xl mx-auto mb-3 md:mb-6">
                     Numbers that tell our story
                 </p>
             </AnimatedSection>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
                 {coffeeFacts?.map((fact) => (
                     <FactCard key={fact.id} fact={fact} />
                 ))}
@@ -480,7 +432,7 @@ const FactCard = ({ fact }) => {
 
     return (
         <motion.div ref={ref} whileHover={{ scale: 1.05 }} className="text-center">
-            <Card className="p-8 hover:shadow-xl transition-shadow">
+            <Card className="p-6 md:p-8 hover:shadow-xl transition-shadow">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#0D7C53]/10 flex items-center justify-center text-[#0D7C53]">
                     {getIcon(fact.icon)}
                 </div>
@@ -503,15 +455,15 @@ const SustainabilitySection = () => {
             </div>
 
             <AnimatedSection>
-                <h2 className="text-4xl md:text-5xl font-bold text-gray-800 text-center mb-4">
+                <h2 className="text-3xl md:text-5xl font-bold text-gray-800 text-center mb-2 md:mb-4">
                     Sustainability
                 </h2>
-                <p className="text-gray-600 text-center max-w-2xl mx-auto mb-12">
+                <p className="text-gray-600 text-center max-w-2xl mx-auto mb-3 md:mb-12">
                     Committed to a better future
                 </p>
             </AnimatedSection>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 relative z-10">
                 {sustainabilityData?.map((item) => (
                     <SustainabilityCard key={item.id} item={item} />
                 ))}
@@ -523,7 +475,7 @@ const SustainabilitySection = () => {
 const SustainabilityCard = ({ item }) => {
     return (
         <motion.div whileHover={{ y: -4 }} className="group">
-            <Card className="p-6 flex items-start gap-4 hover:shadow-xl transition-shadow">
+            <Card className="p-3 md:p-6 flex items-start gap-4 hover:shadow-xl transition-shadow">
                 <div className="w-12 h-12 rounded-full bg-[#0D7C53]/10 flex items-center justify-center text-[#0D7C53] flex-shrink-0">
                     {getIcon(item.icon)}
                 </div>
@@ -541,10 +493,10 @@ const GallerySection = () => {
     return (
         <Section>
             <AnimatedSection>
-                <h2 className="text-4xl md:text-5xl font-bold text-gray-800 text-center mb-4">
+                <h2 className="text-3xl md:text-5xl font-bold text-gray-800 text-center mb-2 md:mb-4">
                     Gallery
                 </h2>
-                <p className="text-gray-600 text-center max-w-2xl mx-auto mb-12">
+                <p className="text-gray-600 text-center max-w-2xl mx-auto mb-4 md:mb-12">
                     A visual journey through our coffee world
                 </p>
             </AnimatedSection>
@@ -582,10 +534,10 @@ const FAQSection = () => {
     return (
         <Section>
             <AnimatedSection>
-                <h2 className="text-4xl md:text-5xl font-bold text-gray-800 text-center mb-3">
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-800 text-center mb-2">
                     FAQ
                 </h2>
-                <p className="text-gray-600 text-center max-w-2xl mx-auto mb-7">
+                <p className="text-gray-600 text-center max-w-2xl mx-auto mb-3 md:mb-7">
                     Common questions about our coffee
                 </p>
             </AnimatedSection>

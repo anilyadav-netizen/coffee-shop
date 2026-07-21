@@ -188,7 +188,7 @@ const Favourite = () => {
     }
 
     return (
-        <section className="relative py-6 px-4 overflow-hidden ">
+        <section className="relative py-2 md:py-6 px-4 overflow-hidden ">
             {/* Subtle Background Pattern */}
             <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#E85D3A]/[0.03] rounded-full blur-[150px]"></div>
@@ -198,18 +198,18 @@ const Favourite = () => {
             {/* Content */}
             <div className="max-w-[102rem] mx-auto relative z-10">
                 {/* Header */}
-                <div className="bg-[#FFF8F2] rounded-3xl p-8 shadow-lg shadow-[#E85D3A]/5 border border-[#FEE7DD] mb-7 transition-all duration-700">
-                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div className="bg-[#FFF8F2] rounded-3xl p-3 md:p-8 shadow-lg shadow-[#E85D3A]/5 border border-[#FEE7DD] mb-3.5 md:mb-7 transition-all duration-700">
+                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
                         <div>
-                            <h2 className="text-xl md:text-5xl font-bold text-[#1F2937] tracking-tight mb-2 flex items-center gap-3">
+                            <h2 className="text-2xl md:text-5xl font-bold text-[#1F2937] tracking-tight mb-2 flex items-center gap-3">
                                 All Time Favourites
                                 <span className="text-3xl">🔥</span>
                             </h2>
-                            <p className="text-[#6B7280] text-lg font-light">Curated selections our customers adore</p>
+                            <p className="text-[#6B7280] text-base md:text-lg font-light -mt-2 md:mt-0">Curated selections our customers adore</p>
                         </div>
                         <button
                             onClick={handleViewAll}
-                            className="group flex items-center gap-3 px-8 py-3.5  rounded-full font-medium bg-white text-[#E85D3A] hover:bg-[#E85D3A] hover:text-white transition-all duration-500 border border-[#FEE7DD] hover:border-transparent hover:scale-105 hover:shadow-lg hover:shadow-[#E85D3A]/20"
+                            className="group flex items-center gap-3 px-8 py-3 md:py-3.5  rounded-full font-medium bg-white text-[#E85D3A] hover:bg-[#E85D3A] hover:text-white transition-all duration-500 border border-[#FEE7DD] hover:border-transparent hover:scale-105 hover:shadow-lg hover:shadow-[#E85D3A]/20"
                         >
                             <span>View All Menu</span>
                             <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
@@ -220,7 +220,7 @@ const Favourite = () => {
                 {/* Favourites Grid */}
                 {uniqueCategoryItems.length > 0 ? (
                     <>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 md:gap-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-8">
                             {displayItems.slice(0, 10)?.map((item) => {
                                 const isAdded = addedItems[item._id];
                                 const isWishlisted = wishlistItems.some(
@@ -244,13 +244,13 @@ const Favourite = () => {
                                     >
                                         {/* Image Container */}
                                         <div
-                                            className="relative h-56 overflow-hidden bg-[#FEFAF7] cursor-pointer"
+                                            className="relative h-40 md:h-56 overflow-hidden bg-[#FEFAF7] cursor-pointer"
                                             onClick={() => handleItemClick(item)}
                                         >
                                             <img
                                                 src={item.image}
                                                 alt={item.name}
-                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                                                 onError={(e) => {
                                                     e.target.src = "https://placehold.co/400x300/FAFAFA/6B7280?text=No+Image";
                                                 }}
@@ -306,7 +306,7 @@ const Favourite = () => {
                                         </div>
 
                                         {/* Content */}
-                                        <div className="p-4 bg-[#FFF8F2]">
+                                        <div className="p-4 -mt-2 md:mt-0 bg-[#FFF8F2]">
                                             <div className="flex items-start justify-between mb-1.5">
                                                 <h3
                                                     className="font-bold text-[#1F2937] text-base cursor-pointer hover:text-[#E85D3A] transition-colors duration-300 line-clamp-1 flex-1"
@@ -323,12 +323,12 @@ const Favourite = () => {
                                                 )}
                                             </div>
 
-                                            <p className="text-[#7b818f] text-sm mb-3 line-clamp-2 leading-relaxed">
+                                            <p className="text-[#7b818f] text-sm mb-1 md:mb-3 line-clamp-2 leading-relaxed -mt-1">
                                                 {item.description || "Delicious fast food item"}
                                             </p>
 
                                             {/* Price Section with Trusted Colors */}
-                                            <div className="flex items-center justify-between pt-1.5 border-t border-[#F3F4F6]">
+                                            <div className="flex items-center justify-between -pt-1 md:pt-1.5 border-t border-[#F3F4F6]">
                                                 <div className="flex items-center gap-2">
                                                     {hasDiscount ? (
                                                         <>
@@ -362,7 +362,7 @@ const Favourite = () => {
                                             {/* Add to Cart Button */}
                                             <button
                                                 onClick={(e) => handleAddToCart(item, e)}
-                                                className={`w-full mt-3.5 font-semibold py-2.5 rounded-xl transition-all duration-500 flex items-center justify-center gap-2 text-sm group/btn ${
+                                                className={`w-full mt-1.5 md:mt-3 font-semibold py-2.5 rounded-xl transition-all duration-500 flex items-center justify-center gap-2 text-sm group/btn ${
                                                     isAdded
                                                         ? "bg-[#E86A33] hover:bg-[#D55B25] text-white shadow-lg shadow-[#10B981]/30"
                                                         : "bg-[#E86A33] hover:bg-[#D55B25] text-white hover:shadow-2xl hover:shadow-[#E85D3A]/30 hover:scale-[1.02] hover:-translate-y-0.5"

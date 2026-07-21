@@ -2,10 +2,33 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Banner from '../assets/Images/Banner.png';
 import imagebg from '../assets/Images/imagebg.jpg';
-
 import { getProducts } from "../redux/Slicer/adminProductSlice";
 import { getCategories } from "../redux/Slicer/categorySlice";
 import { toast } from "react-toastify";
+import allImage from '../assets/Images/All.png'
+import BurgerBanner from '../assets/Images/BurgerBanner.png'
+import ChauminBanner from '../assets/Images/ChauminBanner.png'
+import coffeeBanner from '../assets/Images/coffeeBanner.png'
+import DrinksBanner from '../assets/Images/DrinksBanner.png'
+import MomoBanner from '../assets/Images/MomoBanner.png'
+import NonvegBanner from '../assets/Images/NonvegBanner.png'
+import PizzaBanner from '../assets/Images/PizzaBanner.png'
+import StarterBanner from '../assets/Images/StarterBanner.png'
+import VegBanner from '../assets/Images/VegBanner.png'
+
+const categoryBannerMap = {
+    all: allImage,
+    burger: BurgerBanner,
+    chaumin: ChauminBanner,
+    coffee: coffeeBanner,
+    drinks: DrinksBanner,
+    momo: MomoBanner,
+    nonveg: NonvegBanner,
+    pizza: PizzaBanner,
+    starter: StarterBanner,
+    veg: VegBanner,
+};
+
 import {
     ArrowLeft,
     Star,
@@ -37,7 +60,7 @@ const MenuPage = () => {
     );
 
     const { items: wishlistItems } = useSelector((state) => state.wishlist);
-    // console.log(items)
+    console.log(wishlistItems)
 
     // State
     const [searchTerm, setSearchTerm] = useState("");
@@ -47,7 +70,13 @@ const MenuPage = () => {
     const cardRefs = useRef({});
     const [isAnimating, setIsAnimating] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 20; // Changed from 8 to 20
+    const itemsPerPage = 20;
+
+    const getCategoryBanner = (category) => {
+        if (!category) return allImage;
+        const nameKey = category.isAll ? 'all' : category.name?.toLowerCase();
+        return categoryBannerMap[nameKey] || allImage;
+    };
 
     // Fetch data
     useEffect(() => {
@@ -143,14 +172,10 @@ const MenuPage = () => {
         });
     }, [products, categoryId]);
 
-    // Category banners mapping
-    const categoryBanners = {
-        'all': Banner,
-    };
-
     const currentBanner = useMemo(() => {
-        if (!currentCategory) return Banner;
-        return categoryBanners[currentCategory._id] || Banner;
+        if (!currentCategory) return allImage;
+
+        return getCategoryBanner(currentCategory);
     }, [currentCategory]);
 
     // Handle loading state
@@ -188,7 +213,6 @@ const MenuPage = () => {
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
-        // Animation will be triggered by the useEffect that depends on currentPage
     };
 
     // ✅ Handle Add to Cart - FIXED: Added amount field
@@ -318,7 +342,6 @@ const MenuPage = () => {
                         Loading Menu...
                     </p>
                 </div>
-
                 <style>{`
                     @keyframes pour {
                         0% { transform: scaleY(0.5); opacity: 0.7; }
@@ -455,14 +478,6 @@ const MenuPage = () => {
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 sm:w-96 h-48 sm:h-96 bg-white/5 rounded-full blur-3xl opacity-30"></div>
 
                     <div className="container mx-auto px-4 relative z-10">
-                        <button
-                            onClick={() => navigate('/')}
-                            className="mb-6 inline-flex items-center gap-2 text-white/90 hover:text-white transition-colors bg-white/20 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full hover:bg-white/30 text-sm sm:text-base"
-                        >
-                            <ArrowLeft size={18} className="sm:w-5 sm:h-5" />
-                            Back to Home
-                        </button>
-
                         <div className="text-center">
                             <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold text-white mb-4 drop-shadow-lg">
                                 {currentCategory?.name || 'Menu'}
@@ -504,7 +519,7 @@ const MenuPage = () => {
 
                     <div className="container mx-auto px-3 sm:px-4 relative z-10">
                         {/* Category Selector - Updated with Food Colors */}
-                        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-4 sm:mb-6 bg-[#FEFAF7] border border-[#FEE7DD] p-2 sm:p-3 rounded-xl sm:rounded-2xl shadow-lg shadow-[#E85D3A]/5">
+                        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-2 sm:mb-6 bg-[#FEFAF7] border border-[#FEE7DD] p-2 sm:p-3 rounded-xl sm:rounded-2xl shadow-lg shadow-[#E85D3A]/5">
                             {allCategories?.map((cat) => (
                                 <button
                                     key={cat._id}
@@ -524,7 +539,7 @@ const MenuPage = () => {
                         </div>
 
                         {/* Search Bar - Updated with Food Colors */}
-                        <div className="max-w-md mx-auto mb-6 sm:mb-8">
+                        <div className="max-w-md mx-auto mb-3 sm:mb-8">
                             <div className="relative">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]" size={18} />
                                 <input
@@ -532,7 +547,7 @@ const MenuPage = () => {
                                     placeholder={`Search ${currentCategory?.isAll ? 'Menu' : currentCategory?.name}...`}
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full pl-9 sm:pl-10 pr-8 sm:pr-10 py-2 sm:py-3 bg-white border-2 border-[#FEE7DD] rounded-full shadow-lg shadow-[#E85D3A]/5 focus:outline-none focus:ring-2 focus:ring-[#E85D3A] focus:border-transparent transition-all text-[#1F2937] placeholder:text-[#6B7280]"
+                                    className="w-full pl-9 sm:pl-10 pr-8 sm:pr-10 py-1.5 sm:py-3 bg-white border-2 border-[#FEE7DD] rounded-full shadow-lg shadow-[#E85D3A]/5 focus:outline-none focus:ring-2 focus:ring-[#E85D3A] focus:border-transparent transition-all text-[#1F2937] placeholder:text-[#6B7280]"
                                 />
                                 {searchTerm && (
                                     <button
@@ -547,7 +562,7 @@ const MenuPage = () => {
 
                         {/* Items Grid with Auto Animation - Updated with Food Colors */}
                         {currentItems && currentItems.length > 0 ? (
-                            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6 pb-12">
+                            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6 pb-5 md:pb-12">
                                 {currentItems?.map((item, index) => {
                                     let itemCategoryName = 'Uncategorized';
                                     if (item.category && typeof item.category === 'object') {
@@ -556,17 +571,13 @@ const MenuPage = () => {
                                         const found = categories.find(c => String(c._id) === String(item.category));
                                         itemCategoryName = found?.name || 'Uncategorized';
                                     }
-
                                     const isVisible = visibleCards.has(item._id);
-
                                     // Alternate between left and right
                                     const isEven = index % 2 === 0;
                                     const direction = isEven ? 'left' : 'right';
-
                                     // Calculate display price
                                     const displayPrice = item.discountPrice || item.price;
                                     const originalPrice = item.price;
-
                                     return (
                                         <div
                                             key={item._id}
@@ -592,9 +603,7 @@ const MenuPage = () => {
                                                         e.target.src = "https://placehold.co/400x300/FAFAFA/6B7280?text=No+Image";
                                                     }}
                                                 />
-
                                                 <div className="absolute inset-0 bg-gradient-to-t from-[#1F2937]/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
                                                 {/* Discount Badge - Updated with Food Colors */}
                                                 {item.discountPrice && item.discountPrice < item.price && (
                                                     <div className="absolute top-2 sm:top-3 left-2 sm:left-3 z-10 bg-gradient-to-r from-[#E85D3A] to-[#F0744F] text-white text-[8px] sm:text-xs px-2 sm:px-3 py-0.5 sm:py-1.5 rounded-full font-bold shadow-lg shadow-[#E85D3A]/30 flex items-center gap-0.5 sm:gap-1">
@@ -612,7 +621,6 @@ const MenuPage = () => {
                                                         Featured
                                                     </div>
                                                 )}
-
                                                 {currentCategory?.isAll && (
                                                     <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm text-white text-[8px] sm:text-xs px-2 py-0.5 sm:py-1 rounded-full">
                                                         {itemCategoryName}
@@ -633,7 +641,6 @@ const MenuPage = () => {
                                                     />
                                                 </button>
                                             </div>
-
                                             {/* Content - Updated with Food Colors */}
                                             <div className="p-3 sm:p-4 md:p-5 flex flex-col flex-1 bg-[#FEFAF7]">
                                                 <h3 className="font-bold text-[#1F2937] text-sm sm:text-base md:text-lg group-hover:text-[#E85D3A] transition-colors mb-0.5 sm:mb-1 truncate">
@@ -697,7 +704,6 @@ const MenuPage = () => {
                                 </div>
                             </div>
                         )}
-
                         {/* Pagination - Updated with Food Colors */}
                         {totalPages > 1 && (
                             <div className="flex flex-wrap items-center justify-center gap-2 mt-4 sm:mt-6 pb-6">
@@ -711,7 +717,6 @@ const MenuPage = () => {
                                 >
                                     Previous
                                 </button>
-
                                 <div className="flex flex-wrap gap-1">
                                     {Array.from({ length: totalPages }, (_, i) => i + 1)?.map((page) => (
                                         <button
@@ -726,7 +731,6 @@ const MenuPage = () => {
                                         </button>
                                     ))}
                                 </div>
-
                                 <button
                                     onClick={() => handlePageChange(currentPage + 1)}
                                     disabled={currentPage === totalPages}
@@ -742,7 +746,6 @@ const MenuPage = () => {
                     </div>
                 </div>
             </div>
-
             <style>{`
                 @keyframes pulse-slow {
                     0%, 100% { transform: scale(1); opacity: 0.5; }

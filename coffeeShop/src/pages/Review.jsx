@@ -100,11 +100,11 @@ const Review = () => {
     const visibleReviews = getVisibleReviews();
 
     return (
-        <section className="py-4 px-4 bg-white">
+        <section className="py-2 md:py-4 px-4 bg-white">
             <div className="max-w-[102rem] mx-auto">
                 {/* Header */}
-                <div className="text-center mb-8">
-                    <h2 className="text-4xl font-bold text-[#1F2937]">
+                <div className="text-center mb-4 md:mb-8">
+                    <h2 className="text-2xl md:text-4xl font-bold text-[#1F2937]">
                         What Our <span className="text-[#DC8D64]">Food Lovers</span> Say
                     </h2>
                 </div>
@@ -185,7 +185,7 @@ const Review = () => {
                 </div>
 
                 {/* Dots Indicator */}
-                <div className="flex justify-center gap-2 mt-8">
+                <div className="flex justify-center gap-2 mt-4 md:mt-8">
                     {[...Array(totalSlides)]?.map((_, index) => (
                         <button
                             key={index}

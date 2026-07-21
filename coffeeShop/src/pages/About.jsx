@@ -79,9 +79,9 @@ const About = () => {
         <>
             <div className="min-h-screen bg-[#FCF2E9]">
                 {/* ========== HERO SECTION - UNCHANGED ========== */}
-                <div className="relative h-[50vh] md:h-[80vh] min-h-[400px] md:min-h-[500px] overflow-hidden">
+                <div className="relative h-[10vh] md:h-[80vh] min-h-[250px] md:min-h-[500px] overflow-hidden">
                     <div
-                        className="absolute inset-0 w-full h-[120%] -top-[10%]"
+                        className="absolute inset-0 w-full h-[120%]"
                         style={{
                             transform: `translateY(${scrollY * 0.2}px) scale(${1 + scrollY * 0.0003})`,
                         }}
@@ -102,35 +102,10 @@ const About = () => {
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-9xl">☕</div>
                     </div>
 
-                    <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4">
-                        <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 px-6 py-2 rounded-full mb-6 animate-fade-in-down">
-                            <span className="w-2 h-2 bg-green-400 rounded-full animate-ping"></span>
-                            <span className="text-white/90 text-sm font-medium tracking-wider">{hero.badge}</span>
-                        </div>
-
-                        <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold text-white mb-2 md:mb-6 leading-tight animate-fade-in-up">
-                            {hero.title}
-                            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#0D7C53] to-green-400">
-                                {hero.highlight}
-                            </span>
-                        </h1>
-
-                        <p className="text-white/80 max-w-2xl mx-auto text-base sm:text-lg md:text-xl animate-fade-in-up delay-200">
-                            {hero.subtitle}
-                        </p>
-
-                        <div className="w-24 h-1 bg-gradient-to-r from-[#0D7C53] to-green-400 mx-auto mt-2 md:mt-6 rounded-full animate-fade-in-up delay-300"></div>
-
-                        <div className="absolute bottom-5 md:bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-                            <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center p-1">
-                                <div className="w-1 h-2 bg-white/50 rounded-full animate-scroll"></div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 {/* ========== OUR STORY SECTION WITH GLASS EFFECT ========== */}
-                <section className="relative py-6 md:py-14 px-4 overflow-hidden">
+                <section className="relative  py-3 md:py-14 px-4 overflow-hidden">
                     {/* Glass Background */}
                     <div className="absolute inset-0 -z-10">
                         <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />
@@ -147,19 +122,19 @@ const About = () => {
                     </div>
 
                     <div className="max-w-[104rem] mx-auto relative z-10">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-12 items-center">
                             <div className="relative order-2 lg:order-1">
                                 <div className="relative rounded-3xl overflow-hidden shadow-md shadow-black/5 border border-white/30  bg-white/10">
                                     <img
                                         src={story.image}
                                         alt="Our Story"
-                                        className="w-full h-[440px] object-cover"
+                                        className="w-full h-[270px] md:h-[440px] object-fill"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-                                    <div className="absolute bottom-6 left-6  bg-white/40 border border-white/30 rounded-xl p-4 shadow-md">
-                                        <div className="flex items-center gap-3">
+                                    <div className="absolute bottom-3 left-6  bg-white/40 border border-white/30 rounded-xl p-4 shadow-md">
+                                        <div className="flex items-center gap-2">
                                             <div className="bg-[#0D7C53] p-2 rounded-lg">
-                                                <Coffee className="w-6 h-6 text-white" />
+                                                <Coffee className="md:w-6 md:h-6 w-4 h-4 text-white" />
                                             </div>
                                             <div>
                                                 <p className="text-xs text-gray-600">Since {story.since}</p>
@@ -173,23 +148,28 @@ const About = () => {
                             </div>
 
                             <div className="order-1 lg:order-2">
-                                <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10  px-4 py-1.5 rounded-full mb-4 border border-white/20">
-                                    <span className="text-[#0D7C53] text-sm font-semibold tracking-wider">{story.badge}</span>
+                                <div className="block text-center md:text-left mb-1">
+                                    <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10 px-4 py-1.5 rounded-full border border-white/20">
+                                        <span className="text-[#0D7C53] text-sm font-semibold tracking-wider">
+                                            {story.badge}
+                                        </span>
+                                    </div>
                                 </div>
-                                <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+
+                                <h2 className="text-2xl md:text-4xl font-bold text-gray-800 mb-2 md:mb-4 text-center md:text-left">
                                     {story.title} <span className="text-[#0D7C53]">{story.highlight}</span>
                                 </h2>
-                                <div className="w-16 h-1 bg-[#0D7C53] rounded-full mb-6"></div>
-                                <p className="text-gray-600 leading-relaxed mb-4 text-lg">
+                                {/* <div className="w-16 h-1 bg-[#0D7C53] rounded-full mb-3 md:mb-6"></div> */}
+                                <p className="text-gray-600 leading-relaxed mb-1 md:mb-4 text-base md:text-lg">
                                     {story.description1}
                                 </p>
-                                <p className="text-gray-600 leading-relaxed mb-6 text-lg">
+                                <p className="text-gray-600 leading-relaxed mb-3 md:mb-6 text-base md:text-lg">
                                     {story.description2}
                                 </p>
 
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-2 gap-2 md:gap-4">
                                     {story.highlights?.map((highlight, index) => (
-                                        <div key={index} className="flex items-center gap-2  bg-white/20 border border-white/30 p-3 rounded-xl shadow-xl shadow-black/5">
+                                        <div key={index} className="flex items-center gap-2  bg-white/20 border border-white/30 p-2 md:p-3 rounded-xl shadow-xl shadow-black/5">
                                             {getIcon(highlight.icon, "w-5 h-5 text-[#0D7C53]")}
                                             <span className="text-base font-medium text-gray-700">{highlight.label}</span>
                                         </div>
@@ -201,7 +181,7 @@ const About = () => {
                 </section>
 
                 {/* ========== CORE VALUES WITH GLASS EFFECT ========== */}
-                <section className="relative px-4 py-5 overflow-hidden">
+                <section className="relative px-4 py-1 md:py-5 overflow-hidden">
                     {/* Glass Background */}
                     <div className="absolute inset-0 -z-10">
                         <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />
@@ -217,21 +197,21 @@ const About = () => {
                         </div>
                     </div>
                     <div className="max-w-[102rem] mx-auto relative z-10">
-                        <div className="text-center mb-14">
+                        <div className="text-center mb-5 md:mb-14">
                             <h2 className="text-3xl md:text-4xl font-bold text-gray-800">
                                 {valuesSection.title} <span className="text-[#0D7C53]">{valuesSection.highlight}</span>
                             </h2>
                             <div className="w-16 h-1 bg-[#0D7C53] mx-auto mt-4 rounded-full"></div>
-                            <p className="text-gray-500 mt-4 max-w-2xl mx-auto">
+                            <p className="text-gray-500 mt-2 md:mt-4 max-w-2xl mx-auto">
                                 {valuesSection.subtitle}
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                             {values?.map((value, index) => (
                                 <div
                                     key={index}
-                                    className="group  bg-white/20 border border-white/30 rounded-2xl p-6 shadow-md shadow-black/5 hover:shadow-lg transition-all duration-500 hover:-translate-y-2 text-center"
+                                    className="group  bg-white/20 border border-white/30 rounded-2xl p-3 md:p-6 shadow-md shadow-black/5 hover:shadow-lg transition-all duration-500 hover:-translate-y-2 text-center"
                                 >
                                     <div className="inline-flex items-center justify-center w-16 h-16 bg-[#0D7C53]/20  rounded-2xl text-[#0D7C53] group-hover:bg-[#0D7C53] group-hover:text-white transition-all duration-300 mb-4">
                                         {getIcon(value.icon, "w-8 h-8")}
@@ -245,7 +225,7 @@ const About = () => {
                 </section>
 
                 {/* ========== TEAM SECTION WITH GLASS EFFECT ========== */}
-                <section className="relative py-10 px-4 overflow-hidden">
+                <section className="relative py-3 md:py-10 px-4 overflow-hidden">
                     {/* Glass Background */}
                     <div className="absolute inset-0 -z-10">
                         <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />
@@ -259,18 +239,18 @@ const About = () => {
                     </div>
 
                     <div className="max-w-[100rem] mx-auto relative z-10">
-                        <div className="text-center mb-14">
-                            <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10  px-4 py-1.5 rounded-full mb-4 border border-white/20">
+                        <div className="text-center mb-6 md:mb-14">
+                            <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10  px-4 py-1.5 rounded-full mb-2 md:mb-4 border border-white/20">
                                 <span className="text-[#0D7C53] text-sm font-semibold tracking-wider">{teamSection.badge}</span>
                             </div>
                             <h2 className="text-3xl md:text-4xl font-bold text-gray-800">
                                 {teamSection.title} <span className="text-[#0D7C53]">{teamSection.highlight}</span>,
                                 <br className="sm:hidden" /> {teamSection.subtitle} <span className="text-[#0D7C53]">{teamSection.highlight2}</span>
                             </h2>
-                            <div className="w-16 h-1 bg-[#0D7C53] mx-auto mt-4 rounded-full"></div>
+                            <div className="w-16 h-1 bg-[#0D7C53] mx-auto mt-2 md:mt-4 rounded-full"></div>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
                             {team?.map((member) => (
                                 <div
                                     key={member.id}
@@ -280,14 +260,14 @@ const About = () => {
                                         <img
                                             src={member.image}
                                             alt={member.name}
-                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                            className="w-full h-full object-fill group-hover:scale-110 transition-transform duration-700"
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
                                     </div>
-                                    <div className="p-5 text-center">
-                                        <h3 className="font-bold text-gray-800">{member.name}</h3>
-                                        <p className="text-sm text-[#0D7C53] font-medium">{member.role}</p>
-                                        <p className="text-xs text-gray-500 mt-1">{member.experience}</p>
+                                    <div className="p-4 text-center">
+                                        <h3 className="font-bold text-lg text-gray-800">{member.name}</h3>
+                                        <p className="text-[15px] text-[#0D7C53] font-medium">{member.role}</p>
+                                        <p className="text-sm text-gray-500 mt-1 font-semibold">{member.experience}</p>
                                     </div>
                                 </div>
                             ))}
