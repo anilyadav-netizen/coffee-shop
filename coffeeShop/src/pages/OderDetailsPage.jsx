@@ -211,7 +211,7 @@ const OrderDetailsPage = () => {
 
     // ==================== SOCKET CONNECTION ====================
     useEffect(() => {
-        const SOCKET_URL = 'http://localhost:5003';
+        const SOCKET_URL = 'http://food.go-drop.in';
 
         const socketInstance = io(SOCKET_URL, {
             transports: ['websocket'],

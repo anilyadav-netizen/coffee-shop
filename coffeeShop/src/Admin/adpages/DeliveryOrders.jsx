@@ -326,7 +326,7 @@ const DeliveryOrders = () => {
     try {
       setIsUpdating(true);
 
-      const response = await fetch(`http://localhost:5003/api/rider/admin/update-order-status`, {
+      const response = await fetch(`http://food.go-drop.in/api/rider/admin/update-order-status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
