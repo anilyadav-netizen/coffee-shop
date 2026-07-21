@@ -150,7 +150,7 @@ const Gallery = () => {
     return (
         <>
             {/* ========== HERO SECTION WITH OVERLAP ========== */}
-            <section className="relative h-[50vh] md:h-[80vh] min-h-[400px] md:min-h-[500px] bg-[#FCF2E9] overflow-hidden">
+            <section className="relative h-[10vh] md:h-[80vh] min-h-[250px] md:min-h-[500px] bg-[#FCF2E9] overflow-hidden">
                 {/* Background Image */}
                 <div className="absolute inset-0 w-full h-full">
                     <img
@@ -172,34 +172,20 @@ const Gallery = () => {
 
                 {/* Content */}
                 <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4 mt-5 md:mt-10">
-                    <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 px-6 py-2 rounded-full mb-1 md:mb-6 animate-fade-in-down">
-                        <span className="w-2 h-2 bg-green-400 rounded-full animate-ping"></span>
-                        <span className="text-white/90 text-sm font-medium tracking-wider">SHARE YOUR MOMENTS</span>
-                    </div>
-
-                    <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-white mb-6 leading-tight animate-fade-in-up">
-                        Capture the <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0D7C53] to-green-400">Coffee Vibe</span>
-                    </h1>
-
-                    <p className="text-white/80 max-w-2xl mx-auto text-base sm:text-lg md:text-xl animate-fade-in-up delay-200">
-                        Share your coffee moments with our community and get featured!
-                    </p>
-
-                    <div className="w-24 h-1 bg-gradient-to-r from-[#0D7C53] to-green-400 mx-auto mt-2 md:mt-6 rounded-full animate-fade-in-up delay-300"></div>
-
+                   
                     {/* Upload Button */}
-                    <button
+                    {/* <button
                         onClick={() => setShowUploadModal(true)}
                         className="mt-3 md:mt-8 flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#0D7C53] to-green-500 text-white rounded-full font-medium hover:shadow-lg hover:scale-105 transition-all duration-300"
                     >
                         <Camera size={20} />
                         Share Your Moment
-                    </button>
+                    </button> */}
                 </div>
             </section>
 
             {/* ========== GALLERY SECTION WITH GLASS EFFECT ========== */}
-            <section className="relative px-4 py-8 overflow-hidden">
+            <section className="relative px-4 py-3 md:py-8 overflow-hidden">
                 {/* Glass Background */}
                 <div className="absolute inset-0 -z-10">
                     <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />
@@ -214,21 +200,21 @@ const Gallery = () => {
 
                 <div className="max-w-[95rem] mx-auto relative z-10">
                     {/* Header */}
-                    <div className="text-center mb-12">
-                        <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10  px-4 py-1.5 rounded-full mb-4 border border-white/20">
+                    <div className="text-center mb-3 md:mb-12">
+                        <div className="inline-flex items-center gap-2 bg-[#0D7C53]/10  px-4 py-1.5 rounded-full mb-1.5 md:mb-4 border border-white/20">
                             <span className="text-[#0D7C53] text-sm font-semibold tracking-wider">COMMUNITY GALLERY</span>
                         </div>
-                        <h2 className="text-4xl md:text-5xl font-bold text-gray-800">
+                        <h2 className="text-3xl md:text-5xl font-bold text-gray-800">
                             Our <span className="text-[#0D7C53]">Gallery</span>
                         </h2>
-                        <p className="text-gray-500 max-w-2xl mx-auto mt-2">
+                        <p className="text-gray-500 max-w-2xl mx-auto text-sm">
                             A visual journey through our coffee culture and community moments
                         </p>
-                        <div className="w-24 h-1 bg-gradient-to-r from-[#0D7C53] to-green-500 mx-auto mt-4 rounded-full"></div>
+                        <div className="w-24 h-1 bg-gradient-to-r from-[#0D7C53] to-green-500 mx-auto mt-2 md:mt-4 rounded-full"></div>
                     </div>
 
                     {/* Gallery Stats */}
-                    <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+                    <div className="flex flex-wrap items-center justify-between gap-4 mb-4 md:mb-8">
                         <div className="flex items-center gap-6">
                             <div className=" bg-white/20 border border-white/30 rounded-2xl px-4 py-2 shadow-xl">
                                 <span className="text-sm text-gray-600">Total Photos</span>
@@ -259,7 +245,7 @@ const Gallery = () => {
                                 <img
                                     src={item.image}
                                     alt={item.title}
-                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                     loading="lazy"
                                 />
 

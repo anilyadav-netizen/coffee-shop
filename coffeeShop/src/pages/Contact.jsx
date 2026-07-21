@@ -71,7 +71,7 @@ const Contact = () => {
         <>
             <div className="min-h-screen bg-[#FCF2E9]">
                 {/* ========== HERO SECTION - UNCHANGED ========== */}
-                <div className="relative  h-[50vh] md:h-[80vh] min-h-[400px] md:min-h-[500px] overflow-hidden">
+                <div className="relative  h-[10vh] md:h-[80vh] min-h-[250px] md:min-h-[500px] overflow-hidden">
                     {/* Background Image with Parallax */}
                     <div
                         className="absolute inset-0 w-full h-[115%] -top-[15%]"
@@ -133,38 +133,10 @@ const Contact = () => {
                             ))}
                         </div>
                     </div>
-
-                    {/* Content */}
-                    <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4">
-                        {/* Badge */}
-                        <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 px-6 py-2 rounded-full mb-6 animate-fade-in-down">
-                            <span className="w-2 h-2 bg-green-400 rounded-full animate-ping"></span>
-                            <span className="text-white/90 text-sm font-medium tracking-wider">
-                                {heroData.badge}
-                            </span>
-                        </div>
-
-                        <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-white mb-6 leading-tight animate-fade-in-up">
-                            {heroData.title.split(' ')?.map((word, index) => (
-                                word === heroData.titleHighlight ?
-                                    <span key={index} className="text-transparent bg-clip-text bg-gradient-to-r from-[#0D7C53] to-green-400">
-                                        {word}
-                                    </span> :
-                                    <span key={index}>{word} </span>
-                            ))}
-                            <span className="block text-white">{heroData.subtitle}</span>
-                        </h1>
-
-                        <p className="text-white/80 max-w-2xl mx-auto text-base sm:text-lg md:text-xl animate-fade-in-up delay-200">
-                            {heroData.description}
-                        </p>
-
-                        <div className="w-24 h-1 bg-gradient-to-r from-[#0D7C53] to-green-400 mx-auto mt-6 rounded-full animate-fade-in-up delay-300"></div>
-                    </div>
                 </div>
 
                 {/* ========== CONTACT SECTION WITH GLASS EFFECT ========== */}
-                <section className="relative py-10 px-4 overflow-hidden">
+                <section className="relative py-2 md:py-10 overflow-hidden">
                     {/* Glass Background */}
                     <div className="absolute inset-0 -z-10">
                         <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />
@@ -181,24 +153,24 @@ const Contact = () => {
                     </div>
 
                     <div className="max-w-[100rem] mx-auto relative z-10">
-                        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 md:gap-8">
                             {/* Contact Info - Left Side - Glass Effect */}
-                            <div className="lg:col-span-2 space-y-6">
-                                <div className=" bg-white/20 border border-white/30 rounded-3xl p-8 shadow-2xl shadow-black/5">
-                                    <h2 className="text-2xl font-bold text-[#0D7C53] mb-2">
+                            <div className="lg:col-span-2 space-y-2 md:space-y-6">
+                                <div className=" bg-white/20 border border-white/30 rounded-3xl p-3 md:p-8 shadow-2xl shadow-black/5">
+                                    <h2 className="text-2xl font-bold text-[#0D7C53] mb-2 text-center md:text-left">
                                         Get in <span className="text-[#0D7C53]">Touch</span>
                                     </h2>
-                                    <p className="text-gray-600 text-base mb-6">
+                                    <p className="text-gray-600 text-sm mb-4 md:mb-6">
                                         We'd love to hear from you. Reach out to us through any of the channels below.
                                     </p>
 
-                                    <div className="space-y-4">
+                                    <div className="space-y-2 md:space-y-4">
                                         {contactInfo?.map((info) => {
                                             const IconComponent = info.icon;
                                             return (
                                                 <div
                                                     key={info.id}
-                                                    className="flex items-start gap-4 p-3 rounded-xl  bg-white/40 border border-white/20 hover:bg-white/60 transition-all duration-300 group shadow-md hover:shadow-lg"
+                                                    className="flex items-start gap-4 p-2 md:p-3 rounded-xl  bg-white/40 border border-white/20 hover:bg-white/60 transition-all duration-300 group shadow-md hover:shadow-lg"
                                                 >
                                                     <div className={`p-3 rounded-xl bg-gradient-to-br ${info.color} text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                                                         <IconComponent className="w-6 h-6" />
@@ -206,7 +178,7 @@ const Contact = () => {
                                                     <div>
                                                         <h4 className="font-semibold text-gray-800 text-lg">{info.title}</h4>
                                                         {info.details?.map((detail, i) => (
-                                                            <p key={i} className="text-gray-600 text-sm">{detail}</p>
+                                                            <p key={i} className="text-gray-600 text-[13px]">{detail}</p>
                                                         ))}
                                                     </div>
                                                 </div>
@@ -215,8 +187,8 @@ const Contact = () => {
                                     </div>
 
                                     {/* Social Links - Glass Effect */}
-                                    <div className="mt-6 pt-6 border-t border-white/20">
-                                        <p className="text-sm font-medium text-gray-600 mb-4">Follow us on social media</p>
+                                    <div className="mt-3 md:mt-6 pt-2 md:pt-6 border-t border-white/20">
+                                        <p className="text-sm font-medium text-gray-600 mb-2 md:mb-4">Follow us on social media</p>
                                         <div className="flex gap-3">
                                             {socialLinks?.map((social) => {
                                                 const IconComponent = social.icon;
@@ -224,7 +196,7 @@ const Contact = () => {
                                                     <a
                                                         key={social.id}
                                                         href={social.url}
-                                                        className={`p-3  bg-white/40 border border-white/20 rounded-xl text-gray-600 transition-all duration-300 hover:text-white ${social.color} hover:shadow-lg hover:scale-110`}
+                                                        className={`p-2  bg-white/40 border border-white/20 rounded-xl text-gray-600 transition-all duration-300 hover:text-white ${social.color} hover:shadow-lg hover:scale-110`}
                                                         aria-label={social.label}
                                                     >
                                                         <IconComponent className="w-5 h-5" />
@@ -238,7 +210,7 @@ const Contact = () => {
 
                             {/* Contact Form - Right Side - Glass Effect */}
                             <div className="lg:col-span-3">
-                                <div className=" bg-white/20 border border-white/30 rounded-3xl p-10 shadow-2xl shadow-black/5">
+                                <div className=" bg-white/20 border border-white/30 rounded-3xl p-4 md:p-10 shadow-2xl shadow-black/5">
                                     <div className="mb-7">
                                         <h3 className="text-2xl font-bold text-[#0D7C53]">
                                             {formDataConfig.title.split(' ')?.map((word, index) => (
@@ -254,18 +226,18 @@ const Contact = () => {
 
                                     {isSubmitted ? (
                                         <div className=" bg-green-50/60 border border-green-200/50 rounded-xl p-6 text-center animate-fade-in-up">
-                                            <div className="w-16 h-16 bg-green-100/80 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <div className="w-16 h-16 bg-green-100/80 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-4">
                                                 <CheckCircle className="w-8 h-8 text-green-500" />
                                             </div>
                                             <h4 className="text-xl font-bold text-gray-800">
                                                 {formDataConfig.successMessage.title}
                                             </h4>
-                                            <p className="text-gray-600 text-sm mt-2">
+                                            <p className="text-gray-600 text-sm md:mt-2">
                                                 {formDataConfig.successMessage.description}
                                             </p>
                                         </div>
                                     ) : (
-                                        <form onSubmit={handleSubmit} className="space-y-4">
+                                        <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
                                             {/* Dynamic Form Fields */}
                                             {formDataConfig.fields?.map((field) => {
                                                 const IconComponent = field.icon === 'User' ? User : Mail;
@@ -289,7 +261,7 @@ const Contact = () => {
                                                                 onBlur={() => setActiveField(null)}
                                                                 required={field.required}
                                                                 placeholder={field.placeholder}
-                                                                className="w-full pl-10 pr-4 py-3  bg-white/40 border rounded-lg focus:outline-none  border-green-200 transition-all duration-300 text-gray-800 placeholder:text-gray-400"
+                                                                className="w-full pl-10 pr-4 py-3  bg-white/40 border rounded-lg focus:outline-none border-green-200 transition-all duration-300 text-gray-800 placeholder:text-gray-400"
                                                             />
                                                         </div>
                                                     </div>
@@ -323,8 +295,8 @@ const Contact = () => {
                                                 type="submit"
                                                 disabled={isSubmitting}
                                                 className={`w-full py-3.5 bg-gradient-to-r mt-2 from-[#0D7C53] to-green-600 text-white rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-[#0D7C53]/20 ${isSubmitting
-                                                        ? 'opacity-70 cursor-not-allowed'
-                                                        : 'hover:shadow-xl hover:shadow-[#0D7C53]/30 hover:scale-[1.02]'
+                                                    ? 'opacity-70 cursor-not-allowed'
+                                                    : 'hover:shadow-xl hover:shadow-[#0D7C53]/30 hover:scale-[1.02]'
                                                     }`}
                                             >
                                                 {isSubmitting ? (
@@ -348,7 +320,7 @@ const Contact = () => {
                 </section>
 
                 {/* ========== MAP / LOCATION SECTION - Glass Effect ========== */}
-                <section className="relative px-4 py-10 overflow-hidden">
+                <section className="relative px-4 py-4 md:py-10 overflow-hidden">
                     {/* Glass Background for Map Section */}
                     <div className="absolute inset-0 -z-10">
                         <div className="absolute inset-0 bg-gradient-to-br from-white/90 via-amber-50/80 to-orange-50/70" />
@@ -358,7 +330,7 @@ const Contact = () => {
                     </div>
 
                     <div className="max-w-[100rem] mx-auto relative z-10">
-                        <div className="text-center mb-8">
+                        <div className="text-center mb-3 md:mb-8">
                             <h2 className="text-2xl md:text-3xl font-bold text-[#0D7C53]">
                                 {mapData.title.split(' ')?.map((word, index) => (
                                     word === mapData.titleHighlight ?
@@ -366,12 +338,12 @@ const Contact = () => {
                                         <span key={index}>{word} </span>
                                 ))}
                             </h2>
-                            <div className="w-16 h-1 bg-[#0D7C53] mx-auto mt-3 rounded-full"></div>
+                            <div className="w-16 h-1 bg-[#0D7C53] mx-auto mt-1 rounded-full"></div>
                         </div>
                         <div className="w-full overflow-hidden rounded-3xl shadow-2xl border-4 border-white/30 ">
                             <iframe
                                 src={mapData.embedUrl}
-                                className="w-full h-[400px]"
+                                className="w-full h-[260px] md:h-[400px]"
                                 style={{ border: 0 }}
                                 allowFullScreen
                                 loading="lazy"

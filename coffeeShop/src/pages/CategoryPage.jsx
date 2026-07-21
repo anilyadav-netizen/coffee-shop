@@ -123,7 +123,7 @@ const CategoryPage = () => {
 
         {/* ===== HEADING ===== */}
         <div className="text-center mb-3 md:mb-10">
-          <h2 className="text-3xl lg:text-5xl font-bold leading-tight">
+          <h2 className="text-2xl lg:text-5xl font-bold leading-tight">
             Discover <span className="text-[#E86A33]">Delicious Dishes</span>
           </h2>
          

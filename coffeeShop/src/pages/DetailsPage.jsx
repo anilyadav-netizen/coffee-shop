@@ -295,7 +295,6 @@ const DetailsPage = () => {
 
     const relatedProducts = getRelatedProducts();
 
-    // Loading state
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]">
@@ -304,7 +303,6 @@ const DetailsPage = () => {
         );
     }
 
-    // Error state
     if (error) {
         return (
             <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]">
@@ -329,7 +327,7 @@ const DetailsPage = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3] pt-20 sm:pt-28 px-2 sm:px-4 pb-10 overflow-hidden">
+        <div className="min-h-screen bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3] pt-20 sm:pt-28 px-1.5 sm:px-4 pb-10 overflow-hidden">
             {/* Background Effects (unchanged) */}
             <div className="absolute inset-0 -z-10 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#FDF8F3] via-[#FBF3EA] to-[#F5E6D3]" />
@@ -346,7 +344,7 @@ const DetailsPage = () => {
 
                 {/* Product Main Section */}
                 <div className="bg-white/30 border border-white/40 rounded-2xl sm:rounded-3xl p-2 sm:p-6 md:p-8 shadow-2xl shadow-black/5">
-                    <div className="grid md:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
+                    <div className="grid md:grid-cols-2 gap-4 sm:gap-8 lg:gap-12">
 
                         {/* Product Image */}
                         <div className="relative">
@@ -373,21 +371,19 @@ const DetailsPage = () => {
                         {/* Product Details */}
                         <div className="flex flex-col">
                             {/* Category - Dynamically from Redux */}
-                            <div className="flex items-center gap-2 flex-wrap">
+                            <div className="flex items-center gap-1 flex-wrap">
                                 <span
-                                    className={`font-semibold text-sm uppercase tracking-wide px-3 py-1 rounded-full border ${
-                                        isNonVegCategory
-                                            ? 'bg-red-100 text-red-600 border-red-300'
-                                            : 'bg-[#FFE8DA] text-[#E86A33] border-[#E86A33]/30'
-                                    }`}
+                                    className={`font-semibold text-sm uppercase tracking-wide px-3 py-1 rounded-full border ${isNonVegCategory
+                                        ? 'bg-red-100 text-red-600 border-red-300'
+                                        : 'bg-[#FFE8DA] text-[#E86A33] border-[#E86A33]/30'
+                                        }`}
                                 >
                                     {product.category?.name || "Uncategorized"}
                                 </span>
 
                                 {product.category?.type && (
-                                    <span className={`text-sm font-medium flex items-center gap-1 ${
-                                        isNonVegCategory ? 'text-red-500' : 'text-[#E86A33]'
-                                    }`}>
+                                    <span className={`text-sm font-medium flex items-center gap-1 ${isNonVegCategory ? 'text-red-500' : 'text-[#E86A33]'
+                                        }`}>
                                         {isNonVegCategory ? (
                                             <svg className="w-4 h-4" viewBox="0 0 24 24">
                                                 <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" strokeWidth="2" fill="none" />
@@ -405,12 +401,12 @@ const DetailsPage = () => {
                             </div>
 
                             {/* Product Name */}
-                            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mt-2 text-gray-800">
+                            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mt-0.5 text-gray-800">
                                 {product.name}
                             </h1>
 
                             {/* Price Section */}
-                            <div className="flex items-center gap-3 mt-3">
+                            <div className="flex items-center gap-3 mt-1 md:mt-3">
                                 {product.discountPrice ? (
                                     <>
                                         <span className="text-3xl sm:text-4xl font-bold text-[#E86A33]">
@@ -431,7 +427,7 @@ const DetailsPage = () => {
                             </div>
 
                             {/* Quick Info Chips */}
-                            <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-4">
+                            <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-2 md:mt-4">
                                 <div className="flex items-center gap-1.5 text-sm text-gray-600">
                                     <Flame size={16} className="text-orange-500" />
                                     <span>{product.calories || 170} calories</span>
@@ -449,14 +445,14 @@ const DetailsPage = () => {
                             </div>
 
                             {/* Description */}
-                            <div className="mt-5">
+                            <div className="mt-2 md:mt-5">
                                 <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
                                     {product.description}
                                 </p>
                             </div>
 
                             {/* Customize / More Details */}
-                            <div className="mt-4 border-t border-gray-200/50 pt-4">
+                            <div className="mt-2 md:mt-4 border-t border-gray-200/50 pt-2">
                                 <button
                                     onClick={() => setShowMoreDetails(!showMoreDetails)}
                                     className="flex items-center gap-2 text-[#E86A33] font-medium hover:text-[#D55B25] transition-colors"
@@ -483,7 +479,7 @@ const DetailsPage = () => {
                             </div>
 
                             {/* Quantity Controls */}
-                            <div className="flex items-center gap-4 mt-5">
+                            <div className="flex items-center gap-4 mt-3 md:mt-5">
                                 <span className="font-medium text-gray-700 text-sm">Quantity:</span>
                                 <div className="flex items-center border border-gray-300 rounded-full overflow-hidden bg-white/50">
                                     <button
@@ -510,7 +506,7 @@ const DetailsPage = () => {
                             </div>
 
                             {/* Action Buttons - Add to Cart and Wishlist in one line */}
-                            <div className="mt-6 flex gap-3">
+                            <div className="mt-3 md:mt-6 flex gap-3">
                                 <button
                                     onClick={handleAddToCart}
                                     disabled={product.stock === 0}
@@ -519,21 +515,19 @@ const DetailsPage = () => {
                                     <ShoppingBag size={20} className="sm:w-6 sm:h-6" />
                                     <span>Add to Cart</span>
                                 </button>
-                                
+
                                 <button
                                     onClick={handleWishlistToggle}
                                     disabled={wishlistLoading}
-                                    className={`px-5 sm:px-6 py-3.5 sm:py-4 rounded-full font-semibold transition-all duration-300 flex items-center justify-center gap-2 border-2 ${
-                                        isProductInWishlist
-                                            ? 'bg-red-50 border-red-500 text-red-500 hover:bg-red-100'
-                                            : 'bg-white/80 border-gray-300 text-gray-700 hover:border-[#E86A33] hover:text-[#E86A33]'
-                                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                    className={`px-5 sm:px-6 py-3.5 sm:py-4 rounded-full font-semibold transition-all duration-300 flex items-center justify-center gap-2 border-2 ${isProductInWishlist
+                                        ? 'bg-red-50 border-red-500 text-red-500 hover:bg-red-100'
+                                        : 'bg-white/80 border-gray-300 text-gray-700 hover:border-[#E86A33] hover:text-[#E86A33]'
+                                        } disabled:opacity-50 disabled:cursor-not-allowed`}
                                 >
-                                    <Heart 
-                                        size={20} 
-                                        className={`sm:w-6 sm:h-6 ${
-                                            isProductInWishlist ? 'fill-red-500' : ''
-                                        }`}
+                                    <Heart
+                                        size={20}
+                                        className={`sm:w-6 sm:h-6 ${isProductInWishlist ? 'fill-red-500' : ''
+                                            }`}
                                     />
                                     <span className="hidden sm:inline">
                                         {isProductInWishlist ? 'Wishlisted' : 'Wishlist'}
@@ -542,7 +536,7 @@ const DetailsPage = () => {
                             </div>
 
                             {/* Trust Badges */}
-                            <div className="mt-6 flex items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-500">
+                            <div className="mt-3 md:mt-6 flex items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-500">
                                 <div className="flex items-center gap-1.5">
                                     <Shield size={16} className="text-[#E86A33]" />
                                     <span>Quality Guaranteed</span>
@@ -564,7 +558,7 @@ const DetailsPage = () => {
 
                 {/* Related Products Section */}
                 {relatedProducts.length > 0 && (
-                    <div className="mt-10 sm:mt-16">
+                    <div className="mt-4 md:mt-8 sm:mt-12">
                         <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-4 sm:mb-6">
                             Related <span className="text-[#E86A33]">Products</span>
                         </h2>

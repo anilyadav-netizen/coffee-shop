@@ -225,7 +225,7 @@ const Hero = () => {
     const headingChars = headingText.split("");
 
     return (
-        <div className="relative h-[22vh] md:h-[80vh] min-h-[235px] md:min-h-[500px] lg:min-h-screen overflow-hidden">
+        <div className="relative h-[20vh] md:h-[80vh] min-h-[230px] md:min-h-[500px] lg:min-h-screen overflow-hidden">
             {/* ✅ Navbar Component */}
             <Navbar />
 

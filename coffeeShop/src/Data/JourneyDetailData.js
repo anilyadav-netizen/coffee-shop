@@ -365,14 +365,3 @@ export const faqData = [
     },
 ];
 
-export const heroContent = {
-    badge: 'Coffee Journey',
-    heading: 'From Bean to Cup',
-    highlightedWord: 'Cup',
-    subtitle:
-        'Discover how every coffee bean travels from sustainable farms to your cup through a carefully crafted journey of roasting, grinding, brewing, and serving.',
-    buttons: {
-        primary: 'Explore Our Menu',
-        secondary: 'Watch Journey',
-    },
-};

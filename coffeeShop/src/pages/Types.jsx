@@ -21,7 +21,7 @@ const Types = () => {
     };
 
     return (
-        <section className="bg-white py-2 md:py-8 overflow-hidden">
+        <section className="bg-white py-1.5 md:py-8 overflow-hidden">
             <div className="max-w-[100rem] mx-auto px-3 sm:px-5">
 
                 {/* Heading – Desktop center, Mobile as per Zomato */}
@@ -149,7 +149,7 @@ const Types = () => {
                                 </div>
 
                                 <h3 className="
-                                    mt-2
+                                    mt-1
                                     text-[11px] sm:text-[13px] md:text-[16px]
                                     font-semibold
                                     text-gray-700

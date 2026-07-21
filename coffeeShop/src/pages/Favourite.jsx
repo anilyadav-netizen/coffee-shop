@@ -198,7 +198,7 @@ const Favourite = () => {
             {/* Content */}
             <div className="max-w-[102rem] mx-auto relative z-10">
                 {/* Header */}
-                <div className="bg-[#FFF8F2] rounded-3xl p-4 md:p-8 shadow-lg shadow-[#E85D3A]/5 border border-[#FEE7DD] mb-3.5 md:mb-7 transition-all duration-700">
+                <div className="bg-[#FFF8F2] rounded-3xl p-3 md:p-8 shadow-lg shadow-[#E85D3A]/5 border border-[#FEE7DD] mb-3.5 md:mb-7 transition-all duration-700">
                     <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
                         <div>
                             <h2 className="text-2xl md:text-5xl font-bold text-[#1F2937] tracking-tight mb-2 flex items-center gap-3">

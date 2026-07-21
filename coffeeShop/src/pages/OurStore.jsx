@@ -82,28 +82,28 @@ const OurStore = () => {
     return (
         <section
             ref={sectionRef}
-            className="py-4 md:py-10 px-4 md:px-8 lg:px-12 bg-[#FBF6F0] "
+            className="py-2 md:py-10 px-4 md:px-8 lg:px-12 bg-[#FBF6F0] "
         >
             <div className="max-w-[104rem] mx-auto">
 
 
                 {/* ========== MAIN TWO-COLUMN LAYOUT ========== */}
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-6">
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-1 md:gap-8 mb-1 md:mb-6">
                     {/* LEFT COLUMN - Image (3 columns) */}
                     <div className="lg:col-span-3 relative group">
                         <div className="relative rounded-2xl overflow-hidden border-2 border-[#F2E5D8] bg-white shadow-lg">
                             <img
                                 src={currentLocation.image}
                                 alt={currentLocation.name}
-                                className="w-full h-[310px] md:h-[470px] object-cover transition-transform duration-700 group-hover:scale-105"
+                                className="w-full h-[280px] md:h-[470px] object-cover transition-transform duration-700 group-hover:scale-105"
                             />
                             {/* Gradient Overlay */}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
 
                             {/* Rating Badge - Top Left */}
-                            <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-xl px-4 py-2.5 shadow-lg flex items-center gap-3">
+                            <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-xl px-4 py-1.5 md:py-2.5 shadow-lg flex items-center gap-3">
                                 <div className="flex items-center gap-1.5">
-                                    <Star className="w-4 h-4 text-[#F59E0B] fill-[#F59E0B]" />
+                                    <Star className="w-3 h-3 text-[#F59E0B] fill-[#F59E0B]" />
                                     <span className="font-bold text-[#1F1B18]">{currentLocation.rating}</span>
                                 </div>
                                 <div className="w-px h-5 bg-[#E5E5E5]"></div>
@@ -132,26 +132,26 @@ const OurStore = () => {
 
                     {/* RIGHT COLUMN - Details (2 columns) */}
                     <div className="lg:col-span-2 flex flex-col justify-between">
-                        <div className="rounded-2xl p-5 md:p-8 bg-[#FBF6F0] ">
+                        <div className="rounded-2xl p-2 md:p-8 bg-[#FBF6F0] ">
                             {/* Discover Near You Badge */}
-                            <div className="mb-4">
+                            <div className="mb-2 md:mb-4 text-center md:text-left">
                                 <span className="inline-block text-[#C56E2D] text-xs font-semibold uppercase bg-[#C56E2D]/10 px-4 py-1.5 rounded-full">
                                     Discover Near You
                                 </span>
                             </div>
 
                             {/* Heading */}
-                            <h2 className="text-3xl md:text-4xl font-serif font-bold text-[#1F1B18] mb-2">
+                            <h2 className="text-[22px] md:text-4xl font-serif font-bold text-[#1F1B18] mb-0 md:mb-1 text-center md:text-left">
                                 Find Your Perfect <span className="text-[#C56E2D]">Food Spot</span>
                             </h2>
 
                             {/* Description */}
-                            <p className="text-[#6B6B6B] text-sm mb-6">
+                            <p className="text-[#6B6B6B] text-sm mb-3 md:mb-6">
                                 Find our handcrafted spaces designed for connection, creativity & perfect meals.
                             </p>
 
                             {/* Store Name and City */}
-                            <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-start justify-between mb-1.5 md:mb-3">
                                 <div>
                                     <h3 className="text-2xl md:text-3xl font-bold text-[#1F1B18]">
                                         Heritage Brew House
@@ -163,13 +163,13 @@ const OurStore = () => {
                             </div>
 
                             {/* Address */}
-                            <div className="flex items-start gap-3 mb-6 text-[#6B6B6B]">
-                                <MapPin className="w-5 h-5 text-[#C56E2D] mt-0.5 flex-shrink-0" />
+                            <div className="flex items-start gap-3 mb-3 md:mb-6 text-[#6B6B6B]">
+                                <MapPin className="w-5 h-5 text-[#C56E2D] flex-shrink-0" />
                                 <span className="text-sm">Hazratganj, Lucknow, Uttar Pradesh 226001</span>
                             </div>
 
                             {/* Info Cards - Side by Side */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-4 mb-3 md:mb-6">
                                 {/* Timing Card */}
                                 <div className="bg-[#FBF6F0] rounded-xl p-4 shadow-sm border border-[#F2E5D8] transition-all duration-300 hover:shadow-md hover:bg-[#F8F0E8]">
                                     <div className="flex items-center gap-3">
@@ -199,7 +199,7 @@ const OurStore = () => {
 
                             {/* Buttons Row */}
                             <div className="flex items-center gap-3">
-                                <button className="flex-1 py-3.5 bg-gradient-to-r from-[#E46F2E] to-[#D95A2B] text-white rounded-full font-semibold hover:shadow-lg hover:shadow-[#C56E2D]/30 transition-all duration-300 flex items-center justify-center gap-2 text-sm group">
+                                <button className="flex-1 py-3 md:py-3.5 bg-gradient-to-r from-[#E46F2E] to-[#D95A2B] text-white rounded-full font-semibold hover:shadow-lg hover:shadow-[#C56E2D]/30 transition-all duration-300 flex items-center justify-center gap-2 text-sm group">
                                     <MapPin className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
                                     Get Directions
                                 </button>
@@ -208,7 +208,7 @@ const OurStore = () => {
                                     className="w-12 h-12 flex-shrink-0 bg-[#FBF6F0] border-2 border-[#F2E5D8] rounded-full flex items-center justify-center transition-all duration-300 hover:border-[#C56E2D] hover:shadow-md"
                                 >
                                     <Heart
-                                        className={`w-5 h-5 transition-all duration-300 ${isLiked ? 'fill-[#C56E2D] text-[#C56E2D] scale-110' : 'text-[#6B6B6B]'
+                                        className={`w-4 h-4 md:w-5 md:h-5 transition-all duration-300 ${isLiked ? 'fill-[#C56E2D] text-[#C56E2D] scale-110' : 'text-[#6B6B6B]'
                                             }`}
                                     />
                                 </button>
@@ -220,7 +220,7 @@ const OurStore = () => {
                 {/* ========== TRENDING NOW SECTION ========== */}
                 <div>
                     {/* Header */}
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center justify-between mb-3 md:mb-6">
                         <div className="flex items-center gap-3">
                             <span className="text-3xl animate-pulse">🔥</span>
                             <h3 className="text-2xl md:text-3xl font-bold text-[#1F1B18]">
@@ -230,12 +230,12 @@ const OurStore = () => {
                     </div>
 
                     {/* Product Cards - Horizontal layout with image left, text right */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-6">
                         {featuredProducts?.map((product) => (
                             <div
                                 key={product.id}
-                                onClick={() => navigate("/menu")} 
-                                className="bg-white border border-[#F2E5D8] rounded-2xl p-4 shadow hover:shadow-lg transition-all duration-500 hover:-translate-y-1 group cursor-pointer flex items-center gap-4"
+                                onClick={() => navigate("/menu")}
+                                className="bg-white border border-[#F2E5D8] rounded-2xl p-3 md:p-4 shadow hover:shadow-lg transition-all duration-500 hover:-translate-y-1 group cursor-pointer flex items-center gap-4"
                             >
                                 {/* Left - Small Circular Image */}
                                 <div className="relative flex-shrink-0">
@@ -251,7 +251,7 @@ const OurStore = () => {
 
                                 {/* Right - Name and Price */}
                                 <div className="flex-1 min-w-0">
-                                    <h4 className="font-semibold text-[#1F1B18] text-sm group-hover:text-[#C56E2D] transition-colors duration-300 truncate">
+                                    <h4 className="font-semibold text-[#1F1B18] text-base group-hover:text-[#C56E2D] transition-colors duration-300 truncate">
                                         {product.name}
                                     </h4>
                                     <p className="text-[#C56E2D] font-bold text-lg">

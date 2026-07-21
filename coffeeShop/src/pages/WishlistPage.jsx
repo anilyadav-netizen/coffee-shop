@@ -193,7 +193,7 @@ const WishlistPage = () => {
                     </div>
                 </div>
 
-                <div className="max-w-7xl mx-auto relative z-10 mt-8">
+                <div className="max-w-7xl mx-auto relative z-10 mt-4 md:mt-8">
                     {/* Header */}
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-8">
                         <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">

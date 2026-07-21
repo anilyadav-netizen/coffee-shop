@@ -688,7 +688,7 @@ const CartPage = () => {
                     )}
 
                     {/* Header */}
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-8">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-2 md:mb-4 sm:mb-8">
                         <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
                             <div className="min-w-0 flex-1">
                                 <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 truncate">
@@ -717,7 +717,7 @@ const CartPage = () => {
                                 return (
                                     <div
                                         key={coffeeId}
-                                        className="group bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-md shadow-black/5 hover:shadow-lg transition-all duration-300"
+                                        className="group bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl p-2 sm:p-4 shadow-md shadow-black/5 hover:shadow-lg transition-all duration-300"
                                     >
                                         <div className="flex gap-3 sm:gap-4">
                                             {/* Image */}
@@ -802,8 +802,8 @@ const CartPage = () => {
 
                         {/* Order Summary */}
                         <div className="lg:col-span-1">
-                            <div className="sticky top-20 sm:top-24 bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl shadow-black/5">
-                                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">
+                            <div className="sticky top-20 sm:top-24 bg-white/30 border border-white/40 rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-xl shadow-black/5">
+                                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-1.5 sm:mb-4">
                                     Order Summary
                                 </h3>
 
