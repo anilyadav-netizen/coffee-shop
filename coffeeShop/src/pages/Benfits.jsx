@@ -87,7 +87,7 @@ const Benefits = () => {
                                             {getIcon(benefit.icon, `w-5 h-5 ${benefit.iconColor}`)}
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-[#1F2937] text-lg group-hover:text-[#E85D3A] transition-colors duration-300 -mt-0.5 md:mt-0">
+                                            <h3 className="font-bold text-[#1F2937] text-[17px] group-hover:text-[#E85D3A] transition-colors duration-300 -mt-0.5 md:mt-0">
                                                 {benefit.title.split('\n')?.map((line, i) => (
                                                     <React.Fragment key={i}>
                                                         {line}
