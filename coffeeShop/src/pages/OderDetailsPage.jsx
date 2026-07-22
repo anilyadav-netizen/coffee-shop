@@ -1405,7 +1405,6 @@ const OrderDetailsPage = () => {
                     </div>
                 </div>
             </div>
-
             <style>{`
                 @keyframes pulse-slow {
                     0%, 100% { transform: scale(1); opacity: 0.5; }

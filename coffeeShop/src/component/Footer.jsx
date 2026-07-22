@@ -82,9 +82,9 @@ const Footer = () => {
                     <div className="absolute -bottom-10 -right-10 text-9xl">🫘</div>
                 </div>
 
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8">
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 md:pt-12 pb-4 md:pb-8">
                     {/* Main Footer Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-10 lg:gap-8">
 
                         {/* Brand Section */}
                         <div className="space-y-4">
@@ -234,7 +234,7 @@ const Footer = () => {
                     </div>
 
                     {/* Bottom Bar */}
-                    <div className="mt-12 pt-6 border-t border-white/10">
+                    <div className="mt-3 md:mt-12 pt-6 border-t border-white/10">
                         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                             <p className="text-gray-400 text-sm">
                                 © {currentYear} CoffeeHub. All rights reserved.
