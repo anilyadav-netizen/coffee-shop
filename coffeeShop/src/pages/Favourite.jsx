@@ -12,7 +12,6 @@ import {
 } from 'lucide-react';
 import { getProducts } from '../redux/Slicer/adminProductSlice';
 import { useDispatch, useSelector } from 'react-redux';
-import { getCategories } from '../redux/Slicer/categorySlice';
 import { addToCart } from "../redux/Slicer/cartSlice";
 import {
     getWishlist,
@@ -41,7 +40,6 @@ const Favourite = () => {
 
     useEffect(() => {
         dispatch(getProducts());
-        dispatch(getCategories());
         dispatch(getWishlist());
     }, [dispatch]);
 

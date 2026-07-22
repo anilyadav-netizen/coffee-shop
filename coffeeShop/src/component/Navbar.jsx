@@ -13,7 +13,6 @@ import {
     Heart
 } from "lucide-react";
 import { getCart } from '../redux/Slicer/cartSlice';
-import { getWishlist } from '../redux/Slicer/wishlistSlice';
 
 const Navbar = () => {
 
@@ -77,7 +76,6 @@ const Navbar = () => {
 
     useEffect(() => {
         dispatch(getCart());
-        dispatch(getWishlist())
     }, [dispatch]);
 
 

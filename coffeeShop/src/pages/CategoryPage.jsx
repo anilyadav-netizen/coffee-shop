@@ -7,9 +7,8 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import "swiper/css";
 
-import { addToWishlist, removeFromWishlist, getWishlist } from "../redux/Slicer/wishlistSlice";
+import { addToWishlist, removeFromWishlist } from "../redux/Slicer/wishlistSlice";
 import { addToCart } from "../redux/Slicer/cartSlice";
-import { getProducts } from "../redux/Slicer/adminProductSlice";
 
 // ===== ICONS =====
 const HeartIcon = ({ active }) => (
@@ -37,12 +36,6 @@ const CategoryPage = () => {
   // ===== REDUX STATE =====
   const { products, loading } = useSelector((state) => state.adminProducts);
   const { items: wishlistItems } = useSelector((state) => state.wishlist);
-
-  // ===== EFFECTS =====
-  useEffect(() => {
-    dispatch(getProducts());
-    dispatch(getWishlist());
-  }, [dispatch]);
 
   // ===== HELPER FUNCTIONS =====
   const getProductId = (product) => product._id || product.id;

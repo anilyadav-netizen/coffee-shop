@@ -283,17 +283,14 @@ const CartPage = () => {
                 isDefault: addressData.isDefault || false,
             };
 
-            console.log("📦 Formatted address for backend:", formattedAddress);
 
             // Address Create
             const result = await dispatch(createAddress(formattedAddress)).unwrap();
 
-            console.log("✅ Address created:", result);
 
             // Refresh Profile
             await dispatch(getProfile()).unwrap();
 
-            console.log("✅ Profile refreshed");
 
             setIsAddressModalOpen(false);
             setShowAddressPopup(false);
@@ -425,8 +422,6 @@ const CartPage = () => {
             // ✅ Add deliveryAddress for delivery orders - properly formatted
             if (orderType === "delivery" && address) {
                 const formattedAddress = formatAddressForBackend(address);
-                console.log("📦 Formatted address for order payload:", formattedAddress);
-
                 // Send both formats to ensure backend compatibility
                 orderPayload.deliveryAddress = formattedAddress;
                 orderPayload.deliveryAddressId = address._id;
@@ -438,11 +433,9 @@ const CartPage = () => {
                 orderPayload.tableNumber = selectedTable.tableNumber;
             }
 
-            console.log("📦 Final Order Payload:", JSON.stringify(orderPayload, null, 2));
 
             // ✅ Create order
             const result = await dispatch(createOrder(orderPayload)).unwrap();
-            console.log("✅ Order created:", result);
 
             const orderData = result.order;
             const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_Rn6mAmy8ydPszM";
@@ -473,7 +466,6 @@ const CartPage = () => {
                     color: "#0D7C53"
                 },
                 handler: async function (response) {
-                    console.log("✅ Payment successful:", response);
                     try {
                         const verificationData = {
                             razorpay_order_id: response.razorpay_order_id,
@@ -538,8 +530,7 @@ const CartPage = () => {
 
     // ✅ Handle Checkout - FIXED
     const handleCheckout = async () => {
-        console.log("========== CHECKOUT CLICKED ==========");
-        console.log("Selected Address:", selectedAddress);
+       
         console.log("Order Type:", orderType);
         console.log("Cart Items:", cartItems.length);
 

@@ -49,7 +49,6 @@ const MenuPage = () => {
     const navigate = useNavigate();
     const { categoryId } = useParams();
 
-    // Get categories from Redux
     const { categories, loading: categoriesLoading } = useSelector(
         (state) => state.category
     );
@@ -60,7 +59,6 @@ const MenuPage = () => {
     );
 
     const { items: wishlistItems } = useSelector((state) => state.wishlist);
-    console.log(wishlistItems)
 
     // State
     const [searchTerm, setSearchTerm] = useState("");
@@ -82,7 +80,6 @@ const MenuPage = () => {
     useEffect(() => {
         dispatch(getCategories());
         dispatch(getProducts());
-        dispatch(getWishlist());
     }, [dispatch]);
 
     // ===== AUTO ANIMATE ITEMS ON CATEGORY CHANGE OR SEARCH =====

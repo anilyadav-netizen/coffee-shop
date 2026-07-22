@@ -5,7 +5,6 @@ import { Coffee, ArrowRight, Clock, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from 'framer-motion';
 // import video from '../assets/Video/coffeeVideo.mp4';
 import video from '../assets/Video/CoffeeMaking.mp4';
-import Navbar from '../component/Navbar';
 
 const Hero = () => {
     const [scrollY, setScrollY] = useState(0);
@@ -227,7 +226,6 @@ const Hero = () => {
     return (
         <div className="relative h-[20vh] md:h-[80vh] min-h-[220px] md:min-h-[500px] lg:min-h-screen overflow-hidden">
             {/* ✅ Navbar Component */}
-            <Navbar />
 
             {/* ✅ Hero Background with Video + Parallax */}
             <div className=" inset-0 w-full h-[60vh] md:h-full">

@@ -13,7 +13,7 @@ export const REVIEWS_DATA = [
     {
         id: 2,
         name: "Priya Sharma",
-        avatar: "https://images.unsplash.com/photo-1494790108372-be9c29b29330?w=150&h=150&fit=crop&auto=format",
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&auto=format",
         rating: 5,
         date: "2024-12-14",
         review: "Best coffee shop in town! The cold brew is amazing and the staff is super welcoming. I love coming here every morning before work. Their pastries are freshly baked too!",

@@ -58,7 +58,7 @@ const RiderAssignedOrder = lazy(() => import("./Admin/adpages/RiderAssignedOrder
 function App() {
   const dispatch = useDispatch();
   const { token, authChecked, user } = useSelector((state) => state.auth);
-
+  
   useEffect(() => {
     if (token && !authChecked) {
       dispatch(getProfile());

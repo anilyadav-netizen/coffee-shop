@@ -109,9 +109,7 @@ const Profile = () => {
     // Fetch profile, orders, and wishlist when component mounts
     useEffect(() => {
         if (isAuthenticated) {
-            dispatch(getProfile());
             dispatch(getMyOrders());
-            dispatch(getWishlist());
         }
     }, [dispatch, isAuthenticated]);
 
@@ -460,11 +458,10 @@ const Profile = () => {
                                     {addresses?.map((address) => (
                                         <div
                                             key={address._id || address.id}
-                                            className={`bg-white/40 backdrop-blur-sm rounded-xl p-2 border transition-all hover:shadow-md ${
-                                                address.isDefault
+                                            className={`bg-white/40 backdrop-blur-sm rounded-xl p-2 border transition-all hover:shadow-md ${address.isDefault
                                                     ? "border-[#0D7C53]/40 bg-[#0D7C53]/5"
                                                     : "border-white/30"
-                                            }`}
+                                                }`}
                                         >
                                             <div className="flex items-start justify-between">
                                                 <div className="flex-1 space-y-2">
@@ -610,11 +607,10 @@ const Profile = () => {
                                                             </div>
                                                         </div>
                                                         <div className="flex items-center gap-2">
-                                                            <span className={`text-xs px-2 py-0.5 rounded-full flex items-center gap-1 ${
-                                                                isDineIn
+                                                            <span className={`text-xs px-2 py-0.5 rounded-full flex items-center gap-1 ${isDineIn
                                                                     ? 'bg-purple-100/80 text-purple-700'
                                                                     : 'bg-blue-100/80 text-blue-700'
-                                                            }`}>
+                                                                }`}>
                                                                 {isDineIn ? '🍽️ Dine In' : '🚚 Delivery'}
                                                                 {isDineIn && tableNumber && (
                                                                     <span className="font-bold">(Table {tableNumber})</span>
@@ -786,11 +782,10 @@ const Profile = () => {
                                                             </div>
                                                             <button
                                                                 onClick={() => handleAddToCart(item)}
-                                                                className={`px-3 py-1.5 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-1.5 text-sm ${
-                                                                    addedItems[itemData.id]
+                                                                className={`px-3 py-1.5 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-1.5 text-sm ${addedItems[itemData.id]
                                                                         ? 'bg-[#0D7C53] text-white'
                                                                         : 'bg-[#0D7C53] hover:bg-[#0A6B46] text-white hover:shadow-lg hover:scale-[1.02]'
-                                                                }`}
+                                                                    }`}
                                                             >
                                                                 {addedItems[itemData.id] ? (
                                                                     <>
