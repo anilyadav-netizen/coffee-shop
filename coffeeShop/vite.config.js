@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:5003", // backend port
+        target: "http://food.go-drop.in", // backend port
         changeOrigin: true,
         secure: false,
       },

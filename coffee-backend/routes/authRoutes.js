@@ -12,7 +12,7 @@ const {
   createAddress,
   deleteAddress,
   updateUserRole
-} = require("../controllers/authController");
+} = require("../controllers/authcontroller");
 const { protect } = require("../middleware/authMiddleware");
 
 
