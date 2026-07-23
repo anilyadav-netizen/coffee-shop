@@ -248,7 +248,7 @@ const Favourite = () => {
                                             <img
                                                 src={item.image}
                                                 alt={item.name}
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                                className="w-full h-full object-fill group-hover:scale-105 transition-transform duration-700"
                                                 onError={(e) => {
                                                     e.target.src = "https://placehold.co/400x300/FAFAFA/6B7280?text=No+Image";
                                                 }}

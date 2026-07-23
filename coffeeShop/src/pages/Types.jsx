@@ -10,11 +10,18 @@ import "swiper/css";
 const Types = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { categories } = useSelector((state) => state.category);
+    const { categories } = useSelector(
+        (state) => state.category
+    );
+
 
     useEffect(() => {
-        dispatch(getCategories());
-    }, [dispatch]);
+
+        if (categories.length === 0) {
+            dispatch(getCategories());
+        }
+
+    }, [dispatch, categories.length]);
 
     const handleCategoryClick = (category) => {
         navigate(`/menu/${category._id}`);

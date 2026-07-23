@@ -19,18 +19,19 @@ import { getCategories } from "../redux/Slicer/categorySlice";
 import { addToCart } from "../redux/slicer/cartSlice";
 import { addToWishlist, removeFromWishlist, getWishlist } from "../redux/slicer/wishlistSlice";
 
-import allImage from '../assets/Images/All.png';
-import BurgerBanner from '../assets/Images/BurgerBanner.png';
-import ChauminBanner from '../assets/Images/ChauminBanner.png';
-import coffeeBanner from '../assets/Images/coffeeBanner.png';
-import DrinksBanner from '../assets/Images/DrinksBanner.png';
-import MomoBanner from '../assets/Images/MomoBanner.png';
-import NonvegBanner from '../assets/Images/NonvegBanner.png';
-import PizzaBanner from '../assets/Images/PizzaBanner.png';
-import StarterBanner from '../assets/Images/StarterBanner.png';
-import VegBanner from '../assets/Images/VegBanner.png';
+import allImage from '../assets/Images/All.jpg';
+import BurgerBanner from '../assets/Images/BurgerBanner.jpg';
+import ChauminBanner from '../assets/Images/ChauminBanner.jpg';
+import coffeeBanner from '../assets/Images/coffeeBanner.jpg';
+import DrinksBanner from '../assets/Images/DrinksBanner.jpg';
+import MomoBanner from '../assets/Images/MomoBanner.jpg';
+import NonvegBanner from '../assets/Images/NonvegBanner.jpg';
+import PizzaBanner from '../assets/Images/PizzaBanner.jpg';
+import StarterBanner from '../assets/Images/StarterBanner.jpg';
+import VegBanner from '../assets/Images/VegBanner.jpg';
 import imagebg from '../assets/Images/imagebg.jpg';
 
+// Static fallback map (used for hero banner and as fallback for categories)
 const categoryBannerMap = {
     all: allImage,
     burger: BurgerBanner,
@@ -86,14 +87,24 @@ const MenuPage = () => {
         return found || allCategories[0];
     }, [allCategories, categoryId]);
 
-    // ===== Get banner for category =====
-    const getCategoryBanner = (category) => {
+    // ===== Hero banner – static only =====
+    const getHeroBanner = (category) => {
         if (!category) return allImage;
         const nameKey = category.isAll ? 'all' : category.name?.toLowerCase();
         return categoryBannerMap[nameKey] || allImage;
     };
 
-    const currentBanner = useMemo(() => getCategoryBanner(currentCategory), [currentCategory]);
+    // ===== Category image – dynamic icon first, then static fallback =====
+    const getCategoryImage = (category) => {
+        if (!category) return allImage;
+        // If category has an icon from reducer, use it
+        if (category.icon) return category.icon;
+        // Otherwise fallback to static map
+        const nameKey = category.isAll ? 'all' : category.name?.toLowerCase();
+        return categoryBannerMap[nameKey] || allImage;
+    };
+
+    const currentBanner = useMemo(() => getHeroBanner(currentCategory), [currentCategory]);
 
     // ===== Fetch data =====
     useEffect(() => {
@@ -349,7 +360,8 @@ const MenuPage = () => {
                                         const isActive =
                                             String(currentCategory?._id) === String(cat._id);
 
-                                        const catImage = getCategoryBanner(cat);
+                                        // Use dynamic icon if available, else static fallback
+                                        const catImage = getCategoryImage(cat);
 
                                         return (
                                             <button
